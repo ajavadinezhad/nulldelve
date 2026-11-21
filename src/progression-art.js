@@ -1,4 +1,5 @@
-import {createWireCircuitArt} from './wire-circuit-art.js?v=rotation-r14';
+import {hospitalFlowSequence} from './progression.js?v=hospital-r15';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=hospital-r15';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */
@@ -32,13 +33,20 @@ export function createProgressionArt(scene, box, state) {
     part(g,0,.34,.08,.34,.5,.28,materials.steel);
     part(g,0,.63,0,.69,.12,.62,materials.trim);
     const display=canvasTexture(128,128),ctx=display.ctx;
-    ctx.fillStyle='#142923';ctx.fillRect(0,0,128,128);
+    ctx.fillStyle=device.task?.startsWith('hospital')?'#162733':'#142923';ctx.fillRect(0,0,128,128);
     if(device.kind==='glyph')glyph(ctx,device.glyph||device.id.replace('glyph-',''),64,55,61,'#b5d7c3');
     else if(device.kind==='log'){ctx.strokeStyle='#b5d7c3';ctx.lineWidth=4;ctx.strokeRect(33,22,62,70);for(let y=38;y<85;y+=13){ctx.beginPath();ctx.moveTo(43,y);ctx.lineTo(85,y);ctx.stroke();}}
     else if(device.kind==='power'){ctx.fillStyle='#e5c477';ctx.font='bold 65px monospace';ctx.textAlign='center';ctx.fillText(device.id.slice(-1).toUpperCase(),64,80);}
     else if(device.kind==='task'){
       ctx.strokeStyle=device.task==='researchCoolant'?'#8ed5de':'#e0cf91';ctx.fillStyle='#e0cf91';ctx.lineWidth=5;
-      if(device.task==='commandFuse'){ctx.strokeRect(32,41,64,28);for(const x of [39,85]){ctx.beginPath();ctx.moveTo(x,30);ctx.lineTo(x,80);ctx.stroke();}}
+      if(device.task?.startsWith('hospital')){
+       ctx.strokeStyle='#c5dbe5';ctx.fillStyle='#c5dbe5';
+       if(device.task==='hospitalSample'){ctx.strokeRect(48,30,32,55);ctx.strokeRect(43,23,42,9);ctx.fillStyle='#b76c7c';ctx.fillRect(53,55,22,24);}
+       else if(device.task==='hospitalAuth'){ctx.beginPath();ctx.moveTo(23,60);ctx.lineTo(42,60);ctx.lineTo(52,37);ctx.lineTo(66,82);ctx.lineTo(78,53);ctx.lineTo(104,53);ctx.stroke();}
+       else if(device.task.startsWith('hospitalValve')){ctx.beginPath();ctx.arc(64,55,29,0,Math.PI*2);ctx.stroke();ctx.font='bold 33px monospace';ctx.textAlign='center';ctx.fillText(device.task.slice(-1)==='A'?'O':device.task.slice(-1)==='B'?'F':'S',64,67);}
+       else{ctx.beginPath();ctx.moveTo(71,22);ctx.lineTo(46,60);ctx.lineTo(65,60);ctx.lineTo(55,90);ctx.lineTo(84,49);ctx.lineTo(65,49);ctx.closePath();ctx.stroke();}
+      }
+      else if(device.task==='commandFuse'){ctx.strokeRect(32,41,64,28);for(const x of [39,85]){ctx.beginPath();ctx.moveTo(x,30);ctx.lineTo(x,80);ctx.stroke();}}
       else if(device.task==='commandRepair'||device.task==='evacPower'){ctx.beginPath();ctx.arc(64,58,29,-Math.PI*.35,Math.PI*1.35);ctx.stroke();ctx.beginPath();ctx.moveTo(64,17);ctx.lineTo(64,55);ctx.stroke();}
       else if(device.task==='researchCoolant'){ctx.beginPath();ctx.moveTo(64,20);ctx.quadraticCurveTo(17,76,64,88);ctx.quadraticCurveTo(111,76,64,20);ctx.stroke();}
       else if(device.task==='nestDecode'){for(const x of [32,64,96]){ctx.beginPath();ctx.arc(x,55,9,0,Math.PI*2);ctx.stroke();}ctx.beginPath();ctx.moveTo(32,75);ctx.lineTo(64,91);ctx.lineTo(96,75);ctx.stroke();}
@@ -57,9 +65,11 @@ export function createProgressionArt(scene, box, state) {
   // Plaques redraw after loading a saved normal/remixed operation.
   const clue=canvasTexture(512,160);plane(clue.texture,3.45,1.08,state.clue.x,.035,state.clue.z);
   const maintenance=[['power',59,33,'POWER ROUTE'],['valves',86,32,'VENT ORDER']].map(([id,x,z,title])=>{const plaque=canvasTexture(512,100);plane(plaque.texture,4.6,.9,x,.035,z);return {id,title,...plaque};});
+  const hospitalPlaque=canvasTexture(512,160);plane(hospitalPlaque.texture,3.8,1.1,118,.035,31);
   let clueVersion='';
   function updateClues(){
-    const version=JSON.stringify([state.archive.sequence,state.power.sequence,state.valves.sequence]);if(version===clueVersion)return;clueVersion=version;
+    const version=JSON.stringify([state.archive.sequence,state.power.sequence,state.valves.sequence,state.remix]);if(version===clueVersion)return;clueVersion=version;
+    const hc=hospitalPlaque.ctx;hc.clearRect(0,0,512,160);hc.fillStyle='#243540';hc.fillRect(0,0,512,160);hc.strokeStyle='#a5bbc8';hc.lineWidth=4;hc.strokeRect(4,4,504,152);hc.textAlign='center';hc.fillStyle='#e0e9e9';hc.font='bold 24px monospace';hc.fillText('THEATRE STERILIZATION',256,48);hc.font='bold 22px monospace';hc.fillText(hospitalFlowSequence(state.remix).map(task=>({hospitalValveA:'OXYGEN',hospitalValveB:'FILTER',hospitalValveC:'SALINE'})[task]).join(' → '),256,106);hospitalPlaque.texture.needsUpdate=true;
     const c=clue.ctx;c.clearRect(0,0,512,160);c.fillStyle='#222e29';c.fillRect(0,0,512,160);c.strokeStyle='#8e967b';c.lineWidth=4;c.strokeRect(4,4,504,152);
     c.fillStyle='#a4b59b';c.textAlign='center';c.font='bold 17px monospace';c.fillText('ARCHIVE OVERRIDE · INPUT ORDER',256,31);
     state.archive.sequence.forEach((kind,i)=>glyph(c,kind,100+i*157,94,61,'#ded4a6'));

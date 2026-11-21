@@ -1,5 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=rotation-r14';
-import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=rotation-r14';
+import {compatibleStorage} from './storage-compat.js?v=hospital-r15';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=hospital-r15';
 export const CAMPAIGN_PROGRESS_KEY='nulldelve.campaign.v1';
 const ids=CAMPAIGN_OPERATIONS.map(operation=>operation.id);
 const logIds=['log-lab','log-containment','log-nest'];

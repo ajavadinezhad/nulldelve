@@ -1,5 +1,5 @@
-import {createItemIcon} from './item-icons.js?v=rotation-r14';
-import {formatKey} from './controls.js?v=rotation-r14';
+import {createItemIcon} from './item-icons.js?v=hospital-r15';
+import {formatKey} from './controls.js?v=hospital-r15';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
@@ -16,6 +16,8 @@ function icon(type){
   lmg:['M7 16h39v9H25l-7 14H6l6-18H7z','M46 19h22M27 25h20v17H27zM31 29v9M38 29v9M53 23l-5 17M56 23l7 17M24 11h15v5'],
   hush:['M8 24h43v6H30l-8 11H11l5-13H8z','M48 21h20v10H48zM27 13h18v7H27zM33 30v10h8V30'],
   scattergun:['M7 18h39v11H29l-9 12H8l7-16H7z','M46 18h21v5H46M46 26h21v5H46M29 31a8 8 0 1 0 16 0 8 8 0 1 0-16 0'],
+  kestrel:['M8 20h42v9H29l-7 12H11l5-16H8z','M50 21h17v5H50M38 29v12h10V29M21 14h20v6M6 20V10h15v10'],
+  mantis:['M4 24h41v6H26l-8 11H7l5-14H4z','M45 23h23v6H45M28 10h21v8H28zM25 9v11M50 8v12M53 30l-5 11M57 30l8 11M29 30v9h8v-9'],
   shotgun:['M5 20h48v7H29l-8 13H8l7-16H5z','M30 14h34v6M30 23h23M27 29h20'],
   pistol:['M14 12h43v12H34l-5 17H17l5-20h-8z','M34 24v9h10l4-9M21 17h31'],
   gear:['M13 14h46v28H13zM25 14V7h22v7','M32 20h8v6h6v8h-6v6h-8v-6h-6v-8h6z'],

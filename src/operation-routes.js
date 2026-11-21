@@ -10,5 +10,7 @@ export const OPERATION_ROUTES=Object.freeze([
  {id:'route-scrub',task:'containmentScrub',operation:'containment',x:79,z:57,label:'FLUSH EVACUATION AIRLOCK',previous:'containmentIsolate',requires:'evacuation',hint:'Go south to the western Evacuation scrubber and flush the airlock after the lockdown.'},
  {id:'route-blackbox',task:'nestBlackbox',operation:'nest',x:80,z:13,label:'RECOVER NEST BLACK BOX',requires:'nest',hint:'Recover the black box from southwest Nest Core after destroying the core.'},
  {id:'route-uplink',task:'nestUplink',operation:'nest',x:91,z:48,label:'TRANSMIT BLACK BOX',previous:'nestBlackbox',requires:'nest',hint:'Carry the black box south through Containment to the northeast Evacuation uplink.'},
+ {id:'route-hospital-records',task:'hospitalRecords',operation:'hospital',x:142,z:60,label:'RECOVER QUARANTINE PATIENT LEDGER',requires:'hospital-isolation',hint:'Recover the sealed patient ledger in southeast Isolation after clearing the quarantine swarm.'},
+ {id:'route-hospital-dispatch',task:'hospitalDispatch',operation:'hospital',x:109,z:47,label:'TRANSMIT AMBULANCE MANIFEST',previous:'hospitalRecords',requires:'hospital-isolation',hint:'Return west through the quarantine transfer corridor to Admission. Transmit the ledger at the ambulance dispatch terminal.'},
 ].map(Object.freeze));
 export function operationRouteComplete(id,tasks){return OPERATION_ROUTES.filter(route=>route.operation===id).every(route=>tasks[route.task]===true);}

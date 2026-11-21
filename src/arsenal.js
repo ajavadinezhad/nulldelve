@@ -7,8 +7,10 @@ export const PRIMARY_WEAPONS=Object.freeze([
  {id:'lmg',name:'M60 WARDEN LMG',capacity:60,reload:3.6,interval:.085,baseDamage:1,range:21,stagger:0,pellets:1,spread:0,cost:650,description:'Heavy automatic weapon. Large belt box and slow reload.'},
  {id:'hush',name:'HUSH-9 Precision Carbine',capacity:18,reload:2,interval:.24,baseDamage:2,range:23,stagger:.08,pellets:1,spread:0,cost:380,description:'Measured precision fire. Efficient single shots; less effective when surrounded.'},
  {id:'scattergun',name:'TWIN Drum Scattergun',capacity:8,reload:2.8,interval:.44,baseDamage:1,range:7,stagger:.12,pellets:3,spread:.20,cost:520,description:'Rapid three-pellet bursts for tight corridors. Short reach and a slow drum reload.'},
+ {id:'kestrel',name:'KESTREL Battle Rifle',capacity:20,reload:2.9,interval:.16,baseDamage:2,range:17,stagger:.04,pellets:1,spread:0,cost:820,description:'Heavy automatic fire from a compact bullpup. Shorter reach and a long reload demand careful positioning.'},
+ {id:'mantis',name:'MANTIS AMR',capacity:5,reload:3.3,interval:.95,baseDamage:8,range:32,stagger:.3,pellets:1,spread:0,cost:900,description:'Heavy single-shot precision for armored mutations. Five rounds, slow follow-up and a lengthy reload.'},
 ].map(Object.freeze));
 export function primaryWeapon(id){return PRIMARY_WEAPONS.find(w=>w.id===id)??PRIMARY_WEAPONS[0];}
 /** Deterministic fan in radians. The central pellet follows the exact aim direction. */
 export function shotDirections(dx,dz,profile){const length=Math.hypot(dx,dz);if(length<.001)return [];const base=Math.atan2(dz,dx),count=Math.max(1,Math.min(9,Math.floor(profile?.pellets??1))),spread=Math.max(0,Math.min(.8,profile?.spread??0));return Array.from({length:count},(_,i)=>{const angle=base+(count===1?0:(i/(count-1)-.5)*spread);return {x:Math.cos(angle),z:Math.sin(angle)};});}
-export function primaryReserve(id){return id==='hush'?36:id==='scattergun'?16:id==='shotgun'?12:id==='smg'?90:id==='marksman'?24:id==='lmg'?120:60;}
+export function primaryReserve(id){return id==='mantis'?12:id==='kestrel'?40:id==='hush'?36:id==='scattergun'?16:id==='shotgun'?12:id==='smg'?90:id==='marksman'?24:id==='lmg'?120:60;}

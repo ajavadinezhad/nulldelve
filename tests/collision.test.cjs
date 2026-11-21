@@ -1,3 +1,5 @@
+const {WORLD_WIDTH,WORLD_HEIGHT}=require('../src/world-layout.js');
+const {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps}=require('../src/hospital-layout.js');
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -7,7 +9,7 @@ const {EXPANSION_ROOMS,carveExpansion}=require('../src/facility-expansion.js');
 
 function world(){
   const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8');
-  const ctx={barrelSystem:null,Math,Set,W:101,H:69,EXPANSION_ROOMS,carveExpansion,doors:[],createPressurePuzzle,overlapsCrate,moveWithCrates};vm.createContext(ctx);
+  const ctx={barrelSystem:null,Math,Set,W:WORLD_WIDTH,H:WORLD_HEIGHT,HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,EXPANSION_ROOMS,carveExpansion,doors:[],createPressurePuzzle,overlapsCrate,moveWithCrates};vm.createContext(ctx);
   vm.runInContext(source.slice(source.indexOf('const map='),source.indexOf('const boxGeo=')),ctx);
   vm.runInContext('let player={x:7,z:20};'+source.slice(source.indexOf('function solid('),source.indexOf('const pursue=')),ctx);
   return expression=>vm.runInContext(expression,ctx);
@@ -35,7 +37,7 @@ test('wall sliding permits motion along the wall without crossing it',()=>{
   assert.ok(Math.abs(run('player.z')-28.8)<1e-9);
   assert.equal(run('solid(-1,10)'),true);
 });
-test('all fourteen rooms and both mission positions connect through carved passages',()=>{
+test('all twenty rooms and both mission positions connect through carved passages',()=>{
   const run=world();assert.equal(run(`(()=>{
     const visited=new Set(['7,29']),queue=[[7,29]];
     for(let i=0;i<queue.length;i++){const [x,z]=queue[i];for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,nz=z+dz,k=nx+','+nz;if(!visited.has(k)&&!solid(nx,nz,.32)){visited.add(k);queue.push([nx,nz]);}}}

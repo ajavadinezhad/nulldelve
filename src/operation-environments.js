@@ -2,6 +2,7 @@ import * as THREE from '../vendor/three.module.js';
 
 /** Regional dressing stays below walls and never changes collision or door access. */
 const THEMES={
+ hospital:{background:0x101921,lightColor:0xe4f2ff,lightIntensity:2.65,hemisphereSky:0xdce8ee,hemisphereGround:0x3b4d5b,floor:0x899da7,rooms:['HOSPITAL ADMISSION','HOSPITAL PHARMACY','HOSPITAL TRIAGE','HOSPITAL WARD','HOSPITAL SURGERY','HOSPITAL ISOLATION'],label:'Silent hospital'},
  breach:{background:0x15120d,lightColor:0xffd5a0,lightIntensity:2.55,hemisphereSky:0xe6cba0,hemisphereGround:0x3b3025,floor:0x69533a,rooms:['INSERTION','ARCHIVE','SECURITY'],label:'Collapsed entrance'},
  command:{background:0x08101a,lightColor:0xbdd9ff,lightIntensity:2.55,hemisphereSky:0xb8d7f6,hemisphereGround:0x202d43,floor:0x253b55,rooms:['STORAGE','COMMAND'],label:'Cold command bunker'},
  research:{background:0x0a180e,lightColor:0xc5efb3,lightIntensity:2.65,hemisphereSky:0xc5eac1,hemisphereGround:0x243c22,floor:0x325a33,rooms:['BIO LAB','REACTOR'],label:'Overgrown research wing'},
@@ -25,6 +26,14 @@ export function buildOperationEnvironment({scene,operation,roomDefs=[],cover=[]}
  for(const [id,theme] of Object.entries(THEMES)){
   for(const r of roomDefs.filter(room=>theme.rooms.includes(room.name))){
    slab(theme.floor,r.x+(r.w-1)/2,r.z+(r.h-1)/2,r.w-.14,r.h-.14,.38);
+   if(id==='hospital'){
+    // Clinical wayfinding, blood-red biohazard marks and cold emergency light strips.
+    const centerX=r.x+(r.w-1)/2;
+    for(let z=r.z+1;z<r.z+r.h-1;z+=2)slab(0x477b99,centerX,z,.16,1.1,.7);
+    for(const side of [-1,1]){const x=centerX+side*(r.w/2-1.2),z=r.z+1.1;add('box',0xe4f2f3,x,1.53,z,1.8,.05,.15,0,{emissive:0x6e9aad});}
+    if(r.name==='HOSPITAL ADMISSION'){slab(0x95484d,centerX,r.z+4,2.2,.5);slab(0x95484d,centerX,r.z+4,.5,2.2);}
+    if(r.name==='HOSPITAL ISOLATION')perimeter(r,(x,z,i)=>{add('sphere',0x875e78,x,.15,z,.45,.23,.32);add('box',0x9d4f59,x+.2,.025,z+.3,.55,.025,.12,i*.4);});
+   }
    if(id==='breach'){
     // Broken slabs, rebar and emergency lamps distinguish the ruined entry.
     perimeter(r,(x,z,i)=>{add('box',0x918979,x,.10,z,.7+(i%3)*.18,.17,.45,i*.6);add('box',0x33302a,x+.12,.16,z,.85,.035,.04,i*.5);add('box',0xf3a846,x,.025,z+.45,.32,.025,.1,0,{emissive:0x9b460d});});

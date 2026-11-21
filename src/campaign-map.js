@@ -1,4 +1,4 @@
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=rotation-r14';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=hospital-r15';
 const NS='http://www.w3.org/2000/svg';
 let mapSerial=0;
 function svgNode(tag,attributes={},parent){const node=document.createElementNS(NS,tag);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,String(value));parent?.append(node);return node;}
@@ -32,6 +32,11 @@ export function createCampaignMap({selected,onSelect,completed=[]}){
   if(j===1){svgNode('rect',{x:-12,y:-55,width:35,height:95,fill:'#69818a',stroke:'#a7acb7'},group);svgNode('path',{d:'M-28 -65Q7 -95 42 -65L7 -45Z',fill:'#a1a8b6'},group);}
   if(j===2){for(const x of [-55,0,55]){svgNode('path',{d:`M${x-20} -20Q${x} -65 ${x+20} -20V48H${x-20}Z`,fill:'#4f5767',stroke:'#8d96a7','stroke-width':2},group);for(let y=-10;y<45;y+=13)svgNode('path',{d:`M${x-18} ${y}h36`,stroke:'#9da4b3','stroke-width':1},group);}}
   if(j===3){svgNode('rect',{x:-92,y:-65,width:184,height:135,fill:'#1e6264',opacity:.6},group);for(const x of [-50,15,70]){svgNode('ellipse',{cx:x,cy:3,rx:21,ry:39,fill:'#727a8b',stroke:'#abb2bf','stroke-width':2},group);svgNode('ellipse',{cx:x,cy:-12,rx:15,ry:27,fill:'#294b4d'},group);}svgNode('path',{d:'M-85 50H85M-80 -46H82',stroke:'#b2a571','stroke-width':7},group);}
+  if(CAMPAIGN_OPERATIONS[j].id==='hospital'){
+   svgNode('rect',{x:-70,y:-49,width:140,height:98,rx:3,fill:'#9bafb8',stroke:'#d4e1e4','stroke-width':2},group);
+   svgNode('path',{d:'M-12 -37h24v23h24v24H12v23h-24V10h-24v-24h24Z',fill:'#9b4c56'},group);
+   for(const x of [-55,45])for(const y of [-33,-9,15])svgNode('rect',{x,y,width:12,height:9,fill:'#345d72'},group);
+  }
   if(j===4){svgNode('ellipse',{cx:0,cy:0,rx:88,ry:66,fill:'#251d2b',stroke:'#73505e','stroke-width':5},group);for(let i=0;i<12;i++){const x=Math.cos(i*2.4)*55,y=Math.sin(i*2.4)*39;svgNode('ellipse',{cx:x,cy:y,rx:15+(i%3)*4,ry:11,fill:i%3?'#604153':'#b67b62',stroke:'#987063'},group);svgNode('path',{d:`M${x} ${y}Q0 20 ${-x} ${-y}`,fill:'none',stroke:'#7f4b5d','stroke-width':2},group);}}
  }
  svgNode('path',{d:CAMPAIGN_OPERATIONS.map((op,i)=>`${i?'L':'M'}${op.x*12} ${op.y*6.5}`).join(' '),fill:'none',stroke:'#a3abb9','stroke-width':2,'stroke-dasharray':'5 10',opacity:.65},art);

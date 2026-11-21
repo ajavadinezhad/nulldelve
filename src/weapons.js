@@ -43,6 +43,32 @@ export function weapon(type='rifle'){
     tube(group,'glass',0,.22,-.28,.052,.008);
     block(group,'black',0,.2,-.37,.04,.07,.04);
     group.userData.muzzle=new THREE.Vector3(0,0,-1.25);
+  }else if(type==='mantis'){
+    // Long heavy barrel, slab muzzle brake, oversized scope and skeleton buttstock.
+    block(group,'receiver',0,0,-.26,.21,.21,.64);block(group,'black',0,.13,-.30,.17,.045,.66);
+    block(group,'steel',0,0,-.76,.18,.18,.37);for(const z of [-.64,-.73,-.82]){block(group,'black',.10,0,z,.02,.08,.04);block(group,'black',-.10,0,z,.02,.08,.04);}
+    tube(group,'steel',0,.01,-1.22,.035,.58);block(group,'black',0,.01,-1.59,.16,.13,.18);
+    for(const x of [-.085,.085])for(const z of [-1.54,-1.61])block(group,'steel',x,.01,z,.012,.075,.027);
+    block(group,'receiver',0,-.015,.17,.07,.08,.24);for(const x of [-.06,.06])block(group,'steel',x,-.01,.34,.025,.055,.34);
+    block(group,'black',0,-.015,.53,.18,.23,.06);block(group,'black',0,.095,.38,.15,.06,.20);
+    block(group,'black',0,-.17,.025,.11,.27,.13).rotation.x=-.22;group.userData.magazine=block(group,'black',0,-.22,-.31,.14,.29,.20);
+    for(const z of [-.11,-.48])block(group,'steel',0,.18,z,.075,.12,.06);
+    tube(group,'receiver',0,.27,-.29,.085,.50);tube(group,'black',0,.27,-.61,.12,.17);tube(group,'glass',0,.27,-.70,.093,.01);
+    tube(group,'black',0,.27,.015,.09,.11);tube(group,'glass',0,.27,.075,.067,.01);block(group,'black',.09,.27,-.25,.09,.10,.10);
+    for(const side of [-1,1]){const leg=block(group,'steel',side*.105,-.09,-.96,.025,.04,.50);leg.rotation.y=side*.14;block(group,'black',side*.14,-.115,-.71,.075,.055,.09);}
+    group.userData.muzzle=new THREE.Vector3(0,.01,-1.69);
+  }else if(type==='kestrel'){
+    // Bullpup action: magazine sits behind the grip, with a raised bridge sight.
+    block(group,'receiver',0,0,-.11,.23,.22,.67);block(group,'black',0,.14,-.14,.18,.05,.68);
+    block(group,'black',0,-.015,.30,.21,.24,.27);block(group,'steel',0,-.015,.46,.23,.27,.045);
+    block(group,'receiver',0,-.03,-.53,.22,.19,.28);for(const z of [-.45,-.52,-.59])block(group,'black',0,-.03,z,.235,.20,.022);
+    tube(group,'steel',0,.015,-.82,.04,.30);tube(group,'black',0,.015,-1.015,.057,.09);
+    block(group,'black',0,-.18,-.24,.115,.26,.14).rotation.x=-.18;
+    group.userData.magazine=block(group,'black',0,-.23,.135,.14,.32,.18);for(const x of [-.075,.075])block(group,'steel',x,-.23,.135,.014,.23,.07);
+    for(const z of [-.15,-.40])block(group,'steel',0,.22,z,.045,.14,.05);block(group,'black',0,.30,-.28,.12,.045,.32);
+    tube(group,'receiver',0,.345,-.28,.07,.17);tube(group,'glass',0,.345,-.37,.05,.01);
+    block(group,'steel',.13,.035,.015,.025,.07,.16);block(group,'black',.15,.10,-.08,.075,.035,.07);
+    group.userData.muzzle=new THREE.Vector3(0,.015,-1.065);
   }else if(type==='hush'){
     // Short precision chassis, enclosed optic, and a broad integral barrel shroud.
     block(group,'receiver',0,0,-.21,.17,.18,.50);block(group,'black',0,.11,-.24,.13,.035,.55);
@@ -141,7 +167,7 @@ export function createCombatEffects(scene){
     const origin=new THREE.Vector3(x,1.18,z).addScaledVector(right,.28).addScaledVector(forward,.5);
     const casing=particle(cylinder,materials.brass,origin,new THREE.Vector3(right.x*(1.6+(serial%3)*.2),1.6,right.z*1.6),5,'brass');
     casing.mesh.scale.set(.027,.11,.027);casing.mesh.rotation.z=Math.PI/2;
-    const muzzle=new THREE.Vector3(x,1.18,z).addScaledVector(right,.28).addScaledVector(forward,['rifle','carbine','shotgun','marksman','lmg','hush','scattergun'].includes(type)?1.56:.77);
+    const muzzle=new THREE.Vector3(x,1.18,z).addScaledVector(right,.28).addScaledVector(forward,['rifle','carbine','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis'].includes(type)?1.56:.77);
     const puff=particle(sphere,smokeMaterial,muzzle,new THREE.Vector3(forward.x*.5,.28,forward.z*.5),.3,'smoke');puff.mesh.scale.setScalar(.055);
   }
   function impact(x,z){

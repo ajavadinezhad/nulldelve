@@ -1,10 +1,11 @@
 import * as THREE from '../vendor/three.module.js';
-import {soldier} from './character.js?v=rotation-r14';
-import {createRoach} from './roach.js?v=rotation-r14';
+import {soldier} from './character.js?v=hospital-r15';
+import {createRoach} from './roach.js?v=hospital-r15';
 
 const cache=new Map();
 let renderAttempted=false;
 const DESCRIPTIONS={
+ hospital:'3D preview of Silent hospital: clinical beds, a red medical cross, operating equipment, and pale and violet mutations.',
  campaign:'3D preview of Facility descent: connected concrete rooms, security doors, stacked crates, and an armed operator.',
  siege:'3D preview of Reactor siege: an illuminated reactor surrounded by cover, machinery, and approaching brown and green creatures.',
  nest:'3D preview of Nest hunt: a dark infested chamber with a giant spiked red creature, purple armored creatures, and egg clusters.'
@@ -61,6 +62,15 @@ function renderPreviews(){
   box(s,-7,.8,-5.6,1.4,1.6,.8,0x4c4138);box(s,-7,1.64,-5.6,1.1,.04,.6,0xbf7043,0x843b23);
   box(s,6,1.35,-6.35,2.5,.12,.16,0xd37e58,0x9c3c21);
  }
+ function hospital(s){
+  room(s,-4,1,8,10,0x8c9fa8);room(s,5,-1,8,12,0x9cabb1);
+  box(s,.25,.75,-1,.30,1.5,10,0xb9c5ca);box(s,5,.025,3,5,.02,.10,0x54819a);
+  function bed(x,z){box(s,x,.30,z,1.5,.15,2.7,0x5e7585);box(s,x,.50,z,1.3,.25,2.5,0xe1e7e7);box(s,x,.66,z+.35,1.32,.09,1.65,0x638ba5);box(s,x,.69,z-.85,1,.13,.45,0xeceddf);for(const side of [-1,1])box(s,x+side*.73,.64,z,.05,.25,2.5,0x8797a4);}
+  for(const [x,z]of [[-6,-2],[-2,-2],[3,-4],[7,-4]])bed(x,z);
+  box(s,-6,.8,-3.6,1.3,1.6,.8,0xb8c8cc);box(s,-6,1.62,-3.6,.8,.025,.22,0xaa4c54);box(s,-6,1.63,-3.6,.22,.025,.8,0xaa4c54);
+  box(s,4,.75,3.9,2.3,1.5,.9,0xc0ccd0);box(s,4,1.53,3.9,1.8,.03,.55,0x6a93a6);
+  operator(s,-4,3.4);roach(s,4,1,'leaper',-.4);roach(s,7,-1,'screecher',.7);
+ }
  function instanceScene(s){
   // Merge identical geometry/material draws. Imported soldier/creature details keep
   // their exact shapes while the thumbnail stays below 150 rendered meshes.
@@ -70,7 +80,7 @@ function renderPreviews(){
   for(const {geometry,material,matrices} of groups.values()){const m=new THREE.InstancedMesh(geometry,material,matrices.length);matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.instanceMatrix.needsUpdate=true;s.add(m);}
  }
  try{
-  for(const [id,build] of Object.entries({campaign,siege,nest})){
+  for(const [id,build] of Object.entries({campaign,siege,nest,hospital})){
    const s=new THREE.Scene();s.background=new THREE.Color(id==='nest'?0x121315:0x0d1818);
    s.add(new THREE.HemisphereLight(0xe8f4df,0x28342f,2.3));const key=new THREE.DirectionalLight(id==='nest'?0xffd7bd:0xf6fff3,3.2);key.position.set(-6,16,10);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-16,right:16,top:16,bottom:-16,near:1,far:50});key.shadow.normalBias=.04;s.add(key);
    build(s);instanceScene(s);

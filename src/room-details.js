@@ -33,6 +33,7 @@ export function addRoomDetails(scene, box, roomDefs) {
       ctx.fillStyle=gradient;ctx.fillRect(x<100?x:x-18,8,18,496);
     }
     // Maintenance access grate, bolts and warning stripe, painted flush with the floor.
+    if(!room.name.startsWith('HOSPITAL ')){
     const gx=index%2?365:68,gz=345;
     ctx.fillStyle='#28322d';ctx.fillRect(gx,gz,58,82);
     ctx.strokeStyle='#6b7362';ctx.lineWidth=2;ctx.strokeRect(gx,gz,58,82);
@@ -43,6 +44,7 @@ export function addRoomDetails(scene, box, roomDefs) {
     ctx.fillStyle='#8d865a';ctx.fillRect(gx-5,gz-10,68,7);
     ctx.strokeStyle='#202923';ctx.lineWidth=5;
     for(let x=gx-20;x<gx+80;x+=12){ctx.beginPath();ctx.moveTo(x,gz-14);ctx.lineTo(x+10,gz+1);ctx.stroke();}ctx.restore();
+    }
     // A few bootprints form a subtle route from each room's lower half.
     ctx.fillStyle='rgba(133,133,110,.10)';
     for(let i=0;i<8;i++){ctx.save();ctx.translate(230+(i%2?14:-14)+random()*12,250+i*15);ctx.rotate(-.16);ctx.fillRect(-3,-5,6,10);ctx.restore();}
@@ -53,6 +55,7 @@ export function addRoomDetails(scene, box, roomDefs) {
   }
   roomDefs.forEach((r,index)=>{
     floorTexture(r,index);
+    if(r.name.startsWith('HOSPITAL '))return;
     const left=r.x-1,right=r.x+r.w,north=r.z-1,south=r.z+r.h;
     // Corners get machined wall cap sections and inset utility conduits. Short sections
     // deliberately avoid every doorway, including the horizontal connecting corridors.

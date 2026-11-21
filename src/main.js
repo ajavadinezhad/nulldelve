@@ -1,57 +1,60 @@
-import {createGrenadeActions} from './grenade-actions.js?v=rotation-r14';
-import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=rotation-r14';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=rotation-r14';
-import {compatibleStorage} from './storage-compat.js?v=rotation-r14';
-import {createTouchControls} from './touch-controls.js?v=rotation-r14';
-import {createHudFeedback} from './hud-feedback.js?v=rotation-r14';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=rotation-r14';
+import {grantHospitalAmmo} from './mission-supplies.js?v=hospital-r15';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=hospital-r15';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=hospital-r15';
+import {createGrenadeActions} from './grenade-actions.js?v=hospital-r15';
+import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=hospital-r15';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=hospital-r15';
+import {compatibleStorage} from './storage-compat.js?v=hospital-r15';
+import {createTouchControls} from './touch-controls.js?v=hospital-r15';
+import {createHudFeedback} from './hud-feedback.js?v=hospital-r15';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=hospital-r15';
 const puzzleDiscovery=createPuzzleDiscovery();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=rotation-r14';
-import {soldier, animateSoldier} from './character.js?v=rotation-r14';
-import {weapon, createCombatEffects} from './weapons.js?v=rotation-r14';
-import {addRoomDetails} from './room-details.js?v=rotation-r14';
-import {createMinimap} from './minimap.js?v=rotation-r14';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=rotation-r14';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=rotation-r14';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=rotation-r14';
-import {createPuzzleArt} from './puzzle-art.js?v=rotation-r14';
-import {createWeaponPreview} from './weapon-preview.js?v=rotation-r14';
-import {createProgression} from './progression.js?v=rotation-r14';
-import {createProgressionArt} from './progression-art.js?v=rotation-r14';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=rotation-r14';
-import {buildWorld} from './world-render.js?v=rotation-r14';
-import {createNavigator} from './navigation.js?v=rotation-r14';
-import {createGameMenu} from './game-menu.js?v=rotation-r14';
-import {createSaveSlots} from './save-slots.js?v=rotation-r14';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=rotation-r14';
-import {createEconomy} from './economy.js?v=rotation-r14';
-import {createExplosions} from './explosion.js?v=rotation-r14';
-import {createGameAudio} from './audio.js?v=rotation-r14';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=rotation-r14';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=rotation-r14';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=rotation-r14';
-import {observeHudLayout} from './interface-layout.js?v=rotation-r14';
-import {createMapFocus} from './map-accessibility.js?v=rotation-r14';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=rotation-r14';
-import {placeLootDrops} from './loot-placement.js?v=rotation-r14';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=rotation-r14';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=rotation-r14';
-import {createFireZones} from './fire-grenades.js?v=rotation-r14';
-import {itemIconPath} from './item-icons.js?v=rotation-r14';
-import {createLootView} from './loot-view.js?v=rotation-r14';
-import {meleeTargets} from './melee.js?v=rotation-r14';
-import {createPuzzleHints} from './puzzle-hints.js?v=rotation-r14';
-import {createOnboarding} from './onboarding.js?v=rotation-r14';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=rotation-r14';
-import {validateSnapshot} from './snapshot-validation.js?v=rotation-r14';
-import {DIFFICULTY_RULES} from './difficulty.js?v=rotation-r14';
-import {createCampaignProfile} from './campaign-profile.js?v=rotation-r14';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=rotation-r14';
-import {createCampaignProgress} from './campaign-progress.js?v=rotation-r14';
-import {buildOperationEnvironment} from './operation-environments.js?v=rotation-r14';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=rotation-r14';
-const $=s=>document.querySelector(s), W=101,H=69;
+import {buildArt} from './environment.js?v=hospital-r15';
+import {soldier, animateSoldier} from './character.js?v=hospital-r15';
+import {weapon, createCombatEffects} from './weapons.js?v=hospital-r15';
+import {addRoomDetails} from './room-details.js?v=hospital-r15';
+import {createMinimap} from './minimap.js?v=hospital-r15';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=hospital-r15';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=hospital-r15';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=hospital-r15';
+import {createPuzzleArt} from './puzzle-art.js?v=hospital-r15';
+import {createWeaponPreview} from './weapon-preview.js?v=hospital-r15';
+import {createProgression} from './progression.js?v=hospital-r15';
+import {createProgressionArt} from './progression-art.js?v=hospital-r15';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=hospital-r15';
+import {buildWorld} from './world-render.js?v=hospital-r15';
+import {createNavigator} from './navigation.js?v=hospital-r15';
+import {createGameMenu} from './game-menu.js?v=hospital-r15';
+import {createSaveSlots} from './save-slots.js?v=hospital-r15';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=hospital-r15';
+import {createEconomy} from './economy.js?v=hospital-r15';
+import {createExplosions} from './explosion.js?v=hospital-r15';
+import {createGameAudio} from './audio.js?v=hospital-r15';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=hospital-r15';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=hospital-r15';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=hospital-r15';
+import {observeHudLayout} from './interface-layout.js?v=hospital-r15';
+import {createMapFocus} from './map-accessibility.js?v=hospital-r15';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=hospital-r15';
+import {placeLootDrops} from './loot-placement.js?v=hospital-r15';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=hospital-r15';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=hospital-r15';
+import {createFireZones} from './fire-grenades.js?v=hospital-r15';
+import {itemIconPath} from './item-icons.js?v=hospital-r15';
+import {createLootView} from './loot-view.js?v=hospital-r15';
+import {meleeTargets} from './melee.js?v=hospital-r15';
+import {createPuzzleHints} from './puzzle-hints.js?v=hospital-r15';
+import {createOnboarding} from './onboarding.js?v=hospital-r15';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=hospital-r15';
+import {validateSnapshot} from './snapshot-validation.js?v=hospital-r15';
+import {DIFFICULTY_RULES} from './difficulty.js?v=hospital-r15';
+import {createCampaignProfile} from './campaign-profile.js?v=hospital-r15';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=hospital-r15';
+import {createCampaignProgress} from './campaign-progress.js?v=hospital-r15';
+import {buildOperationEnvironment} from './operation-environments.js?v=hospital-r15';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=hospital-r15';
+const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
 function operationTitle(){return CAMPAIGN_OPERATIONS.find(op=>op.id===runConfig.operation)?.name??(runConfig.mission==='campaign'?'Facility descent':runConfig.mission==='siege'?'Reactor siege':'Nest hunt');}
@@ -76,8 +79,8 @@ const camera=new THREE.OrthographicCamera();camera.up.set(0,0,-1);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
 scene.add(new THREE.HemisphereLight(0xc9e8db,0x243028,1.6));const sun=new THREE.DirectionalLight(0xffffff,2.6);sun.position.set(-10,25,15);scene.add(sun);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-34,right:34,top:34,bottom:-34,near:.1,far:90});sun.position.set(5,35,20);sun.target.position.set(23,0,17);scene.add(sun.target);sun.shadow.normalBias=.04;
 const map=Array.from({length:H},()=>Array(W).fill(1)), explored=new Set(),seenRooms=new Set();
-const roomDefs=[{x:2,z:21,w:12,h:11,name:'INSERTION'},{x:2,z:4,w:12,h:12,name:'ARCHIVE'},{x:18,z:4,w:11,h:12,name:'SECURITY'},{x:18,z:21,w:11,h:11,name:'STORAGE'},{x:33,z:21,w:12,h:11,name:'EXTRACTION'},{x:33,z:4,w:12,h:12,name:'COMMAND'},...EXPANSION_ROOMS];
-function carve(x,z,w,h){for(let j=z;j<z+h;j++)for(let i=x;i<x+w;i++)map[j][i]=0;}roomDefs.forEach(r=>carve(r.x,r.z,r.w,r.h));carve(6,15,3,7);carve(13,9,6,3);carve(22,15,3,7);carve(28,25,6,3);carve(37,15,3,7);carve(28,9,6,3);carveExpansion(carve);const totalFloor=map.reduce((sum,row)=>sum+row.filter(v=>v===0).length,0);
+const roomDefs=[{x:2,z:21,w:12,h:11,name:'INSERTION'},{x:2,z:4,w:12,h:12,name:'ARCHIVE'},{x:18,z:4,w:11,h:12,name:'SECURITY'},{x:18,z:21,w:11,h:11,name:'STORAGE'},{x:33,z:21,w:12,h:11,name:'EXTRACTION'},{x:33,z:4,w:12,h:12,name:'COMMAND'},...EXPANSION_ROOMS,...HOSPITAL_ROOMS];
+function carve(x,z,w,h){for(let j=z;j<z+h;j++)for(let i=x;i<x+w;i++)map[j][i]=0;}roomDefs.forEach(r=>carve(r.x,r.z,r.w,r.h));carve(6,15,3,7);carve(13,9,6,3);carve(22,15,3,7);carve(28,25,6,3);carve(37,15,3,7);carve(28,9,6,3);carveExpansion(carve);carveHospital(carve);const totalFloor=map.reduce((sum,row)=>sum+row.filter(v=>v===0).length,0);
 const puzzle=createPressurePuzzle();
 const cover=[{x:8,z:26,w:3,h:1.5},{x:6,z:8,w:2,h:3},{x:23,z:9,w:3,h:2},{x:22,z:26,w:2,h:3},{x:39,z:8,w:2,h:3},{x:39,z:26,w:3,h:2}];
 const boxGeo=new THREE.BoxGeometry(1,1,1);function box(x,y,z,w,h,d,color,group=scene){const m=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color,roughness:.85}));m.position.set(x,y,z);m.scale.set(w,h,d);m.castShadow=true;m.receiveShadow=true;group.add(m);return m;}
@@ -88,11 +91,11 @@ const fogTexture=new THREE.DataTexture(fogPixels,W,H);fogTexture.colorSpace=THRE
 const fogOverlay=new THREE.Mesh(new THREE.PlaneGeometry(W,H),new THREE.MeshBasicMaterial({map:fogTexture,transparent:true,depthWrite:false}));fogOverlay.rotation.x=-Math.PI/2;fogOverlay.position.set((W-1)/2,3,(H-1)/2);fogOverlay.renderOrder=10;scene.add(fogOverlay);
 buildWorld(scene,map,W,H);
 buildArt(scene,box,cover,roomDefs.slice(0,6));
-addExpansionProps(scene,box,cover);
+addExpansionProps(scene,box,cover);addHospitalProps(scene,box,cover);
 addRoomDetails(scene,box,roomDefs);
 let operationEnvironment=null;function updateOperationEnvironment(){operationEnvironment?.dispose();operationEnvironment=buildOperationEnvironment({scene,operation:runConfig.operation,roomDefs,cover});scene.background.set(operationEnvironment.background);const fogColor=operationEnvironment.background;for(let i=0;i<fogPixels.length;i+=4){fogPixels[i]=(fogColor>>16)&255;fogPixels[i+1]=(fogColor>>8)&255;fogPixels[i+2]=fogColor&255;}fogTexture.needsUpdate=true;sun.color.set(operationEnvironment.lightColor);sun.intensity=operationEnvironment.lightIntensity;const ambient=scene.children.find(child=>child.isHemisphereLight);if(ambient){ambient.color.set(operationEnvironment.hemisphereSky);ambient.groundColor.set(operationEnvironment.hemisphereGround);}}
 updateOperationEnvironment();
-const doors=[{x:7,z:18,axis:'x'},{x:15.5,z:10,axis:'z'},{x:23,z:18,axis:'x'},{x:30.5,z:26,axis:'z'},{x:38,z:18,axis:'x'},{x:30.5,z:10,axis:'z'},...EXPANSION_DOORS];
+const doors=[{x:7,z:18,axis:'x'},{x:15.5,z:10,axis:'z'},{x:23,z:18,axis:'x'},{x:30.5,z:26,axis:'z'},{x:38,z:18,axis:'x'},{x:30.5,z:10,axis:'z'},...EXPANSION_DOORS,...HOSPITAL_DOORS].map(door=>({...door}));
 for(const door of doors){
  door.open=false;door.slide=0;door.group=new THREE.Group();door.group.position.set(door.x,0,door.z);if(door.axis==='z')door.group.rotation.y=Math.PI/2;scene.add(door.group);
  box(0,.75,0,3,1.5,.24,0x667b73,door.group);box(0,1.53,0,3.1,.08,.3,0xa2afa0,door.group);
@@ -105,7 +108,7 @@ doors[0].needsPower=true;doors[0].unlocked=false;doors[0].status.material.color.
 const updatePuzzleArt=createPuzzleArt(scene,box,puzzle.crates,puzzle.plates,doors[0]);
 function nearbyDoor(){return doors.filter(d=>Math.hypot(d.x-player.x,d.z-player.z)<2.7).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0];}
 function beginInteraction(){if(beginCrateGrab(puzzle,player,(x,z,r)=>solid(x,z,r,true)))return;interact();}
-function interact(){if(runConfig.operation&&campaignOperationComplete(runConfig.operation,{player,progression})){queueCheckpoint('Sector departed');commitCheckpoint();end(true);return;}const artifactsBefore=progression.state.artifacts?.length??0,taskBefore=progression.state.milestone??0,cipherBefore=progression.state.archive.solved,powerBefore=progression.state.power.solved,valvesBefore=progression.state.valves.solved,logsBefore=progression.state.logs.length;if(progression.interact(player)){if((progression.state.artifacts?.length??0)>artifactsBefore){for(const id of progression.state.artifacts)campaignProgress.recordArtifact(id);}if((progression.state.milestone??0)>taskBefore)queueCheckpoint('Operation milestone');if(!powerBefore&&progression.state.power.solved)queueCheckpoint('Reactor power restored');if(!valvesBefore&&progression.state.valves.solved)queueCheckpoint('Containment vented');if(progression.state.logs.length>logsBefore){for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);queueCheckpoint('Research log recovered');}if(!cipherBefore&&progression.state.archive.solved){queueCheckpoint('Archive cipher solved');audio.puzzle(true);}return;}const d=nearbyDoor();if(!d)return;if(d.progressLocked){toast(d.lockReason);return;}if(d.needsPower&&!d.unlocked){toast('NO POWER · 2 CIRCUITS OFFLINE');return;}const across=d.axis==='x'?Math.abs(player.z-d.z):Math.abs(player.x-d.x),along=d.axis==='x'?Math.abs(player.x-d.x):Math.abs(player.z-d.z);if(d.open&&((across<.6&&along<1.9)||enemies.some(e=>e.hp>0&&Math.abs(e.x-d.x)<(d.axis==='x'?1.9:.6)&&Math.abs(e.z-d.z)<(d.axis==='x'?.6:1.9)))){toast('CLEAR THE DOORWAY FIRST');return;}if(d.slide>.05&&d.slide<.95)return;d.open=!d.open;if(d.open)tutorial?.event('door');d.status.material.color.set(d.open||d.unlocked?0x9ae8a9:0xd7a75f);audio.door(d.open);updateFog();}
+function interact(){const hospitalSampleBefore=!!progression.state.operationTasks?.hospitalSample,hospitalAuthBefore=!!progression.state.operationTasks?.hospitalAuth;if(runConfig.operation&&campaignOperationComplete(runConfig.operation,{player,progression})){queueCheckpoint('Sector departed');commitCheckpoint();end(true);return;}const artifactsBefore=progression.state.artifacts?.length??0,taskBefore=progression.state.milestone??0,cipherBefore=progression.state.archive.solved,powerBefore=progression.state.power.solved,valvesBefore=progression.state.valves.solved,logsBefore=progression.state.logs.length;if(progression.interact(player)){if(runConfig.operation==='hospital'&&((!hospitalSampleBefore&&progression.state.operationTasks.hospitalSample)||(!hospitalAuthBefore&&progression.state.operationTasks.hospitalAuth))){grantHospitalAmmo(weapons);audio.pickup('ammo');hud();}if((progression.state.artifacts?.length??0)>artifactsBefore){for(const id of progression.state.artifacts)campaignProgress.recordArtifact(id);}if((progression.state.milestone??0)>taskBefore)queueCheckpoint('Operation milestone');if(!powerBefore&&progression.state.power.solved)queueCheckpoint('Reactor power restored');if(!valvesBefore&&progression.state.valves.solved)queueCheckpoint('Containment vented');if(progression.state.logs.length>logsBefore){for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);queueCheckpoint('Research log recovered');}if(!cipherBefore&&progression.state.archive.solved){queueCheckpoint('Archive cipher solved');audio.puzzle(true);}return;}const d=nearbyDoor();if(!d)return;if(d.progressLocked){toast(d.lockReason);return;}if(d.needsPower&&!d.unlocked){toast('NO POWER · 2 CIRCUITS OFFLINE');return;}const across=d.axis==='x'?Math.abs(player.z-d.z):Math.abs(player.x-d.x),along=d.axis==='x'?Math.abs(player.x-d.x):Math.abs(player.z-d.z);if(d.open&&((across<.6&&along<1.9)||enemies.some(e=>e.hp>0&&Math.abs(e.x-d.x)<(d.axis==='x'?1.9:.6)&&Math.abs(e.z-d.z)<(d.axis==='x'?.6:1.9)))){toast('CLEAR THE DOORWAY FIRST');return;}if(d.slide>.05&&d.slide<.95)return;d.open=!d.open;if(d.open)tutorial?.event('door');d.status.material.color.set(d.open||d.unlocked?0x9ae8a9:0xd7a75f);audio.door(d.open);updateFog();}
 function actor(color){return soldier(color,scene,box);}
 const primary=primaryWeapon(campaignProfile.state.primary);const weapons={rifle:{...primary,name:primary.name.toUpperCase(),capacity:primary.id==='carbine'?rules.magazine:primary.capacity,ammo:primary.id==='carbine'?rules.magazine:primary.capacity,reserve:primaryReserve(primary.id,runConfig.difficulty)},pistol:{name:'P9 SIDEARM',capacity:12,ammo:12,reserve:rules.pistolReserve,interval:.29,reload:1.1,baseDamage:2,range:22,stagger:.25,pellets:1,spread:0}};let selected='rifle';
 for(const gun of Object.values(weapons)){gun.baseCapacity=gun.capacity;gun.baseReload=gun.reload;}
@@ -166,7 +169,7 @@ function end(win){
  ended=true;active=false;audio.setPaused(true);tutorial?.hide();shooting=false;keys.clear();touchControls?.reset();menu?.hide();document.body.classList.remove('playing');
  persistCampaignProfile();if(win&&runConfig.mission==='campaign'&&runConfig.operation)campaignProgress.complete(runConfig.operation);
  const result=recordResult(browserStorage(),runConfig,operationStats,win,explorationPercent());
- const sectorComplete=win&&runConfig.mission==='campaign'&&runConfig.operation&&runConfig.operation!=='nest';
+ const sectorComplete=win&&runConfig.mission==='campaign'&&runConfig.operation&&runConfig.operation!==CAMPAIGN_OPERATIONS[CAMPAIGN_OPERATIONS.length-1].id;
  const overlay=$('#overlay');overlay.classList.remove('menu-overlay');overlay.style.display='flex';
  overlay.innerHTML=`<section class="result-panel${win?' result-success':''}" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="result-heading"><svg class="result-symbol" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="16" cy="16" r="13"/><path d="${win?'m9 16 5 5 9-10':'m11 11 10 10m0-10L11 21'}"/></svg><h1 id="result-title">${sectorComplete?'Sector secured':win?'Mission complete':'Operation failed'}</h1></div><p id="result-context" class="result-context"></p><div class="result-actions" id="result-actions"><button id="again" class="result-action">Retry operation</button><button id="back-menu" class="result-action">Main menu</button></div><details class="result-details"><summary>Run details</summary><dl class="debrief" id="result-stats"></dl><div id="result-notes"></div></details></section>`;
  const difficulty={easy:'Recruit',normal:'Operator',hard:'Veteran'}[runConfig.difficulty]??runConfig.difficulty;
@@ -177,7 +180,7 @@ function end(win){
  else if(!win&&checkpointMatchesOperation(latestSnapshot(),runConfig)){const button=document.createElement('button');button.id='restart-checkpoint';button.textContent='Restart checkpoint';button.className='result-action result-primary';button.onclick=queueCheckpointLoad;$('#again').before(button);primary=button;}
  else $('#again').className='result-action result-primary';
  if(win&&result.delta!==null){const difference=document.createElement('p');difference.className='debrief-delta';difference.textContent=(result.delta<0?'−':'+')+formatDuration(Math.abs(result.delta))+' vs previous best';$('#result-notes').append(difference);}
- if(win&&(!runConfig.operation||runConfig.operation==='nest')&&new Set([...progression.state.logs,...campaignProgress.researchLogs()]).size===3){const transmission=document.createElement('p');transmission.className='debrief-transmission';transmission.textContent='The nest was a relay. The recovered research traces the colony’s orders to a source beneath the facility.';$('#result-notes').append(transmission);}
+ if(win&&(!runConfig.operation||runConfig.operation==='nest')&&new Set([...progression.state.logs,...campaignProgress.researchLogs()]).size===3){const transmission=document.createElement('p');transmission.className='debrief-transmission';transmission.textContent='The nest was a relay. The recovered research traces the colony’s orders to a sealed hospital annex. Its quarantine ledger may reveal who brought the specimens inside.';$('#result-notes').append(transmission);}
  $('#again').onclick=()=>{location.href=deploymentUrl(runConfig);};$('#back-menu').onclick=()=>menu.show('main');primary.focus?.();
 }
 
@@ -258,7 +261,7 @@ function simulate(dt){
  for(const e of livingEnemies){
    if((e.spawnDelay??0)>0){e.spawnDelay=Math.max(0,e.spawnDelay-dt);e.mesh.visible=false;if(e.spawnCue){e.spawnCue.visible=visible(e.x,e.z);e.spawnCue.scale.setScalar(1+(.7-e.spawnDelay)*.6);e.spawnCue.material.opacity=.35+Math.sin(time*18)*.2;}if(e.spawnDelay===0)removeSpawnCue(e);continue;}
    const wasWinding=(e.attackWindup??0)>0;
-   let routed=false;if(e.alerted&&!(e.attackWindup>0)&&!(e.pulseWindup>0||e.chargeWindup>0||e.chargeRemaining>0)&&!(e.staggerTime>0)&&!pursue.canMoveDirect(e,player))routed=pursue(e,player,dt,move);
+   let routed=false;if(e.alerted&&!(e.attackWindup>0)&&!(e.pulseWindup>0||e.chargeWindup>0||e.chargeRemaining>0||e.shriekWindup>0||e.leapWindup>0||e.leapRemaining>0)&&!(e.staggerTime>0)&&!pursue.canMoveDirect(e,player))routed=pursue(e,player,dt,move);
    updateRoachEnemy(e,player,dt,{lineOfSight:los,move,allowMovement:!routed,onBite:damage=>{
      if(!applyPlayerDamage(damage))return;
      $('.player-status').classList.add('damaged');clearTimeout(player.damageTimer);player.damageTimer=setTimeout(()=>$('.player-status').classList.remove('damaged'),180);
@@ -266,7 +269,7 @@ function simulate(dt){
    }});
    if(!wasWinding&&e.attackWindup>0&&visible(e.x,e.z))audio.attack(e.x,e.z,player.x,player.z,e.variant);
    e.chitterTimer=(e.chitterTimer??2)-dt;if(e.chitterTimer<=0){e.chitterTimer=3+(Number(e.id.slice(1))%4);if(visible(e.x,e.z))audio.creature(e.x,e.z,player.x,player.z,e.variant);}
-   if(!(e.attackWindup>0)&&!(e.pulseWindup>0||e.chargeWindup>0||e.chargeRemaining>0)&&!(e.staggerTime>0))for(const other of livingEnemies){if(other===e||other.hp<=0||(other.spawnDelay??0)>0)continue;const dx=e.x-other.x,dz=e.z-other.z,d=Math.hypot(dx,dz),spacing=(e.radius??.32)+(other.radius??.32)+.12;if(d>0&&d<spacing)move(e,dx/d*Math.min(.04,(spacing-d)*dt*3),dz/d*Math.min(.04,(spacing-d)*dt*3));}
+   if(!(e.attackWindup>0)&&!(e.pulseWindup>0||e.chargeWindup>0||e.chargeRemaining>0||e.shriekWindup>0||e.leapWindup>0||e.leapRemaining>0)&&!(e.staggerTime>0))for(const other of livingEnemies){if(other===e||other.hp<=0||(other.spawnDelay??0)>0)continue;const dx=e.x-other.x,dz=e.z-other.z,d=Math.hypot(dx,dz),spacing=(e.radius??.32)+(other.radius??.32)+.12;if(d>0&&d<spacing)move(e,dx/d*Math.min(.04,(spacing-d)*dt*3),dz/d*Math.min(.04,(spacing-d)*dt*3));}
    e.mesh.position.set(e.x,0,e.z);e.mesh.visible=e.hp>0&&(e.spawnDelay??0)<=0&&visible(e.x,e.z);updateEnemyHealthBar(e);
    if(ended)break;
  }
@@ -307,19 +310,20 @@ function applySettings(settings){
 function captureSnapshot(){return {
  version:3,barrels:barrelSystem.serialize(),doorHints:doorHint?.serializeSeen()??[],fireZones:fireZones.serialize(),profileRevision:campaignProfile.state.revision,loadout:{primary:active&&!ended?(weapons.rifle.id??campaignProfile.state.primary):campaignProfile.state.primary,unlocked:[...campaignProfile.state.unlocked]},stats:{...operationStats},loot:JSON.parse(JSON.stringify(loot)),reserves:{rifle:weapons.rifle.reserve,pistol:weapons.pistol.reserve},economy:economy.serialize(),world:[W,H],config:{...runConfig},player:{x:player.x,z:player.z,hp:player.hp,maxHp:player.maxHp,ammo:player.ammo,intel:player.intel,angle:player.angle,hurtGrace:player.hurtGrace},selected,
  magazines:{rifle:selected==='rifle'?player.ammo:weapons.rifle.ammo,pistol:selected==='pistol'?player.ammo:weapons.pistol.ammo},reload,
- enemies:enemies.map(e=>({id:e.id,x:e.x,z:e.z,hp:e.hp,maxHp:e.maxHp,variant:e.variant,cooldown:e.cooldown,alerted:e.alerted,spawnDelay:e.spawnDelay,attackWindup:e.attackWindup,staggerTime:e.staggerTime,lootDropped:!!e.lootDropped,encounter:e.encounter,bossMechanic:e.bossMechanic,pulseCooldown:e.pulseCooldown,chargeCooldown:e.chargeCooldown,staggerImmunity:e.staggerImmunity})),
+ enemies:enemies.map(e=>({id:e.id,x:e.x,z:e.z,hp:e.hp,maxHp:e.maxHp,variant:e.variant,cooldown:e.cooldown,alerted:e.alerted,spawnDelay:e.spawnDelay,attackWindup:e.attackWindup,staggerTime:e.staggerTime,lootDropped:!!e.lootDropped,encounter:e.encounter,bossMechanic:e.bossMechanic,pulseCooldown:e.pulseCooldown,chargeCooldown:e.chargeCooldown,shriekCooldown:e.shriekCooldown,leapCooldown:e.leapCooldown,staggerImmunity:e.staggerImmunity})),
  doors:doors.map(d=>({open:d.open,slide:d.slide,unlocked:!!d.unlocked})),
  puzzle:{solved:puzzle.solved,crates:puzzle.crates.map(c=>({x:c.x,z:c.z,seated:c.seated})),plates:puzzle.plates.map(p=>({active:p.active}))},
  progression:progression.serializeState(),explored:[...explored],seenRooms:[...seenRooms],rewardedZones:[...rewardedZones]
 };}
 function restoreSnapshot(data){
+ if(!validateSnapshot(data))return false;if(data.world[0]!==W||data.world[1]!==H||data.doors.length!==doors.length)data=upgradeWorldSnapshot(data);
  if(!validateSnapshot(data,{width:W,height:H,doorCount:doors.length,crateCount:puzzle.crates.length,plateCount:puzzle.plates.length,barrelIds:barrelSystem.state.map(b=>b.id)}))return false;
  if(typeof grenadeActions!=='undefined')grenadeActions?.clear();doorHint?.skip();barrelSystem.restore(data.barrels);doorHint?.restoreSeen(data.doorHints??[]);guidanceDoorIndex=data.doorHints?.length?Number(data.doorHints[data.doorHints.length-1].split('|')[0]):null;
  Object.assign(operationStats,createOperationStats(data.stats));
  Object.assign(runConfig,{operation:null,remix:false},data.config);updateOperationEnvironment();rules=difficultyRules[runConfig.difficulty]||difficultyRules.normal;campaignProfile.reload();const retainPurchases=campaignProfile.state.revision>(Number(data.profileRevision)||0);if(!retainPurchases){campaignProfile.restoreLoadout(data.loadout??{});economy.restore(data.economy);campaignProfile.state.revision=Math.max(campaignProfile.state.revision,Number(data.profileRevision)||0);}applyPrimaryLoadout();
  Object.assign(player,data.player);if(player.maxHp!==100){player.hp=Math.min(100,Math.max(0,player.hp/player.maxHp*100));player.maxHp=100;}player.hurtGrace=Math.max(0,Math.min(.4,Number(player.hurtGrace)||0));if(!Number.isFinite(player.x)||!Number.isFinite(player.z)||player.x<1||player.z<1||player.x>=W-1||player.z>=H-1)return false;
  for(const e of enemies){removeSpawnCue(e);scene.remove(e.mesh);if(e.healthBar)scene.remove(e.healthBar.group);}enemies.length=0;const byId=new Map();nextEnemyId=1;lootView.clear();Object.assign(loot,createLootState(data.loot));weapons.rifle.reserve=Math.max(0,Math.min(300,Number(data.reserves?.rifle??120)||0));weapons.pistol.reserve=Math.max(0,Math.min(150,Number(data.reserves?.pistol??60)||0));
- for(const saved of data.enemies){const base=ROACH_VARIANTS[saved.variant]||ROACH_VARIANTS.normal;const enemy={...base,...saved,maxHp:saved.maxHp??Math.ceil(base.hp*rules.hp),speed:base.speed*rules.speed,biteDamage:Math.round(base.biteDamage*rules.damage),behavior:rules.behavior,windupDuration:rules.windupDuration,mesh:saved.hp>0?createRoach(scene,saved.variant):new THREE.Group()};if(saved.variant==='charger')enemy.chargeCooldown=Math.max(0,Math.min(4.5,Number.isFinite(saved.chargeCooldown)?saved.chargeCooldown:1));enemy.attackWindup=Math.max(0,Number(enemy.attackWindup)||0);enemy.staggerTime=Math.max(0,Number(enemy.staggerTime)||0);enemy.mesh.position.set(enemy.x,0,enemy.z);enemy.mesh.visible=false;attachEnemyHealthBar(scene,enemy);enemies.push(enemy);byId.set(enemy.id,enemy);nextEnemyId=Math.max(nextEnemyId,(Number(enemy.id?.slice(1))||0)+1);}
+ for(const saved of data.enemies){const base=ROACH_VARIANTS[saved.variant]||ROACH_VARIANTS.normal;const enemy={...base,...saved,maxHp:saved.maxHp??Math.ceil(base.hp*rules.hp),speed:base.speed*rules.speed,biteDamage:Math.round(base.biteDamage*rules.damage),behavior:rules.behavior,windupDuration:rules.windupDuration,mesh:saved.hp>0?createRoach(scene,saved.variant):new THREE.Group()};if(saved.variant==='screecher')enemy.shriekCooldown=Math.max(0,Math.min(6,Number.isFinite(saved.shriekCooldown)?saved.shriekCooldown:1));if(saved.variant==='leaper')enemy.leapCooldown=Math.max(0,Math.min(4.8,Number.isFinite(saved.leapCooldown)?saved.leapCooldown:1));if(saved.variant==='charger')enemy.chargeCooldown=Math.max(0,Math.min(4.5,Number.isFinite(saved.chargeCooldown)?saved.chargeCooldown:1));enemy.chargeWindup=0;enemy.chargeRemaining=0;enemy.shriekWindup=0;enemy.leapWindup=0;enemy.leapRemaining=0;enemy.pulseWindup=0;enemy.attackWindup=Math.max(0,Number(enemy.attackWindup)||0);enemy.staggerTime=Math.max(0,Number(enemy.staggerTime)||0);enemy.mesh.position.set(enemy.x,0,enemy.z);enemy.mesh.visible=false;attachEnemyHealthBar(scene,enemy);enemies.push(enemy);byId.set(enemy.id,enemy);nextEnemyId=Math.max(nextEnemyId,(Number(enemy.id?.slice(1))||0)+1);}
  if(!progression.restoreState(data.progression,byId))return false;progression.state.mission=runConfig.mission;runConfig.remix=!!progression.state.remix;for(const zone of progression.state.zones)for(const enemy of zone.wave){enemy.encounter=zone.id;if(zone.id==='nest'&&enemy.variant==='boss'){enemy.bossMechanic='pulse';enemy.pulseCooldown=Math.max(2,Number(enemy.pulseCooldown)||0);}enemy.pulseWindup=0;}fireZones.clear();if(data.fireZones)fireZones.restore(data.fireZones);for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);
  data.doors?.forEach((d,i)=>{if(doors[i])Object.assign(doors[i],d);});
  progression.state.artifacts=[...new Set([...progression.state.artifacts,...campaignProgress.artifacts()])];progression.state.logs=[...new Set([...progression.state.logs,...campaignProgress.researchLogs()])];for(const device of progression.state.devices){if(device.kind==='artifact'||device.kind==='log'){device.active=(device.kind==='artifact'?progression.state.artifacts:progression.state.logs).includes(device.id);device.progress=device.active?1:0;}}progression.refreshLocks();

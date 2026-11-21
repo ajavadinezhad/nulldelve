@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import {weapon} from './weapons.js?v=rotation-r14';
-export const WEAPON_PREVIEW_LABELS=Object.freeze({rifle:'MK4 carbine',carbine:'MK4 carbine',smg:'VX9 SMG',shotgun:'BREACH-12 shotgun',marksman:'SABLE DMR marksman rifle',lmg:'M60 WARDEN light machine gun',hush:'HUSH-9 precision carbine',scattergun:'TWIN drum scattergun',pistol:'P9 sidearm'});
+import {weapon} from './weapons.js?v=hospital-r15';
+export const WEAPON_PREVIEW_LABELS=Object.freeze({rifle:'MK4 carbine',carbine:'MK4 carbine',smg:'VX9 SMG',shotgun:'BREACH-12 shotgun',marksman:'SABLE DMR marksman rifle',lmg:'M60 WARDEN light machine gun',hush:'HUSH-9 precision carbine',scattergun:'TWIN drum scattergun',kestrel:'KESTREL bullpup battle rifle',mantis:'MANTIS heavy anti-mutation rifle',pistol:'P9 sidearm'});
 /** Long barrels and bulky magazines fit the same preview without cropping. */
 export function frameWeaponPreview(model){
  model.rotation.y=-Math.PI/2;model.updateMatrixWorld(true);

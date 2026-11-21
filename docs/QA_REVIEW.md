@@ -85,3 +85,7 @@ The previous Medium phone default forced1× CSS-resolution rendering; High cappe
 ## Rotation framing r14
 
 Touch framing now applies symmetric aspect compensation in portrait and landscape. With a393×707 viewport rotated to707×393 at base zoom22, both orientations render approximately23.96 CSS pixels per world unit; previously landscape fell to17.86. Tests cover multiple phone/tablet dimensions and all saved zoom endpoints, preserving desktop framing and bounding extreme aspect ratios. Landscape training feedback moved below the operator to avoid obscuring the play center. All58 regression files pass; browser viewport checks verified both orientations without errors.
+
+## r15 hospital expansion
+
+61 test files pass. Coverage includes 36 campaign and 12 legacy arena configurations, 648 ammunition projections, hospital collision-aware puzzle traversal/checkpoint restoration, finite supply no-farming, new weapon purchase/upgrades and mutation attack/cooldown behavior. Legacy 101×69 snapshots migrate into 151×69 while preserving exploration coordinates, inventory and existing door identities. Browser startup caught frozen hospital door definitions being mutated; live doors now clone definitions, with a regression check. External Chrome starts the hospital without console errors and exposes the sixth operation and armory. Automated traversal instantly removes enemy HP to exercise progression; it does not replace human combat playtesting or real-phone performance validation.

@@ -1,8 +1,8 @@
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=rotation-r14';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=rotation-r14';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=rotation-r14';
-import {validateSnapshot} from './snapshot-validation.js?v=rotation-r14';
-import {normalizeSettings} from './controls.js?v=rotation-r14';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=hospital-r15';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=hospital-r15';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=hospital-r15';
+import {validateSnapshot} from './snapshot-validation.js?v=hospital-r15';
+import {normalizeSettings} from './controls.js?v=hospital-r15';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

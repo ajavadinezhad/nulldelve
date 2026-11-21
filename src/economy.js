@@ -1,9 +1,9 @@
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
-const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','pistol'],UPGRADES=['damage','magazine','reload'];
+const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','pistol'],UPGRADES=['damage','magazine','reload'];
 const COSTS={damage:[100,200,350],magazine:[80,160,280],reload:[80,160,280]};
-const REWARDS={normal:5,runner:6,brute:14,charger:18,sentinel:24,boss:75};
-const GUN_NAMES={rifle:'MK4',smg:'VX9',shotgun:'BREACH-12',marksman:'SABLE',lmg:'M60',hush:'HUSH-9',scattergun:'TWIN',pistol:'P9'};
+const REWARDS={normal:5,runner:6,brute:14,charger:18,sentinel:24,screecher:20,leaper:16,boss:75};
+const GUN_NAMES={rifle:'MK4',smg:'VX9',shotgun:'BREACH-12',marksman:'SABLE',lmg:'M60',hush:'HUSH-9',scattergun:'TWIN',kestrel:'KESTREL',mantis:'MANTIS',pistol:'P9'};
 const ITEM_LIMIT=5,CREDIT_LIMIT=999999999;
 const clamp=(value,min,max,fallback=0)=>typeof value==='number'&&Number.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
 const integer=(value,min,max,fallback=0)=>Math.floor(clamp(value,min,max,fallback));
