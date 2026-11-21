@@ -1,0 +1,39 @@
+name: Preview bug report
+description: Something broke, felt confusing, or blocked your operation.
+title: "[Preview] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      placeholder: Tell us what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it?
+      placeholder: Operation, difficulty, room, and the actions before the problem.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: For example, Android phone / Chrome or Windows laptop / Firefox
+    validations:
+      required: true
+  - type: dropdown
+    id: input
+    attributes:
+      label: Controls
+      options:
+        - Mouse and keyboard
+        - Touchpad and keyboard
+        - Touch controls
+        - Other
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshot or extra details
+      description: You can drag a screenshot here. Please do not include private information.

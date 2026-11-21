@@ -1,5 +1,5 @@
-import {normalizeCampaignProfile} from './campaign-profile.js?v=critic-review-7';
-import {normalizeCampaignProgress} from './campaign-progress.js?v=critic-review-7';
+import {normalizeCampaignProfile} from './campaign-profile.js?v=preview-r8';
+import {normalizeCampaignProgress} from './campaign-progress.js?v=preview-r8';
 const PREFIX='#deployment=';
 /** Game-only session transfer survives document navigation when storage is blocked. */
 export function encodeDeploymentState({profile,progress}={}){

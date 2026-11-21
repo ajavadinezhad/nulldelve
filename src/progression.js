@@ -1,5 +1,5 @@
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=critic-review-7';
-import {DIFFICULTY_RULES} from './difficulty.js?v=critic-review-7';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=preview-r8';
+import {DIFFICULTY_RULES} from './difficulty.js?v=preview-r8';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -289,9 +289,9 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if(zone.queue.length===0&&zone.remaining===0){
         zone.status='cleared';recomputeLocks();
         onToast(`${zone.label} CLEARED · ${zone.total} ELIMINATED · EXITS UNLOCKED`);
-        if(zone===security)hint('Security is clear. Continue through Storage or Command to reach the annex.');
+        if(zone===security)hint('Security is clear. Follow the marked route and complete the remaining sector objectives.');
         else if(zone===storage)hint('Storage is clear. Reach Command and defeat its mutation horde.');
-        else if(zone===command)hint('Research annex unlocked. Search the larger eastern sectors for the nest core.');
+        else if(zone===command)hint('Command is clear. Check the next objective and follow the service route.');
         else if(zone===nest)hint('Nest destroyed. Recover the cyan intel, then reach Evacuation in the southeast.');
         else hint(`${zone.label} cleared. Push deeper into the annex and find the nest core.`);
         if(zone===generator&&state.operationTasks.genInserted){powerCircuit(state.circuit);if(!finishCircuit(player))hint('Power House online. Follow its broken yellow cable north through Extraction into Command, rotating floor junctions to carry power to the Bio Lab door.');}

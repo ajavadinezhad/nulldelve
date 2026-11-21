@@ -49,3 +49,15 @@ Renamed browser titles, menus, map captions, field notes, exports and documentat
 Three independent reviewers completed targeted passes and follow-up checks. Fixed wrong-sector checkpoint restart, hidden minimap state after pausing, missing touch sprint, stale cash after damage-over-time kills, inaccurate capped healing feedback, empty grenade type fallback, contradictory Nest lock guidance, and phone keyboard settings reflow. Short campaign briefings connect adjacent sectors. Difficulty/remix selections and debriefs share the graphite/amber theme; phone utility icons use consistent SVG shapes. Green cash and world/power indicators remain semantic.
 
 Validated 271 checks across 49 files, including new item-use, touch sprint, checkpoint matching, story hints, and settings expansion regressions. Browser checks cover campaign selection, actual difficulty rules, compact phone settings and startup. The suggested boss-pulse balance change was deferred as a design choice, not treated as a proven bug.
+
+## Preview r8 release follow-up
+
+Implemented touch-first once-only training, contextual touch action labels, portrait camera compensation with continuous zoom, conservative first-run touch quality, graphics-loss checkpoint recovery, isolated normal/remix records, and a boss pulse safe wedge that requires reacting. Field Notes diagrams and atlas selections use the shared graphite/amber/blue vocabulary. Startup displays an accessible loading state. Main/pause menus expose the early-preview revision and a GitHub feedback link. Social metadata, a real gameplay poster and a silent captured gameplay GIF are included.
+
+Manual acceptance checklist (pending human/device access, not claimed as completed):
+- Fresh desktop and phone players: open insertion door without coaching; identify objective, reload/swap/loot and resume the correct checkpoint.
+- Record opening completion time, deaths, hints, ammunition and cash; tune from observed play rather than ideal-damage arithmetic.
+- Physical Android and iPhone: simultaneous movement/aim, sprint, audio after first gesture, background/resume, portrait/landscape and sustained large-wave performance.
+- Keep mobile labelled experimental until these checks pass. No accounts or additional campaign content are needed for this early preview.
+
+Final automated validation: **284 checks across 52 files pass**. Browser verification covered touch training layout, the preview/footer flow, startup/loading replacement, and captured real gameplay. Physical-device and uncoached-human checks above remain pending.

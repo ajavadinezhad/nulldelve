@@ -1,6 +1,6 @@
 # NULLDELVE — Tactical breach
 
-A local three.js tactical shooter with fog of war, environmental puzzles, giant mutated cockroaches, and staged hordes.
+An early playable browser preview of a three.js tactical shooter with fog of war, environmental puzzles, giant mutated cockroaches, and staged hordes.
 
 ![Nulldelve main menu](assets/screenshots/facility-preview.jpg)
 
@@ -77,3 +77,11 @@ The bundled three.js runtime is distributed under the MIT license; see [vendor/L
 - `docs/`: review notes.
 
 GitHub Pages serves the root HTML pages from `main`. All runtime paths are relative so the game works under the repository URL.
+
+## Early preview
+
+Desktop browsers are the primary preview target. Touch controls are available experimentally; physical Android/iPhone performance and fresh-player playtests are still pending. Progress is stored in the current browser.
+
+[Report a bug or confusing interaction](https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml). Include the operation, difficulty, device/browser, and what happened.
+
+Preview assets: [share image](assets/preview/share-card.jpg), [actual gameplay sample](assets/preview/gameplay-preview.gif). The silent animation captures a real Nest arena play session; it is not a promise of final art or balance. The share card can be regenerated from `tools/preview-card.html`.

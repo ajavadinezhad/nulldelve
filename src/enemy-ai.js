@@ -30,7 +30,9 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,allowM
   if(!seesPlayer||!enemy.alerted){cancelBite();return;}
   enemy.mesh.rotation.y=Math.atan2(-dx,-dz);
   if(enemy.variant==='boss'&&(enemy.encounter==='nest'||enemy.bossMechanic==='pulse')&&d>2&&d<=NEST_PULSE.radius+1&&enemy.pulseCooldown<=0){
-    cancelBite();enemy.pulseGapAngle=Math.atan2(dz,dx);enemy.pulseWindup=NEST_PULSE.windup;visual.pulse={active:true,angle:enemy.pulseGapAngle,radius:NEST_PULSE.radius,progress:0};return;
+    // The telegraphed gap sits beside the starting position, so standing still is
+    // dangerous while a short sidestep reaches safety. Alternate the side each pulse.
+    cancelBite();enemy.pulseSide=enemy.pulseSide===1?-1:1;enemy.pulseGapAngle=Math.atan2(dz,dx)+enemy.pulseSide*.95;enemy.pulseWindup=NEST_PULSE.windup;visual.pulse={active:true,angle:enemy.pulseGapAngle,radius:NEST_PULSE.radius,progress:0};return;
   }
   const duration=Math.max(.15,stat('windupDuration',.35));
   if((enemy.attackWindup??0)>0){

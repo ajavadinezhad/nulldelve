@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=critic-review-7';
+import {compatibleStorage} from './storage-compat.js?v=preview-r8';
 export const PUZZLE_DISCOVERY_KEY='nulldelve.puzzle-discovery.v1';
 const kinds={glyph:'glyph-cipher',relay:'timed-relays',power:'power-sequence',valve:'pressure-balance',wire:'wire-network',artifact:'artifact-seal'};
 export function encounteredPuzzles({player,devices=[],plates=[],visible=()=>false}){
