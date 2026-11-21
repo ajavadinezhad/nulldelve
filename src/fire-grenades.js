@@ -35,7 +35,7 @@ export function createFireZones(scene,{isVisible=()=>true,lineOfSight=()=>true,o
    view.flames.instanceMatrix.needsUpdate=true;view.embers.instanceMatrix.needsUpdate=true;
   }
  }
- function burst(x,z,multiplier=1){if(!finite(x,-10000,10000)||!finite(z,-10000,10000))return null;const zone={id:nextId++,x,z,remaining:FIRE_DURATION,...(multiplier>1?{radius:FIRE_RADIUS*Math.min(1.15,multiplier)}:{})};zones.push(zone);build(zone);render();return zone.id;}
+ function burst(x,z,multiplier=1){if(!finite(x,-10000,10000)||!finite(z,-10000,10000))return null;const zone={id:nextId++,x,z,remaining:FIRE_DURATION,...(multiplier>1?{radius:FIRE_RADIUS*Math.min(1.25,multiplier)}:{})};zones.push(zone);build(zone);render();return zone.id;}
  function tick(){
   // One global interval and one pass over actors prevent overlapping fire stacking.
   const damaged=new Set();
@@ -59,7 +59,7 @@ export function createFireZones(scene,{isVisible=()=>true,lineOfSight=()=>true,o
  function restore(saved){
   if(!saved||saved.version!==1||!Array.isArray(saved.zones)||saved.zones.length>256||!finite(saved.phase,0,FIRE_TICK)||!Number.isSafeInteger(saved.nextId)||saved.nextId<1)return false;
   const ids=new Set(),restored=[];
-  for(const zone of saved.zones){if(!zone||!Number.isSafeInteger(zone.id)||zone.id<1||ids.has(zone.id)||!finite(zone.x,-10000,10000)||!finite(zone.z,-10000,10000)||!Number.isFinite(zone.remaining))return false;ids.add(zone.id);if(zone.radius!==undefined&&!finite(zone.radius,FIRE_RADIUS,FIRE_RADIUS*1.15))return false;if(zone.remaining>0)restored.push({id:zone.id,x:zone.x,z:zone.z,remaining:Math.min(FIRE_DURATION,zone.remaining),...(zone.radius?{radius:zone.radius}:{})});}
+  for(const zone of saved.zones){if(!zone||!Number.isSafeInteger(zone.id)||zone.id<1||ids.has(zone.id)||!finite(zone.x,-10000,10000)||!finite(zone.z,-10000,10000)||!Number.isFinite(zone.remaining))return false;ids.add(zone.id);if(zone.radius!==undefined&&!finite(zone.radius,FIRE_RADIUS,FIRE_RADIUS*1.25))return false;if(zone.remaining>0)restored.push({id:zone.id,x:zone.x,z:zone.z,remaining:Math.min(FIRE_DURATION,zone.remaining),...(zone.radius?{radius:zone.radius}:{})});}
   clear();zones=restored;phase=Math.min(FIRE_TICK-1e-8,saved.phase);nextId=Math.max(saved.nextId,...restored.map(zone=>zone.id+1));for(const zone of zones)build(zone);render();return true;
  }
  function setReducedEffects(value){reducedEffects=!!value;render();}

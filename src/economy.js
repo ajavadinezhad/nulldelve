@@ -1,5 +1,5 @@
-import {cashReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=ledger-r24';
-import {normalizeAttachments} from './weapon-attachments.js?v=ledger-r24';
+import {cashReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=branches-r25';
+import {normalizeAttachments} from './weapon-attachments.js?v=branches-r25';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','pistol'],UPGRADES=['damage','magazine','reload'];

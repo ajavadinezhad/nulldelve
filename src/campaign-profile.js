@@ -1,7 +1,7 @@
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=ledger-r24';
-import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=ledger-r24';
-import {createEconomy} from './economy.js?v=ledger-r24';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=branches-r25';
+import {compatibleStorage} from './storage-compat.js?v=branches-r25';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=branches-r25';
+import {createEconomy} from './economy.js?v=branches-r25';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';

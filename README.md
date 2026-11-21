@@ -112,7 +112,7 @@ The armory adds the KESTREL battle rifle ($820) and MANTIS anti-materiel rifle (
 
 ## Field kit and encounter update (r19)
 
-Armory has one field-skill slot: Field Medic (65 healing per finite medkit, after Breach), Rapid Response (+10% sprint, after Command), or Demolition Harness (+15% grenade area, after Research). Walking and crate movement are unchanged. Skills do not stack or generate supplies. Your active skill is stored in checkpoints. Explosives and ground fire also threaten the operator; Demolition expands that danger area too.
+Armory has 12 developable field skills across three connected branches, each with two prerequisite stages and a specialization fork. Medicine offers armor efficiency or stronger finite medkits; Mobility offers faster reloads or stronger close-range knife strikes; Demolition offers quicker throw charging or wider blast/fire coverage. Earn one training point per unique operation clear (seven currently); one developed skill is equipped at a time. Effects replace rather than stack, checkpoints retain the equipped skill, and existing development survives stale deployment links. Explosives and ground fire also threaten the operator.
 
 Each equipped primary has one free attachment choice. Single-projectile guns trade reload speed for range or range for slower cadence. Pellet weapons trade spread against stagger. Attachments preserve paid damage, magazine upgrades and loaded ammo.
 

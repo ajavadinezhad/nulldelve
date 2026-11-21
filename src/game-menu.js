@@ -1,13 +1,13 @@
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=ledger-r24';
-import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=ledger-r24';
-import {DIFFICULTY_RULES} from './difficulty.js?v=ledger-r24';
-import {createCampaignMap} from './campaign-map.js?v=ledger-r24';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=ledger-r24';
-import {createItemIcon} from './item-icons.js?v=ledger-r24';
-import {buildMissionPreview} from './mission-previews.js?v=ledger-r24';
-import {renderShop} from './shop-ui.js?v=ledger-r24';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=ledger-r24';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=branches-r25';
+import {compatibleStorage} from './storage-compat.js?v=branches-r25';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=branches-r25';
+import {DIFFICULTY_RULES} from './difficulty.js?v=branches-r25';
+import {createCampaignMap} from './campaign-map.js?v=branches-r25';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=branches-r25';
+import {createItemIcon} from './item-icons.js?v=branches-r25';
+import {buildMissionPreview} from './mission-previews.js?v=branches-r25';
+import {renderShop} from './shop-ui.js?v=branches-r25';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=branches-r25';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -23,13 +23,13 @@ const DIFFICULTIES=[
 function readSettings(){try{return normalizeSettings(JSON.parse(compatibleStorage(localStorage).getItem(SETTINGS_KEY)??'{}'));}catch{return normalizeSettings();}}
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 function button(text,action,className='menu-button'){const node=element('button',className,text);node.type='button';node.addEventListener('click',action);return node;}
-function skillIcon(node){if(node.icon!=='armory'&&node.icon!=='move')return createItemIcon(node.icon);const image=element('img','skill-icon');image.src=node.icon==='move'?'./assets/skill-mobility.svg':'./assets/menu-armory.svg';image.alt='';image.setAttribute('aria-hidden','true');image.width=28;image.height=28;image.draggable=false;return image;}
+function skillIcon(node){const paths={armory:'menu-armory',move:'skill-mobility',armor:'skill-armor',reload:'skill-reload',melee:'skill-melee',charge:'skill-charge',healing:'skill-triage',blast:'skill-blast'};if(!paths[node.icon])return createItemIcon(node.icon);const image=element('img','skill-icon');image.src='./assets/'+paths[node.icon]+'.svg';image.alt='';image.setAttribute('aria-hidden','true');image.width=28;image.height=28;image.draggable=false;return image;}
 function formatTime(value){if(!value)return 'Time unavailable';try{const date=new Date(value);return Number.isNaN(date.getTime())?'Time unavailable':date.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch{return 'Time unavailable';}}
 
 /** DOM-only game menu. The owning game controls gameplay, save storage and settings effects. */
 export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>{},onExportBackup=null,onPreviewBackup=null,onImportBackup=null,onContinue=()=>{},onLoad=()=>{},onLoadCheckpoint=()=>{},onSave=()=>{},onPurchase=()=>{},onFieldSkill=()=>{},onResume=()=>{},onClose=()=>{},onSettings=()=>{},getStatus=()=>({active:false,slots:[],canContinue:false})}){
  const settings=readSettings();
- let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,backupPreview=null,keyboardOpen=null;
+ let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,selectedSkillBranch=null,backupPreview=null,keyboardOpen=null;
  let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems';
  const nestedScrollPositions=new Map();
  function status(){try{return getStatus()??{active:false,slots:[],canContinue:false};}catch{return {active:false,slots:[],canContinue:false};}}
@@ -154,17 +154,25 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
    skills.append(element('p','training-balance',`${trainingPoints(state,completed)} training points`));
    const nodeButton=(node,tier)=>{
     const learned=node.id==='none'||state.learned.includes(node.id),available=node.id==='none'||skillLearnable(node.id,state,completed),equipped=current.fieldSkill===node.id;
-    const control=button('',()=>{selectedSkill=node.id;render(false);},'skill-circle'+(learned?' developed':'')+(available&&!learned?' available':'')+(equipped?' equipped':'')+(!learned&&!available?' locked':''));
+    const control=button('',()=>{selectedSkill=node.id;selectedSkillBranch=SKILL_BRANCHES.find(branch=>branch.nodes.includes(node.id))?.id??selectedSkillBranch;render(false);},'skill-circle'+(learned?' developed':'')+(available&&!learned?' available':'')+(equipped?' equipped':'')+(!learned&&!available?' locked':''));
     control.dataset.focusKey='skill-node-'+node.id;control.setAttribute('aria-pressed',String(selectedSkill===node.id));control.setAttribute('aria-label',`${node.name}, ${equipped?'equipped':learned?'developed':available?'available':'locked'}`);control.setAttribute('aria-controls','skill-detail');
     control.append(skillIcon(node));const badge=element('span','skill-circle-badge',equipped?'✓':!learned&&!available?'⌑':String(tier));badge.setAttribute('aria-hidden','true');control.append(badge);
     return control;
    };
-   const standard=FIELD_SKILLS.find(node=>node.id==='none'),root=element('div','skill-root');root.append(nodeButton(standard,0),element('span','','Standard kit'));map.append(root);
-   const branches=element('div','skill-branches');for(const branch of SKILL_BRANCHES){const lane=element('section','skill-branch');lane.append(element('h3','',branch.name));for(const [index,id]of branch.nodes.entries()){
-    const node=SKILL_NODES.find(n=>n.id===id),holder=element('div','skill-node-wrap');holder.append(nodeButton(node,index+1),element('span','skill-node-name',node.name));lane.append(holder);
-   }branches.append(lane);}map.append(branches);
+   const standard=FIELD_SKILLS.find(node=>node.id==='none'),root=element('div','skill-root');root.append(nodeButton(standard,0),element('span','','Standard kit'));
+   selectedSkillBranch=SKILL_BRANCHES.some(branch=>branch.id===selectedSkillBranch)?selectedSkillBranch:(SKILL_BRANCHES.find(branch=>branch.nodes.includes(selectedSkill))?.id??SKILL_BRANCHES[0].id);
+   const filters=element('div','skill-branch-filters');filters.setAttribute('aria-label','Skill branches');for(const branch of SKILL_BRANCHES){const filter=button(branch.name,()=>{selectedSkillBranch=branch.id;selectedSkill=branch.nodes[0];render(false);},'skill-branch-filter');filter.setAttribute('aria-pressed',String(branch.id===selectedSkillBranch));filter.dataset.focusKey='skill-branch-'+branch.id;filters.append(filter);}map.append(filters,root);
+   const branches=element('div','skill-branches');for(const branch of SKILL_BRANCHES){
+    const lane=element('section','skill-branch'+(branch.id===selectedSkillBranch?' active-branch':''));lane.setAttribute('aria-label',branch.name+' branch');lane.append(element('h3','',branch.name));
+    const nodes=branch.nodes.map(id=>SKILL_NODES.find(node=>node.id===id)).filter(Boolean),depth=node=>node.requires&&nodes.some(parent=>parent.id===node.requires)?1+depth(nodes.find(parent=>parent.id===node.requires)):1,maxDepth=Math.max(...nodes.map(depth));
+    for(let tier=1;tier<=maxDepth;tier++){
+     const tierNodes=nodes.filter(node=>depth(node)===tier),row=element('div','skill-tier'+(tierNodes.length>1?' skill-fork':''));row.dataset.depth=String(tier);
+     for(const node of tierNodes){const holder=element('div','skill-node-wrap'+(node.requires&&state.learned.includes(node.requires)?' parent-developed':''));if(node.requires)holder.dataset.requires=node.requires;holder.append(nodeButton(node,tier),element('span','skill-node-name',node.name));row.append(holder);}lane.append(row);
+    }branches.append(lane);
+   }map.append(branches);
    const node=selectedSkill==='none'?standard:SKILL_NODES.find(n=>n.id===selectedSkill),learned=node.id==='none'||state.learned.includes(node.id),canLearn=skillLearnable(node.id,state,completed);
    details.id='skill-detail';details.setAttribute('aria-label','Selected skill');details.append(skillIcon(node),element('h3','',node.name),element('p','',node.description));
+   details.append(element('span','skill-equipped-summary',`Equipped: ${[...FIELD_SKILLS,...SKILL_NODES].find(skill=>skill.id===current.fieldSkill)?.name??'Standard kit'}`));
    const requirement=!fieldSkillUnlocked(node.id,completed)?`Complete ${node.unlockAfter}`:node.requires&&!state.learned.includes(node.requires)?`Develop ${SKILL_NODES.find(n=>n.id===node.requires).name} first`:trainingPoints(state,completed)<1?'Earn a training point from your next first clear':'1 training point';
    if(!learned)details.append(element('p','skill-requirement',requirement));
    const activate=button(current.fieldSkill===node.id?'Equipped':learned?'Equip':'Develop · 1 point',()=>action(onFieldSkill,[learned?node.id:'learn:'+node.id],{close:false}),'menu-button skill-activate');activate.disabled=current.fieldSkill===node.id||!learned&&!canLearn;activate.dataset.focusKey='skill-activate';details.append(activate,element('small','','One skill equipped. First clears earn training points.'));
@@ -204,7 +212,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r24'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r25'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
  }

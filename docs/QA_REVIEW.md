@@ -123,3 +123,7 @@ Enemy cash uses permanent encounter/ordinal claims, shared across checkpoint ret
 Independent regression coverage includes interrupted reopen recovery, simultaneous claims, preserving earnings after reload, avoiding refunds after purchases, and migration seeds not replacing genuine pending payouts. Wave recovery preserves reward ordinals for missing enemy references.
 
 Skills use small connected icon circles with one selected detail panel. Locked nodes can be inspected, but development requires the parent and a point. Stale deployment transfers preserve developed nodes; legacy skill IDs cannot bypass prerequisites. Browser checks cover desktop and portrait viewport emulation; physical-phone verification remains outstanding.
+
+## r25 deeper skills
+
+Expanded to twelve nodes with three specialization forks. Actual-function gameplay regressions cover finite healing/armor, reload duration, melee targeting/cooldown, charge timing and fire-zone radius persistence. Larger Demolition ranks now affect ground fire rather than silently clamping at the first rank. Point-budget import reconciliation prioritizes already-developed nodes. Phone branch filters keep circles readable; desktop retains all three connected trees. Full balance rationale is in SKILL_BALANCE.md.

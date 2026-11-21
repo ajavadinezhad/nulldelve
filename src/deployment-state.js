@@ -1,6 +1,6 @@
-import {normalizeFieldSkill} from './field-skills.js?v=ledger-r24';
-import {normalizeCampaignProfile} from './campaign-profile.js?v=ledger-r24';
-import {normalizeCampaignProgress} from './campaign-progress.js?v=ledger-r24';
+import {normalizeFieldSkill} from './field-skills.js?v=branches-r25';
+import {normalizeCampaignProfile} from './campaign-profile.js?v=branches-r25';
+import {normalizeCampaignProgress} from './campaign-progress.js?v=branches-r25';
 const PREFIX='#deployment=';
 /** Game-only session transfer survives document navigation when storage is blocked. */
 export function encodeDeploymentState({profile,progress,fieldSkill}={}){

@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
+import {compatibleStorage} from './storage-compat.js?v=branches-r25';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
@@ -9,29 +9,30 @@ export const FIELD_SKILLS=Object.freeze([
  {id:'demolition',name:'Demolition Harness',description:'Grenade effects reach 15% farther. Keep clear: the danger radius grows too.',unlockAfter:'research',icon:'grenade'},
 ].map(Object.freeze));
 export const SKILL_BRANCHES=Object.freeze([
- {id:'medic',name:'Medicine',nodes:['medic','surgeon']},
- {id:'runner',name:'Mobility',nodes:['runner','pathfinder']},
- {id:'demolition',name:'Demolition',nodes:['demolition','ordnance']},
+ {id:'medic',name:'Medicine',nodes:['medic','surgeon','plating','triage']},
+ {id:'runner',name:'Mobility',nodes:['runner','pathfinder','quickloader','closequarters']},
+ {id:'demolition',name:'Demolition',nodes:['demolition','ordnance','steadythrow','widearea']},
 ]);
 const milestones=['breach','command','research','containment','nest','hospital','freight'];
 const advanced=[
  {id:'surgeon',name:'Trauma Specialist',description:'Medkits restore up to 75 health.',unlockAfter:'containment',requires:'medic',icon:'medkit'},
  {id:'pathfinder',name:'Pathfinder',description:'Sprint 15% faster. Crate movement stays unchanged.',unlockAfter:'nest',requires:'runner',icon:'move'},
  {id:'ordnance',name:'Ordnance Specialist',description:'Grenade effects and danger radius reach 20% farther.',unlockAfter:'hospital',requires:'demolition',icon:'grenade'},
+ {id:'plating',name:'Reactive Plating',description:'Armor absorbs the same hit using 20% less armor. Unarmored damage is unchanged.',unlockAfter:'nest',requires:'surgeon',icon:'armor'},
+ {id:'triage',name:'Emergency Triage',description:'Medkits restore up to 85 health. Still consumes one kit; no passive regeneration.',unlockAfter:'hospital',requires:'surgeon',icon:'healing'},
+ {id:'quickloader',name:'Tactical Reload',description:'Reload 12% faster with either gun. Damage and magazine capacity stay unchanged.',unlockAfter:'hospital',requires:'pathfinder',icon:'reload'},
+ {id:'closequarters',name:'Close Quarters',description:'Knife strikes deal 2 damage instead of 1. Reach and cooldown stay unchanged.',unlockAfter:'freight',requires:'pathfinder',icon:'melee'},
+ {id:'steadythrow',name:'Quick Cast',description:'Reach full throwing range 20% sooner. Grenade damage and fuse stay unchanged.',unlockAfter:'hospital',requires:'ordnance',icon:'charge'},
+ {id:'widearea',name:'Blast Control',description:'Grenade effects and danger radius reach 25% farther. Keep clear of your own blast.',unlockAfter:'freight',requires:'ordnance',icon:'blast'},
 ];
 export const SKILL_NODES=Object.freeze([...FIELD_SKILLS.slice(1),...advanced].map(Object.freeze));
 export function trainingPoints(state,completed=[]){return Math.max(0,milestones.filter(id=>completed.includes(id)).length-(state?.learned?.length??0));}
 export function skillLearnable(id,state,completed=[]){const node=SKILL_NODES.find(n=>n.id===id);return !!node&&fieldSkillUnlocked(id,completed)&&(!node.requires||state?.learned?.includes(node.requires))&&!state?.learned?.includes(id)&&trainingPoints(state,completed)>0;}
 
-const effects=Object.freeze({
- none:Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1}),
- medic:Object.freeze({medkitHealing:65,sprintMultiplier:1,grenadeRadiusMultiplier:1}),
- runner:Object.freeze({medkitHealing:50,sprintMultiplier:1.1,grenadeRadiusMultiplier:1}),
- demolition:Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1.15}),
- surgeon:Object.freeze({medkitHealing:75,sprintMultiplier:1,grenadeRadiusMultiplier:1}),
- pathfinder:Object.freeze({medkitHealing:50,sprintMultiplier:1.15,grenadeRadiusMultiplier:1}),
- ordnance:Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1.2}),
-});
+const baseEffects=Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1,reloadMultiplier:1,meleeDamage:1,armorDamageMultiplier:1,grenadeChargeMultiplier:1});
+const effectOverrides={none:{},medic:{medkitHealing:65},runner:{sprintMultiplier:1.1},demolition:{grenadeRadiusMultiplier:1.15},surgeon:{medkitHealing:75},pathfinder:{sprintMultiplier:1.15},ordnance:{grenadeRadiusMultiplier:1.2},plating:{armorDamageMultiplier:.8},triage:{medkitHealing:85},quickloader:{reloadMultiplier:.88},closequarters:{meleeDamage:2},steadythrow:{grenadeChargeMultiplier:.8},widearea:{grenadeRadiusMultiplier:1.25}};
+const effects=Object.freeze(Object.fromEntries(Object.entries(effectOverrides).map(([id,overrides])=>[id,Object.freeze({...baseEffects,...overrides})])));
+
 export function fieldSkillUnlocked(id,completed=[]){
  const skill=[...FIELD_SKILLS,...advanced].find(item=>item.id===id);if(!skill)return false;
  if(!skill.unlockAfter)return true;
@@ -82,7 +83,8 @@ export function createFieldSkills(storage){
   if(![1,2].includes(saved?.version)||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
   // A stale deployment link can change the equipped choice, but cannot erase development.
   const incoming=normalizeFieldSkill(saved,completed),current=read(completed);
-  memory=normalizeFieldSkill({version:2,selected:incoming.selected,learned:[...new Set([...current.learned,...incoming.learned])]},completed);try{if(!storage?.setItem)throw Error('Unavailable');storage.setItem(FIELD_SKILLS_KEY,JSON.stringify(memory));volatile=false;}catch{volatile=true;}return true;
+  const learned=[...current.learned];for(const node of SKILL_NODES)if(incoming.learned.includes(node.id)&&skillLearnable(node.id,{learned},completed))learned.push(node.id);
+  memory={version:2,selected:incoming.selected==='none'||learned.includes(incoming.selected)?incoming.selected:current.selected,learned};try{if(!storage?.setItem)throw Error('Unavailable');storage.setItem(FIELD_SKILLS_KEY,JSON.stringify(memory));volatile=false;}catch{volatile=true;}return true;
  }
  return {selected,equip,learn,serialize,restoreTransient,restoreDeployment,isSessionOnly:()=>volatile};
 }
