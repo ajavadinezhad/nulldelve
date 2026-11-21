@@ -44,3 +44,7 @@ Run `node --test tests/*.test.cjs` for the full regression suite. Run `node tool
 ## Hospital expansion checks
 
 Six hospital rooms add three escalating encounters (140 baseline creatures), a fuse and emergency-power route, biological sample/diagnostics and ordered sterilisation flow. Required sample and diagnostics milestones grant one finite ammo allocation each; no loaded magazines, health or cash are granted. The ammunition model includes these allocations, collected enemy drops and sidearm fallback. Hard emergency drops retain a six-shell threshold for pellet weapons only when both guns are low. This is a supply projection, not an enemy-AI or human-accuracy simulation.
+
+## r18 supply and upgrade adjustment
+
+Ordinary primary drops account for base round/pellet value with a bounded divisor, reducing excess precision ammo without penalizing damage purchases. Heavy MANTIS drops change from six to two rounds. Hard emergency aid admits a six-round AMR threshold only when both guns are low (nearby pending drops count). All 648 projections pass; full eightfold normalization failed the unupgraded Hard Hospital 75% accuracy case, so it was rejected. New magazine increments vary by weapon; paid legacy capacity is saved explicitly and retained.

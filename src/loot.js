@@ -1,4 +1,4 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=preview-r17';
+import {DIFFICULTY_RULES} from './difficulty.js?v=review-r18';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;
@@ -34,11 +34,17 @@ export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='n
  const held=selected??player?.selected;
  const supply=gun=>Math.max(0,Number(weapons?.[gun]?.reserve)||0)+Math.max(0,Number(held===gun?player?.ammo:weapons?.[gun]?.ammo)||0)+nearby.reduce((n,d)=>n+(d.kind==='ammo'?Math.max(0,Number(d[gun])||0):0),0);
  const primaryDamage=Math.max(1,Number(weapons?.rifle?.damage??weapons?.rifle?.baseDamage)||1),primaryPellets=Math.max(1,Number(weapons?.rifle?.pellets)||1);
- const primaryLowThreshold=difficulty==='hard'?Math.max(primaryPellets>1?6:0,Math.ceil(28/(primaryDamage*primaryPellets))):18;
+ const primaryLowThreshold=difficulty==='hard'?Math.max(primaryPellets>1?6:0,(weapons?.rifle?.baseDamage??1)>=8?6:0,Math.ceil(28/(primaryDamage*primaryPellets))):18;
  const lowAmmo=!!weapons&&supply('rifle')<primaryLowThreshold&&supply('pistol')<(difficulty==='hard'?14:8);
  const added=[];
  if(big||boss||state.kills%3===0||lowAmmo){
-  const baseRifle=boss?12:big?6:lowAmmo?(difficulty==='hard'?3:2):3;let rifle=weapons?.rifle?.pellets>1?Math.max(1,Math.round(baseRifle/3)):baseRifle,pistol=boss?4:big?2:1;
+  const baseRifle=boss?12:big?6:lowAmmo?(difficulty==='hard'?3:2):3;
+  // A shell or AMR round carries more damage than a carbine round. Scale by
+  // the weapon's base value, capped to keep precision ammo viable; purchasing
+  // damage never reduces physical loot. Hard AMR aid uses a six-round floor
+  // only while BOTH guns are low, avoiding stockpiles from ordinary heavy kills.
+  const baseValue=Math.max(1,Math.min(4,Number(weapons?.rifle?.baseDamage)||1),primaryPellets>1?3:1);
+  let rifle=Math.max(1,Math.round(baseRifle/baseValue)),pistol=boss?4:big?2:1;
   if(difficulty==='hard'&&lowAmmo&&(big||boss)){
    // Recover a bounded fighting chance after an expensive mutation, only when
    // both weapons (including nearby uncollected drops) are running dry.

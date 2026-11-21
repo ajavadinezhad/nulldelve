@@ -89,3 +89,7 @@ Touch framing now applies symmetric aspect compensation in portrait and landscap
 ## r15 hospital expansion
 
 61 test files pass. Coverage includes 36 campaign and 12 legacy arena configurations, 648 ammunition projections, hospital collision-aware puzzle traversal/checkpoint restoration, finite supply no-farming, new weapon purchase/upgrades and mutation attack/cooldown behavior. Legacy 101×69 snapshots migrate into 151×69 while preserving exploration coordinates, inventory and existing door identities. Browser startup caught frozen hospital door definitions being mutated; live doors now clone definitions, with a regression check. External Chrome starts the hospital without console errors and exposes the sixth operation and armory. Automated traversal instantly removes enemy HP to exercise progression; it does not replace human combat playtesting or real-phone performance validation.
+
+## r18 review fixes
+
+Three agents reviewed skills/progression, combat/economy and mission UX. Fixed Hospital record filtering, Hospital requested hints/discovery, disproportionate ordinary precision-ammo drops, per-weapon magazine increments with legacy capacity preservation, and reload cancellation when switching weapons. Regression checks cover canonical operation records, Remix hint order, nearby-visible discovery, paid magazine migration, shop arrows, all 648 ammo projections and switching without free ammo or shot-cooldown resets. Human combat feel and phone checks remain outstanding. See GAMEPLAY_REVIEW.md for prioritized missing features.

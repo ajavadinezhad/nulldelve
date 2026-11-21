@@ -1,4 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=preview-r17';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=review-r18';
+import {compatibleStorage} from './storage-compat.js?v=review-r18';
 const KEY='nulldelve.records.v1';
 // Keep legacy normal keys readable; alternate puzzle layouts have separate best times.
 export function operationRecordKey(config){return config.mission+(config.operation?':'+config.operation:'')+':'+config.difficulty+(config.remix?':remix':'');}
@@ -13,6 +14,8 @@ export function recordResult(storage,config,stats,won,exploration){storage=compa
 }
 export function formatDuration(seconds){const n=Math.max(0,Math.floor(seconds));return `${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`;}
 
-export function completedCampaignOperations(storage){storage=compatibleStorage(storage);try{const records=JSON.parse(storage.getItem(KEY)||'{}');return ['breach','command','research','containment','nest'].filter(id=>['easy','normal','hard'].some(d=>[false,true].some(remix=>Number.isFinite(records[operationRecordKey({mission:'campaign',operation:id,difficulty:d,remix})]?.elapsed))));}catch{return [];}}
+export function completedCampaignOperations(storage){try{const records=readOperationRecords(storage);return CAMPAIGN_OPERATIONS.map(operation=>operation.id).filter(id=>['easy','normal','hard'].some(d=>[false,true].some(remix=>Number.isFinite(records[operationRecordKey({mission:'campaign',operation:id,difficulty:d,remix})]?.elapsed))));}catch{return [];}}
 
-export function readOperationRecords(storage){storage=compatibleStorage(storage);try{const value=JSON.parse(storage?.getItem(KEY)||'{}');if(!value||typeof value!=='object'||Array.isArray(value))return {};return Object.fromEntries(Object.entries(value).filter(([key,r])=>/^campaign(?::(breach|command|research|containment|nest))?:(easy|normal|hard)(?::remix)?$/.test(key)&&Number.isFinite(r?.elapsed)&&r.elapsed>=0));}catch{return {};}}
+const campaignOperationIds=new Set(CAMPAIGN_OPERATIONS.map(operation=>operation.id));
+function isCampaignRecordKey(key){const parts=key.split(':');if(parts.shift()!=='campaign')return false;if(campaignOperationIds.has(parts[0]))parts.shift();return ['easy','normal','hard'].includes(parts[0])&&(parts.length===1||(parts.length===2&&parts[1]==='remix'));}
+export function readOperationRecords(storage){storage=compatibleStorage(storage);try{const value=JSON.parse(storage?.getItem(KEY)||'{}');if(!value||typeof value!=='object'||Array.isArray(value))return {};return Object.fromEntries(Object.entries(value).filter(([key,r])=>isCampaignRecordKey(key)&&Number.isFinite(r?.elapsed)&&r.elapsed>=0));}catch{return {};}}
