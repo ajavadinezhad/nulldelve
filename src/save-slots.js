@@ -1,8 +1,8 @@
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=actions-r9';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=actions-r9';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=actions-r9';
-import {validateSnapshot} from './snapshot-validation.js?v=actions-r9';
-import {normalizeSettings} from './controls.js?v=actions-r9';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=depth-r10';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=depth-r10';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=depth-r10';
+import {validateSnapshot} from './snapshot-validation.js?v=depth-r10';
+import {normalizeSettings} from './controls.js?v=depth-r10';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

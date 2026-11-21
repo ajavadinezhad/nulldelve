@@ -26,7 +26,7 @@ export function createLootState(saved){
 }
 export function dropEnemyLoot(state,enemy,{player,weapons,selected}={}){
  if(enemy.lootDropped)return [];enemy.lootDropped=true;state.kills++;
- const big=enemy.variant==='brute',boss=enemy.variant==='boss';
+ const big=['brute','charger','sentinel'].includes(enemy.variant),boss=enemy.variant==='boss';
  // Count nearby uncollected supplies in the aid budget: ignoring drops must not
  // create an unlimited pile, while supplies left in older rooms do not block aid.
  const nearby=player?state.drops.filter(d=>Math.hypot(d.x-player.x,d.z-player.z)<=8):[];

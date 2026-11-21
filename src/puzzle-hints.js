@@ -1,4 +1,4 @@
-import {progressionSequences,ARTIFACTS} from './progression.js?v=actions-r9';
+import {progressionSequences,ARTIFACTS} from './progression.js?v=depth-r10';
 /** Player-requested hints reveal one layer at a time, only for the nearby puzzle. */
 const PUZZLES=[
  {id:'insertion',title:'Insertion door',bounds:[2,14,21,32],unsolved:c=>!c.puzzle?.solved,hints:['The door indicator is linked to two floor switches. Look around the room for something heavy.','Move a marked crate onto each floor switch. You can push crates by walking into them; reset misplaced crates if needed.','Seat one crate on each switch at the same time. Both door indicators turn green; approach the door and use Interact to open it.']},

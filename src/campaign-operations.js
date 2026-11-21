@@ -1,5 +1,6 @@
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=actions-r9';
-import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=actions-r9';
+import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=depth-r10';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=depth-r10';
+import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=depth-r10';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},
@@ -44,6 +45,7 @@ export function campaignOperationObjectivesComplete(value,{player,progression}){
  const id=normalizeCampaignOperation(value);if(!id)return false;
  const state=progression.state??progression,cleared=name=>state.zones.find(z=>z.id===name)?.status==='cleared';
  const tasks=state.operationTasks??createOperationTasks();
+ if(!operationRouteComplete(id,tasks))return false;
  if(id==='breach')return cleared('security')&&cleared('storage');
  if(id==='command')return cleared('command')&&cleared('generator')&&tasks.commandFuse&&tasks.commandRepair;
  if(id==='research')return cleared('lab')&&cleared('reactor')&&!!state.power?.solved&&tasks.researchCoolant&&cleared('transit');
@@ -65,6 +67,7 @@ export function campaignOperationGuidance(value,{player,puzzle,progression}){
  if(id==='research')steps=[step('Clear Bio Lab',cleared('lab'),'Eliminate the Bio Lab outbreak.'),step('Clear the Reactor swarm',cleared('reactor'),'Go south from Bio Lab and clear Reactor.'),step('Restore Reactor power',state.power.solved,''),step('Start the Transit coolant purge',tasks.researchCoolant,'Go south from Reactor into Transit and activate the central coolant console.'),step('Defend the Transit purge',cleared('transit'),'Clear the coolant purge swarm to open the eastern Transit exit.')];
  if(id==='containment')steps=[step('Clear the Containment breach',cleared('containment'),'Defeat every Containment reinforcement.'),step('Release the pressure lock',state.valves.solved,''),step('Restore Evacuation power',tasks.evacPower,'Head south into Evacuation. Restore its power at the eastern service console.'),step('Clear the Evacuation lockdown',cleared('evacuation'),'Survive the power restart lockdown before returning north.')];
  if(id==='nest')steps=[step('Find the three socket relics',state.artifacts?.length===3,`The Nest seal has three sockets; ${state.artifacts?.length??0} are filled. Revisit stabilized sectors and look for matching markings. Request a puzzle hint if you need a lead.`),step('Charge the Transit signal relay',tasks.nestRelay.started||tasks.nestRelay.linked,'Find relay A in northwest Transit. Prepare a route east through Evacuation and north to Containment.'),step('Link the Containment relay',tasks.nestRelay.linked,tasks.nestRelay.started?`Reach relay B in southwest Containment within ${Math.ceil(tasks.nestRelay.remaining)} seconds.`:'Charge Transit relay A, then reach Containment relay B within thirty seconds.'),step('Decode the Nest shield',tasks.nestRelay.decoded,'Reach Bio Lab through Reactor and use the decoder near the center of the room.'),step('Destroy the Nest Core',cleared('nest'),'Enter Nest Core east of Bio Lab. Defeat the mutation and every reinforcement.'),step('Recover the research intel',player.intel,'Collect the cyan intel in the northeast of Nest Core.')];
+ for(const route of OPERATION_ROUTES.filter(route=>route.operation===id))steps.push(step(route.label.toLowerCase(),tasks[route.task],route.hint));
  const exit=campaignOperationExit(id);steps.push(step(id==='nest'?'Reach Evacuation':'Reach sector exit',false,`${exit.direction}. Press Interact at the marked ${exit.label.toLowerCase()} to depart.`));
  const objectivesDone=campaignOperationObjectivesComplete(id,{player,progression:state});
  const next=steps.find(s=>!s.done),battle=state.zones.find(z=>z.status==='active');

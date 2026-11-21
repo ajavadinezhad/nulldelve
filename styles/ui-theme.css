@@ -58,7 +58,6 @@ body:has(>#overlay.menu-overlay)>.hud{visibility:hidden}
 
 .preview-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:10px;margin-top:10px;border-top:1px solid var(--ui-border);font-size:10px;color:var(--ui-muted);letter-spacing:.4px}.preview-footer a{display:flex;align-items:center;min-height:44px;color:var(--ui-accent);font-size:12px;letter-spacing:0;text-decoration:none}.preview-footer a:hover{text-decoration:underline}
 
-.capture-toolbar{position:fixed;right:14px;bottom:14px;z-index:70;display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:min(540px,calc(100vw - 28px));padding:10px;background:#111824f5;border:1px solid #665338;border-radius:9px;font:12px system-ui;color:#e1e6ef}.capture-toolbar button,.capture-toolbar select,.capture-toolbar a{min-height:44px;padding:8px 12px;border-radius:6px}.capture-toolbar select{background:#1d2632;color:#e1e6ef;border:1px solid #485667}.capture-toolbar button{background:#efba62;color:#211b12}.capture-toolbar a{display:flex;align-items:center;color:#efba62}.capture-toolbar a[hidden]{display:none}.capture-toolbar span{flex-basis:100%;font-size:11px;color:#aab8c8}
 
 /* Results are a compact decision panel; detailed statistics stay optional. */
 #overlay:has(>.result-panel){justify-content:center;align-items:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:radial-gradient(ellipse at center,#2730406b,transparent 70%),#090d15db}body:has(>#overlay>.result-panel)>.hud{visibility:hidden}
@@ -67,5 +66,4 @@ body:has(>#overlay.menu-overlay)>.hud{visibility:hidden}
 
 .inventory-item.charging-grenade{background:linear-gradient(90deg,#9e742d99 calc(var(--throw-power,0)*100%),#222b38 calc(var(--throw-power,0)*100%));border-color:#efba62;box-shadow:0 0 12px #efba6240}.inventory-item.charging-grenade img{filter:drop-shadow(0 0 4px #efba62)}
 
-.capture-review{flex-basis:100%;min-width:0}.capture-review[hidden]{display:none}.capture-review summary{min-height:36px;display:flex;align-items:center;color:#d8c195;cursor:pointer}.capture-review video{display:block;width:100%;max-height:230px;background:#080d10;border-radius:5px}
 .result-actions:has(>:nth-child(2):last-child) .result-action:last-child{grid-column:1/-1}

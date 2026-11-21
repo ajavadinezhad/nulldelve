@@ -1,11 +1,13 @@
 export function applyEnemyStagger(enemy,duration){
  if(!Number.isFinite(duration)||duration<=0)return false;
+ if(enemy.variant==='sentinel'){duration=Math.min(.08,duration);if((enemy.staggerImmunity??0)>0)return false;enemy.staggerImmunity=.9;}
  if(enemy.variant==='boss'){
   if((enemy.staggerImmunity??0)>0||(enemy.pulseWindup??0)>0)return false;
   enemy.staggerTime=Math.max(enemy.staggerTime??0,Math.min(.10,duration));enemy.staggerImmunity=1.1;return true;
  }
  enemy.staggerTime=Math.max(enemy.staggerTime??0,duration);return true;
 }
+export const CHARGER_RUSH={windup:.9,speed:10,duration:.62,cooldown:4.5,damage:18};
 export const NEST_PULSE={radius:5.5,windup:1.1,cooldown:6,safeHalfAngle:.6,damage:20};
 const angleDifference=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 /** Roaches announce a bite before striking. Stats may live directly on enemy or in stats. */
@@ -16,13 +18,26 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,allowM
   const cancelBite=()=>{enemy.attackWindup=0;visual.attackWindup=0;};
   enemy.staggerImmunity=Math.max(0,(enemy.staggerImmunity??0)-dt);
   enemy.pulseCooldown=Math.max(0,(enemy.pulseCooldown??0)-dt);
+  enemy.chargeCooldown=Math.max(0,(enemy.chargeCooldown??0)-dt);
   enemy.cooldown=Math.max(0,(enemy.cooldown??0)-dt);
   if((enemy.pulseWindup??0)>0){
     enemy.pulseWindup=Math.max(0,enemy.pulseWindup-dt);visual.pulse={active:enemy.pulseWindup>0,angle:enemy.pulseGapAngle,radius:NEST_PULSE.radius,progress:1-enemy.pulseWindup/NEST_PULSE.windup};
     if(enemy.pulseWindup===0){const dx=player.x-enemy.x,dz=player.z-enemy.z;enemy.pulseCooldown=NEST_PULSE.cooldown;if(Math.hypot(dx,dz)<=NEST_PULSE.radius&&Math.abs(angleDifference(Math.atan2(dz,dx),enemy.pulseGapAngle))>NEST_PULSE.safeHalfAngle&&lineOfSight(enemy.x,enemy.z,player.x,player.z))onBite(NEST_PULSE.damage);}
     return;
   }
-  if((enemy.staggerTime??0)>0){enemy.staggerTime=Math.max(0,enemy.staggerTime-dt);cancelBite();return;}
+  if((enemy.staggerTime??0)>0){if((enemy.chargeWindup??0)>0||(enemy.chargeRemaining??0)>0)enemy.chargeCooldown=CHARGER_RUSH.cooldown;enemy.chargeWindup=0;enemy.chargeRemaining=0;visual.chargeWindup=0;enemy.staggerTime=Math.max(0,enemy.staggerTime-dt);cancelBite();return;}
+  if(enemy.variant==='charger'&&(enemy.chargeWindup??0)>0){
+    enemy.chargeWindup=Math.max(0,enemy.chargeWindup-dt);visual.chargeWindup=1-enemy.chargeWindup/CHARGER_RUSH.windup;
+    if(enemy.chargeWindup===0){enemy.chargeRemaining=CHARGER_RUSH.duration;visual.chargeWindup=0;}return;
+  }
+  if(enemy.variant==='charger'&&(enemy.chargeRemaining??0)>0){
+    const step=Math.min(dt,enemy.chargeRemaining)*CHARGER_RUSH.speed,tx=enemy.x+enemy.chargeX*step,tz=enemy.z+enemy.chargeZ*step;
+    enemy.chargeRemaining=Math.max(0,enemy.chargeRemaining-dt);
+    if(!allowMovement||!lineOfSight(enemy.x,enemy.z,tx,tz)){enemy.chargeRemaining=0;enemy.chargeCooldown=CHARGER_RUSH.cooldown;return;}
+    const px=player.x-enemy.x,pz=player.z-enemy.z,t=Math.max(0,Math.min(step,px*enemy.chargeX+pz*enemy.chargeZ));
+    if(!enemy.chargeHit&&Math.hypot(px-enemy.chargeX*t,pz-enemy.chargeZ*t)<.85&&lineOfSight(enemy.x,enemy.z,player.x,player.z)){onBite(CHARGER_RUSH.damage);enemy.chargeHit=true;}
+    move(enemy,enemy.chargeX*step,enemy.chargeZ*step);if(enemy.chargeRemaining===0)enemy.chargeCooldown=CHARGER_RUSH.cooldown;return;
+  }
   const speed=stat('speed',2.7),biteRange=stat('biteRange',1.05),stopDistance=stat('stopDistance',.78);
   const dx=player.x-enemy.x,dz=player.z-enemy.z,d=Math.hypot(dx,dz);
   const seesPlayer=lineOfSight(enemy.x,enemy.z,player.x,player.z);
@@ -34,7 +49,8 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,allowM
     // dangerous while a short sidestep reaches safety. Alternate the side each pulse.
     cancelBite();enemy.pulseSide=enemy.pulseSide===1?-1:1;enemy.pulseGapAngle=Math.atan2(dz,dx)+enemy.pulseSide*.95;enemy.pulseWindup=NEST_PULSE.windup;visual.pulse={active:true,angle:enemy.pulseGapAngle,radius:NEST_PULSE.radius,progress:0};return;
   }
-  const duration=Math.max(.15,stat('windupDuration',.35));
+  if(enemy.variant==='charger'&&allowMovement&&d>3&&d<7&&(enemy.chargeCooldown??0)<=0){cancelBite();enemy.chargeX=dx/d;enemy.chargeZ=dz/d;enemy.chargeHit=false;enemy.chargeWindup=CHARGER_RUSH.windup;visual.chargeWindup=.01;return;}
+  const duration=Math.max(enemy.variant==='sentinel'?.65:.15,stat('windupDuration',.35));
   if((enemy.attackWindup??0)>0){
     if(d>=biteRange){cancelBite();return;}
     enemy.attackWindup=Math.max(0,enemy.attackWindup-dt);

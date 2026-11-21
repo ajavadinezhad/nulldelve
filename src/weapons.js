@@ -43,6 +43,26 @@ export function weapon(type='rifle'){
     tube(group,'glass',0,.22,-.28,.052,.008);
     block(group,'black',0,.2,-.37,.04,.07,.04);
     group.userData.muzzle=new THREE.Vector3(0,0,-1.25);
+  }else if(type==='hush'){
+    // Short precision chassis, enclosed optic, and a broad integral barrel shroud.
+    block(group,'receiver',0,0,-.21,.17,.18,.50);block(group,'black',0,.11,-.24,.13,.035,.55);
+    block(group,'polymer',0,0,-.56,.18,.19,.25);tube(group,'black',0,0,-.93,.073,.48);tube(group,'steel',0,0,-1.18,.045,.025);
+    for(const z of [-.47,-.54,-.61])block(group,'steel',.096,.02,z,.012,.05,.03);
+    block(group,'polymer',0,-.025,.28,.14,.17,.36);block(group,'black',0,-.025,.48,.16,.20,.04);
+    block(group,'black',0,-.16,.015,.10,.24,.13).rotation.x=-.18;
+    group.userData.magazine=block(group,'black',0,-.19,-.24,.12,.25,.16);
+    block(group,'black',0,.17,-.22,.11,.10,.30);tube(group,'receiver',0,.24,-.25,.065,.27);tube(group,'glass',0,.24,-.39,.052,.01);
+    group.userData.muzzle=new THREE.Vector3(0,0,-1.20);
+  }else if(type==='scattergun'){
+    // Twin muzzle tubes and a cylindrical drum read clearly from overhead.
+    block(group,'receiver',0,0,-.18,.22,.23,.48);block(group,'black',0,.14,-.20,.18,.035,.47);
+    for(const x of [-.065,.065]){tube(group,'steel',x,.025,-.73,.049,.65);tube(group,'black',x,.025,-1.08,.061,.08);}
+    block(group,'polymer',0,-.035,-.57,.26,.17,.28);for(const z of [-.48,-.55,-.62])block(group,'black',0,-.035,z,.27,.18,.018);
+    const drum=part(group,cylinder,'black',0,-.24,-.22,.21,.24,.21);drum.rotation.z=Math.PI/2;group.userData.magazine=drum;
+    block(group,'steel',.13,-.24,-.22,.03,.26,.25);block(group,'polymer',0,-.17,.02,.11,.26,.14).rotation.x=-.22;
+    block(group,'polymer',0,-.02,.29,.17,.20,.32);block(group,'black',0,-.02,.47,.19,.23,.04);
+    block(group,'black',0,.19,-.22,.09,.07,.17);tube(group,'glass',0,.23,-.31,.035,.009);
+    group.userData.muzzle=new THREE.Vector3(0,.025,-1.13);
   }else if(type==='smg'){
     block(group,'receiver',0,0,-.2,.16,.19,.43);block(group,'black',0,.115,-.2,.13,.035,.47);
     tube(group,'steel',0,0,-.52,.035,.24);tube(group,'black',0,0,-.68,.05,.10);
@@ -121,7 +141,7 @@ export function createCombatEffects(scene){
     const origin=new THREE.Vector3(x,1.18,z).addScaledVector(right,.28).addScaledVector(forward,.5);
     const casing=particle(cylinder,materials.brass,origin,new THREE.Vector3(right.x*(1.6+(serial%3)*.2),1.6,right.z*1.6),5,'brass');
     casing.mesh.scale.set(.027,.11,.027);casing.mesh.rotation.z=Math.PI/2;
-    const muzzle=new THREE.Vector3(x,1.18,z).addScaledVector(right,.28).addScaledVector(forward,['rifle','carbine','shotgun','marksman','lmg'].includes(type)?1.56:.77);
+    const muzzle=new THREE.Vector3(x,1.18,z).addScaledVector(right,.28).addScaledVector(forward,['rifle','carbine','shotgun','marksman','lmg','hush','scattergun'].includes(type)?1.56:.77);
     const puff=particle(sphere,smokeMaterial,muzzle,new THREE.Vector3(forward.x*.5,.28,forward.z*.5),.3,'smoke');puff.mesh.scale.setScalar(.055);
   }
   function impact(x,z){

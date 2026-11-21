@@ -1,5 +1,6 @@
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=actions-r9';
-import {DIFFICULTY_RULES} from './difficulty.js?v=actions-r9';
+import {OPERATION_ROUTES} from './operation-routes.js?v=depth-r10';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=depth-r10';
+import {DIFFICULTY_RULES} from './difficulty.js?v=depth-r10';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -8,7 +9,7 @@ export const ARTIFACTS=Object.freeze([
  {id:'artifact-generator',kind:'artifact',x:29,z:54,label:'GENERATOR CORE RELIC'},
  {id:'artifact-containment',kind:'artifact',x:94,z:36,label:'CONTAINMENT SEAL RELIC'},
 ].map(Object.freeze));
-export function createOperationTasks(){return {commandFuse:false,genInserted:false,commandRepair:false,researchCoolant:false,evacPower:false,nestRelay:{started:false,remaining:0,linked:false,decoded:false}};}
+export function createOperationTasks(){return {...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,false])),commandFuse:false,genInserted:false,commandRepair:false,researchCoolant:false,evacPower:false,nestRelay:{started:false,remaining:0,linked:false,decoded:false}};}
 export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHint=()=>{},getDifficulty=()=> 'normal',remix=false}){
   const initialSequences=progressionSequences(remix);
   const devices=[
@@ -24,17 +25,18 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     ...[{id:'task-fuse',task:'commandFuse',x:12,z:52,label:'MAINTENANCE FUSE'},{id:'task-generator',task:'commandRepair',x:35,z:56,label:'POWER HOUSE SUPPLY'},{id:'task-coolant',task:'researchCoolant',x:62,z:52,label:'TRANSIT COOLANT'},{id:'task-evac',task:'evacPower',x:92,z:52,label:'EVAC POWER'},{id:'task-signal-a',task:'nestStart',x:55,z:50,label:'SIGNAL RELAY A'},{id:'task-signal-b',task:'nestLink',x:82,z:31,label:'SIGNAL RELAY B'},{id:'task-signal-c',task:'nestDecode',x:61,z:12,label:'SIGNAL DECODER'}].map(d=>({...d,kind:'task',active:false,progress:0})),
     ...[{id:'log-lab',x:66,z:8,label:'RESEARCH LOG 1',text:'Specimen 07 responds to electrical pulses. The power network became its nervous system.'},{id:'log-containment',x:94,z:30,label:'RESEARCH LOG 2',text:'Containment failed from inside. The colony learned the door access sequence.'},{id:'log-nest',x:92,z:14,label:'RESEARCH LOG 3',text:'The nest is a relay, not the source. Something beneath the facility is still transmitting.'}].map(d=>({...d,kind:'log',active:false,progress:0})),
   ];
+  devices.push(...OPERATION_ROUTES.map(route=>({...route,kind:'task',active:false,progress:0})));
   const definitions=[
     {id:'security',label:'SECURITY PURGE',total:8,batch:3,liveCap:6,legacyTotal:24,corners:[[20,6],[27,6],[20,14],[27,14]]},
-    {id:'storage',label:'STORAGE AMBUSH',total:14,batch:4,liveCap:10,legacyTotal:40,bounds:[20,26,23,29],corners:[[19.5,22],[27,22],[19.5,30],[27,30]]},
-    {id:'command',label:'COMMAND MUTATION',total:20,batch:5,liveCap:12,legacyTotal:48,bounds:[35,42,6,13],corners:[[34,5],[43,5],[34,14],[43,14]],boss:true},
-    {id:'lab',label:'BIO LAB OUTBREAK',total:28,batch:6,liveCap:16,legacyTotal:32,bounds:[54,65,7,14],corners:[[52,5],[67,5],[52,16],[67,16]]},
-    {id:'reactor',label:'REACTOR SWARM',total:36,batch:6,liveCap:18,legacyTotal:40,bounds:[54,65,26,34],corners:[[52,24],[67,24],[52,36],[67,36]]},
-    {id:'containment',label:'CONTAINMENT BREACH',total:52,batch:8,liveCap:22,legacyTotal:48,bounds:[78,93,26,34],corners:[[76,24],[95,24],[76,36],[95,36]]},
-    {id:'generator',label:'GENERATOR RESTART',total:24,batch:5,liveCap:14,legacyTotal:24,corners:[[27,45],[43,45],[27,61],[43,61]],interactive:true},
-    {id:'transit',label:'TRANSIT PURGE',total:40,batch:7,liveCap:20,legacyTotal:40,corners:[[53,50],[67,50],[53,61],[67,57]],interactive:true},
-    {id:'evacuation',label:'EVACUATION LOCKDOWN',total:60,batch:9,liveCap:23,legacyTotal:60,corners:[[77,45],[95,45],[77,61],[95,61]],interactive:true},
-    {id:'nest',label:'NEST CORE HORDE',total:80,batch:10,liveCap:24,legacyTotal:64,bounds:[78,93,7,14],corners:[[76,5],[95,5],[76,16],[95,16]],boss:true},
+    {id:'storage',label:'STORAGE AMBUSH',total:22,batch:4,liveCap:10,legacyTotal:40,bounds:[20,26,23,29],corners:[[19.5,22],[27,22],[19.5,30],[27,30]]},
+    {id:'command',label:'COMMAND MUTATION',total:32,batch:5,liveCap:12,legacyTotal:48,bounds:[35,42,6,13],corners:[[34,5],[43,5],[34,14],[43,14]],boss:true},
+    {id:'lab',label:'BIO LAB OUTBREAK',total:40,batch:6,liveCap:16,legacyTotal:32,bounds:[54,65,7,14],corners:[[52,5],[67,5],[52,16],[67,16]]},
+    {id:'reactor',label:'REACTOR SWARM',total:52,batch:6,liveCap:18,legacyTotal:40,bounds:[54,65,26,34],corners:[[52,24],[67,24],[52,36],[67,36]]},
+    {id:'containment',label:'CONTAINMENT BREACH',total:72,batch:8,liveCap:22,legacyTotal:48,bounds:[78,93,26,34],corners:[[76,24],[95,24],[76,36],[95,36]]},
+    {id:'generator',label:'GENERATOR RESTART',total:38,batch:5,liveCap:14,legacyTotal:24,corners:[[27,45],[43,45],[27,61],[43,61]],interactive:true},
+    {id:'transit',label:'TRANSIT PURGE',total:58,batch:7,liveCap:20,legacyTotal:40,corners:[[53,50],[67,50],[53,61],[67,57]],interactive:true},
+    {id:'evacuation',label:'EVACUATION LOCKDOWN',total:84,batch:9,liveCap:23,legacyTotal:60,corners:[[77,45],[95,45],[77,61],[95,61]],interactive:true},
+    {id:'nest',label:'NEST CORE HORDE',total:112,batch:10,liveCap:24,legacyTotal:64,bounds:[78,93,7,14],corners:[[76,5],[95,5],[76,16],[95,16]],boss:true},
   ];
   definitions.sort((a,b)=>a.total-b.total);
   const difficulty=()=>DIFFICULTY_RULES[getDifficulty()]??DIFFICULTY_RULES.normal;
@@ -104,7 +106,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(researchExitLocked){const point=!state.power.solved?state.clues.find(c=>c.id==='power'):devices.find(d=>d.task==='researchCoolant');target(17,point,!state.power.solved?'A Reactor maintenance clue':'The Transit coolant console');}
     for(const index of [8,11]){if(nestArtifactsLocked){const artifact=ARTIFACTS.find(a=>!state.artifacts.includes(a.id));target(index,artifact,'A trace of a missing relic');}else if(nestSignalLocked){const point=devices.find(d=>d.task===(state.operationTasks.nestRelay.linked?'nestDecode':state.operationTasks.nestRelay.started?'nestLink':'nestStart'));target(index,point,'A signal controlling the Nest shield');}}
   }
-  const taskOperation={commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
+  const taskOperation={...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,route.operation])),commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
   function nearestDevice(player){return devices.filter(d=>(d.kind!=='task'||!state.operationId||taskOperation[d.task]===state.operationId)&&distance(d,player)<=1.7).sort((a,b)=>distance(a,player)-distance(b,player))[0];}
   const nearestClue=player=>state.clues.filter(c=>distance(c,player)<=1.8).sort((a,b)=>distance(a,player)-distance(b,player))[0];
   function getPrompt(player){
@@ -150,7 +152,9 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     const localLiving=zone.wave.filter(living).length;
     const encounterLiving=new Set(zones.filter(z=>z.status==='active').flatMap(z=>z.wave.filter(living))).size;
     const available=Math.max(0,Math.min(zone.liveCap-localLiving,state.liveCap-encounterLiving));
-    const attempts=Math.min(definition.batch,available,zone.queue.length);
+    const phaseSize=zone.id==='security'?zone.total:Math.ceil(zone.total/3),phaseRemaining=phaseSize-zone.spawned%phaseSize;
+    if(zone.spawned>0&&zone.spawned%phaseSize===0&&localLiving>0){zone.spawnTimer=.65;return;}
+    const attempts=Math.min(definition.batch,available,zone.queue.length,phaseRemaining);
     let spawnedNow=0;
     for(let i=0;i<attempts;i++){
       const corner=definition.corners[(zone.spawned+i)%definition.corners.length];
@@ -161,7 +165,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if(enemy){zone.queue.shift();zone.wave.push(enemy);zone.spawned++;spawnedNow++;}
     }
     refreshCounts(zone);
-    zone.spawnTimer=spawnedNow>0?(difficulty().reinforcementInterval??3):.65;
+    zone.spawnTimer=spawnedNow>0?(zone.id!=='security'&&zone.spawned%Math.ceil(zone.total/3)===0?6:(difficulty().reinforcementInterval??3)):.65;
   }
   function launchWave(zone,player){
     if(zone.status!=='dormant')return;
@@ -181,6 +185,8 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       else if(zone===reactor){if(i%3===(remix?0:1))variant='runner';if(i%6===(remix?2:5))variant='brute';}
       else if(zone===containment){if(i%5<(remix?3:2))variant='runner';if(i%5===(remix?3:4))variant='brute';}
       else if(zone===nest){if(i%2===(remix?0:1))variant='runner';if(i%4===(remix?2:3))variant='brute';}
+      if(![security,storage].includes(zone)&&i>zone.total*.45&&i%11===8)variant='charger';
+      if([reactor,containment,transit,evacuationZone,nest].includes(zone)&&i>zone.total*.6&&i%13===10)variant='sentinel';
       if(definition.boss&&i===0)variant='boss';
       zone.queue.push(variant);
     }
@@ -211,6 +217,16 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(d.kind==='task'){
       const tasks=state.operationTasks,relay=tasks.nestRelay;
       const finish=(text,instruction)=>{d.active=true;d.progress=1;state.milestone++;onToast(text);hint(instruction);recomputeLocks();return true;};
+      const route=OPERATION_ROUTES.find(route=>route.task===d.task);
+      if(route){
+        if(tasks[route.task]){onToast('SYSTEM ALREADY SECURED');return true;}
+        if(state.zones.find(zone=>zone.id===route.requires)?.status!=='cleared'){onToast('STABILIZE THE LOCAL THREAT FIRST');return true;}
+        if(route.previous&&!tasks[route.previous]){hint(OPERATION_ROUTES.find(item=>item.task===route.previous).hint);return true;}
+        if(route.task==='containmentIsolate'&&!state.valves.solved){onToast('RELEASE CONTAINMENT PRESSURE FIRST');return true;}
+        tasks[route.task]=true;
+        const next=OPERATION_ROUTES.find(item=>item.previous===route.task);
+        return finish('ROUTE OBJECTIVE SECURED',next?.hint??'Return to the sector exit after completing the remaining objectives.');
+      }
       if(d.task==='commandFuse'){if(tasks.commandFuse){onToast('FUSE ALREADY RECOVERED');return true;}if(command.status!=='cleared'){onToast('CLEAR COMMAND BEFORE RECOVERING ITS SERVICE FUSE');return true;}tasks.commandFuse=true;return finish('SERVICE FUSE RECOVERED','Reach Generator east of Maintenance and repair the restart console.');}
       if(d.task==='commandRepair'){
         if(tasks.commandRepair){onToast('GENERATOR REPAIRED');return true;}
@@ -315,7 +331,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     };
   }
   function restoreState(snapshot,enemyById){
-    const variants=new Set(['normal','runner','brute','boss']),statuses=new Set(['dormant','active','cleared']);
+    const variants=new Set(['normal','runner','brute','boss','charger','sentinel']),statuses=new Set(['dormant','active','cleared']);
     if(!snapshot||snapshot.version!==1||!snapshot.archive||!snapshot.relay||!Array.isArray(snapshot.zones)||snapshot.zones.length<7||snapshot.zones.length>zones.length)return false;
     if(snapshot.remix!==undefined&&typeof snapshot.remix!=='boolean')return false;
     const restoredSequences=progressionSequences(snapshot.remix===true);
@@ -336,6 +352,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(rawTasks?.genInserted!==undefined&&typeof rawTasks.genInserted!=='boolean')return false;
     if(rawTasks!==undefined&&(!rawTasks||typeof rawTasks!=='object'||Array.isArray(rawTasks)))return false;
     const savedTasks=rawTasks?{...taskDefaults,...rawTasks,genInserted:rawTasks.genInserted??!!rawTasks.commandRepair}:taskDefaults;
+    for(const route of OPERATION_ROUTES){if(rawTasks?.[route.task]!==undefined&&typeof rawTasks[route.task]!=='boolean')return false;if(rawTasks?.[route.task]===undefined)savedTasks[route.task]=true;}
     const restoredCircuit=snapshot.circuit===undefined?(savedTasks.commandRepair?{rotations:[...WIRE_SOLUTION],powered:true,solved:true}:createWireCircuit()):createWireCircuit(snapshot.circuit);
     if(!restoredCircuit||restoredCircuit.solved!==savedTasks.commandRepair||restoredCircuit.powered&&!savedTasks.genInserted)return false;
     if(!savedTasks||typeof savedTasks!=='object'||['commandFuse','genInserted','commandRepair','researchCoolant','evacPower'].some(key=>typeof savedTasks[key]!=='boolean')||!savedTasks.nestRelay||['started','linked','decoded'].some(key=>typeof savedTasks.nestRelay[key]!=='boolean')||!Number.isFinite(savedTasks.nestRelay.remaining)||savedTasks.nestRelay.remaining<0||savedTasks.nestRelay.remaining>30)return false;
@@ -364,7 +381,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     }
     for(const zone of zones){
       const saved=snapshot.zones.find(item=>item&&item.id===zone.id);if(!saved){zone.status='dormant';zone.total=scaledTotal(definitions.find(d=>d.id===zone.id));zone.spawned=0;zone.queue=[];zone.wave=[];zone.spawnTimer=0;refreshCounts(zone);continue;}zone.total=saved.total??definitions.find(d=>d.id===zone.id).legacyTotal;zone.status=saved.status;zone.spawned=Math.floor(saved.spawned);zone.queue=[...saved.queue];zone.wave=[];
-      zone.spawnTimer=Number.isFinite(saved.spawnTimer)?Math.max(0,Math.min(4,saved.spawnTimer)):0;
+      zone.spawnTimer=Number.isFinite(saved.spawnTimer)?Math.max(0,Math.min(6,saved.spawnTimer)):0;
       for(let i=0;i<saved.waveIds.length;i++){
         const id=saved.waveIds[i],enemy=enemyById instanceof Map?enemyById.get(id):enemyById?.[id];
         if(enemy)zone.wave.push(enemy);

@@ -3,7 +3,7 @@ const clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,Number.isFinite(Numbe
 
 /** All audio is generated locally. Creating this controller never starts an AudioContext. */
 export function createGameAudio(environment={}){
- let captureDestination=null;let context=null,master=null,sfx=null,music=null,noiseBuffer=null,disposed=false,paused=false;
+ let context=null,master=null,sfx=null,music=null,noiseBuffer=null,disposed=false,paused=false;
  let settings={...DEFAULTS},ambient=[],lastCreature=-Infinity,lastAttack=-Infinity,serial=0;
  const voices=[];
  const Context=environment.AudioContext??globalThis.AudioContext??globalThis.webkitAudioContext;
@@ -99,7 +99,6 @@ export function createGameAudio(environment={}){
   noise(.16+(serial++%3)*.03,volume,{filterType:'bandpass',frequency,q:2.2,pan});
   if(variant==='boss'||variant==='brute')tone(variant==='boss'?75:110,45,.2,volume*.55,'sawtooth',{pan});
  }
- async function captureStream(){if(!await unlock()||!context?.createMediaStreamDestination)return null;if(!captureDestination){captureDestination=context.createMediaStreamDestination();master.connect(captureDestination);}return captureDestination.stream;}
  function dispose(){
   if(disposed)return;disposed=true;
   while(voices.length)clearVoice(voices[0],true);
@@ -107,7 +106,7 @@ export function createGameAudio(environment={}){
   try{ambient.compressor?.disconnect();master?.disconnect();sfx?.disconnect();music?.disconnect();}catch{}
   ambient=[];
   if(context?.close){try{const closing=context.close();closing?.catch?.(()=>{});}catch{}}
-  captureDestination=null;context=null;
+  context=null;
  }
- return {captureStream,unlock,applySettings,shot,reload,door,bite,melee,attack,explosion,pickup,purchase,puzzle,wave,creature,setPaused,dispose};
+ return {unlock,applySettings,shot,reload,door,bite,melee,attack,explosion,pickup,purchase,puzzle,wave,creature,setPaused,dispose};
 }
