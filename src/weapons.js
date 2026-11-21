@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 
 // Compact, locally modelled equipment. The muzzle points down local -Z.
 const materials={

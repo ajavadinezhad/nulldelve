@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const THREE=require('../vendor/three.module.js');
-const {createFireZones,FIRE_DURATION,FIRE_TICK}=require('../fire-grenades.js');
+const {createFireZones,FIRE_DURATION,FIRE_TICK}=require('../src/fire-grenades.js');
 const enemy=(x=0,z=0)=>({x,z,hp:20,spawnDelay:0});
 test('fire damages once per interval, respects walls and radius, and never stacks overlapping zones',()=>{const hits=[],fire=createFireZones(null,{lineOfSight:(x,z,tx)=>tx<1,onDamage:(e,n)=>hits.push([e,n])}),inside=enemy(.5),blocked=enemy(1.5),outside=enemy(4),hatching={...enemy(),spawnDelay:1},dead={...enemy(),hp:0};fire.burst(0,0);fire.burst(.2,0);fire.update(.59,[inside,blocked,outside,hatching,dead]);assert.equal(hits.length,0);fire.update(.01,[inside,inside,blocked,outside,hatching,dead]);assert.deepEqual(hits,[[inside,1]]);fire.update(.6,[inside,blocked,outside]);assert.equal(hits.length,2);});
 test('burn lifetime is finite, large updates keep the intended tick count and clear visuals/state',()=>{const hits=[],fire=createFireZones(null,{onDamage:(e,n)=>hits.push(n)});fire.burst(0,0);fire.update(FIRE_DURATION,[enemy()]);assert.equal(hits.length,9);assert.equal(fire.serialize().zones.length,0);fire.update(2,[enemy()]);assert.equal(hits.length,9);});

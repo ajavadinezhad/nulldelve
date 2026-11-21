@@ -3,7 +3,7 @@ import {createTouchControls} from './touch-controls.js?v=nulldelve-6';
 import {createHudFeedback} from './hud-feedback.js?v=nulldelve-6';
 import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=nulldelve-6';
 const puzzleDiscovery=createPuzzleDiscovery();
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 import {buildArt} from './environment.js?v=nulldelve-6';
 import {soldier, animateSoldier} from './character.js?v=nulldelve-6';
 import {weapon, createCombatEffects} from './weapons.js?v=nulldelve-6';

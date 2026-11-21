@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 import {WIRE_LAYOUT,WIRE_LINKS,junctionPorts,evaluateCircuit} from './wire-circuit.js?v=nulldelve-6';
 
 /** The actual cross-room cable follows the same authored port graph as the puzzle. */

@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 export function createExplosions(scene){
  const effects=[];
  return {

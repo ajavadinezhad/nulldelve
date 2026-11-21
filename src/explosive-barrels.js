@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 export const BARREL_POINTS=Object.freeze([[12,22],[12,14],[19,14],[27,30],[43,5],[67,16],[67,36],[95,36],[43,61],[67,61],[95,61],[95,16]].map(Object.freeze));
 export const BARREL_RADIUS=.38,BARREL_HP=3,BARREL_BLAST_RADIUS=3.4;
 const idFor=index=>'barrel-'+(index+1);

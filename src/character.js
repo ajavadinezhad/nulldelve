@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 import { weapon } from './weapons.js?v=nulldelve-6';
 
 const sphere = new THREE.SphereGeometry(1, 14, 10);

@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 import {weapon} from './weapons.js?v=nulldelve-6';
 export const WEAPON_PREVIEW_LABELS=Object.freeze({rifle:'MK4 carbine',carbine:'MK4 carbine',smg:'VX9 SMG',shotgun:'BREACH-12 shotgun',marksman:'SABLE DMR marksman rifle',lmg:'M60 WARDEN light machine gun',pistol:'P9 sidearm'});
 /** Long barrels and bulky magazines fit the same preview without cropping. */

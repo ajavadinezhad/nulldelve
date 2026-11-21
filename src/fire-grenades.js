@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 export const FIRE_RADIUS=2.6,FIRE_DURATION=5.5,FIRE_TICK=.6;
 const finite=(value,min,max)=>Number.isFinite(value)&&value>=min&&value<=max;
 /** Persistent ground fire. The game owns damage, rewards, and actor health. */

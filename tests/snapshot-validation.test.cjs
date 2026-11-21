@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {validateSnapshot}=require('../snapshot-validation.js');
-const {createSaveSlots}=require('../save-slots.js');
-const {createProgression}=require('../progression.js');
+const {validateSnapshot}=require('../src/snapshot-validation.js');
+const {createSaveSlots}=require('../src/save-slots.js');
+const {createProgression}=require('../src/progression.js');
 function snapshot(){return {version:3,world:[101,69],config:{mission:'campaign',difficulty:'normal'},player:{x:7,z:29,hp:100,maxHp:100,ammo:30,intel:false,angle:0},selected:'rifle',magazines:{rifle:30,pistol:12},reload:0,enemies:[],doors:Array.from({length:18},()=>({open:false,slide:0,unlocked:false})),puzzle:{solved:false,crates:[{x:6,z:23.5,seated:false},{x:11,z:27.8,seated:false}],plates:[{active:false},{active:false}]},progression:createProgression({doors:[],enemies:[],spawnEnemy:()=>null}).serializeState(),explored:[],seenRooms:[],rewardedZones:[]};}
 function setup(){const values=new Map();return {values,saves:createSaveSlots({getItem:key=>values.get(key)??null,setItem:(key,v)=>values.set(key,v),removeItem:key=>values.delete(key)})};}
 test('whole snapshots reject malformed nested state without touching the input',()=>{assert.equal(validateSnapshot(snapshot()),true);const cases=[s=>s.enemies=[null],s=>delete s.puzzle.crates,s=>s.progression.version=99,s=>s.progression.zones[0]=null,s=>s.player.x=NaN,s=>s.config.difficulty='unknown',s=>s.doors[0]=null,s=>s.progression.archive.input=['circle']];for(const mutate of cases){const s=snapshot();mutate(s);const before=JSON.stringify(s);assert.equal(validateSnapshot(s),false);assert.equal(JSON.stringify(s),before);}});

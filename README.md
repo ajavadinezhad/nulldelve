@@ -2,9 +2,11 @@
 
 A local three.js tactical shooter with fog of war, environmental puzzles, giant mutated cockroaches, and staged hordes.
 
-![Nulldelve main menu](facility-preview.jpg)
+![Nulldelve main menu](assets/screenshots/facility-preview.jpg)
 
 ## Play
+
+Online: https://ajavadinezhad.github.io/nulldelve/
 
 Run `python3 -m http.server 8000 --bind 127.0.0.1` from this folder, then open http://localhost:8000. No npm installation or internet connection is needed. three.js r180 is bundled in `vendor/`.
 
@@ -64,3 +66,14 @@ Puzzle help uses layered clues: environmental guidance first, then optional clea
 Open `/puzzle-lab.html` for Field notes. It only displays systems encountered nearby and in sight during play; unseen types, their names, and the library total stay hidden. New games start with an empty journal. The internal library begins with 20 presets and can grow to 40 or more; each operation selects a suitable subset. The journal is view-only: reference diagrams and optional hints cannot solve or change the real in-world puzzle. Seed, export, and automatic solution tools are hidden from the player journal.
 
 The bundled three.js runtime is distributed under the MIT license; see [vendor/LICENSE](vendor/LICENSE).
+
+## Project folders
+
+- `src/`: game modules and interface logic.
+- `styles/`: game and menu styles.
+- `assets/`: icons, artwork, and screenshots.
+- `vendor/`: bundled three.js and its license.
+- `tests/`: automated checks and browser fixtures.
+- `docs/`: review notes.
+
+GitHub Pages serves the root HTML pages from `main`. All runtime paths are relative so the game works under the repository URL.

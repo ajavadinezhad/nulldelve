@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 /** Shared batches keep the expanded facility from creating thousands of draw calls. */
 export function buildWorld(scene,map,width,height){
  const floors=[[],[],[]],walls=[];

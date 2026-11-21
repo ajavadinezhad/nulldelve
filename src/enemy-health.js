@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 const geometry=new THREE.PlaneGeometry(1,1);
 const background=new THREE.MeshBasicMaterial({color:0x14201b});
 const colors=[0xa4e89c,0xe7b86f,0xee826a].map(color=>new THREE.MeshBasicMaterial({color}));

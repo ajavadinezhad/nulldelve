@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 
 const shellGeometry=new THREE.SphereGeometry(1,14,10);
 const segmentGeometry=new THREE.CylinderGeometry(1,1,1,5);

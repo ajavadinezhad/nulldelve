@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine}=require('../loot.js');
-const {meleeTargets}=require('../melee.js');
+const {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine}=require('../src/loot.js');
+const {meleeTargets}=require('../src/melee.js');
 const enemy=(variant='normal',x=0)=>({x,z:0,variant});
 const context=(hp=100)=>({player:{x:0,z:0,hp,maxHp:100,ammo:24},selected:'rifle',weapons:{rifle:{ammo:24,reserve:60},pistol:{ammo:12,reserve:20}}});
 test('ordinary ammo arrives every third kill with a small budget and no duplicate rewards',()=>{const s=createLootState(),c=context(),e=enemy();assert.deepEqual(dropEnemyLoot(s,e,c),[]);assert.deepEqual(dropEnemyLoot(s,e,c),[]);assert.equal(s.kills,1);assert.deepEqual(dropEnemyLoot(s,enemy(),c),[]);const drops=dropEnemyLoot(s,enemy(),c);assert.equal(drops.length,1);assert.equal(drops[0].rifle,3);assert.equal(drops[0].pistol,1);assert.deepEqual(dropEnemyLoot(s,enemy(),c),[]);assert.equal(s.drops.length,1);});

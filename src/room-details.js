@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 
 /** Facility finishing pass. Everything stays below the fog plane and off the collision map. */
 export function addRoomDetails(scene, box, roomDefs) {

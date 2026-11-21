@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const THREE=require('../vendor/three.module.js');
-const {createExplosiveBarrels,validateBarrelSnapshot}=require('../explosive-barrels.js');
+const {createExplosiveBarrels,validateBarrelSnapshot}=require('../src/explosive-barrels.js');
 function line(system,xs){system.state.forEach((b,i)=>{b.x=i<xs.length?xs[i]:100+i*10;b.z=0;});}
 test('a fuel barrel withstands two shots and detonates on the third only once',()=>{let blasts=0;const barrels=createExplosiveBarrels(null,{onBlast:()=>blasts++}),barrel=barrels.state[0];assert.equal(barrels.findHit(barrel.x+.4,barrel.z),barrel);assert.equal(barrels.hit(barrel,1),0);assert.equal(barrels.hit(barrel.id,1),0);assert.equal(barrel.hp,1);assert.equal(barrels.hit(barrel,1),1);assert.equal(barrels.hit(barrel,20),0);assert.equal(barrels.findHit(barrel.x,barrel.z),null);assert.equal(blasts,1);});
 test('chain reactions queue each nearby barrel once even with reentrant blasts',()=>{const seen=[];let barrels;barrels=createExplosiveBarrels(null,{onBlast:blast=>{seen.push(blast);assert.equal(barrels.findHit(blast.x,blast.z,0),null);barrels.explodeNear(blast.x,blast.z,blast.radius);}});line(barrels,[0,2,4,7]);assert.equal(barrels.hit(barrels.state[0],3),4);assert.equal(seen.length,4);assert.ok(seen.every(blast=>blast.radius===3.4&&blast.damage===10));assert.equal(barrels.state.filter(b=>b.hp===0).length,4);});

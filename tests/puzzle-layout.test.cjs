@@ -1,9 +1,9 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');
-const {createPressurePuzzle,moveWithCrates,updatePressurePuzzle}=require('../pressure-puzzle.js');
-const {EXPANSION_ROOMS,carveExpansion,addExpansionProps}=require('../facility-expansion.js');
+const {createPressurePuzzle,moveWithCrates,updatePressurePuzzle}=require('../src/pressure-puzzle.js');
+const {EXPANSION_ROOMS,carveExpansion,addExpansionProps}=require('../src/facility-expansion.js');
 test('both pressure plates are reachable by pushing crates through the actual furnished room',async()=>{
- const THREE=await import('../vendor/three.module.js'),{buildArt}=await import('../environment.js');
- const source=fs.readFileSync(new URL('../main.js',`file://${__filename}`),'utf8'),ctx={W:101,H:69,createPressurePuzzle,EXPANSION_ROOMS,carveExpansion};vm.createContext(ctx);
+ const THREE=await import('../vendor/three.module.js'),{buildArt}=await import('../src/environment.js');
+ const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8'),ctx={W:101,H:69,createPressurePuzzle,EXPANSION_ROOMS,carveExpansion};vm.createContext(ctx);
  vm.runInContext(source.slice(source.indexOf('const map='),source.indexOf('const boxGeo='))+';globalThis.layout={map,cover,roomDefs,puzzle};',ctx);
  const {map,cover,roomDefs,puzzle}=ctx.layout,scene=new THREE.Scene();
  const previous=global.document;global.document={createElement:()=>({getContext:()=>new Proxy({},{get:(o,k)=>o[k]??(()=>{})})})};

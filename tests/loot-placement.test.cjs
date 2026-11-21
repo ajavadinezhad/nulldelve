@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {placeLootDrops}=require('../loot-placement.js');
+const {placeLootDrops}=require('../src/loot-placement.js');
 const drop=(id,kind='ammo',x=.24,z=.12)=>({id,kind,x,z,amount:kind==='health'?8:0,rifle:kind==='ammo'?4:0,pistol:kind==='ammo'?2:0});
 const sums=s=>s.drops.reduce((total,d)=>{for(const key of ['amount','rifle','pistol'])total[key]+=d[key]||0;return total;},{amount:0,rifle:0,pistol:0});
 test('drops near a thin wall stay on their origin side with their whole footprint clear',()=>{const drops=[drop('1'),drop('2','health',-.26,-.16)],state={drops};const solid=(x,z,r)=>x+r>.4,lineOfSight=(x,z,tx)=>tx<.4;placeLootDrops(state,[...drops],{x:0,z:0},{solid,lineOfSight});for(const d of drops){assert.equal(solid(d.x,d.z,d.compact?.22:.38),false);assert.ok(d.x<.4);}assert.ok(Math.hypot(drops[0].x-drops[1].x,drops[0].z-drops[1].z)>=.55);});

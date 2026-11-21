@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance}=require('../campaign-operations.js');
-const {createProgression}=require('../progression.js');const {WIRE_SOLUTION}=require('../wire-circuit.js');const {createPressurePuzzle}=require('../pressure-puzzle.js');
+const {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance}=require('../src/campaign-operations.js');
+const {createProgression}=require('../src/progression.js');const {WIRE_SOLUTION}=require('../src/wire-circuit.js');const {createPressurePuzzle}=require('../src/pressure-puzzle.js');
 function setup(){const doors=Array.from({length:18},()=>({open:false})),enemies=[],player={x:7,z:29,intel:false},puzzle=createPressurePuzzle(),progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant)=>{const enemy={id:'e'+enemies.length,x,z,variant,hp:2};enemies.push(enemy);return enemy;}});return {doors,enemies,player,puzzle,progression};}
 function go(s,x,z){Object.assign(s.player,{x,z});s.progression.update(s.player,.1);}
 function use(s,id){const d=s.progression.state.devices.find(d=>d.id===id);assert.ok(d,id);Object.assign(s.player,{x:d.x,z:d.z});assert.equal(s.progression.interact(s.player),true,id);}

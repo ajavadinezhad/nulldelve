@@ -1,5 +1,5 @@
 import {createWireCircuitArt} from './wire-circuit-art.js?v=nulldelve-6';
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */
 export function createProgressionArt(scene, box, state) {
