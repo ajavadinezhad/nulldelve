@@ -1,4 +1,4 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=hospital-r15';
+import {DIFFICULTY_RULES} from './difficulty.js?v=identity-r16';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;

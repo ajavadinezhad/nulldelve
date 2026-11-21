@@ -1,5 +1,5 @@
-import {hospitalFlowSequence} from './progression.js?v=hospital-r15';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=hospital-r15';
+import {hospitalFlowSequence} from './progression.js?v=identity-r16';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=identity-r16';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */
