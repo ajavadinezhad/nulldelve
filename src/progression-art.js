@@ -1,4 +1,4 @@
-import {createWireCircuitArt} from './wire-circuit-art.js?v=balance-r11';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=crate-r12';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */

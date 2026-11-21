@@ -17,6 +17,8 @@ export function touchInteractionContext(prompt){
  if(/\bLOCKED\b|\bNO POWER\b|\bCHARGE A FIRST\b/.test(description))label='Locked';
  else if(/\bEVACUATE\b|\bLEAVE SECTOR\b/.test(description))label='Exit';
  else if(/^(?:REREAD|READ)\b/.test(description))label='Read';
+ else if(/^(?:HOLD.*GRAB|GRAB)\b/.test(description))label='Grab';
+ else if(/^RELEASE\b/.test(description))label='Release';
  else if(/^ROTATE\b/.test(description))label='Rotate';
  else if(/^OPEN\b/.test(description))label='Open';
  else if(/^CLOSE\b/.test(description))label='Close';
@@ -27,13 +29,16 @@ export function touchInteractionContext(prompt){
  else if(/COMPLETE|ACCEPTED|ALREADY|ONLINE|CONNECTED|ESTABLISHED/.test(description))label='Check';
  return {label,description,available:true};
 }
-const ICONS={interact:'M8 5h15v23H8zM4 17h15m-5-5 5 5-5 5',reload:'M25 12a11 11 0 1 0 1 10M25 5v8h-8',weapon:'M4 13h8V9h12v4h5v5H17l-5 9H6l4-9H4z',knife:'m7 27 7-7m-3 3 4 4M14 20 25 5l2 9-9 10z'};
+/** One finger owns the held action until release, cancellation or input reset. */
+export function createHeldInteraction(onStart,onEnd){let pointer=null;return {get held(){return pointer!==null;},begin(id){if(pointer!==null)return false;pointer=id;onStart();return true;},end(id){if(pointer!==id)return false;pointer=null;onEnd();return true;},reset(){if(pointer!==null){pointer=null;onEnd();}}};}
+const ICONS={grab:'M10 10h12v13H10zM10 14h12M16 10v13M3 17h4v9h7m15-9h-4v9h-7',interact:'M8 5h15v23H8zM4 17h15m-5-5 5 5-5 5',reload:'M25 12a11 11 0 1 0 1 10M25 5v8h-8',weapon:'M4 13h8V9h12v4h5v5H17l-5 9H6l4-9H4z',knife:'m7 27 7-7m-3 3 4 4M14 20 25 5l2 9-9 10z'};
 export function createTouchControls({host,isRunning,onAction,device=()=>({coarse:globalThis.matchMedia?.('(pointer: coarse)')?.matches??false,touchPoints:globalThis.navigator?.maxTouchPoints??0})}){
  if(!host)return {enabled:false,getState:()=>({move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false}),reset(){},configure(){}};
+ const heldInteract=createHeldInteraction(()=>onAction('interact'),()=>onAction('interactEnd'));
  const input=createTwinStickInput(),knobs={},cleanups=[];let enabled=false,mode='auto',lastInteractPrompt=null;
  const doc=host.ownerDocument??document,make=(tag,cls,text)=>{const node=doc.createElement(tag);node.className=cls;if(text)node.textContent=text;return node;};
  function paint(name){const state=input.getState()[name],knob=knobs[name];knob.style.transform=`translate(${state.x*34}px,${state.z*34}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);}
- function reset(){input.reset();for(const name of ['move','aim'])paint(name);}
+ function reset(){heldInteract.reset();input.reset();for(const name of ['move','aim'])paint(name);}
  function listen(node,name,callback,options){node.addEventListener(name,callback,options);cleanups.push(()=>node.removeEventListener(name,callback,options));}
  host.replaceChildren();
  for(const [name,label] of [['move','Move / run'],['aim','Aim + fire']]){
@@ -44,8 +49,12 @@ export function createTouchControls({host,isRunning,onAction,device=()=>({coarse
   listen(stick,'pointermove',e=>{const p=position(e);if(input.update(name,e.pointerId,p.x,p.z)){e.preventDefault();paint(name);}});
   const end=e=>{if(input.end(name,e.pointerId)){e.preventDefault();paint(name);}};listen(stick,'pointerup',end);listen(stick,'pointercancel',end);listen(stick,'lostpointercapture',end);
  }
- const actions=make('div','touch-actions');for(const [action,label] of [['interact','Interact'],['reload','Reload'],['weapon','Swap'],['knife','Melee']]){const button=make('button','touch-action');button.type='button';button.dataset.action=action;button.setAttribute('aria-label',label);const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg'),path=doc.createElementNS('http://www.w3.org/2000/svg','path');svg.setAttribute('viewBox','0 0 32 32');svg.setAttribute('aria-hidden','true');path.setAttribute('d',ICONS[action]);svg.append(path);button.append(svg,make('span','',label));listen(button,'click',()=>{if(enabled&&isRunning())onAction(action);});actions.append(button);}host.append(actions);
+ const actions=make('div','touch-actions');for(const [action,label] of [['interact','Interact'],['reload','Reload'],['weapon','Swap'],['knife','Melee']]){const button=make('button','touch-action');button.type='button';button.dataset.action=action;button.setAttribute('aria-label',label);const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg'),path=doc.createElementNS('http://www.w3.org/2000/svg','path');svg.setAttribute('viewBox','0 0 32 32');svg.setAttribute('aria-hidden','true');path.setAttribute('d',ICONS[action]);svg.append(path);button.append(svg,make('span','',label));if(action==='interact'){
+ listen(button,'pointerdown',event=>{if(!enabled||!isRunning()||event.button>0)return;event.preventDefault();if(heldInteract.begin(event.pointerId)){try{button.setPointerCapture(event.pointerId);}catch{}}});
+ const end=event=>{if(heldInteract.end(event.pointerId))event.preventDefault();};for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(button,type,end);
+ listen(button,'click',event=>{if(event.detail===0&&enabled&&isRunning()){onAction(action);onAction('interactEnd');}});
+ }else listen(button,'click',()=>{if(enabled&&isRunning())onAction(action);});actions.append(button);}host.append(actions);
  function configure(next=mode){mode=next;const nextEnabled=shouldShowTouchControls(mode,device());if(nextEnabled!==enabled)reset();enabled=nextEnabled;host.hidden=!enabled;doc.body.classList.toggle('touch-controls-enabled',enabled);}
  configure();listen(globalThis,'blur',reset);listen(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
- return {get enabled(){return enabled;},getState:()=>enabled?input.getState():{move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false},reset,configure,setInteractAvailable(prompt){if(prompt===lastInteractPrompt)return;lastInteractPrompt=prompt;const button=actions.querySelector('[data-action="interact"]');if(!button)return;const context=touchInteractionContext(prompt);button.classList.toggle('available',context.available);button.setAttribute('aria-label',context.description);button.title=context.description;button.querySelector('span').textContent=context.label;},dispose(){reset();cleanups.forEach(fn=>fn());doc.body.classList.remove('touch-controls-enabled');host.replaceChildren();}};
+ return {get enabled(){return enabled;},getState:()=>enabled?{...input.getState(),interactHeld:heldInteract.held}:{move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false},reset,configure,setInteractAvailable(prompt){if(prompt===lastInteractPrompt)return;lastInteractPrompt=prompt;const button=actions.querySelector('[data-action="interact"]');if(!button)return;const context=touchInteractionContext(prompt);button.classList.toggle('available',context.available);button.setAttribute('aria-label',context.description);button.title=context.description;button.querySelector('span').textContent=context.label;button.querySelector('path').setAttribute('d',['Grab','Release'].includes(context.label)?ICONS.grab:ICONS.interact);},dispose(){reset();cleanups.forEach(fn=>fn());doc.body.classList.remove('touch-controls-enabled');host.replaceChildren();}};
 }

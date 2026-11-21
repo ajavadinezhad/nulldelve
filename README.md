@@ -95,3 +95,7 @@ Hold G (or hold the grenade icon) to build throw strength and preview its arc; r
 ## Extended operations
 
 Each operation includes a two-stage return route: Archive authorization, backup power stabilization, sample transport, airlock decontamination, or black-box transmission. Reinforcements beyond Security arrive in three phases with a short respite. Larger encounters retain their existing simultaneous enemy limits. New Charger and Sentinel mutations appear later in encounters; HUSH-9 and TWIN are available in the armory with separate upgrades. Historical checkpoints preserve existing route progress.
+
+## Recovering crates
+
+Hold your Interact key (E by default) next to an unseated crate, then move to drag it away from a wall or corner. Release to let go. On phones, hold the contextual Grab button while moving with the left stick. Dragging is slower than walking; seated switch crates remain locked. Reset crates remains available with T or in touch Help. Pausing, losing input, and loading a checkpoint drop the grip.

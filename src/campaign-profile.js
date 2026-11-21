@@ -1,6 +1,6 @@
-import {compatibleStorage} from './storage-compat.js?v=balance-r11';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=balance-r11';
-import {createEconomy} from './economy.js?v=balance-r11';
+import {compatibleStorage} from './storage-compat.js?v=crate-r12';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=crate-r12';
+import {createEconomy} from './economy.js?v=crate-r12';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';
 const ids=()=>PRIMARY_WEAPONS.map(weapon=>weapon.id);

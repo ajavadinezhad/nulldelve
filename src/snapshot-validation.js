@@ -1,7 +1,7 @@
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=balance-r11';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=balance-r11';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=balance-r11';
-import {createProgression} from './progression.js?v=balance-r11';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=crate-r12';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=crate-r12';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=crate-r12';
+import {createProgression} from './progression.js?v=crate-r12';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','boss']);
