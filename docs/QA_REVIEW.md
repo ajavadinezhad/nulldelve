@@ -109,3 +109,9 @@ Three source-review agents checked combat, mission state and armory usability. F
 ## r22 content and economy expansion
 
 Added seventh sequential Flooded freight operation, two specialist primary weapons with models, milestone purchase locks, finite authored cash caches and one-time first-clear contracts. World revision201×69/32doors accepts and migrates101/18 and151/26 profiles. Live cash pickup regression requires current-operation proximity/visibility and verifies durable one-time payment after profile reload. Hospital ledger points to freight. Existing Generator defense guidance and interlocked Hospital prompts received mission audit fixes. Automated coverage:67test files,42campaign+12legacy traversals,924baseline+1848attachment supply projections,1056puzzle preset combinations. Models do not establish human survival/playtime, cache-finding rates or phone performance.
+
+## r23 review
+
+Freight fresh-session checkpoint coverage spans all six difficulty/Remix combinations, including mid-transfer and missing Cold Chain enemy references. Locked track controls no longer advertise interaction. Primary upgrade transactions enforce owned/equipped guns. Cross-tab salvage claims pay once. Phone resize releases sticks and crate grip; grenade hold ownership ignores other fingers. Coarse-pointer purchase controls have 44px minimum targets.
+
+Skills now use three two-node branches. Each unique operation completion earns one training point; advanced nodes require their earlier node and a later mission milestone. Old selected skills migrate as developed nodes. One passive remains equipped at a time. Portrait/landscape menu checks use desktop viewport emulation, not physical-phone validation. Ordinary kill-cash checkpoint replay remains an economy limitation requiring a separate durable ledger.

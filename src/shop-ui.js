@@ -1,6 +1,6 @@
-import {weaponThumbnail} from './weapon-preview.js?v=expansion-r22';
-import {createItemIcon} from './item-icons.js?v=expansion-r22';
-import {formatKey} from './controls.js?v=expansion-r22';
+import {weaponThumbnail} from './weapon-preview.js?v=skills-r23';
+import {createItemIcon} from './item-icons.js?v=skills-r23';
+import {formatKey} from './controls.js?v=skills-r23';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
@@ -42,7 +42,7 @@ function purchaseButton(offer,onPurchase,{label,name,maxed=false,full=false}={})
 export function renderShop(target,armory,onPurchase,{group:selectedGroup='weapons',onGroupChange=()=>{},selectedWeapon=null,onWeaponSelect=()=>{},detailTab='upgrades',onDetailTab=()=>{}}={}){
  if(!armory){target.append(element('p','shop-status','Armory unavailable.'));return;}
  selectedGroup=['gear','skills'].includes(selectedGroup)?selectedGroup:'weapons';const credits=integer(armory.credits),header=element('div','shop-toolbar'),balance=element('div','shop-balance');balance.setAttribute('aria-label',`$${credits} cash available`);const cash=element('img','cash-icon');cash.src='./assets/cash.svg';cash.alt='';balance.append(cash,element('strong','',`$${credits.toLocaleString()}`));
- const tabs=element('div','menu-tabs shop-tabs');tabs.setAttribute('aria-label','Armory categories');for(const [id,title]of [['weapons','Weapons'],['gear','Supplies'],['skills','Field skill']]){const tab=element('button','menu-button secondary'+(selectedGroup===id?' selected':''));tab.type='button';tab.append(icon(id==='skills'?'armor':id),element('span','',title));tab.dataset.focusKey='shop-'+id;tab.setAttribute('aria-pressed',String(selectedGroup===id));tab.addEventListener('click',()=>onGroupChange(id));tabs.append(tab);}header.append(tabs,balance);target.append(header);
+ const tabs=element('div','menu-tabs shop-tabs');tabs.setAttribute('aria-label','Armory categories');for(const [id,title]of [['weapons','Weapons'],['gear','Supplies'],['skills','Skills']]){const tab=element('button','menu-button secondary'+(selectedGroup===id?' selected':''));tab.type='button';tab.append(icon(id==='skills'?'armor':id),element('span','',title));tab.dataset.focusKey='shop-'+id;tab.setAttribute('aria-pressed',String(selectedGroup===id));tab.addEventListener('click',()=>onGroupChange(id));tabs.append(tab);}header.append(tabs,balance);target.append(header);
  const offers=Array.isArray(armory.offers)?armory.offers:[];if(selectedGroup==='skills')return;if(selectedGroup==='gear'){renderSupplies(target,armory,offers,onPurchase);return;}
  const guns=[...(armory.weapons??[]),{weaponId:'pistol',label:'P9 Sidearm',owned:true,stats:armory.sidearm?.stats??{}}];const gunId=g=>g.weaponId??String(g.id).replace(/^weapon\./,'');const selected=guns.find(g=>gunId(g)===selectedWeapon)??guns.find(g=>gunId(g)===armory.primary)??guns[0];if(!selected){target.append(element('p','shop-status','No weapons available.'));return;}
  const layout=element('div','armory-workbench'),list=element('nav','armory-roster');list.setAttribute('aria-label','Weapon selection');list.dataset.scrollKey='weapon-roster';

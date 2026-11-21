@@ -1,7 +1,7 @@
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=expansion-r22';
-import {compatibleStorage} from './storage-compat.js?v=expansion-r22';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=expansion-r22';
-import {createEconomy} from './economy.js?v=expansion-r22';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=skills-r23';
+import {compatibleStorage} from './storage-compat.js?v=skills-r23';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=skills-r23';
+import {createEconomy} from './economy.js?v=skills-r23';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';
 const ids=()=>PRIMARY_WEAPONS.map(weapon=>weapon.id);
@@ -92,7 +92,12 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
     else if(String(id).startsWith('equip.'))result=mutate(id,true);
     else if(String(id).startsWith('reward.'))result=economy.claimReward(String(id).slice(7));
     else if(String(id).startsWith('attachment.'))result=setAttachment(id);
-    else result=economy.purchase(id);
+    else {
+     const upgrade=String(id).match(/^(carbine|rifle|smg|shotgun|marksman|lmg|hush|scattergun|kestrel|mantis|jackal|vesper|pistol)\.(damage|magazine|reload)$/);
+     const gun=upgrade?.[1]==='rifle'?'carbine':upgrade?.[1];
+     if(upgrade&&gun!=='pistol'&&(!state.unlocked.includes(gun)||state.primary!==gun))result={ok:false,message:'Equip an owned weapon before upgrading it.'};
+     else result=economy.purchase(id);
+    }
     return finishMutation(result,before,true);
    }finally{releaseLease();}
   };

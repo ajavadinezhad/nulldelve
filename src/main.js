@@ -1,66 +1,66 @@
-import {SALVAGE_CACHES} from './mission-salvage.js?v=expansion-r22';
-import {createSalvageArt} from './salvage-art.js?v=expansion-r22';
-import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=expansion-r22';
-import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=expansion-r22';
-import {applyWeaponAttachment} from './weapon-attachments.js?v=expansion-r22';
-import {createMutationNotes} from './mutation-notes.js?v=expansion-r22';
-import {grantHospitalAmmo} from './mission-supplies.js?v=expansion-r22';
-import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=expansion-r22';
-import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=expansion-r22';
-import {createGrenadeActions} from './grenade-actions.js?v=expansion-r22';
-import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=expansion-r22';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=expansion-r22';
-import {compatibleStorage} from './storage-compat.js?v=expansion-r22';
-import {createTouchControls} from './touch-controls.js?v=expansion-r22';
-import {createHudFeedback} from './hud-feedback.js?v=expansion-r22';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=expansion-r22';
+import {SALVAGE_CACHES} from './mission-salvage.js?v=skills-r23';
+import {createSalvageArt} from './salvage-art.js?v=skills-r23';
+import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=skills-r23';
+import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=skills-r23';
+import {applyWeaponAttachment} from './weapon-attachments.js?v=skills-r23';
+import {createMutationNotes} from './mutation-notes.js?v=skills-r23';
+import {grantHospitalAmmo} from './mission-supplies.js?v=skills-r23';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=skills-r23';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=skills-r23';
+import {createGrenadeActions} from './grenade-actions.js?v=skills-r23';
+import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=skills-r23';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=skills-r23';
+import {compatibleStorage} from './storage-compat.js?v=skills-r23';
+import {createTouchControls} from './touch-controls.js?v=skills-r23';
+import {createHudFeedback} from './hud-feedback.js?v=skills-r23';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=skills-r23';
 const puzzleDiscovery=createPuzzleDiscovery();
 const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=expansion-r22';
-import {soldier, animateSoldier} from './character.js?v=expansion-r22';
-import {weapon, createCombatEffects} from './weapons.js?v=expansion-r22';
-import {addRoomDetails} from './room-details.js?v=expansion-r22';
-import {createMinimap} from './minimap.js?v=expansion-r22';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=expansion-r22';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=expansion-r22';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=expansion-r22';
-import {createPuzzleArt} from './puzzle-art.js?v=expansion-r22';
-import {createWeaponPreview} from './weapon-preview.js?v=expansion-r22';
-import {createProgression} from './progression.js?v=expansion-r22';
-import {createProgressionArt} from './progression-art.js?v=expansion-r22';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=expansion-r22';
-import {buildWorld} from './world-render.js?v=expansion-r22';
-import {createNavigator} from './navigation.js?v=expansion-r22';
-import {createGameMenu} from './game-menu.js?v=expansion-r22';
-import {createSaveSlots} from './save-slots.js?v=expansion-r22';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=expansion-r22';
-import {createEconomy} from './economy.js?v=expansion-r22';
-import {createExplosions} from './explosion.js?v=expansion-r22';
-import {createGameAudio} from './audio.js?v=expansion-r22';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=expansion-r22';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=expansion-r22';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=expansion-r22';
-import {observeHudLayout} from './interface-layout.js?v=expansion-r22';
-import {createMapFocus} from './map-accessibility.js?v=expansion-r22';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=expansion-r22';
-import {placeLootDrops} from './loot-placement.js?v=expansion-r22';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=expansion-r22';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=expansion-r22';
-import {createFireZones} from './fire-grenades.js?v=expansion-r22';
-import {itemIconPath} from './item-icons.js?v=expansion-r22';
-import {createLootView} from './loot-view.js?v=expansion-r22';
-import {meleeTargets} from './melee.js?v=expansion-r22';
-import {createPuzzleHints} from './puzzle-hints.js?v=expansion-r22';
-import {createOnboarding} from './onboarding.js?v=expansion-r22';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=expansion-r22';
-import {validateSnapshot} from './snapshot-validation.js?v=expansion-r22';
-import {DIFFICULTY_RULES} from './difficulty.js?v=expansion-r22';
-import {createCampaignProfile} from './campaign-profile.js?v=expansion-r22';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=expansion-r22';
-import {createCampaignProgress} from './campaign-progress.js?v=expansion-r22';
-import {buildOperationEnvironment} from './operation-environments.js?v=expansion-r22';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=expansion-r22';
+import {buildArt} from './environment.js?v=skills-r23';
+import {soldier, animateSoldier} from './character.js?v=skills-r23';
+import {weapon, createCombatEffects} from './weapons.js?v=skills-r23';
+import {addRoomDetails} from './room-details.js?v=skills-r23';
+import {createMinimap} from './minimap.js?v=skills-r23';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=skills-r23';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=skills-r23';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=skills-r23';
+import {createPuzzleArt} from './puzzle-art.js?v=skills-r23';
+import {createWeaponPreview} from './weapon-preview.js?v=skills-r23';
+import {createProgression} from './progression.js?v=skills-r23';
+import {createProgressionArt} from './progression-art.js?v=skills-r23';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=skills-r23';
+import {buildWorld} from './world-render.js?v=skills-r23';
+import {createNavigator} from './navigation.js?v=skills-r23';
+import {createGameMenu} from './game-menu.js?v=skills-r23';
+import {createSaveSlots} from './save-slots.js?v=skills-r23';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=skills-r23';
+import {createEconomy} from './economy.js?v=skills-r23';
+import {createExplosions} from './explosion.js?v=skills-r23';
+import {createGameAudio} from './audio.js?v=skills-r23';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=skills-r23';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=skills-r23';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=skills-r23';
+import {observeHudLayout} from './interface-layout.js?v=skills-r23';
+import {createMapFocus} from './map-accessibility.js?v=skills-r23';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=skills-r23';
+import {placeLootDrops} from './loot-placement.js?v=skills-r23';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=skills-r23';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=skills-r23';
+import {createFireZones} from './fire-grenades.js?v=skills-r23';
+import {itemIconPath} from './item-icons.js?v=skills-r23';
+import {createLootView} from './loot-view.js?v=skills-r23';
+import {meleeTargets} from './melee.js?v=skills-r23';
+import {createPuzzleHints} from './puzzle-hints.js?v=skills-r23';
+import {createOnboarding} from './onboarding.js?v=skills-r23';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=skills-r23';
+import {validateSnapshot} from './snapshot-validation.js?v=skills-r23';
+import {DIFFICULTY_RULES} from './difficulty.js?v=skills-r23';
+import {createCampaignProfile} from './campaign-profile.js?v=skills-r23';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=skills-r23';
+import {createCampaignProgress} from './campaign-progress.js?v=skills-r23';
+import {buildOperationEnvironment} from './operation-environments.js?v=skills-r23';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=skills-r23';
 const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
@@ -238,7 +238,12 @@ function toggleHelp(){if(!active||ended||menu?.isOpen())return;if(typeof puzzle!
 $('#help-button').onclick=toggleHelp;
 $('#replay-guidance').onclick=()=>{const door=doors[guidanceDoorIndex];if(!isRunning()||!door?.hintTarget)return;if(combatIsActive(player,enemies,progression.state.zones)){toast('CAMERA LEAD AVAILABLE AFTER COMBAT');return;}doorHint.repeat(String(guidanceDoorIndex),door.hintTarget,player);};
 $('#switch-grenade').onclick=()=>{if(isRunning())cycleGrenade();renderer.domElement.focus();};
-$('#use-medkit').onclick=()=>{if(isRunning())useMedkit();renderer.domElement.focus();};$('#use-grenade').onclick=event=>{if(event.detail===0&&isRunning())throwGrenade();renderer.domElement.focus();};const grenadeButton=$('#use-grenade');grenadeButton.addEventListener('pointerdown',event=>{if(!isRunning()||event.button>0)return;event.preventDefault();grenadeButton.setPointerCapture?.(event.pointerId);beginGrenadeCharge();});grenadeButton.addEventListener('pointerup',event=>{event.preventDefault();if(isRunning())releaseGrenadeCharge();else cancelGrenadeCharge();renderer.domElement.focus();});grenadeButton.addEventListener('pointercancel',cancelGrenadeCharge);grenadeButton.addEventListener('lostpointercapture',cancelGrenadeCharge);
+$('#use-medkit').onclick=()=>{if(isRunning())useMedkit();renderer.domElement.focus();};$('#use-grenade').onclick=event=>{if(event.detail===0&&isRunning())throwGrenade();renderer.domElement.focus();};const grenadeButton=$('#use-grenade');let grenadePointer=null;
+grenadeButton.addEventListener('pointerdown',event=>{if(!isRunning()||event.button>0||grenadePointer!==null)return;event.preventDefault();grenadePointer=event.pointerId;grenadeButton.setPointerCapture?.(event.pointerId);beginGrenadeCharge();});
+grenadeButton.addEventListener('pointerup',event=>{if(event.pointerId!==grenadePointer)return;grenadePointer=null;event.preventDefault();if(isRunning())releaseGrenadeCharge();else cancelGrenadeCharge();renderer.domElement.focus();});
+function cancelGrenadePointer(event){if(event&&event.type!=='resize'&&event.pointerId!==grenadePointer)return;grenadePointer=null;cancelGrenadeCharge();}
+grenadeButton.addEventListener('pointercancel',cancelGrenadePointer);grenadeButton.addEventListener('lostpointercapture',cancelGrenadePointer);window.addEventListener('resize',cancelGrenadePointer);
+
 function toggleMap(){
  if(typeof puzzle!=='undefined')puzzle.grabbed=null;
  if(menu?.isOpen()||ended)return;if(typeof grenadeActions!=='undefined')grenadeActions?.cancel();touchControls?.reset();mapOpen=!mapOpen;shooting=false;keys.clear();drawMinimap.setExpanded(mapOpen);$('.map-panel').classList.toggle('map-expanded',mapOpen);$('#toggle-map').textContent=(mapOpen?'CLOSE MAP  ':'EXPAND  ')+formatKey(bindings().map);$('#toggle-map').setAttribute('aria-label',mapOpen?'Close map':'Open map');$('.map-panel').style.display=mapOpen||menu?.settings.showMinimap?'block':'none';drawMinimap(visibleTiles);if(mapOpen)mapFocus.open();else{mapFocus.close();renderer.domElement.focus();}
@@ -326,7 +331,7 @@ function applySettings(settings){
  audio.applySettings(settings);fireZones.setReducedEffects(!!settings.reducedEffects);document.body.classList.toggle('reduced-effects',!!settings.reducedEffects);const fittingScale=settings.hudScale??1;document.documentElement.style.setProperty('--hud-scale',String(fittingScale));if(settings.aimMode==='mouse'||settings.aimMode==='keyboard')aimMode=settings.aimMode;viewHeight=settings.zoom;resize();refreshHelp();$('.map-panel').style.display=settings.showMinimap?'block':'none';
 }
 function captureSnapshot(){return {
- version:3,fieldSkill:{version:1,selected:activeFieldSkill},barrels:barrelSystem.serialize(),doorHints:doorHint?.serializeSeen()??[],fireZones:fireZones.serialize(),profileRevision:campaignProfile.state.revision,loadout:{primary:active&&!ended?(weapons.rifle.id??campaignProfile.state.primary):campaignProfile.state.primary,unlocked:[...campaignProfile.state.unlocked]},stats:{...operationStats},loot:JSON.parse(JSON.stringify(loot)),reserves:{rifle:weapons.rifle.reserve,pistol:weapons.pistol.reserve},economy:economy.serialize(),world:[W,H],config:{...runConfig},player:{x:player.x,z:player.z,hp:player.hp,maxHp:player.maxHp,ammo:player.ammo,intel:player.intel,angle:player.angle,hurtGrace:player.hurtGrace},selected,
+ version:3,fieldSkill:{...fieldSkills.serialize(campaignProgress.completed()),selected:activeFieldSkill},barrels:barrelSystem.serialize(),doorHints:doorHint?.serializeSeen()??[],fireZones:fireZones.serialize(),profileRevision:campaignProfile.state.revision,loadout:{primary:active&&!ended?(weapons.rifle.id??campaignProfile.state.primary):campaignProfile.state.primary,unlocked:[...campaignProfile.state.unlocked]},stats:{...operationStats},loot:JSON.parse(JSON.stringify(loot)),reserves:{rifle:weapons.rifle.reserve,pistol:weapons.pistol.reserve},economy:economy.serialize(),world:[W,H],config:{...runConfig},player:{x:player.x,z:player.z,hp:player.hp,maxHp:player.maxHp,ammo:player.ammo,intel:player.intel,angle:player.angle,hurtGrace:player.hurtGrace},selected,
  magazines:{rifle:selected==='rifle'?player.ammo:weapons.rifle.ammo,pistol:selected==='pistol'?player.ammo:weapons.pistol.ammo},reload,
  enemies:enemies.map(e=>({id:e.id,x:e.x,z:e.z,hp:e.hp,maxHp:e.maxHp,variant:e.variant,cooldown:e.cooldown,alerted:e.alerted,spawnDelay:e.spawnDelay,attackWindup:e.attackWindup,staggerTime:e.staggerTime,lootDropped:!!e.lootDropped,encounter:e.encounter,bossMechanic:e.bossMechanic,pulseCooldown:e.pulseCooldown,chargeCooldown:e.chargeCooldown,shriekCooldown:e.shriekCooldown,leapCooldown:e.leapCooldown,staggerImmunity:e.staggerImmunity})),
  doors:doors.map(d=>({open:d.open,slide:d.slide,unlocked:!!d.unlocked})),
@@ -356,9 +361,9 @@ function restoreSnapshot(data){
 function startOperation(saveInitial=true){active=true;ended=false;resumeRun();menu?.hide();renderer.domElement.focus();if(saveInitial&&runConfig.mission==='campaign'&&(!runConfig.operation||runConfig.operation==='breach'))tutorial?.start(player,{touch:!!touchControls?.enabled});toast(operationTitle().toUpperCase());if(saveInitial){queueCheckpoint('Operation deployment');commitCheckpoint();}}
 function queueLoad(slot){const snapshot=saveSlots.load(slot);if(!snapshot)throw new Error('This save slot is empty or could not be read.');try{compatibleStorage(sessionStorage).setItem('nulldelve.pendingLoad',JSON.stringify(snapshot));}catch{throw new Error('Browser session storage is unavailable. Enable storage to load this save.');}location.href=location.pathname+'?play=load';return true;}
 menu=createGameMenu({overlay:$('#overlay'),
- getStatus:()=>({active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:currentGuidance().steps,armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(),items:economy.state.items,sidearm:{stats:{damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload}},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
+ getStatus:()=>({active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),skillState:fieldSkills.serialize(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:currentGuidance().steps,armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(),items:economy.state.items,sidearm:{stats:{damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload}},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
  onPrepareOperation:prepareOperation,
- onFieldSkill:id=>{if(!isSafeToShop())return {ok:false,message:"Choose a field skill before deployment."};const result=fieldSkills.equip(id,campaignProgress.completed());if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());updateDeploymentTransfer();}return result;},
+ onFieldSkill:id=>{if(!isSafeToShop())return {ok:false,message:"Choose a field skill before deployment."};const result=id.startsWith('learn:')?fieldSkills.learn(id.slice(6),campaignProgress.completed()):fieldSkills.equip(id,campaignProgress.completed());if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());updateDeploymentTransfer();}return result;},
  onNewGame:config=>{if(config.mission==='campaign'&&config.operation&&!campaignProgress.isUnlocked(config.operation))return {ok:false,message:'Finish the previous operation to unlock this location.'};persistCampaignProfile();location.href=deploymentUrl(config);},
  onContinue:()=>{if(active&&!ended){resumeRun();return true;}return queueCheckpointLoad();},
  onPurchase:async id=>{if(!isSafeToShop())return {ok:false,message:'Visit the armory before deployment.'};const result=await campaignProfile.purchaseOffer(id);if(result.ok){audio.purchase();applyPrimaryLoadout();hud();updateDeploymentTransfer();}return result;},

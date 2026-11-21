@@ -9,3 +9,33 @@ test('phone interaction labels describe the nearby action while retaining full d
 
 test('held Interact has one touch owner and releases on cancel/reset without replaying the action',()=>{const {createHeldInteraction}=require('../src/touch-controls.js'),events=[],hold=createHeldInteraction(()=>events.push('grab'),()=>events.push('release'));assert.equal(hold.begin(4),true);assert.equal(hold.begin(5),false);assert.equal(hold.end(5),false);assert.equal(hold.held,true);assert.equal(hold.end(4),true);assert.equal(hold.held,false);assert.deepEqual(events,['grab','release']);hold.begin(6);hold.reset();hold.end(6);assert.deepEqual(events,['grab','release','grab','release']);assert.equal(hold.held,false);});
 test('phone crate prompts offer Grab before holding and Release during a grip',()=>{const {touchInteractionContext}=require('../src/touch-controls.js');assert.equal(touchInteractionContext('E · HOLD TO GRAB CRATE').label,'Grab');assert.equal(touchInteractionContext('E · RELEASE TO LET GO').label,'Release');});
+
+test('invalid deadzones never produce reversed or non-finite stick input',()=>{for(const deadzone of [-1,1,2,NaN,Infinity])assert.deepEqual(stickVector(.8,.4,deadzone),{x:0,z:0});});
+
+test('rotating the viewport releases actual captured sticks and held Interact',()=>{
+ const {createTouchControls}=require('../src/touch-controls.js');
+ class Node {
+  constructor(){this.listeners={};this.children=[];this.style={};this.dataset={};this.classList={toggle(){},remove(){}};}
+  addEventListener(type,fn){(this.listeners[type]??=[]).push(fn);}
+  removeEventListener(type,fn){this.listeners[type]=(this.listeners[type]??[]).filter(f=>f!==fn);}
+  emit(type,event={}){for(const fn of this.listeners[type]??[])fn({preventDefault(){},button:0,...event});}
+  setAttribute(){} setPointerCapture(){} replaceChildren(){this.children=[];}
+  append(...nodes){for(const node of nodes){node.parentElement=this;this.children.push(node);}}
+  getBoundingClientRect(){return {left:0,top:0,width:96,height:96};}
+ }
+ const win=new Node(),doc=new Node();doc.body=new Node();doc.createElement=doc.createElementNS=()=>new Node();const host=new Node();host.ownerDocument=doc;
+ const previousAdd=globalThis.addEventListener,previousRemove=globalThis.removeEventListener;
+ globalThis.addEventListener=win.addEventListener.bind(win);globalThis.removeEventListener=win.removeEventListener.bind(win);
+ try{
+  const events=[],controls=createTouchControls({host,isRunning:()=>true,onAction:a=>events.push(a),device:()=>({coarse:true})});
+  host.children[0].emit('pointerdown',{pointerId:1,clientX:90,clientY:48});
+  host.children[1].emit('pointerdown',{pointerId:2,clientX:48,clientY:4});
+  host.children[2].children[0].emit('pointerdown',{pointerId:3});
+  assert.equal(controls.getState().firing,true);assert.equal(controls.getState().interactHeld,true);
+  win.emit('resize');
+  assert.deepEqual(controls.getState().move,{x:0,z:0});assert.equal(controls.getState().firing,false);assert.equal(controls.getState().interactHeld,false);
+  assert.deepEqual(events,['interact','interactEnd']);
+  host.children[2].children[0].emit('pointerup',{pointerId:3});assert.equal(events.length,2);
+  controls.dispose();assert.equal(win.listeners.resize.length,0);
+ }finally{globalThis.addEventListener=previousAdd;globalThis.removeEventListener=previousRemove;}
+});

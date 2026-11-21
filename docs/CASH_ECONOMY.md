@@ -31,3 +31,9 @@ VESPER Needle Carbine costs $1,150 and unlocks after Containment. It combines lo
 924 baseline projections and 1,848 attachment projections cover 11 primaries × 7 operations × 3 difficulties × base/+1 damage × 75%/80% modeled accuracy, plus two nonstandard attachments. They collect all drops and allow sidearm fallback. Two finite freight resupplies retain the existing 64 base-damage-equivalent primary allotment plus 18 sidearm rounds. Testing rejected arbitrary larger allotments and instead reduced repeated late armored targets to one authored sentinel; freight remains 144 baseline creatures with its boss, leapers and screechers.
 
 The projections do not simulate human aiming, dodging, survival, reachable drop timing or enjoyment. Human combat and phone testing remain necessary.
+
+## r23 transaction review
+
+Weapon upgrades now require the owned, equipped primary at the transaction boundary, matching the armory flow. Rejected requests leave cash, upgrade levels and profile revision untouched; the sidearm remains independently upgradeable. A two-tab simultaneous Freight cache test verifies one payment and the same persisted wallet/claim ledger after reload.
+
+The review retained current prices: JACKAL's short reach, four-round magazine and slow reload trade damage throughput for stagger; VESPER buys reach and suppression rather than a direct damage tier. Supply projections pass for both, but these checks do not establish human willingness to buy them or actual survival difficulty. Checkpoint replay of ordinary kill rewards is separate from finite cache/contract claims; ordinary kills still pay again on replay, as documented above.

@@ -1,6 +1,6 @@
-import {compatibleStorage} from './storage-compat.js?v=expansion-r22';
+import {compatibleStorage} from './storage-compat.js?v=skills-r23';
 
-/** One milestone-unlocked passive choice, never an XP tree or supply generator. */
+/** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
 export const FIELD_SKILLS=Object.freeze([
  {id:'none',name:'Standard kit',description:'No field skill equipped.',unlockAfter:null,icon:'armory'},
@@ -8,50 +8,79 @@ export const FIELD_SKILLS=Object.freeze([
  {id:'runner',name:'Rapid Response',description:'Sprint 10% faster. Walking and crate movement stay unchanged.',unlockAfter:'command',icon:'move'},
  {id:'demolition',name:'Demolition Harness',description:'Grenade effects reach 15% farther. Keep clear: the danger radius grows too.',unlockAfter:'research',icon:'grenade'},
 ].map(Object.freeze));
-const milestones=['breach','command','research'];
+export const SKILL_BRANCHES=Object.freeze([
+ {id:'medic',name:'Medicine',nodes:['medic','surgeon']},
+ {id:'runner',name:'Mobility',nodes:['runner','pathfinder']},
+ {id:'demolition',name:'Demolition',nodes:['demolition','ordnance']},
+]);
+const milestones=['breach','command','research','containment','nest','hospital','freight'];
+const advanced=[
+ {id:'surgeon',name:'Trauma Specialist',description:'Medkits restore up to 75 health.',unlockAfter:'containment',requires:'medic',icon:'medkit'},
+ {id:'pathfinder',name:'Pathfinder',description:'Sprint 15% faster. Crate movement stays unchanged.',unlockAfter:'nest',requires:'runner',icon:'move'},
+ {id:'ordnance',name:'Ordnance Specialist',description:'Grenade effects and danger radius reach 20% farther.',unlockAfter:'hospital',requires:'demolition',icon:'grenade'},
+];
+export const SKILL_NODES=Object.freeze([...FIELD_SKILLS.slice(1),...advanced].map(Object.freeze));
+export function trainingPoints(state,completed=[]){return Math.max(0,milestones.filter(id=>completed.includes(id)).length-(state?.learned?.length??0));}
+export function skillLearnable(id,state,completed=[]){const node=SKILL_NODES.find(n=>n.id===id);return !!node&&fieldSkillUnlocked(id,completed)&&(!node.requires||state?.learned?.includes(node.requires))&&!state?.learned?.includes(id)&&trainingPoints(state,completed)>0;}
+
 const effects=Object.freeze({
  none:Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1}),
  medic:Object.freeze({medkitHealing:65,sprintMultiplier:1,grenadeRadiusMultiplier:1}),
  runner:Object.freeze({medkitHealing:50,sprintMultiplier:1.1,grenadeRadiusMultiplier:1}),
  demolition:Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1.15}),
+ surgeon:Object.freeze({medkitHealing:75,sprintMultiplier:1,grenadeRadiusMultiplier:1}),
+ pathfinder:Object.freeze({medkitHealing:50,sprintMultiplier:1.15,grenadeRadiusMultiplier:1}),
+ ordnance:Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1.2}),
 });
 export function fieldSkillUnlocked(id,completed=[]){
- const skill=FIELD_SKILLS.find(item=>item.id===id);if(!skill)return false;
+ const skill=[...FIELD_SKILLS,...advanced].find(item=>item.id===id);if(!skill)return false;
  if(!skill.unlockAfter)return true;
  return Array.isArray(completed)&&milestones.slice(0,milestones.indexOf(skill.unlockAfter)+1).every(milestone=>completed.includes(milestone));
 }
 export function normalizeFieldSkill(value,completed=[]){
- const id=value?.version===1&&typeof value.selected==='string'?value.selected:'none';
- return {version:1,selected:fieldSkillUnlocked(id,completed)?id:'none'};
+ const valid=value?.version===1||value?.version===2;
+ const selected=valid&&typeof value.selected==='string'&&fieldSkillUnlocked(value.selected,completed)?value.selected:'none';
+ let learned=[];
+ if(value?.version===1&&selected!=='none')learned=[selected];
+ if(value?.version===2&&Array.isArray(value.learned))for(const node of SKILL_NODES){if(value.learned.includes(node.id)&&skillLearnable(node.id,{learned},completed))learned.push(node.id);}
+ return {version:2,selected:selected==='none'||learned.includes(selected)?selected:'none',learned};
 }
 /** Returns a frozen object: selecting a skill replaces, rather than stacks, effects. */
 export function fieldSkillEffects(id){return effects[id]??effects.none;}
 export function createFieldSkills(storage){
  if(storage===undefined){try{storage=globalThis.localStorage;}catch{storage=null;}}storage=compatibleStorage(storage);
- let memory={version:1,selected:'none'},volatile=false;
+ let memory={version:2,selected:'none',learned:[]},volatile=false;
  function read(completed){
   if(!volatile)try{const raw=storage?.getItem(FIELD_SKILLS_KEY);if(raw!==null&&raw!==undefined)memory=normalizeFieldSkill(JSON.parse(raw),completed);}catch{}
   return normalizeFieldSkill(memory,completed);
  }
  function selected(completed=[]){return read(completed).selected;}
  function equip(id,completed=[]){
-  const skill=FIELD_SKILLS.find(item=>item.id===id);
+  const skill=[...FIELD_SKILLS,...advanced].find(item=>item.id===id);
   if(!skill)return {ok:false,message:'That field skill is not available.'};
   if(!fieldSkillUnlocked(id,completed))return {ok:false,message:`Complete ${skill.unlockAfter[0].toUpperCase()+skill.unlockAfter.slice(1)} to unlock this field skill.`};
-  memory={version:1,selected:id};
+  const state=read(completed);
+  if(id!=='none'&&!state.learned.includes(id))return {ok:false,message:'Develop this skill first.'};
+  memory={...state,selected:id};
   try{if(!storage?.setItem)throw new Error('Unavailable');storage.setItem(FIELD_SKILLS_KEY,JSON.stringify(memory));volatile=false;}
   catch{volatile=true;}
   return {ok:true,message:volatile?'Field skill equipped for this session. Browser storage is unavailable.':`${skill.name} equipped.`};
  }
- function serialize(completed=[]){return {...read(completed)};}
+ function learn(id,completed=[]){
+  const state=read(completed);if(!skillLearnable(id,state,completed))return {ok:false,message:'Requires a training point, the earlier skill and its operation milestone.'};
+  memory={...state,learned:[...state.learned,id],selected:id};
+  try{if(!storage?.setItem)throw Error('Unavailable');storage.setItem(FIELD_SKILLS_KEY,JSON.stringify(memory));volatile=false;}catch{volatile=true;}
+  return {ok:true,message:volatile?'Skill developed for this session.':'Skill developed and equipped.'};
+ }
+ function serialize(completed=[]){const state=read(completed);return {...state,learned:[...state.learned]};}
  function restoreTransient(saved,completed=[]){
-  if(saved?.version!==1||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
+  if(![1,2].includes(saved?.version)||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
   memory=normalizeFieldSkill(saved,completed);volatile=true;return true;
  }
  // A deployment is a new base choice, unlike a checkpoint's transient run state.
  function restoreDeployment(saved,completed=[]){
-  if(saved?.version!==1||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
-  return equip(saved.selected,completed).ok;
+  if(![1,2].includes(saved?.version)||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
+  memory=normalizeFieldSkill(saved,completed);try{if(!storage?.setItem)throw Error('Unavailable');storage.setItem(FIELD_SKILLS_KEY,JSON.stringify(memory));volatile=false;}catch{volatile=true;}return true;
  }
- return {selected,equip,serialize,restoreTransient,restoreDeployment,isSessionOnly:()=>volatile};
+ return {selected,equip,learn,serialize,restoreTransient,restoreDeployment,isSessionOnly:()=>volatile};
 }

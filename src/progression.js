@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=expansion-r22';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=expansion-r22';
-import {DIFFICULTY_RULES} from './difficulty.js?v=expansion-r22';
+import {OPERATION_ROUTES} from './operation-routes.js?v=skills-r23';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=skills-r23';
+import {DIFFICULTY_RULES} from './difficulty.js?v=skills-r23';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -150,7 +150,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
         const signal=state.operationTasks.nestRelay;
         if(d.task==='nestStart')return signal.linked?'SIGNAL LINK ESTABLISHED':`E · ${signal.started?'RESTART':'CHARGE'} SIGNAL RELAY A${signal.started?' · '+Math.ceil(signal.remaining)+'s':''}`;
         if(d.task==='nestLink')return signal.linked?'SIGNAL LINK ESTABLISHED':`E · LINK SIGNAL RELAY B${signal.started?' · '+Math.ceil(signal.remaining)+'s':' · CHARGE A FIRST'}`;
-        if(['freightSwitchA','freightSwitchB'].includes(d.task))return `E · ${d.label} · ${state.operationTasks.freightRoute.switches[d.task==='freightSwitchA'?0:1]?'DIVERT':'STRAIGHT'}`;
+        if(['freightSwitchA','freightSwitchB'].includes(d.task)){const route=state.operationTasks.freightRoute;return route.delivered?'CARGO ROUTE SEALED':route.running?'CARGO TRANSFER · TRACKS INTERLOCKED':`E · ${d.label} · ${route.switches[d.task==='freightSwitchA'?0:1]?'DIVERT':'STRAIGHT'}`;}
         if(d.task==='freightDispatch')return state.operationTasks.freightDispatch?'CARGO DELIVERED':state.operationTasks.freightRoute.running?`CARGO TRANSFER · ${Math.ceil(state.operationTasks.freightRoute.remaining)}s`:'E · DISPATCH COLD CHAIN CARGO';
         if(d.task==='hospitalSterile')return state.operationTasks.hospitalSterile?'AIRLOCK STERILE':state.operationTasks.hospitalAirlock.running?`AIRLOCK CYCLE · ${Math.ceil(state.operationTasks.hospitalAirlock.remaining)}s`:'E · START PRESSURE CYCLE';
         if(['hospitalValveA','hospitalValveB','hospitalValveC'].includes(d.task))return state.operationTasks.hospitalSterile?'PRESSURE SETTINGS SEALED':state.operationTasks.hospitalAirlock.running?'PRESSURE CYCLE · CONTROLS INTERLOCKED':`E · ADJUST ${d.label} · ${state.operationTasks.hospitalAirlock.settings[['hospitalValveA','hospitalValveB','hospitalValveC'].indexOf(d.task)]} / 2`;

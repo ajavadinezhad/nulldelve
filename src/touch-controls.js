@@ -1,5 +1,5 @@
 export function stickVector(x,z,deadzone=.15){
- const length=Math.hypot(x,z);if(!Number.isFinite(length)||length<=deadzone)return {x:0,z:0};
+ const length=Math.hypot(x,z);if(!Number.isFinite(deadzone)||deadzone<0||deadzone>=1||!Number.isFinite(length)||length<=deadzone)return {x:0,z:0};
  const magnitude=(Math.min(1,length)-deadzone)/(1-deadzone);return {x:x/length*magnitude,z:z/length*magnitude};
 }
 export function createTwinStickInput(){
@@ -55,6 +55,6 @@ export function createTouchControls({host,isRunning,onAction,device=()=>({coarse
  listen(button,'click',event=>{if(event.detail===0&&enabled&&isRunning()){onAction(action);onAction('interactEnd');}});
  }else listen(button,'click',()=>{if(enabled&&isRunning())onAction(action);});actions.append(button);}host.append(actions);
  function configure(next=mode){mode=next;const nextEnabled=shouldShowTouchControls(mode,device());if(nextEnabled!==enabled)reset();enabled=nextEnabled;host.hidden=!enabled;doc.body.classList.toggle('touch-controls-enabled',enabled);}
- configure();listen(globalThis,'blur',reset);listen(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
+ configure();listen(globalThis,'blur',reset);listen(globalThis,'resize',reset);listen(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
  return {get enabled(){return enabled;},getState:()=>enabled?{...input.getState(),interactHeld:heldInteract.held}:{move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false},reset,configure,setInteractAvailable(prompt){if(prompt===lastInteractPrompt)return;lastInteractPrompt=prompt;const button=actions.querySelector('[data-action="interact"]');if(!button)return;const context=touchInteractionContext(prompt);button.classList.toggle('available',context.available);button.setAttribute('aria-label',context.description);button.title=context.description;button.querySelector('span').textContent=context.label;button.querySelector('path').setAttribute('d',['Grab','Release'].includes(context.label)?ICONS.grab:ICONS.interact);},dispose(){reset();cleanups.forEach(fn=>fn());doc.body.classList.remove('touch-controls-enabled');host.replaceChildren();}};
 }
