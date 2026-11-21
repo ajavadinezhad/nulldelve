@@ -105,3 +105,7 @@ Replaced expanded rows and competing skill cards with a compact browsing roster 
 ## r21 follow-up audit
 
 Three source-review agents checked combat, mission state and armory usability. Fixed release-time grenade collision after operator movement or a closing door, hand origins inside cover, skill deployment persistence, Medic supply labels, nested weapon-roster scroll, authoritative attachment rollback after rejection/exception, stage-aware Hospital door guidance, first-gauge pressure discovery, and delayed/dead sabotage. Added regression checks for each and contradictory mission-state rejection before mutation. Existing mission traversal/supply models remain in use; this is not human combat or physical-phone validation.
+
+## r22 content and economy expansion
+
+Added seventh sequential Flooded freight operation, two specialist primary weapons with models, milestone purchase locks, finite authored cash caches and one-time first-clear contracts. World revision201×69/32doors accepts and migrates101/18 and151/26 profiles. Live cash pickup regression requires current-operation proximity/visibility and verifies durable one-time payment after profile reload. Hospital ledger points to freight. Existing Generator defense guidance and interlocked Hospital prompts received mission audit fixes. Automated coverage:67test files,42campaign+12legacy traversals,924baseline+1848attachment supply projections,1056puzzle preset combinations. Models do not establish human survival/playtime, cache-finding rates or phone performance.

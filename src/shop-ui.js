@@ -1,6 +1,6 @@
-import {weaponThumbnail} from './weapon-preview.js?v=audit-r21';
-import {createItemIcon} from './item-icons.js?v=audit-r21';
-import {formatKey} from './controls.js?v=audit-r21';
+import {weaponThumbnail} from './weapon-preview.js?v=expansion-r22';
+import {createItemIcon} from './item-icons.js?v=expansion-r22';
+import {formatKey} from './controls.js?v=expansion-r22';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
@@ -18,6 +18,8 @@ function icon(type){
   hush:['M8 24h43v6H30l-8 11H11l5-13H8z','M48 21h20v10H48zM27 13h18v7H27zM33 30v10h8V30'],
   scattergun:['M7 18h39v11H29l-9 12H8l7-16H7z','M46 18h21v5H46M46 26h21v5H46M29 31a8 8 0 1 0 16 0 8 8 0 1 0-16 0'],
   kestrel:['M8 20h42v9H29l-7 12H11l5-16H8z','M50 21h17v5H50M38 29v12h10V29M21 14h20v6M6 20V10h15v10'],
+  jackal:['M8 20h44v10H29L20 41H9l6-15H8z','M52 18h14v13H52M28 11h20v9M28 30v9h11v-9'],
+  vesper:['M5 22h50v7H28l-8 12H9l6-15H5z','M55 23h14M27 12h20v7H27M30 29v13h8V29M43 19v4'],
   mantis:['M4 24h41v6H26l-8 11H7l5-14H4z','M45 23h23v6H45M28 10h21v8H28zM25 9v11M50 8v12M53 30l-5 11M57 30l8 11M29 30v9h8v-9'],
   shotgun:['M5 20h48v7H29l-8 13H8l7-16H5z','M30 14h34v6M30 23h23M27 29h20'],
   pistol:['M14 12h43v12H34l-5 17H17l5-20h-8z','M34 24v9h10l4-9M21 17h31'],
@@ -44,11 +46,11 @@ export function renderShop(target,armory,onPurchase,{group:selectedGroup='weapon
  const offers=Array.isArray(armory.offers)?armory.offers:[];if(selectedGroup==='skills')return;if(selectedGroup==='gear'){renderSupplies(target,armory,offers,onPurchase);return;}
  const guns=[...(armory.weapons??[]),{weaponId:'pistol',label:'P9 Sidearm',owned:true,stats:armory.sidearm?.stats??{}}];const gunId=g=>g.weaponId??String(g.id).replace(/^weapon\./,'');const selected=guns.find(g=>gunId(g)===selectedWeapon)??guns.find(g=>gunId(g)===armory.primary)??guns[0];if(!selected){target.append(element('p','shop-status','No weapons available.'));return;}
  const layout=element('div','armory-workbench'),list=element('nav','armory-roster');list.setAttribute('aria-label','Weapon selection');list.dataset.scrollKey='weapon-roster';
- for(const gun of guns){const id=gunId(gun),name=String(gun.name??gun.label??id),equipped=id==='pistol'||id===armory.primary;const row=element('button','roster-weapon'+(id===gunId(selected)?' selected':''));row.type='button';row.dataset.focusKey='browse-'+id;row.setAttribute('data-weapon-id',id);row.setAttribute('aria-label',`Inspect ${name}`);row.setAttribute('aria-pressed',String(id===gunId(selected)));const copy=element('span','roster-copy');copy.append(element('strong','',name),element('small','',equipped?'Equipped':gun.owned?'Owned':`$${integer(gun.cost)}`));row.append(icon(id),copy);row.addEventListener('click',()=>onWeaponSelect(id));list.append(row);}
+ for(const gun of guns){const id=gunId(gun),name=String(gun.name??gun.label??id),equipped=id==='pistol'||id===armory.primary;const row=element('button','roster-weapon'+(id===gunId(selected)?' selected':''));row.type='button';row.dataset.focusKey='browse-'+id;row.setAttribute('data-weapon-id',id);row.setAttribute('aria-label',`Inspect ${name}`);row.setAttribute('aria-pressed',String(id===gunId(selected)));const copy=element('span','roster-copy');copy.append(element('strong','',name),element('small','',equipped?'Equipped':gun.owned?'Owned':gun.locked?'Locked':`$${integer(gun.cost)}`));row.append(icon(id),copy);row.addEventListener('click',()=>onWeaponSelect(id));list.append(row);}
  const detail=element('section','armory-detail');detail.setAttribute('aria-label','Selected weapon');const id=gunId(selected),name=String(selected.name??selected.label??id),owned=!!selected.owned,equipped=id==='pistol'||id===armory.primary;
  const title=element('div','armory-detail-heading');title.append(element('h3','',name));if(equipped)title.append(element('span','equipped-label','Equipped'));detail.append(title);
  const preview=element('div','armory-weapon-preview');try{const img=element('img');img.src=weaponThumbnail(id);img.alt=name+' weapon model';preview.append(img);}catch{preview.append(icon(id));}detail.append(preview,weaponStats(selected.stats??{}));
- if(!equipped){const cost=integer(selected.cost),control=purchaseButton({id:(owned?'equip.':'weapon.')+id,cost,available:owned||credits>=cost},onPurchase,{label:owned?'Equip':`Buy · $${cost.toLocaleString()}`,name:owned?`Equip ${name}`:`Buy ${name}`});if(owned)control.setAttribute('aria-label',`Equip ${name}`);detail.append(control);if(!owned&&credits<cost)detail.append(element('small','shop-status',`$${cost-credits} short`));}
+ if(!equipped){const cost=integer(selected.cost),control=purchaseButton({id:(owned?'equip.':'weapon.')+id,cost,available:!selected.locked&&(owned||credits>=cost)},onPurchase,{label:owned?'Equip':`Buy · $${cost.toLocaleString()}`,name:owned?`Equip ${name}`:`Buy ${name}`});if(owned)control.setAttribute('aria-label',`Equip ${name}`);detail.append(control);if(selected.locked)detail.append(element('small','shop-status',`Complete ${selected.unlockAfter} to unlock`));if(!selected.locked&&!owned&&credits<cost)detail.append(element('small','shop-status',`$${cost-credits} short`));}
  else{const detailTabs=element('div','workbench-tabs');for(const [tab,label]of [['upgrades','Upgrades'],...(id==='pistol'?[]:[['attachment','Attachment']])]){const control=element('button',detailTab===tab?'selected':'');control.type='button';control.textContent=label;control.setAttribute('aria-pressed',String(detailTab===tab));control.dataset.focusKey='detail-'+tab;control.addEventListener('click',()=>onDetailTab(tab));detailTabs.append(control);}detail.append(detailTabs);if(detailTab==='attachment'&&id!=='pistol')renderAttachments(detail,selected,onPurchase);else renderUpgrades(detail,{offers,prefix:id==='carbine'?'rifle':id,name,stats:selected.stats??{},credits,onPurchase});}
  layout.append(list,detail);target.append(layout);
 }

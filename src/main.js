@@ -1,63 +1,66 @@
-import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=audit-r21';
-import {applyWeaponAttachment} from './weapon-attachments.js?v=audit-r21';
-import {createMutationNotes} from './mutation-notes.js?v=audit-r21';
-import {grantHospitalAmmo} from './mission-supplies.js?v=audit-r21';
-import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=audit-r21';
-import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=audit-r21';
-import {createGrenadeActions} from './grenade-actions.js?v=audit-r21';
-import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=audit-r21';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=audit-r21';
-import {compatibleStorage} from './storage-compat.js?v=audit-r21';
-import {createTouchControls} from './touch-controls.js?v=audit-r21';
-import {createHudFeedback} from './hud-feedback.js?v=audit-r21';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=audit-r21';
+import {SALVAGE_CACHES} from './mission-salvage.js?v=expansion-r22';
+import {createSalvageArt} from './salvage-art.js?v=expansion-r22';
+import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=expansion-r22';
+import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=expansion-r22';
+import {applyWeaponAttachment} from './weapon-attachments.js?v=expansion-r22';
+import {createMutationNotes} from './mutation-notes.js?v=expansion-r22';
+import {grantHospitalAmmo} from './mission-supplies.js?v=expansion-r22';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=expansion-r22';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=expansion-r22';
+import {createGrenadeActions} from './grenade-actions.js?v=expansion-r22';
+import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=expansion-r22';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=expansion-r22';
+import {compatibleStorage} from './storage-compat.js?v=expansion-r22';
+import {createTouchControls} from './touch-controls.js?v=expansion-r22';
+import {createHudFeedback} from './hud-feedback.js?v=expansion-r22';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=expansion-r22';
 const puzzleDiscovery=createPuzzleDiscovery();
 const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=audit-r21';
-import {soldier, animateSoldier} from './character.js?v=audit-r21';
-import {weapon, createCombatEffects} from './weapons.js?v=audit-r21';
-import {addRoomDetails} from './room-details.js?v=audit-r21';
-import {createMinimap} from './minimap.js?v=audit-r21';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=audit-r21';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=audit-r21';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=audit-r21';
-import {createPuzzleArt} from './puzzle-art.js?v=audit-r21';
-import {createWeaponPreview} from './weapon-preview.js?v=audit-r21';
-import {createProgression} from './progression.js?v=audit-r21';
-import {createProgressionArt} from './progression-art.js?v=audit-r21';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=audit-r21';
-import {buildWorld} from './world-render.js?v=audit-r21';
-import {createNavigator} from './navigation.js?v=audit-r21';
-import {createGameMenu} from './game-menu.js?v=audit-r21';
-import {createSaveSlots} from './save-slots.js?v=audit-r21';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=audit-r21';
-import {createEconomy} from './economy.js?v=audit-r21';
-import {createExplosions} from './explosion.js?v=audit-r21';
-import {createGameAudio} from './audio.js?v=audit-r21';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=audit-r21';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=audit-r21';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=audit-r21';
-import {observeHudLayout} from './interface-layout.js?v=audit-r21';
-import {createMapFocus} from './map-accessibility.js?v=audit-r21';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=audit-r21';
-import {placeLootDrops} from './loot-placement.js?v=audit-r21';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=audit-r21';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=audit-r21';
-import {createFireZones} from './fire-grenades.js?v=audit-r21';
-import {itemIconPath} from './item-icons.js?v=audit-r21';
-import {createLootView} from './loot-view.js?v=audit-r21';
-import {meleeTargets} from './melee.js?v=audit-r21';
-import {createPuzzleHints} from './puzzle-hints.js?v=audit-r21';
-import {createOnboarding} from './onboarding.js?v=audit-r21';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=audit-r21';
-import {validateSnapshot} from './snapshot-validation.js?v=audit-r21';
-import {DIFFICULTY_RULES} from './difficulty.js?v=audit-r21';
-import {createCampaignProfile} from './campaign-profile.js?v=audit-r21';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=audit-r21';
-import {createCampaignProgress} from './campaign-progress.js?v=audit-r21';
-import {buildOperationEnvironment} from './operation-environments.js?v=audit-r21';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=audit-r21';
+import {buildArt} from './environment.js?v=expansion-r22';
+import {soldier, animateSoldier} from './character.js?v=expansion-r22';
+import {weapon, createCombatEffects} from './weapons.js?v=expansion-r22';
+import {addRoomDetails} from './room-details.js?v=expansion-r22';
+import {createMinimap} from './minimap.js?v=expansion-r22';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=expansion-r22';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=expansion-r22';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=expansion-r22';
+import {createPuzzleArt} from './puzzle-art.js?v=expansion-r22';
+import {createWeaponPreview} from './weapon-preview.js?v=expansion-r22';
+import {createProgression} from './progression.js?v=expansion-r22';
+import {createProgressionArt} from './progression-art.js?v=expansion-r22';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=expansion-r22';
+import {buildWorld} from './world-render.js?v=expansion-r22';
+import {createNavigator} from './navigation.js?v=expansion-r22';
+import {createGameMenu} from './game-menu.js?v=expansion-r22';
+import {createSaveSlots} from './save-slots.js?v=expansion-r22';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=expansion-r22';
+import {createEconomy} from './economy.js?v=expansion-r22';
+import {createExplosions} from './explosion.js?v=expansion-r22';
+import {createGameAudio} from './audio.js?v=expansion-r22';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=expansion-r22';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=expansion-r22';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=expansion-r22';
+import {observeHudLayout} from './interface-layout.js?v=expansion-r22';
+import {createMapFocus} from './map-accessibility.js?v=expansion-r22';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=expansion-r22';
+import {placeLootDrops} from './loot-placement.js?v=expansion-r22';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=expansion-r22';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=expansion-r22';
+import {createFireZones} from './fire-grenades.js?v=expansion-r22';
+import {itemIconPath} from './item-icons.js?v=expansion-r22';
+import {createLootView} from './loot-view.js?v=expansion-r22';
+import {meleeTargets} from './melee.js?v=expansion-r22';
+import {createPuzzleHints} from './puzzle-hints.js?v=expansion-r22';
+import {createOnboarding} from './onboarding.js?v=expansion-r22';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=expansion-r22';
+import {validateSnapshot} from './snapshot-validation.js?v=expansion-r22';
+import {DIFFICULTY_RULES} from './difficulty.js?v=expansion-r22';
+import {createCampaignProfile} from './campaign-profile.js?v=expansion-r22';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=expansion-r22';
+import {createCampaignProgress} from './campaign-progress.js?v=expansion-r22';
+import {buildOperationEnvironment} from './operation-environments.js?v=expansion-r22';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=expansion-r22';
 const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
@@ -69,7 +72,7 @@ const puzzleHints=createPuzzleHints();const campaignProgress=createCampaignProgr
 function skillEffects(){return fieldSkillEffects(activeFieldSkill);}
 const operationStats=createOperationStats();let tutorial=null;
 const saveSlots=createSaveSlots();function latestSnapshot(){const data=saveSlots.loadCheckpoint();return validateSnapshot(data)?data:null;}const baseSnapshot=latestSnapshot();
-const loot=createLootState();const economy=createEconomy(baseSnapshot?.economy);const campaignProfile=createCampaignProfile({storage:browserStorage(),economy});if(!campaignProfile.reload())campaignProfile.restoreLoadout(baseSnapshot?.loadout??{});const incomingDeployment=decodeDeploymentState(location.hash);if(incomingDeployment){campaignProfile.restoreTransient(incomingDeployment.profile);campaignProgress.restoreTransient(incomingDeployment.progress);if(incomingDeployment.fieldSkill)fieldSkills.restoreDeployment(incomingDeployment.fieldSkill,campaignProgress.completed());activeFieldSkill=fieldSkills.selected(campaignProgress.completed());campaignProfile.persist();campaignProgress.persist();if(!campaignProfile.isSessionOnly()&&!campaignProgress.isSessionOnly()&&!fieldSkills.isSessionOnly())history.replaceState(null,'',location.pathname+location.search);}
+const loot=createLootState();const economy=createEconomy(baseSnapshot?.economy);const campaignProfile=createCampaignProfile({storage:browserStorage(),economy,getCompleted:()=>campaignProgress.completed()});if(!campaignProfile.reload())campaignProfile.restoreLoadout(baseSnapshot?.loadout??{});const incomingDeployment=decodeDeploymentState(location.hash);if(incomingDeployment){campaignProfile.restoreTransient(incomingDeployment.profile);campaignProgress.restoreTransient(incomingDeployment.progress);if(incomingDeployment.fieldSkill)fieldSkills.restoreDeployment(incomingDeployment.fieldSkill,campaignProgress.completed());activeFieldSkill=fieldSkills.selected(campaignProgress.completed());campaignProfile.persist();campaignProgress.persist();if(!campaignProfile.isSessionOnly()&&!campaignProgress.isSessionOnly()&&!fieldSkills.isSessionOnly())history.replaceState(null,'',location.pathname+location.search);}
 const audio=createGameAudio();audio.setPaused(true);const simulation=createFixedStepper();
 let barrelSystem=null,doorHint=null,restoreHintFog=null,guidanceDoorIndex=null;
 let grenadeActions=null;
@@ -85,8 +88,8 @@ const camera=new THREE.OrthographicCamera();camera.up.set(0,0,-1);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
 scene.add(new THREE.HemisphereLight(0xc9e8db,0x243028,1.6));const sun=new THREE.DirectionalLight(0xffffff,2.6);sun.position.set(-10,25,15);scene.add(sun);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-34,right:34,top:34,bottom:-34,near:.1,far:90});sun.position.set(5,35,20);sun.target.position.set(23,0,17);scene.add(sun.target);sun.shadow.normalBias=.04;
 const map=Array.from({length:H},()=>Array(W).fill(1)), explored=new Set(),seenRooms=new Set();
-const roomDefs=[{x:2,z:21,w:12,h:11,name:'INSERTION'},{x:2,z:4,w:12,h:12,name:'ARCHIVE'},{x:18,z:4,w:11,h:12,name:'SECURITY'},{x:18,z:21,w:11,h:11,name:'STORAGE'},{x:33,z:21,w:12,h:11,name:'EXTRACTION'},{x:33,z:4,w:12,h:12,name:'COMMAND'},...EXPANSION_ROOMS,...HOSPITAL_ROOMS];
-function carve(x,z,w,h){for(let j=z;j<z+h;j++)for(let i=x;i<x+w;i++)map[j][i]=0;}roomDefs.forEach(r=>carve(r.x,r.z,r.w,r.h));carve(6,15,3,7);carve(13,9,6,3);carve(22,15,3,7);carve(28,25,6,3);carve(37,15,3,7);carve(28,9,6,3);carveExpansion(carve);carveHospital(carve);const totalFloor=map.reduce((sum,row)=>sum+row.filter(v=>v===0).length,0);
+const roomDefs=[{x:2,z:21,w:12,h:11,name:'INSERTION'},{x:2,z:4,w:12,h:12,name:'ARCHIVE'},{x:18,z:4,w:11,h:12,name:'SECURITY'},{x:18,z:21,w:11,h:11,name:'STORAGE'},{x:33,z:21,w:12,h:11,name:'EXTRACTION'},{x:33,z:4,w:12,h:12,name:'COMMAND'},...EXPANSION_ROOMS,...HOSPITAL_ROOMS,...FREIGHT_ROOMS];
+function carve(x,z,w,h){for(let j=z;j<z+h;j++)for(let i=x;i<x+w;i++)map[j][i]=0;}roomDefs.forEach(r=>carve(r.x,r.z,r.w,r.h));carve(6,15,3,7);carve(13,9,6,3);carve(22,15,3,7);carve(28,25,6,3);carve(37,15,3,7);carve(28,9,6,3);carveExpansion(carve);carveHospital(carve);carveFreight(carve);const totalFloor=map.reduce((sum,row)=>sum+row.filter(v=>v===0).length,0);
 const puzzle=createPressurePuzzle();
 const cover=[{x:8,z:26,w:3,h:1.5},{x:6,z:8,w:2,h:3},{x:23,z:9,w:3,h:2},{x:22,z:26,w:2,h:3},{x:39,z:8,w:2,h:3},{x:39,z:26,w:3,h:2}];
 const boxGeo=new THREE.BoxGeometry(1,1,1);function box(x,y,z,w,h,d,color,group=scene){const m=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color,roughness:.85}));m.position.set(x,y,z);m.scale.set(w,h,d);m.castShadow=true;m.receiveShadow=true;group.add(m);return m;}
@@ -97,11 +100,16 @@ const fogTexture=new THREE.DataTexture(fogPixels,W,H);fogTexture.colorSpace=THRE
 const fogOverlay=new THREE.Mesh(new THREE.PlaneGeometry(W,H),new THREE.MeshBasicMaterial({map:fogTexture,transparent:true,depthWrite:false}));fogOverlay.rotation.x=-Math.PI/2;fogOverlay.position.set((W-1)/2,3,(H-1)/2);fogOverlay.renderOrder=10;scene.add(fogOverlay);
 buildWorld(scene,map,W,H);
 buildArt(scene,box,cover,roomDefs.slice(0,6));
-addExpansionProps(scene,box,cover);addHospitalProps(scene,box,cover);
+addExpansionProps(scene,box,cover);addHospitalProps(scene,box,cover);addFreightProps(scene,box,cover);
 addRoomDetails(scene,box,roomDefs);
+let salvageBusy=false;
+const salvageArt=createSalvageArt(scene,{caches:SALVAGE_CACHES,operation:()=>runConfig.operation,claimed:id=>!!economy.state.claimedRewards?.[id],visible});
+function nearbySalvage(){return SALVAGE_CACHES.find(cache=>cache.operation===runConfig.operation&&!economy.state.claimedRewards?.[cache.id]&&Math.hypot(cache.x-player.x,cache.z-player.z)<=1.6&&visible(cache.x,cache.z));}
+function collectSalvage(){const cache=nearbySalvage();if(!cache)return false;if(salvageBusy)return true;salvageBusy=true;campaignProfile.claimCashReward(cache.id).then(result=>{if(result.ok&&result.amount>0){audio.pickup();hud();salvageArt.update();toast(`SALVAGE SECURED · +$${result.amount}`);queueCheckpoint('Cash cache secured');}else if(!result.ok)toast(result.message??'Cash cache could not be collected.');}).catch(()=>toast('Cash cache could not be collected. Try again.')).finally(()=>{salvageBusy=false;});return true;}
+
 let operationEnvironment=null;function updateOperationEnvironment(){operationEnvironment?.dispose();operationEnvironment=buildOperationEnvironment({scene,operation:runConfig.operation,roomDefs,cover});scene.background.set(operationEnvironment.background);const fogColor=operationEnvironment.background;for(let i=0;i<fogPixels.length;i+=4){fogPixels[i]=(fogColor>>16)&255;fogPixels[i+1]=(fogColor>>8)&255;fogPixels[i+2]=fogColor&255;}fogTexture.needsUpdate=true;sun.color.set(operationEnvironment.lightColor);sun.intensity=operationEnvironment.lightIntensity;const ambient=scene.children.find(child=>child.isHemisphereLight);if(ambient){ambient.color.set(operationEnvironment.hemisphereSky);ambient.groundColor.set(operationEnvironment.hemisphereGround);}}
 updateOperationEnvironment();
-const doors=[{x:7,z:18,axis:'x'},{x:15.5,z:10,axis:'z'},{x:23,z:18,axis:'x'},{x:30.5,z:26,axis:'z'},{x:38,z:18,axis:'x'},{x:30.5,z:10,axis:'z'},...EXPANSION_DOORS,...HOSPITAL_DOORS].map(door=>({...door}));
+const doors=[{x:7,z:18,axis:'x'},{x:15.5,z:10,axis:'z'},{x:23,z:18,axis:'x'},{x:30.5,z:26,axis:'z'},{x:38,z:18,axis:'x'},{x:30.5,z:10,axis:'z'},...EXPANSION_DOORS,...HOSPITAL_DOORS,...FREIGHT_DOORS].map(door=>({...door}));
 for(const door of doors){
  door.open=false;door.slide=0;door.group=new THREE.Group();door.group.position.set(door.x,0,door.z);if(door.axis==='z')door.group.rotation.y=Math.PI/2;scene.add(door.group);
  box(0,.75,0,3,1.5,.24,0x667b73,door.group);box(0,1.53,0,3.1,.08,.3,0xa2afa0,door.group);
@@ -114,7 +122,7 @@ doors[0].needsPower=true;doors[0].unlocked=false;doors[0].status.material.color.
 const updatePuzzleArt=createPuzzleArt(scene,box,puzzle.crates,puzzle.plates,doors[0]);
 function nearbyDoor(){return doors.filter(d=>Math.hypot(d.x-player.x,d.z-player.z)<2.7).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0];}
 function beginInteraction(){if(beginCrateGrab(puzzle,player,(x,z,r)=>solid(x,z,r,true)))return;interact();}
-function interact(){const hospitalSampleBefore=!!progression.state.operationTasks?.hospitalSample,hospitalAuthBefore=!!progression.state.operationTasks?.hospitalAuth;if(runConfig.operation&&campaignOperationComplete(runConfig.operation,{player,progression})){queueCheckpoint('Sector departed');commitCheckpoint();end(true);return;}const artifactsBefore=progression.state.artifacts?.length??0,taskBefore=progression.state.milestone??0,cipherBefore=progression.state.archive.solved,powerBefore=progression.state.power.solved,valvesBefore=progression.state.valves.solved,logsBefore=progression.state.logs.length;if(progression.interact(player)){if(runConfig.operation==='hospital'&&((!hospitalSampleBefore&&progression.state.operationTasks.hospitalSample)||(!hospitalAuthBefore&&progression.state.operationTasks.hospitalAuth))){grantHospitalAmmo(weapons);audio.pickup('ammo');hud();}if((progression.state.artifacts?.length??0)>artifactsBefore){for(const id of progression.state.artifacts)campaignProgress.recordArtifact(id);}if((progression.state.milestone??0)>taskBefore)queueCheckpoint('Operation milestone');if(!powerBefore&&progression.state.power.solved)queueCheckpoint('Reactor power restored');if(!valvesBefore&&progression.state.valves.solved)queueCheckpoint('Containment vented');if(progression.state.logs.length>logsBefore){for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);queueCheckpoint('Research log recovered');}if(!cipherBefore&&progression.state.archive.solved){queueCheckpoint('Archive cipher solved');audio.puzzle(true);}return;}const d=nearbyDoor();if(!d)return;if(d.progressLocked){toast(d.lockReason);return;}if(d.needsPower&&!d.unlocked){toast('NO POWER · 2 CIRCUITS OFFLINE');return;}const across=d.axis==='x'?Math.abs(player.z-d.z):Math.abs(player.x-d.x),along=d.axis==='x'?Math.abs(player.x-d.x):Math.abs(player.z-d.z);if(d.open&&((across<.6&&along<1.9)||enemies.some(e=>e.hp>0&&Math.abs(e.x-d.x)<(d.axis==='x'?1.9:.6)&&Math.abs(e.z-d.z)<(d.axis==='x'?.6:1.9)))){toast('CLEAR THE DOORWAY FIRST');return;}if(d.slide>.05&&d.slide<.95)return;d.open=!d.open;if(d.open)tutorial?.event('door');d.status.material.color.set(d.open||d.unlocked?0x9ae8a9:0xd7a75f);audio.door(d.open);updateFog();}
+function interact(){const hospitalSampleBefore=!!progression.state.operationTasks?.hospitalSample,hospitalAuthBefore=!!progression.state.operationTasks?.hospitalAuth,freightDrainBefore=!!progression.state.operationTasks?.freightDrain,freightDispatchBefore=!!progression.state.operationTasks?.freightRoute?.running;if(runConfig.operation&&campaignOperationComplete(runConfig.operation,{player,progression})){queueCheckpoint('Sector departed');commitCheckpoint();end(true);return;}if(collectSalvage())return;const artifactsBefore=progression.state.artifacts?.length??0,taskBefore=progression.state.milestone??0,cipherBefore=progression.state.archive.solved,powerBefore=progression.state.power.solved,valvesBefore=progression.state.valves.solved,logsBefore=progression.state.logs.length;if(progression.interact(player)){if((runConfig.operation==='hospital'&&((!hospitalSampleBefore&&progression.state.operationTasks.hospitalSample)||(!hospitalAuthBefore&&progression.state.operationTasks.hospitalAuth)))||(runConfig.operation==='freight'&&((!freightDrainBefore&&progression.state.operationTasks.freightDrain)||(!freightDispatchBefore&&progression.state.operationTasks.freightRoute?.running)))){grantHospitalAmmo(weapons);audio.pickup('ammo');hud();}if((progression.state.artifacts?.length??0)>artifactsBefore){for(const id of progression.state.artifacts)campaignProgress.recordArtifact(id);}if((progression.state.milestone??0)>taskBefore)queueCheckpoint('Operation milestone');if(!powerBefore&&progression.state.power.solved)queueCheckpoint('Reactor power restored');if(!valvesBefore&&progression.state.valves.solved)queueCheckpoint('Containment vented');if(progression.state.logs.length>logsBefore){for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);queueCheckpoint('Research log recovered');}if(!cipherBefore&&progression.state.archive.solved){queueCheckpoint('Archive cipher solved');audio.puzzle(true);}return;}const d=nearbyDoor();if(!d)return;if(d.progressLocked){toast(d.lockReason);return;}if(d.needsPower&&!d.unlocked){toast('NO POWER · 2 CIRCUITS OFFLINE');return;}const across=d.axis==='x'?Math.abs(player.z-d.z):Math.abs(player.x-d.x),along=d.axis==='x'?Math.abs(player.x-d.x):Math.abs(player.z-d.z);if(d.open&&((across<.6&&along<1.9)||enemies.some(e=>e.hp>0&&Math.abs(e.x-d.x)<(d.axis==='x'?1.9:.6)&&Math.abs(e.z-d.z)<(d.axis==='x'?.6:1.9)))){toast('CLEAR THE DOORWAY FIRST');return;}if(d.slide>.05&&d.slide<.95)return;d.open=!d.open;if(d.open)tutorial?.event('door');d.status.material.color.set(d.open||d.unlocked?0x9ae8a9:0xd7a75f);audio.door(d.open);updateFog();}
 function actor(color){return soldier(color,scene,box);}
 const primary=primaryWeapon(campaignProfile.state.primary);const weapons={rifle:{...primary,name:primary.name.toUpperCase(),capacity:primary.id==='carbine'?rules.magazine:primary.capacity,ammo:primary.id==='carbine'?rules.magazine:primary.capacity,reserve:primaryReserve(primary.id,runConfig.difficulty)},pistol:{name:'P9 SIDEARM',capacity:12,ammo:12,reserve:rules.pistolReserve,interval:.29,reload:1.1,baseDamage:2,range:22,stagger:.25,pellets:1,spread:0}};let selected='rifle';
 for(const gun of Object.values(weapons)){gun.baseCapacity=gun.capacity;gun.baseReload=gun.reload;}
@@ -173,7 +181,7 @@ function hud(){showWeaponPreview(equippedModelType());$('#cash-amount').textCont
 function end(win){
  if(ended)return;
  ended=true;active=false;audio.setPaused(true);tutorial?.hide();shooting=false;keys.clear();touchControls?.reset();menu?.hide();document.body.classList.remove('playing');
- persistCampaignProfile();if(win&&runConfig.mission==='campaign'&&runConfig.operation)campaignProgress.complete(runConfig.operation);
+ persistCampaignProfile();if(win&&runConfig.mission==='campaign'&&runConfig.operation){campaignProgress.complete(runConfig.operation);void campaignProfile.claimCashReward('contract.'+runConfig.operation).then(result=>{if(result.ok&&result.amount>0){hud();const notes=$('#result-notes');if(notes){const payout=document.createElement('p');payout.textContent=`First-clear payout · +$${result.amount}`;notes.append(payout);}}}).catch(()=>{});}
  const result=recordResult(browserStorage(),runConfig,operationStats,win,explorationPercent());
  const sectorComplete=win&&runConfig.mission==='campaign'&&runConfig.operation&&runConfig.operation!==CAMPAIGN_OPERATIONS[CAMPAIGN_OPERATIONS.length-1].id;
  const overlay=$('#overlay');overlay.classList.remove('menu-overlay');overlay.style.display='flex';
@@ -186,6 +194,7 @@ function end(win){
  else if(!win&&checkpointMatchesOperation(latestSnapshot(),runConfig)){const button=document.createElement('button');button.id='restart-checkpoint';button.textContent='Restart checkpoint';button.className='result-action result-primary';button.onclick=queueCheckpointLoad;$('#again').before(button);primary=button;}
  else $('#again').className='result-action result-primary';
  if(win&&result.delta!==null){const difference=document.createElement('p');difference.className='debrief-delta';difference.textContent=(result.delta<0?'−':'+')+formatDuration(Math.abs(result.delta))+' vs previous best';$('#result-notes').append(difference);}
+ if(win&&runConfig.operation==='hospital'){const transmission=document.createElement('p');transmission.className='debrief-transmission';transmission.textContent='The patient ledger links the specimens to refrigerated freight. The terminal manifest may identify who authorized the transfers.';$('#result-notes').append(transmission);}
  if(win&&(!runConfig.operation||runConfig.operation==='nest')&&new Set([...progression.state.logs,...campaignProgress.researchLogs()]).size===3){const transmission=document.createElement('p');transmission.className='debrief-transmission';transmission.textContent='The nest was a relay. The recovered research traces the colony’s orders to a sealed hospital annex. Its quarantine ledger may reveal who brought the specimens inside.';$('#result-notes').append(transmission);}
  $('#again').onclick=()=>{location.href=deploymentUrl(runConfig);};$('#back-menu').onclick=()=>menu.show('main');primary.focus?.();
 }
@@ -302,7 +311,8 @@ let last=performance.now(),lastPausedRender=0;renderer.setAnimationLoop(()=>{
 
  for(const d of doors){d.group.position.set(d.x+(d.axis==='x'?d.slide*3:0),0,d.z+(d.axis==='z'?d.slide*3:0));if(d!==doors[0])d.status.material.color.set(d.progressLocked?0xe57c59:0x92d9a6);}
  const guidanceDoor=doors[guidanceDoorIndex];$('#replay-guidance').hidden=!active||!!menu?.isOpen()||!guidanceDoor?.hintTarget;$('#replay-guidance').disabled=!!doorHint?.isActive();
- const nearest=isRunning()?nearbyDoor():null;const devicePrompt=isRunning()?progression.getPrompt(player):null;const sectorExit=runConfig.operation?campaignOperationExit(runConfig.operation):null,exitReady=!!sectorExit&&campaignOperationObjectivesComplete(runConfig.operation,{player,progression});missionPoints.exit=runConfig.operation?(exitReady?sectorExit:null):{x:92,z:60};missionPoints.intel=runConfig.operation&&runConfig.operation!=='nest'?null:{x:93,z:7};sectorExitMarker.visible=exitReady&&visible(sectorExit.x,sectorExit.z);if(exitReady)sectorExitMarker.position.set(sectorExit.x,.06,sectorExit.z);const exitPrompt=isRunning()&&exitReady&&Math.hypot(player.x-sectorExit.x,player.z-sectorExit.z)<=1.4?(runConfig.operation==='nest'?'E · EVACUATE':'E · LEAVE SECTOR'):null;const cratePrompt=isRunning()?(puzzle.grabbed!=null?'E · RELEASE TO LET GO':nearestPullableCrate(puzzle,player,(x,z,r)=>solid(x,z,r,true))?'E · HOLD TO GRAB CRATE':null):null;$('#interact').textContent=(cratePrompt||exitPrompt||devicePrompt||(nearest?(nearest.progressLocked?'E · LOCKED · '+nearest.lockReason:nearest.needsPower&&!nearest.unlocked?'E · LOCKED · NO POWER':`E · ${nearest.open?'CLOSE':'OPEN'} DOOR`):'')).replace(/^E · /,formatKey(bindings().interact)+' · ');
+ salvageArt.update();
+ const nearest=isRunning()?nearbyDoor():null;const cashCache=isRunning()?nearbySalvage():null;const devicePrompt=cashCache?`E · SALVAGE · $${cashCache.amount}`:isRunning()?progression.getPrompt(player):null;const sectorExit=runConfig.operation?campaignOperationExit(runConfig.operation):null,exitReady=!!sectorExit&&campaignOperationObjectivesComplete(runConfig.operation,{player,progression});missionPoints.exit=runConfig.operation?(exitReady?sectorExit:null):{x:92,z:60};missionPoints.intel=runConfig.operation&&runConfig.operation!=='nest'?null:{x:93,z:7};sectorExitMarker.visible=exitReady&&visible(sectorExit.x,sectorExit.z);if(exitReady)sectorExitMarker.position.set(sectorExit.x,.06,sectorExit.z);const exitPrompt=isRunning()&&exitReady&&Math.hypot(player.x-sectorExit.x,player.z-sectorExit.z)<=1.4?(runConfig.operation==='nest'?'E · EVACUATE':'E · LEAVE SECTOR'):null;const cratePrompt=isRunning()?(puzzle.grabbed!=null?'E · RELEASE TO LET GO':nearestPullableCrate(puzzle,player,(x,z,r)=>solid(x,z,r,true))?'E · HOLD TO GRAB CRATE':null):null;$('#interact').textContent=(cratePrompt||exitPrompt||devicePrompt||(nearest?(nearest.progressLocked?'E · LOCKED · '+nearest.lockReason:nearest.needsPower&&!nearest.unlocked?'E · LOCKED · NO POWER':`E · ${nearest.open?'CLOSE':'OPEN'} DOOR`):'')).replace(/^E · /,formatKey(bindings().interact)+' · ');
  touchControls?.setInteractAvailable($('#interact').textContent);
  for(const mesh of [playerMesh]){if(!paused)mesh.userData.flashTime=Math.max(0,mesh.userData.flashTime-dt);mesh.userData.flash.visible=mesh.userData.flashTime>0;}
  playerMesh.position.set(player.x,0,player.z);playerMesh.rotation.y=player.angle;if(isRunning()){animateSoldier(playerMesh,active?dt:0,reload>0?{progress:1-reload/weapons[selected].reload,type:equippedModelType()}:false);for(const e of enemies)if(e.hp>0&&e.mesh.visible)animateRoach(e.mesh,active?dt:0);}combatEffects.update(running?dt:0);explosions.update(running?dt:0);updateProgressionArt(time);ring.material.color.set(player.hurtGrace>0?0xf2b26f:0xb7f8c6);ring.position.set(player.x,.05,player.z);if(hintFocus){focus.x=hintFocus.x;focus.z=hintFocus.z;}else{focus.x+=(player.x-focus.x)*(1-Math.exp(-7*dt));focus.z+=(player.z-focus.z)*(1-Math.exp(-7*dt));}camera.position.set(focus.x,40,focus.z);camera.lookAt(focus.x,0,focus.z);camera.updateMatrixWorld();if(aimMode==='keyboard'&&active){const screen=aim.clone().project(camera);$('#crosshair').style.left=THREE.MathUtils.clamp((screen.x+1)*innerWidth/2,16,innerWidth-16)+'px';$('#crosshair').style.top=THREE.MathUtils.clamp((1-screen.y)*innerHeight/2,16,innerHeight-16)+'px';}sun.position.set(player.x-18,35,player.z+3);sun.target.position.set(player.x,0,player.z);if(running)fogTick+=dt;if(running&&fogTick>.07){updateFog();fogTick=0;}intelMesh.rotation.y=time;for(let i=tracers.length-1;i>=0;i--){tracers[i].life-=dt;if(tracers[i].life<=0){scene.remove(tracers[i].line);tracers[i].line.geometry.dispose();tracers[i].line.material.dispose();tracers.splice(i,1);}}if(running){lootView.update(loot,visible,time);barrelSystem.update(visible);}renderer.render(scene,camera);

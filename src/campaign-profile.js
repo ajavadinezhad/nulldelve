@@ -1,7 +1,7 @@
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=audit-r21';
-import {compatibleStorage} from './storage-compat.js?v=audit-r21';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=audit-r21';
-import {createEconomy} from './economy.js?v=audit-r21';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=expansion-r22';
+import {compatibleStorage} from './storage-compat.js?v=expansion-r22';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=expansion-r22';
+import {createEconomy} from './economy.js?v=expansion-r22';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';
 const ids=()=>PRIMARY_WEAPONS.map(weapon=>weapon.id);
@@ -13,7 +13,7 @@ export function normalizeCampaignProfile(value){
  return {version:1,revision:revision(value.revision),economy:createEconomy(value.economy).serialize(),primary:unlocked.includes(value.primary)?value.primary:'carbine',unlocked};
 }
 /** One shared economy; shop mutations synchronize before charging and reject conflicts. */
-export function createCampaignProfile({storage,economy=createEconomy(),locks=globalThis.navigator?.locks}={}){
+export function createCampaignProfile({storage,economy=createEconomy(),locks=globalThis.navigator?.locks,getCompleted=()=>[]}={}){
  if(storage===undefined){try{storage=globalThis.localStorage;}catch{storage=null;}}storage=compatibleStorage(storage);
  const state={primary:'carbine',unlocked:['carbine'],revision:0};
  let observedRaw=null,sessionOnly=false,leaseToken=null,lastFailure=null;
@@ -40,12 +40,14 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   }catch{sessionOnly=true;lastFailure='storage';return false;}
  }
  function markPurchase(){state.revision=Math.min(Number.MAX_SAFE_INTEGER,revision(state.revision)+1);persist();return state.revision;}
- function getWeaponOffers(){return PRIMARY_WEAPONS.map(weapon=>{const owned=state.unlocked.includes(weapon.id),equipped=state.primary===weapon.id,attachment=economy.state.attachments[weapon.id]??'standard',stats=applyWeaponAttachment({...weapon,...economy.stats(weapon.id,{damage:weapon.baseDamage,capacity:weapon.capacity,interval:weapon.interval,reload:weapon.reload})},attachment);return {id:'weapon.'+weapon.id,weaponId:weapon.id,kind:'weapon',label:weapon.name??weapon.label??weapon.id,description:weapon.description??'Primary weapon for your next deployment.',cost:weapon.cost,stats:{damage:stats.damage,capacity:stats.capacity,interval:stats.interval,reload:stats.reload,pellets:stats.pellets,range:stats.range},attachment,attachmentOptions:attachmentOptions(weapon.id),owned,equipped,available:!equipped&&(owned||economy.state.credits>=weapon.cost)};});}
+ function weaponUnlocked(weapon){if(!weapon.unlockAfter)return true;const order=['breach','command','research','containment','nest','hospital','freight'],done=getCompleted()??[];return order.slice(0,order.indexOf(weapon.unlockAfter)+1).every(id=>done.includes(id));}
+ function getWeaponOffers(){return PRIMARY_WEAPONS.map(weapon=>{const owned=state.unlocked.includes(weapon.id),unlocked=owned||weaponUnlocked(weapon),equipped=state.primary===weapon.id,attachment=economy.state.attachments[weapon.id]??'standard',stats=applyWeaponAttachment({...weapon,...economy.stats(weapon.id,{damage:weapon.baseDamage,capacity:weapon.capacity,interval:weapon.interval,reload:weapon.reload})},attachment);return {id:'weapon.'+weapon.id,weaponId:weapon.id,kind:'weapon',label:weapon.name??weapon.label??weapon.id,description:weapon.description??'Primary weapon for your next deployment.',unlockAfter:weapon.unlockAfter??null,locked:!unlocked,cost:weapon.cost,stats:{damage:stats.damage,capacity:stats.capacity,interval:stats.interval,reload:stats.reload,pellets:stats.pellets,range:stats.range},attachment,attachmentOptions:attachmentOptions(weapon.id),owned,equipped,available:unlocked&&!equipped&&(owned||economy.state.credits>=weapon.cost)};});}
  function setAttachment(value){const [,weaponId,attachmentId,...extra]=String(value).split('.');if(extra.length||!state.unlocked.includes(weaponId)||state.primary!==weaponId)return {ok:false,message:'Equip an owned weapon before modifying it.'};const option=attachmentOptions(weaponId).find(option=>option.id===attachmentId);if(!option)return {ok:false,message:'That attachment is not available for this weapon.'};economy.state.attachments[weaponId]=attachmentId;return {ok:true,message:`${option.name} fitted.`};}
  function mutate(value,equipOnly=false){
   const id=String(value).replace(/^(weapon|equip)\./,''),weapon=PRIMARY_WEAPONS.find(item=>item.id===id);
   if(!weapon)return {ok:false,message:'That weapon is not available.'};
   if(!state.unlocked.includes(id)){
+   if(!weaponUnlocked(weapon))return {ok:false,message:`Complete ${weapon.unlockAfter} to unlock ${weapon.name}.`};
    if(equipOnly)return {ok:false,message:'Purchase this weapon before equipping it.'};
    if(economy.state.credits<weapon.cost)return {ok:false,message:`Not enough cash. You need $${weapon.cost-economy.state.credits} more.`};
    economy.state.credits-=weapon.cost;state.unlocked.push(id);
@@ -88,6 +90,7 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
     const before=serialize();let result;
     if(String(id).startsWith('weapon.'))result=mutate(id);
     else if(String(id).startsWith('equip.'))result=mutate(id,true);
+    else if(String(id).startsWith('reward.'))result=economy.claimReward(String(id).slice(7));
     else if(String(id).startsWith('attachment.'))result=setAttachment(id);
     else result=economy.purchase(id);
     return finishMutation(result,before,true);
@@ -96,9 +99,10 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   if(!locks?.request)return transaction();
   let started=false;try{return await locks.request(CAMPAIGN_PROFILE_KEY,{mode:'exclusive'},()=>{started=true;return transaction();});}catch(error){if(started)throw error;return transaction();}
  }
+ async function claimCashReward(id){return purchaseOffer('reward.'+id);}
  function restoreLoadout(saved={}){const primary=ids().includes(saved.primary)?saved.primary:'carbine';state.unlocked=['carbine',...ids().filter(id=>id!=='carbine'&&(state.unlocked.includes(id)||saved.unlocked?.includes(id)||id===primary))];state.primary=primary;return true;}
  function restoreTransient(value){const saved=normalizeCampaignProfile(value);if(!saved)return false;const latest=read();if(latest.saved&&latest.saved.revision>saved.revision){observedRaw=latest.raw;apply(latest.saved);return false;}apply(saved);observedRaw=latest.raw;sessionOnly=true;return true;}
  reload();
- return {state,persist,reload,markPurchase,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
+ return {state,persist,reload,markPurchase,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
 }
 export function defaultCampaignProfile(){return initial();}

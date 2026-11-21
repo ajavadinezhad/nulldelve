@@ -48,3 +48,11 @@ Six hospital rooms add three escalating encounters (140 baseline creatures), a f
 ## r18 supply and upgrade adjustment
 
 Ordinary primary drops account for base round/pellet value with a bounded divisor, reducing excess precision ammo without penalizing damage purchases. Heavy MANTIS drops change from six to two rounds. Hard emergency aid admits a six-round AMR threshold only when both guns are low (nearby pending drops count). All 648 projections pass; full eightfold normalization failed the unupgraded Hard Hospital 75% accuracy case, so it was rejected. New magazine increments vary by weapon; paid legacy capacity is saved explicitly and retained.
+
+## r22 Freight and economy expansion
+
+Current coverage: seven campaign operations, 11 weapons, 42 campaign traversal configurations plus 12 legacy arena configurations. All 924 baseline and 1,848 attachment ammunition projections pass (2,772 total). These remain deterministic supply models, not human survival tests.
+
+Flooded freight adds five rooms and 144 Normal creatures in escalating encounters of 32, 48 and 64. Its route includes drainage, independent rail switches, a timed dispatch interlock, a manifest and release controls. Estimated duration is 4.9–7.6 minutes on Easy, 6.0–9.0 on Normal and 8.7–12.8 on Hard. Finite ammunition is granted at the drainage and dispatch milestones; final armored composition was tuned without increasing these allocations.
+
+Two finite salvage caches per operation and one first-clear contract reward persist in the campaign profile. Weapon purchase tiers and smaller future kill payouts are documented in CASH_ECONOMY.md. Existing balances and owned weapons are preserved.

@@ -9,7 +9,7 @@ const {EXPANSION_ROOMS,carveExpansion}=require('../src/facility-expansion.js');
 
 function world(){
   const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8');
-  const ctx={barrelSystem:null,Math,Set,W:WORLD_WIDTH,H:WORLD_HEIGHT,HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,EXPANSION_ROOMS,carveExpansion,doors:[],createPressurePuzzle,overlapsCrate,moveWithCrates};vm.createContext(ctx);
+  const ctx={...require('../src/freight-layout.js'),barrelSystem:null,Math,Set,W:WORLD_WIDTH,H:WORLD_HEIGHT,HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,EXPANSION_ROOMS,carveExpansion,doors:[],createPressurePuzzle,overlapsCrate,moveWithCrates};vm.createContext(ctx);
   vm.runInContext(source.slice(source.indexOf('const map='),source.indexOf('const boxGeo=')),ctx);
   vm.runInContext('let player={x:7,z:20};'+source.slice(source.indexOf('function solid('),source.indexOf('const pursue=')),ctx);
   return expression=>vm.runInContext(expression,ctx);

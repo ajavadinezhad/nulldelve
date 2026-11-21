@@ -1,4 +1,4 @@
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=audit-r21';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=expansion-r22';
 const NS='http://www.w3.org/2000/svg';
 let mapSerial=0;
 function svgNode(tag,attributes={},parent){const node=document.createElementNS(NS,tag);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,String(value));parent?.append(node);return node;}
@@ -29,6 +29,7 @@ export function createCampaignMap({selected,onSelect,completed=[]}){
    svgNode('path',{d:`M${x+4} ${y+5}h${w-9}m-10 0v${h-10}`,stroke:'#2a2e36','stroke-width':3,fill:'none'},group);
    for(let k=0;k<3;k++)svgNode('rect',{x:x+w-4+k*5,y:y+h+4+(k%2)*4,width:4,height:3,fill:'#7b7c65',transform:`rotate(${k*18} ${x+w} ${y+h})`},group);
   }
+  if(CAMPAIGN_OPERATIONS[j].id==='freight'){for(const x of [-50,-15,20,55])svgNode('rect',{x,y:-60,width:20,height:120,fill:'#57717d',stroke:'#a79778','stroke-width':2},group);svgNode('path',{d:'M-90 -20H90M-90 20H90',stroke:'#bdad89','stroke-width':4},group);}
   if(j===1){svgNode('rect',{x:-12,y:-55,width:35,height:95,fill:'#69818a',stroke:'#a7acb7'},group);svgNode('path',{d:'M-28 -65Q7 -95 42 -65L7 -45Z',fill:'#a1a8b6'},group);}
   if(j===2){for(const x of [-55,0,55]){svgNode('path',{d:`M${x-20} -20Q${x} -65 ${x+20} -20V48H${x-20}Z`,fill:'#4f5767',stroke:'#8d96a7','stroke-width':2},group);for(let y=-10;y<45;y+=13)svgNode('path',{d:`M${x-18} ${y}h36`,stroke:'#9da4b3','stroke-width':1},group);}}
   if(j===3){svgNode('rect',{x:-92,y:-65,width:184,height:135,fill:'#1e6264',opacity:.6},group);for(const x of [-50,15,70]){svgNode('ellipse',{cx:x,cy:3,rx:21,ry:39,fill:'#727a8b',stroke:'#abb2bf','stroke-width':2},group);svgNode('ellipse',{cx:x,cy:-12,rx:15,ry:27,fill:'#294b4d'},group);}svgNode('path',{d:'M-85 50H85M-80 -46H82',stroke:'#b2a571','stroke-width':7},group);}

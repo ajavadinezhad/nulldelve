@@ -1,11 +1,11 @@
-import {compatibleStorage} from './storage-compat.js?v=audit-r21';
+import {compatibleStorage} from './storage-compat.js?v=expansion-r22';
 export const PUZZLE_DISCOVERY_KEY='nulldelve.puzzle-discovery.v1';
 const kinds={glyph:'glyph-cipher',relay:'timed-relays',power:'power-sequence',valve:'pressure-balance',wire:'wire-network',artifact:'artifact-seal'};
 export function encounteredPuzzles({player,devices=[],plates=[],visible=()=>false}){
  if(!player)return [];
  const near=p=>Number.isFinite(p.x)&&Number.isFinite(p.z)&&Math.hypot(player.x-p.x,player.z-p.z)<=3&&visible(p.x,p.z);
  const found=new Set();if(plates.some(near))found.add('pressure-plates');
- for(const device of devices){if(!near(device))continue;const id=device.presetId??kinds[device.kind]??(['hospitalSterile','hospitalValveA','hospitalValveB','hospitalValveC'].includes(device.task)?'hospital-pressure':['commandFuse','hospitalFuse','hospitalPower'].includes(device.task)?'fuse-hunt':null);if(id)found.add(id);}
+ for(const device of devices){if(!near(device))continue;const id=device.presetId??kinds[device.kind]??(['freightSwitchA','freightSwitchB','freightDispatch'].includes(device.task)?'freight-routing':['hospitalSterile','hospitalValveA','hospitalValveB','hospitalValveC'].includes(device.task)?'hospital-pressure':['commandFuse','hospitalFuse','hospitalPower'].includes(device.task)?'fuse-hunt':null);if(id)found.add(id);}
  return [...found];
 }
 export function createPuzzleDiscovery(storage){

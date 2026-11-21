@@ -1,5 +1,6 @@
 /** Routine combat feedback stays on the relevant instrument, not in the objective area. */
 export function feedbackFor(message){
+ if(/^SALVAGE SECURED\b/.test(message))return {target:'#credits',tone:'success'};
  if(/^NO (?:RESERVE )?AMMO\b/.test(message))return {target:'.ammo-status',tone:'warning'};
  if(/^NO MEDKITS\b/.test(message))return {target:'#use-medkit',tone:'warning'};
  if(/^NO GRENADES\b/.test(message))return {target:'#use-grenade',tone:'warning'};

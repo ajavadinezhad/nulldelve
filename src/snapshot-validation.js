@@ -1,8 +1,8 @@
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=audit-r21';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=audit-r21';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=audit-r21';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=audit-r21';
-import {createProgression} from './progression.js?v=audit-r21';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=expansion-r22';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=expansion-r22';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=expansion-r22';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=expansion-r22';
+import {createProgression} from './progression.js?v=expansion-r22';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','boss']);
@@ -10,11 +10,11 @@ const variants=new Set(['normal','runner','brute','charger','sentinel','screeche
 export function validateSnapshot(data,{width,height,doorCount,crateCount=2,plateCount=2,barrelIds}={}){
  try{
   if(!object(data)||data.version!==3||!Array.isArray(data.world)||data.world.length!==2)return false;
-  const legacy=data.world[0]===LEGACY_WIDTH&&data.world[1]===LEGACY_HEIGHT,current=data.world[0]===WORLD_WIDTH&&data.world[1]===WORLD_HEIGHT;
-  if(!legacy&&!current)return false;
-  width??=legacy?LEGACY_WIDTH:WORLD_WIDTH;height??=legacy?LEGACY_HEIGHT:WORLD_HEIGHT;doorCount??=legacy?LEGACY_DOOR_COUNT:WORLD_DOOR_COUNT;
+  const legacy=data.world[0]===LEGACY_WIDTH&&data.world[1]===LEGACY_HEIGHT,previous=data.world[0]===PREVIOUS_WIDTH&&data.world[1]===PREVIOUS_HEIGHT,current=data.world[0]===WORLD_WIDTH&&data.world[1]===WORLD_HEIGHT;
+  if(!legacy&&!previous&&!current)return false;
+  width??=data.world[0];height??=data.world[1];doorCount??=legacy?LEGACY_DOOR_COUNT:previous?PREVIOUS_DOOR_COUNT:WORLD_DOOR_COUNT;
   if(data.world[0]!==width||data.world[1]!==height)return false;
-  if(legacy&&data.config?.operation==='hospital')return false;
+  if((legacy&&['hospital','freight'].includes(data.config?.operation))||(previous&&data.config?.operation==='freight'))return false;
   if(!object(data.config)||!['campaign','siege','nest'].includes(data.config.mission)||!['easy','normal','hard'].includes(data.config.difficulty))return false;
   if(data.config.remix!==undefined&&typeof data.config.remix!=='boolean')return false;
   if(!validateBarrelSnapshot(data.barrels,barrelIds))return false;

@@ -1,5 +1,5 @@
-import {hospitalAirlockTarget} from './progression.js?v=audit-r21';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=audit-r21';
+import {hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=expansion-r22';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=expansion-r22';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */
@@ -66,9 +66,11 @@ export function createProgressionArt(scene, box, state) {
   const clue=canvasTexture(512,160);plane(clue.texture,3.45,1.08,state.clue.x,.035,state.clue.z);
   const maintenance=[['power',59,33,'POWER ROUTE'],['valves',86,32,'VENT ORDER']].map(([id,x,z,title])=>{const plaque=canvasTexture(512,100);plane(plaque.texture,4.6,.9,x,.035,z);return {id,title,...plaque};});
   const hospitalPlaque=canvasTexture(512,160);plane(hospitalPlaque.texture,3.8,1.1,118,.035,31);
+  const freightPlaque=canvasTexture(512,160);plane(freightPlaque.texture,4.2,1.1,164,.035,25);
   let clueVersion='';
   function updateClues(){
     const version=JSON.stringify([state.archive.sequence,state.power.sequence,state.valves.sequence,state.remix]);if(version===clueVersion)return;clueVersion=version;
+    const fc=freightPlaque.ctx;fc.fillStyle='#23323e';fc.fillRect(0,0,512,160);fc.strokeStyle='#bca477';fc.lineWidth=4;fc.strokeRect(4,4,504,152);fc.fillStyle='#e5d3ae';fc.textAlign='center';fc.font='bold 26px monospace';fc.fillText('COLD CHAIN ROUTE',256,52);fc.fillText('A / B: '+freightTrackTarget(state.remix).join(' / '),256,111);freightPlaque.texture.needsUpdate=true;
     const hc=hospitalPlaque.ctx;hc.clearRect(0,0,512,160);hc.fillStyle='#243540';hc.fillRect(0,0,512,160);hc.strokeStyle='#a5bbc8';hc.lineWidth=4;hc.strokeRect(4,4,504,152);hc.textAlign='center';hc.fillStyle='#e0e9e9';hc.font='bold 24px monospace';hc.fillText('QUARANTINE PRESSURE',256,48);hc.font='bold 22px monospace';hc.fillText('O / F / E: '+hospitalAirlockTarget(state.remix).join(' / '),256,106);hospitalPlaque.texture.needsUpdate=true;
     const c=clue.ctx;c.clearRect(0,0,512,160);c.fillStyle='#222e29';c.fillRect(0,0,512,160);c.strokeStyle='#8e967b';c.lineWidth=4;c.strokeRect(4,4,504,152);
     c.fillStyle='#a4b59b';c.textAlign='center';c.font='bold 17px monospace';c.fillText('ARCHIVE OVERRIDE · INPUT ORDER',256,31);
@@ -97,8 +99,13 @@ export function createProgressionArt(scene, box, state) {
     part(g,axis==='z'?.32:0,1.51,axis==='x'?.32:0,axis==='x'?1.7:.12,.10,axis==='z'?1.7:.12,materials.dark);
     ['artifact-archive','artifact-generator','artifact-containment'].forEach((id,i)=>{const material=new THREE.MeshBasicMaterial({color:0x725c40});part(g,axis==='x'?(i-1)*.56:.32,1.60,axis==='z'?(i-1)*.56:.32,.22,.10,.22,material);sealMaterials.push({id,material});});
   }
+  const railBoard=new THREE.Group();railBoard.name='freight-routing-board';railBoard.position.set(186,.02,31);root.add(railBoard);
+  for(const x of [-1,1])part(railBoard,x,.03,0,.07,.06,5,materials.steel);
+  for(const z of [-2,-1,0,1,2])part(railBoard,0,.01,z,2.5,.03,.12,materials.trim);
+  const cargoCar=new THREE.Group();part(cargoCar,0,.2,0,1.5,.4,.85,materials.trim);part(cargoCar,0,.45,0,1.2,.2,.7,materials.steel);railBoard.add(cargoCar);
+  const railSignals=[0,1].map(index=>{const material=new THREE.MeshBasicMaterial({color:0xb67b50});part(railBoard,index?1.5:-1.5,.1,0,.2,.15,.2,material);return material;});
   function update(time=0){
-    updateClues();circuitArt.update();
+    updateClues();circuitArt.update();const route=state.operationTasks?.freightRoute;if(route){const progress=route.delivered?1:route.running?1-route.remaining/8:0;cargoCar.position.z=2-progress*4;const target=freightTrackTarget(state.remix);for(let i=0;i<2;i++)railSignals[i].color.set(route.switches[i]===target[i]?0x84b8c8:0xc18c51);}
     const airlock=state.operationTasks?.hospitalAirlock,target=hospitalAirlockTarget(state.remix),defense=state.operationTasks?.generatorDefense;
     if(airlock){const label=state.operationTasks.hospitalSterile?'AIRLOCK STERILE':airlock.running?`SEALED CYCLE ${Math.ceil(airlock.remaining)}s`:`O ${airlock.settings[0]}/2  F ${airlock.settings[1]}/2  E ${airlock.settings[2]}/2`;if(label!==lastAirlock){const c=airlockScreen.ctx;c.clearRect(0,0,512,160);c.fillStyle='#1a2a38';c.fillRect(0,0,512,160);c.textAlign='center';c.font='bold 26px monospace';c.fillStyle='#b7cbd8';c.fillText(label,256,53);c.font='bold 22px monospace';c.fillStyle='#ecc17c';c.fillText('OXYGEN / FILTER / EXHAUST',256,98);c.font='18px monospace';c.fillText('MATCH GAUGES · THEN START CYCLE',256,133);airlockScreen.texture.needsUpdate=true;lastAirlock=label;}}
     if(defense){const label=defense.completed?'RESTART STABLE':defense.jammed?'JAMMED · INTERACT TO REPAIR':defense.started?`DEFEND RESTART ${Math.floor(defense.progress/22*100)}%`:'EMERGENCY RESTART';if(label!==lastRestart){const c=restartScreen.ctx;c.clearRect(0,0,512,128);c.fillStyle='#202a35';c.fillRect(0,0,512,128);c.fillStyle=defense.jammed?'#ef997c':'#edc17c';c.textAlign='center';c.font='bold 24px monospace';c.fillText(label,256,64);c.font='17px monospace';c.fillText('AMBER RINGS: CONSOLE SABOTEURS',256,102);restartScreen.texture.needsUpdate=true;lastRestart=label;}

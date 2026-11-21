@@ -1,10 +1,11 @@
 import * as THREE from '../vendor/three.module.js';
-import {soldier} from './character.js?v=audit-r21';
-import {createRoach} from './roach.js?v=audit-r21';
+import {soldier} from './character.js?v=expansion-r22';
+import {createRoach} from './roach.js?v=expansion-r22';
 
 const cache=new Map();
 let renderAttempted=false;
 const DESCRIPTIONS={
+ freight:'3D preview of Flooded freight: rusted rail tracks, cargo containers, pooled water, an operator and mutated creatures.',
  hospital:'3D preview of Silent hospital: clinical beds, a red medical cross, operating equipment, and pale and violet mutations.',
  campaign:'3D preview of Facility descent: connected concrete rooms, security doors, stacked crates, and an armed operator.',
  siege:'3D preview of Reactor siege: an illuminated reactor surrounded by cover, machinery, and approaching brown and green creatures.',
@@ -62,6 +63,13 @@ function renderPreviews(){
   box(s,-7,.8,-5.6,1.4,1.6,.8,0x4c4138);box(s,-7,1.64,-5.6,1.1,.04,.6,0xbf7043,0x843b23);
   box(s,6,1.35,-6.35,2.5,.12,.16,0xd37e58,0x9c3c21);
  }
+ function freight(s){
+  room(s,0,0,20,15,0x485a64);
+  for(const x of [-2.5,2.5])for(const dx of [-.5,.5])box(s,x+dx,.08,0,.09,.12,13,0xa7a4a0);
+  for(const z of [-6,-4,-2,0,2,4,6])box(s,0,.03,z,7,.08,.16,0x675746);
+  for(const [x,z]of [[-7,-4],[-7,1],[7,-3],[7,4]]){box(s,x,.8,z,3,1.6,2.5,0x577384);for(let i=0;i<5;i++)box(s,x-1.2+i*.6,1.62,z,.07,.05,2.5,0x94a2a8);}
+  box(s,0,.35,2,3,.7,3,0x967452);operator(s,-4,3);roach(s,3,-2,'charger');roach(s,-4,-3,'leaper');
+ }
  function hospital(s){
   room(s,-4,1,8,10,0x8c9fa8);room(s,5,-1,8,12,0x9cabb1);
   box(s,.25,.75,-1,.30,1.5,10,0xb9c5ca);box(s,5,.025,3,5,.02,.10,0x54819a);
@@ -80,7 +88,7 @@ function renderPreviews(){
   for(const {geometry,material,matrices} of groups.values()){const m=new THREE.InstancedMesh(geometry,material,matrices.length);matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.instanceMatrix.needsUpdate=true;s.add(m);}
  }
  try{
-  for(const [id,build] of Object.entries({campaign,siege,nest,hospital})){
+  for(const [id,build] of Object.entries({campaign,siege,nest,hospital,freight})){
    const s=new THREE.Scene();s.background=new THREE.Color(id==='nest'?0x121315:0x0d1818);
    s.add(new THREE.HemisphereLight(0xe8f4df,0x28342f,2.3));const key=new THREE.DirectionalLight(id==='nest'?0xffd7bd:0xf6fff3,3.2);key.position.set(-6,16,10);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-16,right:16,top:16,bottom:-16,near:1,far:50});key.shadow.normalBias=.04;s.add(key);
    build(s);instanceScene(s);

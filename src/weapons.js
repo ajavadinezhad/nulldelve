@@ -43,6 +43,21 @@ export function weapon(type='rifle'){
     tube(group,'glass',0,.22,-.28,.052,.008);
     block(group,'black',0,.2,-.37,.04,.07,.04);
     group.userData.muzzle=new THREE.Vector3(0,0,-1.25);
+  }else if(type==='jackal'){
+    // Short thick riot barrel, tubular four-round action, and folding stock.
+    block(group,'receiver',0,0,-.25,.25,.24,.55);tube(group,'steel',0,.01,-.79,.085,.52);tube(group,'black',0,.01,-1.07,.11,.08);
+    tube(group,'polymer',0,-.13,-.69,.065,.48);for(const z of [-.53,-.63,-.73,-.83])block(group,'black',0,-.12,z,.16,.12,.03);
+    block(group,'black',0,-.16,.015,.12,.27,.14).rotation.x=-.2;group.userData.magazine=block(group,'black',0,-.2,-.22,.17,.22,.22);
+    block(group,'steel',0,.04,.23,.08,.08,.38);block(group,'black',0,-.015,.44,.18,.23,.07);block(group,'steel',0,.17,-.22,.06,.12,.25);tube(group,'glass',0,.23,-.34,.04,.01);
+    group.userData.muzzle=new THREE.Vector3(0,.01,-1.12);
+  }else if(type==='vesper'){
+    // Long vented needle shroud and narrow translucent-style magazine housing.
+    block(group,'receiver',0,0,-.21,.16,.16,.55);block(group,'polymer',0,.015,-.70,.14,.17,.46);
+    for(const z of [-.53,-.63,-.73,-.83]){block(group,'black',.078,.02,z,.015,.10,.04);block(group,'black',-.078,.02,z,.015,.10,.04);}
+    tube(group,'steel',0,.015,-1.06,.024,.26);tube(group,'black',0,.015,-1.22,.043,.08);block(group,'black',0,.10,-.33,.10,.035,.58);
+    block(group,'polymer',0,-.005,.27,.12,.13,.38);block(group,'black',0,-.005,.48,.15,.18,.035);block(group,'black',0,-.15,.015,.09,.24,.12).rotation.x=-.17;
+    group.userData.magazine=block(group,'glass',0,-.23,-.25,.08,.35,.14);for(const z of [-.28,-.22])block(group,'steel',.047,-.23,z,.012,.26,.018);
+    block(group,'black',0,.17,-.25,.09,.10,.24);tube(group,'glass',0,.21,-.38,.035,.01);group.userData.muzzle=new THREE.Vector3(0,.015,-1.27);
   }else if(type==='mantis'){
     // Long heavy barrel, slab muzzle brake, oversized scope and skeleton buttstock.
     block(group,'receiver',0,0,-.26,.21,.21,.64);block(group,'black',0,.13,-.30,.17,.045,.66);

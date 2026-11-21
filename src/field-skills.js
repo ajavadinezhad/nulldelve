@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=audit-r21';
+import {compatibleStorage} from './storage-compat.js?v=expansion-r22';
 
 /** One milestone-unlocked passive choice, never an XP tree or supply generator. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
