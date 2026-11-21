@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=features-r19';
+import {compatibleStorage} from './storage-compat.js?v=armory-r20';
 
 /** One milestone-unlocked passive choice, never an XP tree or supply generator. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';

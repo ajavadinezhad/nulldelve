@@ -1,4 +1,4 @@
-import {normalizeAttachments} from './weapon-attachments.js?v=features-r19';
+import {normalizeAttachments} from './weapon-attachments.js?v=armory-r20';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','pistol'],UPGRADES=['damage','magazine','reload'];

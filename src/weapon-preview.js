@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {weapon} from './weapons.js?v=features-r19';
+import {weapon} from './weapons.js?v=armory-r20';
 export const WEAPON_PREVIEW_LABELS=Object.freeze({rifle:'MK4 carbine',carbine:'MK4 carbine',smg:'VX9 SMG',shotgun:'BREACH-12 shotgun',marksman:'SABLE DMR marksman rifle',lmg:'M60 WARDEN light machine gun',hush:'HUSH-9 precision carbine',scattergun:'TWIN drum scattergun',kestrel:'KESTREL bullpup battle rifle',mantis:'MANTIS heavy anti-mutation rifle',pistol:'P9 sidearm'});
 /** Long barrels and bulky magazines fit the same preview without cropping. */
 export function frameWeaponPreview(model){
@@ -23,4 +23,12 @@ export function createWeaponPreview(canvas){
    current=frameWeaponPreview(weapon(type));scene.add(current);renderer.render(scene,camera);
    canvas.setAttribute('aria-label','Equipped weapon: '+(WEAPON_PREVIEW_LABELS[type]??type));
  };
+}
+
+const thumbnailCache=new Map();
+/** Static armory art from the real model; no persistent render loop or WebGL context. */
+export function weaponThumbnail(type){
+ if(thumbnailCache.has(type))return thumbnailCache.get(type);
+ const canvas=document.createElement('canvas'),renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,preserveDrawingBuffer:true});renderer.setSize(640,250,false);
+ try{const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-1.3,1.3,.51,-.51,.1,20);camera.position.set(.1,1.8,4);camera.lookAt(.1,0,0);scene.add(new THREE.HemisphereLight(0xe8efff,0x424656,3));const key=new THREE.DirectionalLight(0xffdfac,4);key.position.set(-2,4,3);scene.add(key);const model=frameWeaponPreview(weapon(type));scene.add(model);renderer.render(scene,camera);const image=canvas.toDataURL('image/png');thumbnailCache.set(type,image);return image;}finally{renderer.dispose();renderer.forceContextLoss();}
 }

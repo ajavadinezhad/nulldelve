@@ -1,4 +1,4 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=features-r19';
+import {DIFFICULTY_RULES} from './difficulty.js?v=armory-r20';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;

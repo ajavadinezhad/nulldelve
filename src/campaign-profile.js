@@ -1,7 +1,7 @@
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=features-r19';
-import {compatibleStorage} from './storage-compat.js?v=features-r19';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=features-r19';
-import {createEconomy} from './economy.js?v=features-r19';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=armory-r20';
+import {compatibleStorage} from './storage-compat.js?v=armory-r20';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=armory-r20';
+import {createEconomy} from './economy.js?v=armory-r20';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';
 const ids=()=>PRIMARY_WEAPONS.map(weapon=>weapon.id);

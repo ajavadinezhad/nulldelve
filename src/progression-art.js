@@ -1,5 +1,5 @@
-import {hospitalAirlockTarget} from './progression.js?v=features-r19';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=features-r19';
+import {hospitalAirlockTarget} from './progression.js?v=armory-r20';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=armory-r20';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */

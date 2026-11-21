@@ -1,8 +1,8 @@
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=features-r19';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=features-r19';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=features-r19';
-import {validateSnapshot} from './snapshot-validation.js?v=features-r19';
-import {normalizeSettings} from './controls.js?v=features-r19';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=armory-r20';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=armory-r20';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=armory-r20';
+import {validateSnapshot} from './snapshot-validation.js?v=armory-r20';
+import {normalizeSettings} from './controls.js?v=armory-r20';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';
