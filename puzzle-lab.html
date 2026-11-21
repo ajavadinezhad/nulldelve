@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NULLDELVE — Field notes</title>
+  <link rel="stylesheet" href="puzzle-lab.css?v=nulldelve-6"><link rel="stylesheet" href="ui-theme.css?v=nulldelve-6">
+</head>
+<body>
+  <header class="workshop-header"><a class="wordmark" href="/">NULL<span>DELVE</span></a><div><h1>Field notes</h1><p id="catalog-count">Encountered systems</p></div><a class="game-link" href="/">Back to game <span aria-hidden="true">↗</span></a></header>
+  <main class="workshop-layout">
+    <aside class="library" aria-label="Recorded systems">
+      <div class="library-tools"><label class="search-label" for="puzzle-search">Find a system</label><input id="puzzle-search" type="search" placeholder="Search field notes…" autocomplete="off"><label class="visually-hidden" for="puzzle-filter">Filter puzzles</label><select id="puzzle-filter"><option value="all">All mechanics</option></select><p id="filter-count" role="status"></p></div>
+      <nav id="preset-list" aria-label="Puzzle presets"></nav>
+    </aside>
+    <section class="workspace" aria-label="Selected puzzle">
+      <div id="startup-error" role="alert" hidden></div>
+      <div class="puzzle-heading"><div><p id="puzzle-mechanic" class="eyebrow"></p><h2 id="puzzle-title">Select a system</h2></div><span id="puzzle-state" class="state-badge">Ready</span></div>
+      <p id="puzzle-objective" class="objective"></p><p class="reference-label">REFERENCE DIAGRAM · NOT LIVE PUZZLE STATE</p>
+      <form id="setup-form" class="setup-controls"><label>Seed<input id="puzzle-seed" type="number" min="0" max="2147483647" step="1" value="1"></label><label>Variant<input id="puzzle-variant" type="number" min="0" max="999" step="1" value="0"></label><label>Difficulty<select id="puzzle-difficulty"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select></label><button type="submit">Apply</button><button id="reset-puzzle" type="button" class="quiet">Reset</button><button id="export-setup" type="button" class="quiet" title="Download the reusable puzzle configuration">Export setup <span aria-hidden="true">↓</span></button></form>
+      <div id="puzzle-readouts" class="readouts" aria-label="Puzzle readings"></div>
+      <section class="apparatus" aria-label="Puzzle apparatus"><div id="puzzle-board"></div><p id="puzzle-instructions"></p><div id="puzzle-controls" class="mechanic-controls"></div></section>
+      <p id="puzzle-feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true"></p>
+      <section class="help-strip" aria-label="Puzzle assistance"><div class="hint-buttons"><button type="button" data-hint="1" class="quiet">Hint 1</button><button type="button" data-hint="2" class="quiet">Hint 2</button><button type="button" data-hint="3" class="quiet">Hint 3</button><button id="clear-hint" type="button" class="quiet" hidden>Hide hint</button></div><p id="puzzle-hint" hidden></p><details id="solution-details"><summary>Solution preview</summary><p id="solution-explanation"></p><div class="solution-actions"><button id="run-solution" type="button">Demonstrate solution</button><button id="stop-solution" type="button" class="quiet" hidden>Stop</button><span id="solution-progress" role="status"></span></div><ol id="solution-steps"></ol></details></section>
+    </section>
+  </main>
+  <script type="module" src="puzzle-lab.js?v=nulldelve-6"></script>
+</body>
+</html>

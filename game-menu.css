@@ -1,0 +1,708 @@
+/* Main menu, mission selection, local saves, and settings. Scoped to the menu overlay. */
+#overlay.menu-overlay,
+#overlay:has(> .game-menu) {
+  z-index:30;
+  display:block;
+  padding:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  background:radial-gradient(ellipse at 90% 8%,#2e333c70,transparent 50%),linear-gradient(120deg,#0b0c0efb,#0f1114f7 65%,#0e0f12f2);
+  color:#e3e5e9;
+  cursor:default;
+}
+.game-menu {
+  --menu-green:#c1c6d0;
+  --menu-muted:#a0a6b3;
+  --menu-border:#383d48;
+  width:min(1280px,100%);
+  min-height:100%;
+  margin:0 auto;
+  padding:clamp(24px,4vw,56px);
+  display:flex;
+  flex-direction:column;
+  font-size:16px;
+  line-height:1.55;
+}
+.game-menu header.menu-brand {
+  display:block;
+  position:relative;
+  padding-bottom:28px;
+  margin-bottom:30px;
+  border-bottom:1px solid var(--menu-border);
+}
+.game-menu .menu-brand h1 {
+  margin:0;
+  font-size:clamp(36px,5vw,66px);
+  font-weight:850;
+  line-height:1.05;
+  letter-spacing:.14em;
+  color:#e6e8eb;
+}
+.game-menu .menu-brand p {
+  margin:14px 0 0;
+  max-width:65ch;
+  color:var(--menu-muted);
+  font-size:16px;
+  letter-spacing:.025em;
+}
+.game-menu .menu-layout {
+  display:grid;
+  grid-template-columns:200px minmax(0,1fr);
+  gap:clamp(28px,4vw,54px);
+  flex:1;
+  align-items:start;
+}
+.game-menu .menu-nav {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-right:22px;
+  border-right:1px solid var(--menu-border);
+}
+.game-menu button,
+.game-menu input,
+.game-menu select {
+  font:inherit;
+  letter-spacing:normal;
+}
+.game-menu button {min-height:46px;transition:background-color .15s,border-color .15s,color .15s;}
+.game-menu button:disabled {cursor:not-allowed;opacity:.5;}
+.game-menu button:focus-visible,
+.game-menu input:focus-visible,
+.game-menu select:focus-visible {
+  outline:2px solid #d9dce2;
+  outline-offset:4px;
+}
+.game-menu .menu-nav-button {
+  display:block;
+  width:100%;
+  padding:13px 15px;
+  text-align:left;
+  color:#a7aebb;
+  border:1px solid transparent;
+  background:transparent;
+  font-size:16px;
+  font-weight:600;
+}
+.game-menu .menu-nav-button:hover {background:#202329;color:#f0f1f4;}
+.game-menu .menu-nav-button.active {
+  background:#262a31;
+  border-color:#576072;
+  color:#d7dae0;
+  box-shadow:inset 3px 0 0 var(--menu-green);
+}
+.game-menu .menu-content {min-width:0;padding-bottom:20px;}
+.game-menu .menu-eyebrow {
+  margin:0 0 10px;
+  color:var(--menu-green);
+  font-size:14px;
+  font-weight:650;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+.game-menu .menu-title {margin:0 0 14px;font-size:clamp(26px,3vw,38px);font-weight:700;line-height:1.15;letter-spacing:-.025em;}
+.game-menu .menu-description {margin:0 0 26px;max-width:68ch;font-size:16px;color:var(--menu-muted);line-height:1.7;}
+.game-menu .menu-actions {display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:26px;}
+.game-menu .menu-button,
+.game-menu .menu-back {
+  padding:12px 20px;
+  min-height:46px;
+  background:#1c1f25;
+  border:1px solid #4d5463;
+  color:#dddfe4;
+  font-size:16px;
+  font-weight:650;
+  line-height:1.35;
+  text-align:center;
+}
+.game-menu .menu-button:hover,
+.game-menu .menu-back:hover {background:#30353e;border-color:#7e889c;}
+.game-menu .menu-button.primary {background:var(--menu-green);color:#171a1f;border-color:var(--menu-green);padding:14px 26px;}
+.game-menu .menu-button.primary:hover {background:#d6d9df;border-color:#d6d9df;}
+.game-menu .menu-button.secondary {background:#14171b;color:#bcc1cb;}
+.game-menu .menu-button.danger {color:#efb19c;border-color:#754f40;background:#2b201b;}
+.game-menu .menu-button.danger:hover {background:#513124;border-color:#b77759;}
+.game-menu .menu-button.selected {border-color:var(--menu-green);color:#d7dae0;background:#2b2f37;}
+.game-menu .menu-back {margin-top:14px;}
+.game-menu .mission-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0;}
+.game-menu .mission-card {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:12px;
+  min-height:170px;
+  padding:22px;
+  background:linear-gradient(135deg,#21242a,#141619);
+  color:#e1e3e8;
+  border:1px solid #3f4552;
+  text-align:left;
+  font-size:16px;
+  line-height:1.55;
+  font-weight:400;
+}
+.game-menu .mission-card:hover {background:linear-gradient(135deg,#2f343e,#1d2025);border-color:#7a8498;}
+.game-menu .mission-card.selected {border-color:#c5c9d2;box-shadow:inset 0 3px 0 #c5c9d2;background:linear-gradient(135deg,#323740,#1f2228);}
+.game-menu .mission-card strong {display:block;font-size:20px;line-height:1.25;font-weight:700;color:#e9ebee;}
+.game-menu .mission-card span {display:block;color:#b2b8c3;font-size:15px;line-height:1.6;}
+.game-menu .mission-card small {display:block;font-size:14px;color:#a6adbb;}
+.game-menu .menu-mission-detail {padding:20px 22px;background:#1a1c21;border:1px solid #404754;border-left:3px solid #99a1b1;margin:18px 0;color:#cacfd7;font-size:16px;line-height:1.7;}
+.game-menu .menu-mission-detail h3 {font-size:19px;margin:0 0 10px;}
+.game-menu .menu-mission-detail p {margin:8px 0;}
+.game-menu .menu-fieldset {border:0;padding:0;margin:28px 0;min-width:0;}
+.game-menu .menu-fieldset legend {padding:0;margin-bottom:14px;font-size:16px;font-weight:650;color:#c8ccd4;letter-spacing:.02em;}
+.game-menu .difficulty-options {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.game-menu .difficulty-option {
+  display:grid;
+  grid-template-columns:20px minmax(0,1fr);
+  align-content:start;
+  gap:8px 9px;
+  padding:17px 14px;
+  min-height:126px;
+  border:1px solid #3e4551;
+  background:#191b20;
+  cursor:pointer;
+  color:#d2d5dc;
+  font-size:16px;
+  letter-spacing:normal;
+}
+.game-menu .difficulty-option:has(input:checked) {border-color:#bbc0ca;background:#2b2f37;box-shadow:inset 0 3px 0 #bbc0ca;}
+.game-menu .difficulty-option:has(input:focus-visible) {outline:2px solid #d9dce2;outline-offset:4px;}
+.game-menu .difficulty-option input {margin:4px 0 0;width:17px;height:17px;accent-color:#c1c6d0;}
+.game-menu .difficulty-option strong {font-size:16px;font-weight:650;}
+.game-menu .difficulty-option span {grid-column:2;font-size:14px;color:#a8afbc;line-height:1.55;}
+.game-menu .save-slots {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:24px 0;}
+.game-menu .save-slot {display:flex;flex-direction:column;gap:20px;padding:20px 18px;border:1px solid #424855;background:#191b20;min-width:0;}
+.game-menu .slot-copy {display:flex;flex-direction:column;gap:10px;min-height:115px;overflow-wrap:anywhere;}
+.game-menu .slot-copy strong {font-size:19px;font-weight:650;color:#e0e3e8;}
+.game-menu .slot-copy span {font-size:15px;line-height:1.6;color:#b8bdc8;}
+.game-menu .slot-copy small {font-size:14px;line-height:1.6;color:#99a0af;}
+.game-menu .save-slot .menu-button {padding:10px 12px;width:100%;font-size:15px;}
+.game-menu .save-slot .menu-actions {gap:10px;margin:0;}
+.game-menu .settings-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:25px 0;}
+.game-menu .setting-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  padding:18px;
+  border:1px solid #393e49;
+  background:#17191e;
+  color:#d2d6dd;
+  font-size:16px;
+  letter-spacing:normal;
+  line-height:1.5;
+}
+.game-menu .setting-row > span {font-size:16px;font-weight:550;}
+.game-menu .setting-row input[type=range] {grid-column:1 / -1;width:100%;height:24px;accent-color:#b8bdc8;cursor:pointer;}
+.game-menu .setting-row input[type=checkbox] {width:22px;height:22px;margin:0;accent-color:#b8bdc8;cursor:pointer;}
+.game-menu .setting-row select {max-width:100%;min-height:42px;padding:7px 10px;background:#111215;color:#e4e6ea;border:1px solid #606776;cursor:pointer;}
+.game-menu .setting-row output {font-size:14px;color:#babfc9;font-variant-numeric:tabular-nums;}
+.game-menu .setting-row small {grid-column:1 / -1;font-size:14px;line-height:1.6;color:#a1a8b6;}
+.game-menu .menu-status {padding:13px 16px;margin:18px 0;min-height:48px;border-left:2px solid #9099aa;background:#1f2228;color:#d1d5dc;font-size:15px;line-height:1.55;}
+.game-menu .menu-status:empty {display:none;}
+.game-menu .menu-footer {
+  position:static;
+  display:block;
+  margin:30px 0 0;
+  padding-top:18px;
+  border-top:1px solid #323842;
+  color:#9198a6;
+  font-size:14px;
+  line-height:1.65;
+  letter-spacing:normal;
+}
+.game-menu .menu-footer kbd {font-size:13px;color:#bdc3cd;border-color:#535c6c;padding:2px 5px;}
+@media(max-width:1000px) {
+  .game-menu .menu-layout {grid-template-columns:160px minmax(0,1fr);gap:26px;}
+  .game-menu .menu-nav {padding-right:14px;}
+  .game-menu .save-slots {grid-template-columns:1fr;}
+  .game-menu .save-slot {display:grid;grid-template-columns:1fr minmax(130px,190px);align-items:center;gap:16px;}
+  .game-menu .slot-copy {min-height:0;}
+  .game-menu .difficulty-options {gap:8px;}
+  .game-menu .difficulty-option {padding:14px 10px;}
+}
+@media(max-width:760px) {
+  .game-menu {padding:25px 22px;}
+  .game-menu header.menu-brand {padding-bottom:22px;margin-bottom:20px;}
+  .game-menu .menu-layout {grid-template-columns:1fr;gap:25px;}
+  .game-menu .menu-nav {flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid #383d48;padding:0 0 14px;gap:6px;}
+  .game-menu .menu-nav-button {width:auto;padding:11px 14px;font-size:15px;}
+  .game-menu .menu-nav-button.active {box-shadow:inset 0 -2px 0 #c1c6d0;}
+  .game-menu .settings-grid {grid-template-columns:1fr;}
+  .game-menu .mission-card {padding:18px;}
+  .game-menu .menu-footer {margin-top:20px;}
+}
+@media(max-width:520px) {
+  .game-menu {padding:24px 17px;}
+  .game-menu .menu-brand h1 {font-size:36px;letter-spacing:.09em;}
+  .game-menu .menu-brand p {font-size:15px;}
+  .game-menu .mission-grid,.game-menu .difficulty-options {grid-template-columns:1fr;}
+  .game-menu .mission-card {min-height:140px;}
+  .game-menu .difficulty-option {min-height:0;padding:15px;}
+  .game-menu .save-slot {display:flex;align-items:stretch;}
+  .game-menu .menu-actions {align-items:stretch;}
+  .game-menu .menu-actions > .menu-button {flex:1 1 170px;}
+  .game-menu .setting-row {padding:15px;}
+  .game-menu .setting-row select {max-width:170px;font-size:15px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .game-menu button {transition:none;}
+}
+.game-menu .setting-row:has(input[type=range]) output {grid-column:2;grid-row:1;text-align:right;}
+
+/* Scenic operation previews. Keep the interface compact above and below each image. */
+.game-menu .menu-layout {
+  flex:0 0 auto;
+  align-content:start;
+  grid-auto-rows:max-content;
+}
+.game-menu .menu-content {align-self:start;}
+.game-menu .menu-hero {
+  position:relative;
+  isolation:isolate;
+  width:100%;
+  height:230px;
+  margin:0 0 25px;
+  overflow:hidden;
+  border:1px solid #4f5767;
+  background:#1a1c21;
+}
+.game-menu .menu-hero > img,
+.game-menu .menu-hero > canvas {
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:cover;
+  object-position:center;
+}
+.game-menu .menu-hero::after {
+  content:'';
+  position:absolute;
+  z-index:1;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,#0c0d0fbf,#10111426 65%),linear-gradient(0deg,#0d0e10bf,transparent 65%);
+}
+.game-menu .menu-hero-copy {
+  position:absolute;
+  z-index:2;
+  left:24px;
+  bottom:23px;
+  right:20px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  text-shadow:0 2px 10px #000;
+}
+.game-menu .menu-hero-copy small {
+  font-size:14px;
+  font-weight:650;
+  letter-spacing:.13em;
+  color:#ced2da;
+}
+.game-menu .menu-hero-copy strong {
+  font-size:clamp(29px,3.2vw,42px);
+  font-weight:750;
+  line-height:1.1;
+  letter-spacing:-.025em;
+  color:#edeef1;
+}
+.game-menu .mission-grid {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  gap:16px;
+}
+.game-menu .mission-card {
+  min-width:0;
+  min-height:0;
+  padding:0;
+  gap:12px;
+  overflow:hidden;
+  justify-content:flex-start;
+}
+.game-menu .mission-preview {
+  position:relative;
+  display:block;
+  width:100%;
+  aspect-ratio:2 / 1;
+  overflow:hidden;
+  flex:none;
+  border-bottom:1px solid #49505e;
+  background:#191c21;
+}
+.game-menu .mission-preview > img,
+.game-menu .mission-preview > canvas {
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:cover;
+  transition:transform .2s ease;
+}
+.game-menu .mission-card:hover .mission-preview > img,
+.game-menu .mission-card:hover .mission-preview > canvas {transform:scale(1.035);}
+.game-menu .mission-card.selected .mission-preview {border-bottom-color:#b7bcc7;}
+.game-menu .mission-card > strong,
+.game-menu .mission-card > span,
+.game-menu .mission-card > small {margin-left:18px;margin-right:18px;}
+.game-menu .mission-card > strong {margin-top:4px;font-size:20px;}
+.game-menu .mission-card > span {font-size:15px;line-height:1.6;}
+.game-menu .mission-card > small {margin-top:auto;margin-bottom:20px;line-height:1.5;}
+.game-menu .menu-content > .menu-actions + .menu-description {margin-top:22px;}
+@media(max-width:1050px) {
+  .game-menu .mission-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .game-menu .menu-hero {height:210px;}
+}
+@media(max-width:760px) {
+  .game-menu .menu-layout {gap:22px;flex:0 0 auto;align-content:start;grid-auto-rows:max-content;}
+  .game-menu .menu-nav {align-self:start;margin:0;}
+  .game-menu .menu-content {padding-top:0;margin-top:0;}
+  .game-menu .menu-hero {height:180px;margin-bottom:22px;}
+  .game-menu .menu-hero-copy {left:20px;bottom:20px;}
+  .game-menu .mission-grid {grid-template-columns:1fr;gap:18px;}
+  .game-menu .mission-card {padding:0;}
+  .game-menu .mission-preview {aspect-ratio:2 / 1;}
+  .game-menu .mission-card > strong {font-size:21px;}
+}
+@media(max-width:520px) {
+  .game-menu .menu-hero-copy {left:17px;bottom:18px;}
+  .game-menu .menu-hero-copy strong {font-size:30px;}
+  .game-menu .menu-hero-copy small {font-size:14px;letter-spacing:.08em;}
+  .game-menu .mission-card {min-height:0;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .game-menu .mission-preview > img,
+  .game-menu .mission-preview > canvas {transition:none;}
+  .game-menu .mission-card:hover .mission-preview > img,
+  .game-menu .mission-card:hover .mission-preview > canvas {transform:none;}
+}
+/* The menu renderer sets an inline flex display; use the active class only so hide() still works. */
+#overlay.menu-overlay {display:block!important;align-items:stretch;}
+
+/* The browser viewport stays fixed. Only the game-owned content panel scrolls. */
+#overlay.menu-overlay {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  max-height:100dvh;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+.game-menu {
+  height:100%;
+  max-height:100%;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.game-menu header.menu-brand {
+  flex:0 0 auto;
+  margin-bottom:24px;
+  padding-bottom:22px;
+}
+.game-menu .menu-layout {
+  display:grid;
+  flex:1 1 auto;
+  min-height:0;
+  min-width:0;
+  grid-template-rows:minmax(0,1fr);
+  grid-auto-rows:auto;
+  align-items:stretch;
+  align-content:stretch;
+  overflow:hidden;
+}
+.game-menu .menu-nav {
+  align-self:stretch;
+  min-height:0;
+  margin:0;
+  overflow:hidden;
+}
+.game-menu .menu-content {
+  align-self:stretch;
+  min-height:0;
+  max-height:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  scrollbar-width:thin;
+  scrollbar-color:#656f83 #16181d;
+  padding-right:12px;
+  padding-bottom:22px;
+  scroll-padding:14px 0 24px;
+  -webkit-overflow-scrolling:touch;
+}
+.game-menu .menu-content::-webkit-scrollbar {width:9px;}
+.game-menu .menu-content::-webkit-scrollbar-track {background:#16181d;}
+.game-menu .menu-content::-webkit-scrollbar-thumb {background:#656f83;border:2px solid #16181d;border-radius:6px;}
+.game-menu .menu-status {
+  flex:0 0 auto;
+  margin:12px 0 0;
+  padding:10px 14px;
+  min-height:0;
+}
+.game-menu .menu-footer {
+  flex:0 0 auto;
+  margin-top:16px;
+  padding-top:12px;
+}
+@media(max-width:760px) {
+  .game-menu .menu-layout {
+    display:flex;
+    flex-direction:column;
+    flex:1 1 auto;
+    min-height:0;
+    gap:18px;
+    overflow:hidden;
+  }
+  .game-menu .menu-nav {
+    flex:0 0 auto;
+    align-self:stretch;
+    min-height:0;
+    overflow:hidden;
+    padding-bottom:12px;
+  }
+  .game-menu .menu-content {
+    flex:1 1 auto;
+    min-height:0;
+    max-height:none;
+    align-self:stretch;
+    margin:0;
+    padding-top:0;
+    padding-right:10px;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  .game-menu header.menu-brand {margin-bottom:18px;padding-bottom:18px;}
+  .game-menu .menu-footer {margin-top:12px;padding-top:10px;}
+}
+@media(max-height:620px) {
+  .game-menu {padding:16px 24px;}
+  .game-menu header.menu-brand {padding-bottom:12px;margin-bottom:14px;}
+  .game-menu .menu-brand h1 {font-size:32px;}
+  .game-menu .menu-brand p {margin-top:7px;font-size:14px;}
+  .game-menu .menu-nav {gap:4px;}
+  .game-menu .menu-nav-button {min-height:36px;padding:7px 12px;font-size:14px;}
+  .game-menu .menu-layout {gap:16px;}
+  .game-menu .menu-footer {margin-top:10px;padding-top:8px;font-size:14px;}
+  .game-menu .menu-status {padding:8px 12px;margin-top:8px;font-size:14px;}
+}
+
+/* Compact terminal layout. Preserve the fixed shell and single content scroller. */
+.game-menu {padding:18px 22px;font-size:14px;line-height:1.45;}
+.game-menu header.menu-brand {padding-bottom:12px;margin-bottom:14px;}
+.game-menu .menu-brand h1 {font-size:36px;line-height:1.05;letter-spacing:.11em;}
+.game-menu .menu-brand p {margin-top:7px;font-size:12px;line-height:1.4;letter-spacing:.035em;}
+.game-menu .menu-layout {grid-template-columns:155px minmax(0,1fr);gap:18px;}
+.game-menu .menu-nav {gap:5px;padding-right:14px;}
+.game-menu .menu-nav-button {min-height:38px;padding:8px 11px;font-size:14px;line-height:1.35;}
+.game-menu .menu-content {padding:14px 16px 18px;scroll-padding:12px 0 18px;}
+.game-menu .menu-eyebrow {font-size:12px;line-height:1.4;letter-spacing:.1em;margin:0 0 7px;}
+.game-menu .menu-title {font-size:27px;line-height:1.18;margin:0 0 10px;}
+.game-menu .menu-description {font-size:14px;line-height:1.55;margin:0 0 15px;}
+.game-menu .menu-actions {gap:9px;margin-top:15px;}
+.game-menu .menu-button,
+.game-menu .menu-back {min-height:40px;padding:9px 14px;font-size:14px;line-height:1.35;}
+.game-menu .menu-button.primary {padding:10px 18px;}
+.game-menu .menu-back {margin-top:9px;}
+.game-menu .menu-content > .menu-actions + .menu-description {margin-top:15px;}
+.game-menu .menu-hero {height:170px;margin-bottom:17px;}
+.game-menu .menu-hero-copy {left:18px;bottom:16px;gap:6px;}
+.game-menu .menu-hero-copy strong {font-size:32px;}
+.game-menu .menu-hero-copy small {font-size:12px;letter-spacing:.09em;}
+.game-menu .mission-grid {grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0;}
+.game-menu .mission-card {gap:9px;min-height:0;padding:0;}
+.game-menu .mission-preview {height:160px;aspect-ratio:auto;}
+.game-menu .mission-card > strong,
+.game-menu .mission-card > span,
+.game-menu .mission-card > small {margin-left:13px;margin-right:13px;}
+.game-menu .mission-card > strong {font-size:18px;line-height:1.25;margin-top:3px;}
+.game-menu .mission-card > span {font-size:14px;line-height:1.45;}
+.game-menu .mission-card > small {font-size:12px;line-height:1.4;margin-top:auto;margin-bottom:13px;}
+.game-menu .menu-mission-detail {margin:13px 0;padding:13px 15px;font-size:14px;line-height:1.5;}
+.game-menu .menu-mission-detail h3 {font-size:17px;margin:0 0 7px;}
+.game-menu .menu-mission-detail p {margin:6px 0;}
+.game-menu .menu-fieldset {margin:18px 0;}
+.game-menu .menu-fieldset legend {font-size:14px;margin-bottom:10px;}
+.game-menu .difficulty-options {gap:9px;}
+.game-menu .difficulty-option {min-height:0;padding:11px 12px;gap:4px 8px;grid-template-columns:17px minmax(0,1fr);font-size:14px;}
+.game-menu .difficulty-option input {width:15px;height:15px;margin-top:3px;}
+.game-menu .difficulty-option strong {font-size:14px;line-height:1.4;}
+.game-menu .difficulty-option span {font-size:14px;line-height:1.4;}
+.game-menu .save-slots {gap:12px;margin:16px 0;}
+.game-menu .save-slot {padding:12px;gap:13px;}
+.game-menu .slot-copy {gap:7px;min-height:85px;}
+.game-menu .slot-copy strong {font-size:17px;line-height:1.3;}
+.game-menu .slot-copy span {font-size:14px;line-height:1.45;}
+.game-menu .slot-copy small {font-size:12px;line-height:1.4;}
+.game-menu .save-slot .menu-button {font-size:14px;min-height:38px;padding:8px 11px;}
+.game-menu .settings-grid {gap:12px;margin:17px 0;}
+.game-menu .setting-row {padding:12px 13px;gap:9px;font-size:14px;}
+.game-menu .setting-row > span {font-size:14px;}
+.game-menu .setting-row select {font-size:14px;min-height:36px;padding:6px 9px;}
+.game-menu .setting-row input[type=range] {height:21px;}
+.game-menu .setting-row input[type=checkbox] {width:19px;height:19px;}
+.game-menu .setting-row output {font-size:12px;}
+.game-menu .setting-row small {font-size:12px;line-height:1.4;}
+.game-menu .menu-status {margin-top:9px;padding:8px 12px;font-size:14px;line-height:1.4;}
+.game-menu .menu-footer {margin-top:10px;padding-top:9px;font-size:12px;line-height:1.4;}
+@media(max-width:1050px) {
+  .game-menu .menu-layout {grid-template-columns:140px minmax(0,1fr);gap:14px;}
+  .game-menu .mission-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .game-menu .mission-preview {height:140px;}
+  .game-menu .save-slot {padding:12px;}
+  .game-menu .slot-copy {min-height:0;}
+}
+@media(max-width:760px) {
+  .game-menu {padding:14px 16px;}
+  .game-menu header.menu-brand {padding-bottom:10px;margin-bottom:11px;}
+  .game-menu .menu-brand h1 {font-size:30px;letter-spacing:.1em;}
+  .game-menu .menu-layout {display:flex;flex:1 1 auto;min-height:0;flex-direction:column;gap:10px;}
+  .game-menu .menu-nav {gap:5px;padding:0 0 10px;}
+  .game-menu .menu-nav-button {min-height:35px;padding:7px 10px;font-size:14px;}
+  .game-menu .menu-content {flex:1 1 auto;min-height:0;padding:12px 14px 16px;}
+  .game-menu .menu-hero {height:140px;margin-bottom:15px;}
+  .game-menu .menu-hero-copy {left:16px;bottom:14px;}
+  .game-menu .menu-hero-copy strong {font-size:29px;}
+  .game-menu .menu-title {font-size:25px;}
+  .game-menu .mission-grid {grid-template-columns:1fr;gap:12px;}
+  .game-menu .difficulty-options {grid-template-columns:1fr;gap:8px;}
+  .game-menu .difficulty-option {grid-template-columns:17px auto 1fr;align-items:start;padding:10px 12px;gap:6px 9px;}
+  .game-menu .difficulty-option span {grid-column:3;}
+  .game-menu .difficulty-option strong {white-space:nowrap;}
+  .game-menu .settings-grid {grid-template-columns:1fr;gap:10px;}
+  .game-menu .menu-footer {margin-top:9px;padding-top:8px;}
+}
+/* Wide phones and compact tablets use horizontal mission cards rather than tall posters. */
+@media(min-width:500px) and (max-width:760px) {
+  .game-menu .mission-card {display:grid;grid-template-columns:38% minmax(0,1fr);grid-template-rows:auto 1fr auto;column-gap:12px;row-gap:7px;align-items:start;min-height:146px;}
+  .game-menu .mission-preview {grid-column:1;grid-row:1 / 4;align-self:stretch;height:100%;min-height:146px;max-height:180px;border-bottom:0;border-right:1px solid #49505e;}
+  .game-menu .mission-card > strong {grid-column:2;margin:12px 12px 0 0;font-size:18px;line-height:1.25;}
+  .game-menu .mission-card > span {grid-column:2;margin:0 12px 0 0;font-size:14px;line-height:1.4;}
+  .game-menu .mission-card > small {grid-column:2;margin:0 12px 12px 0;font-size:12px;line-height:1.35;}
+}
+@media(max-width:499px) {
+  .game-menu {padding:12px;}
+  .game-menu .menu-content {padding:12px 12px 15px;}
+  .game-menu .mission-preview {height:125px;}
+  .game-menu .menu-hero {height:140px;}
+  .game-menu .difficulty-option {grid-template-columns:17px minmax(0,1fr);}
+  .game-menu .difficulty-option span {grid-column:2;}
+  .game-menu .save-slot {padding:12px;}
+}
+@media(max-height:500px) {
+  .game-menu {padding-top:10px;padding-bottom:10px;}
+  .game-menu header.menu-brand {padding-bottom:8px;margin-bottom:9px;}
+  .game-menu .menu-brand h1 {font-size:28px;}
+  .game-menu .menu-brand p {margin-top:5px;}
+  .game-menu .menu-nav-button {min-height:32px;padding-top:6px;padding-bottom:6px;}
+  .game-menu .menu-footer {margin-top:7px;padding-top:6px;}
+}
+/* Settings stay compact while exposing controls and audio clearly. */
+.game-menu .settings-section-title{grid-column:1/-1;font-size:15px;letter-spacing:.04em;color:#c5c9d2;margin:8px 0 0;border-bottom:1px solid #383d48;padding-bottom:7px}
+.game-menu .settings-controls-note{grid-column:1/-1;margin:0;color:#a8aeb9;font-size:14px;line-height:1.5}
+.game-menu .binding-grid{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.game-menu .binding-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:9px 11px;background:#17191e;border:1px solid #393e49;min-width:0;font-size:14px}
+.game-menu .binding-button{min-width:65px;min-height:32px;padding:5px 9px;white-space:nowrap;text-align:center;font:14px monospace}
+.game-menu .binding-button.capturing{background:#333943;border-color:#c5cad3;color:#e0e3e8}
+.game-menu .menu-guidance{margin:12px 0;padding:11px 13px;border-left:2px solid #abb2bf;background:#1b1e23;color:#d2d5dc;font-size:14px;line-height:1.5}
+.game-menu .menu-guidance>strong{display:block;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#aab0bd;margin-bottom:5px}
+.game-menu .menu-guidance p,.game-menu .menu-guidance ul{margin:0}.game-menu .menu-guidance ul{padding-left:18px}.game-menu .menu-guidance li.complete{color:#8a93a4}
+@media(max-width:499px){.game-menu .binding-grid{grid-template-columns:1fr}.game-menu .binding-row{padding:8px 10px}}
+
+.game-menu .menu-equipment{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.game-menu .menu-equipment-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid #3c424d;background:#1b1d22e0;min-width:158px}.game-menu .menu-equipment-item img{width:30px;height:30px;flex:none}.game-menu .menu-equipment-item strong{display:block;font-size:14px;color:#d9dce2}.game-menu .menu-equipment-item small{display:block;margin-top:3px;font-size:12px;color:#9ba3b2}
+/* One clear action area replaces duplicate sidebar navigation. */
+.game-menu{width:min(1100px,100%)}
+.game-menu .menu-layout{grid-template-columns:minmax(0,1fr);gap:0}
+.game-menu .menu-content{padding:8px 12px 18px}
+.game-menu .menu-hero{height:155px;margin-bottom:14px}
+.game-menu .home-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}
+.game-menu .home-action{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:4px;min-height:72px;padding:13px 16px}
+.game-menu .home-action strong{font-size:17px}
+.game-menu .home-action small{font-size:12px;line-height:1.4;font-weight:400;opacity:.8}
+.game-menu .pause-actions .home-action:first-child{grid-column:1/-1;min-height:76px}
+.game-menu .pause-actions .home-action:first-child strong{font-size:22px}
+.game-menu .menu-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.game-menu .menu-tabs .menu-button{min-height:40px;padding:8px 18px}
+.game-menu .menu-tabs .selected{box-shadow:inset 0 -2px #c1c6d0}
+.game-menu .mission-details{margin-top:9px}.game-menu .mission-details summary{cursor:pointer;color:#b7bdc8;padding:5px 0}.game-menu .mission-details ul{margin:7px 0 0}
+.game-menu .menu-equipment-item{min-width:0;padding:6px 10px}.game-menu .menu-equipment-item img{width:25px;height:25px}
+.game-menu .menu-equipment-item strong{font-size:12px}.game-menu .menu-equipment-item small{margin-top:1px}
+.game-menu .slot-actions{display:flex;gap:8px;flex-wrap:wrap}
+.game-menu .backup-panel{border-top:1px solid #383d48;margin-top:18px;padding-top:14px}.game-menu .backup-panel h3{font-size:16px;margin:0 0 8px}.game-menu .backup-panel input[type=file]{max-width:100%;font-size:13px}.game-menu .backup-preview{padding:12px;margin:10px 0;background:#1d2026;border:1px solid #4d5463}
+@media(max-width:760px){.game-menu .menu-layout{display:flex}.game-menu .menu-hero{height:135px}.game-menu .home-actions{grid-template-columns:1fr 1fr}.game-menu .menu-content{padding:6px 8px 14px}}
+@media(max-width:499px){.game-menu .home-actions{grid-template-columns:1fr}.game-menu .home-action{min-height:57px;padding:10px 12px}.game-menu .menu-hero{height:110px}.game-menu .menu-hero-copy strong{font-size:25px}.game-menu .menu-footer{display:none}}
+@media(max-height:620px){.game-menu .menu-hero{height:100px}.game-menu .menu-hero-copy strong{font-size:25px}.game-menu .home-action{min-height:57px;padding:9px 13px}.game-menu .menu-equipment{margin:8px 0}.game-menu .menu-guidance{margin:9px 0}.game-menu .menu-footer{display:none}}
+/* Facility descent is the single campaign entry; the map owns its operation dots. */
+.game-menu .facility-campaign-card{width:100%;max-width:780px;display:grid;grid-template-columns:52% minmax(0,1fr);grid-template-rows:auto 1fr auto;gap:12px 20px;text-align:left;margin:16px 0 10px}
+.game-menu .facility-campaign-card .mission-preview{grid-column:1;grid-row:1/4;min-height:230px;height:100%;border-bottom:0;border-right:1px solid #49505e}
+.game-menu .facility-campaign-card>strong{grid-column:2;margin:24px 20px 0 0;font-size:26px}
+.game-menu .facility-campaign-card>span{grid-column:2;margin:0 20px 0 0;font-size:15px;line-height:1.6}
+.game-menu .facility-campaign-card>small{grid-column:2;margin:0 20px 24px 0;color:#c5cad3}
+.game-menu .campaign-operation-detail{padding:13px 16px;margin:12px 0;background:#1a1c21e8;border-left:2px solid #a7aebb}
+.game-menu .campaign-operation-detail h3{font-size:19px;margin:0 0 5px;color:#e0e2e7}
+.game-menu .campaign-operation-detail p{font-size:14px;margin:0;color:#adb3c0;line-height:1.5}
+@media(max-width:600px){.game-menu .facility-campaign-card{display:flex;gap:10px}.game-menu .facility-campaign-card .mission-preview{min-height:0;height:180px;border-right:0;border-bottom:1px solid #49505e}.game-menu .facility-campaign-card>strong,.game-menu .facility-campaign-card>span,.game-menu .facility-campaign-card>small{margin-left:15px;margin-right:15px}.game-menu .facility-campaign-card>strong{margin-top:5px;font-size:22px}.game-menu .facility-campaign-card>small{margin-bottom:17px}}
+
+/* Facility Descent: a ruined-site campaign atlas, with unknown terrain swallowed by cloud. */
+.game-menu .campaign-atlas{position:relative;isolation:isolate;width:100%;aspect-ratio:1200/650;min-height:280px;overflow:hidden;border:1px solid #525967;background:#061014;border-radius:5px;margin:12px 0 16px;box-shadow:inset 0 0 70px #000}
+.game-menu .campaign-atlas>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.game-menu .campaign-atlas:after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 30%,#02090c99);z-index:1}
+.game-menu .campaign-node{position:absolute;z-index:3;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:7px;background:transparent;border:0;padding:6px;min-width:48px;min-height:48px;font:12px/1.3 Arial;color:#bfc4cd;text-align:center;max-width:150px;cursor:pointer}
+.game-menu .campaign-node:hover{background:transparent}.game-menu .campaign-node-dot{display:grid;place-items:center;width:31px;height:31px;border-radius:50%;border:2px solid #919aab;background:#1a1d22;box-shadow:0 0 0 5px #1a1d2290,0 3px 12px #000;color:#e1e3e8;font:700 12px monospace;flex-shrink:0}
+.game-menu .campaign-node.selected .campaign-node-dot{background:#bdc3cd;color:#16181c;border-color:#d6dae0;box-shadow:0 0 0 6px #b4bac62b,0 0 26px #bbc0ca75}.game-menu .campaign-node.completed .campaign-node-dot{border-color:#939bab}
+.game-menu .campaign-node-label{background:#0a0b0de6;padding:4px 7px;border:1px solid #565e6f4d;text-shadow:0 1px 3px #000;white-space:nowrap;letter-spacing:.02em;font-weight:600}.game-menu .campaign-node.selected .campaign-node-label{color:#e4e6ea;border-color:#9ea6b5}
+.game-menu .campaign-map-caption{position:absolute;bottom:12px;left:15px;z-index:2;color:#8d9b91;font:10px monospace;letter-spacing:2px;pointer-events:none}
+.game-menu .campaign-operation-detail{display:flex;flex-direction:column;align-items:start;gap:12px;justify-content:space-between;padding:14px 16px;background:#1a1c21e6;border-left:3px solid #b1b7c3;margin:12px 0}.game-menu .campaign-operation-detail h3{margin:0 0 5px;font-size:18px}.game-menu .campaign-operation-detail p{margin:0;color:#b1b7c3;font-size:14px;line-height:1.5}
+.game-menu .facility-entry{max-width:620px}.game-menu .facility-entry .mission-preview{height:190px}
+@media(max-width:600px){.game-menu .campaign-atlas{aspect-ratio:1.2;min-height:320px}.game-menu .campaign-node{max-width:100px;padding:3px;gap:5px}.game-menu .campaign-node-label{white-space:normal;font-size:10px;max-width:96px}.game-menu .campaign-node-dot{width:27px;height:27px;font-size:11px}.game-menu .campaign-map-caption{font-size:8px;letter-spacing:1px;left:9px;bottom:9px}}
+.game-menu .campaign-node.locked{opacity:.7;cursor:not-allowed}.game-menu .campaign-node.locked .campaign-node-dot{background:#10191c;color:#7e848f;border-color:#525863;box-shadow:0 0 0 4px #10171c88}.game-menu .campaign-node.locked .campaign-node-label{color:#8d9b95;background:#061014e8}.game-menu .campaign-operation-status{font:11px monospace;color:#b1b7c3;letter-spacing:.08em}
+.game-menu .campaign-deployment{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}.game-menu .campaign-deployment .campaign-atlas{margin:0;aspect-ratio:1.42;min-height:360px}.game-menu .campaign-briefing .campaign-operation-detail{margin-top:0}.game-menu .campaign-briefing .menu-fieldset{margin:15px 0}.game-menu .campaign-briefing .difficulty-options{grid-template-columns:1fr;gap:7px}.game-menu .campaign-briefing .difficulty-option{min-height:0;padding:8px 10px;gap:2px 8px}.game-menu .campaign-briefing .difficulty-option span{font-size:12px}.game-menu .campaign-briefing .menu-actions{margin-top:12px}.game-menu .campaign-briefing .menu-actions .primary{flex:1}.game-menu .campaign-map-pane{min-width:0}
+@media(max-width:850px){.game-menu .campaign-deployment{grid-template-columns:1fr}.game-menu .campaign-deployment .campaign-atlas{aspect-ratio:1.65;min-height:280px}.game-menu .campaign-briefing .difficulty-options{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:499px){.game-menu .campaign-deployment .campaign-atlas{aspect-ratio:1.2;min-height:280px}.game-menu .campaign-briefing .difficulty-options{grid-template-columns:1fr}.game-menu .campaign-operation-detail{gap:5px}}
+/* Short labels carry the menus; supporting copy appears only where it changes a decision. */
+.game-menu header.menu-brand{padding-bottom:10px;margin-bottom:10px}
+.game-menu .menu-content{padding-top:4px}
+.game-menu .menu-title{margin-bottom:12px}
+.game-menu .home-actions{gap:8px;margin-top:0}
+.game-menu .home-action{min-height:52px;justify-content:center;padding:11px 14px}
+.game-menu .home-action:has(small){min-height:64px}
+.game-menu .pause-actions .home-action:first-child{min-height:58px}
+.game-menu .pause-actions .home-action:first-child strong{font-size:20px}
+.game-menu .menu-hero{margin-bottom:12px}
+.game-menu .menu-equipment{margin:10px 0 0}
+.game-menu .facility-campaign-card{grid-template-rows:auto 1fr;margin-top:12px;row-gap:9px}
+.game-menu .facility-campaign-card .mission-preview{grid-row:1/3;min-height:205px}
+.game-menu .facility-campaign-card>span{margin-bottom:20px}
+.game-menu .campaign-operation-detail{gap:5px;padding:12px 14px}
+.game-menu .campaign-briefing .menu-fieldset{margin:12px 0}
+.game-menu .difficulty-option{grid-template-columns:17px minmax(0,1fr);align-items:center}
+.game-menu .difficulty-option input{margin:0}
+.game-menu .difficulty-option strong{line-height:1.3}
+.game-menu .menu-tabs{margin:9px 0}
+.game-menu .settings-grid{margin:12px 0}
+.game-menu .backup-panel{margin-top:14px;padding-top:12px}
+.game-menu .backup-panel .menu-actions{margin-top:8px}
+@media(max-width:600px){.game-menu .facility-campaign-card .mission-preview{min-height:0;height:170px}.game-menu .facility-campaign-card>span{margin-bottom:16px}}
+@media(max-width:499px){.game-menu .home-action{min-height:46px;padding:10px 12px}.game-menu .home-action:has(small){min-height:58px}.game-menu .pause-actions .home-action:first-child{min-height:52px}}
+/* Difficulty selection shows the rules that actually change the operation. */
+.game-menu .campaign-briefing .difficulty-option{display:grid;grid-template-columns:16px minmax(0,1fr) 16px;align-items:center;gap:8px;padding:10px 11px;border:1px solid #434a57;background:#17191d;cursor:pointer}
+.game-menu .campaign-briefing .difficulty-option strong{font-size:13px;white-space:normal;color:#b7bcc7}
+.game-menu .campaign-briefing .difficulty-option input{accent-color:#cacfd7;outline-offset:4px}
+.game-menu .campaign-briefing .difficulty-option .difficulty-check{grid-column:3;display:block;opacity:0;font-size:16px;font-weight:700;color:#d1d5dc}
+.game-menu .campaign-briefing .difficulty-option.selected{border-color:#bbc0ca;background:#323740;box-shadow:inset 3px 0 #bbc0ca,0 0 0 1px #bbc0ca24}
+.game-menu .campaign-briefing .difficulty-option.selected strong{color:#e4e6ea}.game-menu .campaign-briefing .difficulty-option.selected .difficulty-check{opacity:1}
+.game-menu .difficulty-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0 0;padding:0}
+.game-menu .difficulty-stat{padding:8px 10px;border:1px solid #3f4551;background:#15171b}
+.game-menu .difficulty-stat dt{font-size:11px;color:#a5acb9;line-height:1.3}.game-menu .difficulty-stat dd{margin:4px 0 0;font:700 18px monospace;color:#d9dce2}
+.game-menu .difficulty-stats[data-difficulty=easy] .difficulty-stat:first-child dd{color:#c4c9d2}.game-menu .difficulty-stats[data-difficulty=hard] .difficulty-stat dd{color:#efc092}
+.game-menu .operation-best{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 10px;margin:10px 0 0;padding:9px 10px;border:1px solid #4d5565;background:#1d2026;font-size:12px;color:#bcc2cc}.game-menu .operation-best[hidden]{display:none}.game-menu .operation-best strong{font:700 17px monospace;color:#dcdfe4}.game-menu .operation-best small{font-size:11px;color:#aab0bd}
+.game-menu .remix-option{display:flex;align-items:center;gap:8px;margin:9px 0;padding:9px 10px;color:#c2c7d0;font-size:13px;background:#17191e;border:1px solid #3d4450;cursor:pointer}.game-menu .remix-option input{accent-color:#cacfd7;width:16px;height:16px;margin:0}
+.game-menu .persistence-warning{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;padding:9px 12px;margin:0 0 10px;background:#30281b;border:1px solid #86734d;color:#e1d0a8;flex:0 0 auto;font-size:12px;line-height:1.4}.game-menu .persistence-warning strong{color:#f0d594}.game-menu .persistence-warning span{flex:1;min-width:160px}.game-menu .persistence-warning .menu-button{font-size:12px;min-height:34px;padding:7px 10px}
+.field-notes-frame{display:block;width:100%;height:min(62dvh,660px);min-height:280px;border:1px solid #485057;border-radius:6px;background:#101216}.menu-content:has(.field-notes-frame){max-width:none;width:100%}

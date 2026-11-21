@@ -1,0 +1,26 @@
+import * as THREE from './vendor/three.module.js';
+import {weapon} from './weapons.js?v=nulldelve-6';
+export const WEAPON_PREVIEW_LABELS=Object.freeze({rifle:'MK4 carbine',carbine:'MK4 carbine',smg:'VX9 SMG',shotgun:'BREACH-12 shotgun',marksman:'SABLE DMR marksman rifle',lmg:'M60 WARDEN light machine gun',pistol:'P9 sidearm'});
+/** Long barrels and bulky magazines fit the same preview without cropping. */
+export function frameWeaponPreview(model){
+ model.rotation.y=-Math.PI/2;model.updateMatrixWorld(true);
+ const bounds=new THREE.Box3().setFromObject(model),size=bounds.getSize(new THREE.Vector3());
+ const scale=Math.min(2.0/Math.max(.01,size.x),.76/Math.max(.01,size.y),2);
+ model.scale.multiplyScalar(scale);model.updateMatrixWorld(true);
+ const center=new THREE.Box3().setFromObject(model).getCenter(new THREE.Vector3());model.position.sub(center);model.position.x+=.1;model.updateMatrixWorld(true);return model;
+}
+/** A static render of the actual equipped model; redraws only when the weapon changes. */
+export function createWeaponPreview(canvas){
+ const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(112,50,false);
+ const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-1.08,1.08,.48,-.48,.1,20);
+ camera.position.set(.1,2.2,4);camera.lookAt(.1,0,0);
+ scene.add(new THREE.HemisphereLight(0xe6f3e8,0x34483c,2.8));
+ const light=new THREE.DirectionalLight(0xffffff,3);light.position.set(-2,4,3);scene.add(light);
+ let current=null,lastType='';
+ return function show(type){
+   if(type===lastType)return;lastType=type;if(current)scene.remove(current);
+   current=frameWeaponPreview(weapon(type));scene.add(current);renderer.render(scene,camera);
+   canvas.setAttribute('aria-label','Equipped weapon: '+(WEAPON_PREVIEW_LABELS[type]??type));
+ };
+}

@@ -1,0 +1,84 @@
+const {compatibleStorage}=require('../storage-compat.js');
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const {createProgression}=require('../progression.js');
+const {createEconomy}=require('../economy.js');
+const {createPressurePuzzle}=require('../pressure-puzzle.js');
+const {ROACH_VARIANTS}=require('../roach.js');
+const {missionGuidance}=require('../session-rules.js');
+const {createCampaignProfile}=require('../campaign-profile.js');
+const {primaryWeapon,primaryReserve}=require('../arsenal.js');
+const {createFireZones}=require('../fire-grenades.js');
+const {createCampaignProgress}=require('../campaign-progress.js');
+const {createLootState}=require('../loot.js');
+const {campaignOperationGuidance}=require('../campaign-operations.js');
+const {createOperationStats}=require('../operation-records.js');
+const {validateSnapshot}=require('../snapshot-validation.js');
+const source=fs.readFileSync(new URL('../main.js',`file://${__filename}`),'utf8');
+const noop=()=>{};
+const plain=value=>JSON.parse(JSON.stringify(value));
+function fragment(start,end){const at=source.indexOf(start);assert.ok(at>=0,`main contains ${start}`);const stop=source.indexOf(end,at);assert.ok(stop>at,`main contains ${end}`);return source.slice(at,stop);}
+function mesh(){return {position:{x:0,y:0,z:0,set(x,y,z){Object.assign(this,{x,y,z});},copy(value){Object.assign(this,value);}},visible:false};}
+function session(){
+ const elements=new Map();const $=selector=>{if(!elements.has(selector))elements.set(selector,{textContent:''});return elements.get(selector);};
+ const economy=createEconomy(),puzzle=createPressurePuzzle(),enemies=[],doors=Array.from({length:18},()=>({open:false,slide:0,unlocked:false}));
+ const difficultyRules={easy:{maxHp:150,speed:.85,damage:.65,hp:.8,magazine:40},normal:{maxHp:100,speed:1,damage:1,hp:1,magazine:30},hard:{maxHp:80,speed:1.12,damage:1.35,hp:1.15,magazine:24}};
+ const ctx={barrelSystem:{state:[],serialize:()=>[],restore:noop},doorHint:{serializeSeen:()=>[],restoreSeen:noop,skip:noop},fireZones:createFireZones(null),campaignProgress:createCampaignProgress(null),active:false,ended:false,menu:{settings:{aimMode:'auto'}},lastPointer:null,campaignProfile:createCampaignProfile({storage:null,economy}),primaryWeapon,primaryReserve,updateOperationEnvironment:noop,operationStats:createOperationStats(),createOperationStats,validateSnapshot,W:101,H:69,runConfig:{mission:'campaign',difficulty:'normal',operation:null,remix:false},difficultyRules,rules:difficultyRules.normal,economy,puzzle,enemies,doors,loot:createLootState(),lootView:{clear:noop},createLootState,
+  player:{x:7,z:29,hp:100,maxHp:100,ammo:30,intel:false,angle:0,hurtGrace:0},selected:'rifle',reload:0,nextEnemyId:1,
+  weapons:{rifle:{baseCapacity:30,capacity:30,ammo:30,reserve:120,baseReload:1.7,reload:1.7,baseDamage:1,interval:.11},pistol:{baseCapacity:12,capacity:12,ammo:12,reserve:60,baseReload:1.1,reload:1.1,baseDamage:2,interval:.29}},
+  explored:new Set(),seenRooms:new Set(),rewardedZones:new Set(),fogPixels:new Uint8Array(101*69*4),previousVisible:[1],focus:{x:0,z:0},keyboardAim:{x:0,z:-1},aimMode:'mouse',guidanceKey:'',
+  Map,Set,Math,Number,ROACH_VARIANTS,missionGuidance,campaignOperationGuidance,$,hud:noop,toast:noop,updateFog:noop,updatePuzzleArt:noop,removeSpawnCue:noop,
+  scene:{removed:[],remove(value){this.removed.push(value);}},THREE:{Group:class {constructor(){Object.assign(this,mesh());}}},createRoach:()=>mesh(),
+  attachEnemyHealthBar:(scene,enemy)=>{enemy.healthBar={group:mesh()};},
+  weapon:()=>mesh(),playerMesh:{getObjectByName:()=>({parent:{remove:noop}}),add:noop,userData:{gunMount:{x:.28,y:1.18,z:-.31},flash:{position:{z:-1.56}}}}
+ };
+ ctx.progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant,{encounter}={})=>{const stats=ROACH_VARIANTS[variant],e={encounter,id:'e'+ctx.nextEnemyId++,x,z,...stats,maxHp:stats.hp,variant,cooldown:1,alerted:true,mesh:mesh(),attackWindup:0,staggerTime:0,spawnDelay:0};enemies.push(e);return e;}});
+ ctx.persistCampaignProfile=()=>ctx.campaignProfile.persist();
+ ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;vm.createContext(ctx);
+ vm.runInContext(fragment('function applyUpgrades()','\napplyUpgrades();'),ctx);
+ vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
+ vm.runInContext(fragment('function equippedModelType(','\nrefreshPlayerWeapon();'),ctx);
+ vm.runInContext(fragment('function captureSnapshot()','\nfunction startOperation('),ctx);
+ vm.runInContext(fragment('function currentGuidance()','\nfunction refreshHelp()'),ctx);
+ vm.runInContext('applyUpgrades()',ctx);
+ return {ctx,elements,capture:()=>plain(vm.runInContext('captureSnapshot()',ctx)),restore:data=>{ctx.saved=data;return vm.runInContext('restoreSnapshot(saved)',ctx);}};
+}
+function populatedSnapshot(){
+ const fixture=session(),{ctx}=fixture;
+ ctx.economy.restore({credits:420,upgrades:{rifle:{damage:2,magazine:1,reload:1},pistol:{damage:1,magazine:0,reload:2}},items:{medkit:2,grenade:3},shield:18});
+ vm.runInContext('applyUpgrades()',ctx);
+ Object.assign(ctx.player,{x:23,z:10,hp:63,ammo:7,angle:1.2,hurtGrace:.23});ctx.selected='pistol';ctx.weapons.rifle.ammo=19;ctx.reload=.64;
+ ctx.puzzle.solved=true;ctx.puzzle.plates.forEach(p=>p.active=true);ctx.puzzle.crates.forEach((c,i)=>Object.assign(c,{x:ctx.puzzle.plates[i].x,z:ctx.puzzle.plates[i].z,seated:true}));ctx.doors[0].unlocked=true;
+ for(const x of [8,4,12])ctx.progression.interact({x,z:5});ctx.progression.interact({x:19.5,z:7});ctx.progression.interact({x:27,z:13});
+ ctx.enemies[1].hp=0;ctx.progression.update(ctx.player,.1);Object.assign(ctx.enemies[0],{hp:1,cooldown:.4,attackWindup:.2,staggerTime:.12,spawnDelay:.3});
+ ctx.explored.add(7*101+4);ctx.explored.add(10*101+23);ctx.seenRooms.add('INSERTION');ctx.seenRooms.add('SECURITY');ctx.rewardedZones.add('storage');ctx.doors[1].open=true;ctx.doors[1].slide=.65;
+ return fixture.capture();
+}
+test('actual browser capture/restore roundtrip preserves equipment, world discovery, and active horde identity',()=>{
+ const saved=populatedSnapshot(),target=session();assert.equal(target.restore(saved),true);const {ctx}=target;
+ assert.equal(ctx.selected,'pistol');assert.equal(ctx.player.hp,63);assert.equal(ctx.player.ammo,7);assert.equal(ctx.player.hurtGrace,.23);assert.equal(ctx.reload,.64);
+ assert.equal(ctx.weapons.rifle.ammo,19);assert.equal(ctx.weapons.rifle.damage,3);assert.equal(ctx.weapons.rifle.capacity,36);assert.ok(Math.abs(ctx.weapons.rifle.reload-1.52)<1e-10);assert.equal(ctx.weapons.pistol.damage,3);
+ assert.equal(ctx.economy.state.credits,420);assert.deepEqual(plain(ctx.economy.state.items),{medkit:2,grenade:3,fireGrenade:0});assert.equal(ctx.economy.state.shield,18);
+ assert.deepEqual([...ctx.explored].sort((a,b)=>a-b),saved.explored.sort((a,b)=>a-b));assert.ok(ctx.seenRooms.has('SECURITY'));assert.ok(ctx.rewardedZones.has('storage'));
+ assert.equal(ctx.puzzle.solved,true);assert.equal(ctx.puzzle.plates.every(p=>p.active),true);assert.equal(ctx.puzzle.crates.every(c=>c.seated),true);assert.equal(ctx.puzzle.crates[0].x,4);assert.equal(ctx.doors[0].unlocked,true);assert.equal(ctx.doors[1].slide,.65);
+ const security=ctx.progression.state.zones.find(z=>z.id==='security'),savedZone=saved.progression.zones.find(z=>z.id==='security');assert.equal(security.status,'active');assert.deepEqual(plain(security.queue),savedZone.queue);assert.equal(security.spawned,savedZone.spawned);
+ for(const enemy of security.wave)assert.equal(enemy,ctx.enemies.find(e=>e.id===enemy.id),'wave must refer to the live restored enemy objects');
+ const restored=ctx.enemies.find(e=>e.id===saved.enemies[0].id);assert.equal(restored.attackWindup,.2);assert.equal(restored.staggerTime,.12);assert.equal(restored.spawnDelay,.3);assert.equal(restored.maxHp,2);
+ assert.match(target.elements.get('#objective').textContent,/security purge/i);assert.match(target.elements.get('#hint').textContent,/reinforcements/);assert.notEqual(target.elements.get('#hint').textContent,'Search the dark rooms. Watch your corners.');
+ assert.deepEqual(target.capture(),saved,'a second capture preserves all serialized session fields');
+});
+test('actual save restoration reconstructs the next puzzle instruction after room-entry flags were already saved',()=>{
+ const saved=populatedSnapshot();saved.enemies=[];saved.progression.relay={started:false,remaining:0,completed:false};for(const zone of saved.progression.zones){zone.status='dormant';zone.waveIds=[];zone.waveVariants=[];zone.queue=[];zone.spawned=0;zone.spawnTimer=0;}
+ saved.progression.archiveEntered=true;saved.progression.securityEntered=true;const target=session();assert.equal(target.restore(saved),true);assert.equal(target.elements.get('#objective').textContent,'Link the security relays');assert.match(target.elements.get('#hint').textContent,/eight seconds/);
+});
+test('unsupported save versions are rejected before replacing the current session',()=>{const target=session(),saved=populatedSnapshot();saved.version=2;assert.equal(target.restore(saved),false);assert.equal(target.ctx.player.hp,100);assert.equal(target.ctx.enemies.length,0);});
+test('malformed nested saves never partially replace the live operator or world',()=>{for(const corrupt of [s=>s.enemies=[null],s=>delete s.puzzle.crates,s=>s.progression.version=99,s=>s.player.x=NaN]){const target=session(),before=target.capture(),saved=populatedSnapshot();corrupt(saved);assert.equal(target.restore(saved),false);assert.deepEqual(target.capture(),before);}});
+test('purchased shotgun and SMG loadouts retain their real magazine and cadence after a save',()=>{for(const id of ['smg','shotgun']){const saved=populatedSnapshot();saved.loadout={primary:id,unlocked:['carbine',id]};saved.selected='rifle';saved.player.ammo=2;saved.magazines.rifle=2;const target=session();assert.equal(target.restore(saved),true);const config=primaryWeapon(id);assert.equal(target.ctx.campaignProfile.state.primary,id);assert.equal(target.ctx.weapons.rifle.baseCapacity,config.capacity);assert.equal(target.ctx.weapons.rifle.interval,config.interval);assert.equal(target.ctx.weapons.rifle.pellets,config.pellets);assert.equal(target.ctx.player.ammo,2);assert.equal(target.capture().loadout.primary,id);}});
+test('returning to an older checkpoint retains newer predeployment purchases',()=>{const saved=populatedSnapshot(),target=session();target.ctx.economy.restore({credits:500});assert.equal(target.ctx.campaignProfile.purchaseWeapon('shotgun').ok,true);assert.equal(target.ctx.economy.purchase('armor').ok,true);target.ctx.campaignProfile.markPurchase();const credits=target.ctx.economy.state.credits;assert.equal(target.restore(saved),true);assert.equal(target.ctx.campaignProfile.state.primary,'shotgun');assert.equal(target.ctx.economy.state.credits,credits);assert.equal(target.ctx.economy.state.shield,40);assert.ok(target.ctx.player.ammo<=target.ctx.weapons.pistol.capacity);});
+test('adopting a higher-revision save preserves purchases made after restoring it',()=>{const saved=populatedSnapshot();saved.profileRevision=5;const target=session();assert.equal(target.restore(saved),true);assert.equal(target.ctx.campaignProfile.state.revision,5);assert.equal(target.ctx.economy.purchase('armor').ok,true);target.ctx.campaignProfile.markPurchase();const credits=target.ctx.economy.state.credits;assert.equal(target.restore(saved),true);assert.equal(target.ctx.campaignProfile.state.revision,6);assert.equal(target.ctx.economy.state.credits,credits);});
+
+test('loading a sidearm save during a rifle reload restores weapon identity before its saved timer',()=>{const saved=populatedSnapshot(),target=session();target.ctx.reload=1.2;assert.equal(target.restore(saved),true);assert.equal(target.ctx.selected,'pistol');assert.equal(target.ctx.player.ammo,7);assert.equal(target.ctx.weapons.rifle.ammo,19);assert.equal(target.ctx.reload,.64);});
+
+test('restoring a checkpoint respects mouse-only aiming and re-arms pointer detection',()=>{const saved=populatedSnapshot(),target=session();target.ctx.menu.settings.aimMode='mouse';target.ctx.lastPointer={x:400,y:300};assert.equal(target.restore(saved),true);assert.equal(target.ctx.aimMode,'mouse');assert.equal(target.ctx.lastPointer,null);});
