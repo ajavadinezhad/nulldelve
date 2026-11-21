@@ -127,3 +127,7 @@ Skills use small connected icon circles with one selected detail panel. Locked n
 ## r25 deeper skills
 
 Expanded to twelve nodes with three specialization forks. Actual-function gameplay regressions cover finite healing/armor, reload duration, melee targeting/cooldown, charge timing and fire-zone radius persistence. Larger Demolition ranks now affect ground fire rather than silently clamping at the first rank. Point-budget import reconciliation prioritizes already-developed nodes. Phone branch filters keep circles readable; desktop retains all three connected trees. Full balance rationale is in SKILL_BALANCE.md.
+
+## r26 skill audit
+
+Three agents reviewed skill balance, runtime persistence and phone navigation. Fixed post-final-mission unlocks for two skills, invalid effect-name fallback, checkpoint recapture losing skill prerequisites, missing skill development in exported backups, and phone node details remaining below the viewport. Short landscape skill menus now devote more height to the internally scrolling content. Runtime regressions cover all twelve skills across seven missions and three difficulties (252 double roundtrips), all mutation attacks and all guns with reload upgrades/attachments. Numerical bonus strengths remain unchanged; no human difficulty or physical-phone claim is made.

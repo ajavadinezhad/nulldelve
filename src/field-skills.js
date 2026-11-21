@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=branches-r25';
+import {compatibleStorage} from './storage-compat.js?v=skill-audit-r26';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
@@ -21,9 +21,9 @@ const advanced=[
  {id:'plating',name:'Reactive Plating',description:'Armor absorbs the same hit using 20% less armor. Unarmored damage is unchanged.',unlockAfter:'nest',requires:'surgeon',icon:'armor'},
  {id:'triage',name:'Emergency Triage',description:'Medkits restore up to 85 health. Still consumes one kit; no passive regeneration.',unlockAfter:'hospital',requires:'surgeon',icon:'healing'},
  {id:'quickloader',name:'Tactical Reload',description:'Reload 12% faster with either gun. Damage and magazine capacity stay unchanged.',unlockAfter:'hospital',requires:'pathfinder',icon:'reload'},
- {id:'closequarters',name:'Close Quarters',description:'Knife strikes deal 2 damage instead of 1. Reach and cooldown stay unchanged.',unlockAfter:'freight',requires:'pathfinder',icon:'melee'},
+ {id:'closequarters',name:'Close Quarters',description:'Knife strikes deal 2 damage instead of 1. Reach and cooldown stay unchanged.',unlockAfter:'hospital',requires:'pathfinder',icon:'melee'},
  {id:'steadythrow',name:'Quick Cast',description:'Reach full throwing range 20% sooner. Grenade damage and fuse stay unchanged.',unlockAfter:'hospital',requires:'ordnance',icon:'charge'},
- {id:'widearea',name:'Blast Control',description:'Grenade effects and danger radius reach 25% farther. Keep clear of your own blast.',unlockAfter:'freight',requires:'ordnance',icon:'blast'},
+ {id:'widearea',name:'Blast Control',description:'Grenade effects and danger radius reach 25% farther. Keep clear of your own blast.',unlockAfter:'hospital',requires:'ordnance',icon:'blast'},
 ];
 export const SKILL_NODES=Object.freeze([...FIELD_SKILLS.slice(1),...advanced].map(Object.freeze));
 export function trainingPoints(state,completed=[]){return Math.max(0,milestones.filter(id=>completed.includes(id)).length-(state?.learned?.length??0));}
@@ -47,7 +47,7 @@ export function normalizeFieldSkill(value,completed=[]){
  return {version:2,selected:selected==='none'||learned.includes(selected)?selected:'none',learned};
 }
 /** Returns a frozen object: selecting a skill replaces, rather than stacks, effects. */
-export function fieldSkillEffects(id){return effects[id]??effects.none;}
+export function fieldSkillEffects(id){return Object.prototype.hasOwnProperty.call(effects,id)?effects[id]:effects.none;}
 export function createFieldSkills(storage){
  if(storage===undefined){try{storage=globalThis.localStorage;}catch{storage=null;}}storage=compatibleStorage(storage);
  let memory={version:2,selected:'none',learned:[]},volatile=false;

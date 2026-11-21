@@ -56,3 +56,10 @@ test('seven earned points force branch choices and stale imports cannot erase de
 test('a stale tab reads newly developed skills before spending another point',()=>{
  const storage=store(),a=createFieldSkills(storage),b=createFieldSkills(storage);assert.ok(a.learn('runner',allOperations).ok);assert.ok(a.learn('pathfinder',allOperations).ok);assert.ok(a.learn('quickloader',allOperations).ok);assert.ok(b.learn('medic',allOperations).ok);assert.deepEqual(new Set(a.serialize(allOperations).learned),new Set(['runner','pathfinder','quickloader','medic']));assert.equal(trainingPoints(a.serialize(allOperations),allOperations),3);
 });
+
+
+test('every specialization can be developed before at least one remaining first-clear operation',()=>{
+ const {SKILL_NODES}=require('../src/field-skills.js'),operations=['breach','command','research','containment','nest','hospital','freight'];
+ for(const node of SKILL_NODES){let firstUsable=-1;for(let index=0;index<operations.length;index++){const done=operations.slice(0,index),skills=createFieldSkills(null),path=[];for(let current=node;current;current=SKILL_NODES.find(n=>n.id===current.requires))path.unshift(current.id);if(path.every(id=>skills.learn(id,done).ok)){firstUsable=index;break;}}assert.ok(firstUsable>=0,`${node.id} is reachable during the campaign rather than only after its final operation`);}
+});
+test('prototype property names cannot resolve to skill effects',()=>{for(const id of ['constructor','toString','__proto__','hasOwnProperty'])assert.equal(fieldSkillEffects(id),fieldSkillEffects('none'));});

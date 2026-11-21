@@ -1,8 +1,9 @@
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=branches-r25';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=branches-r25';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=branches-r25';
-import {validateSnapshot} from './snapshot-validation.js?v=branches-r25';
-import {normalizeSettings} from './controls.js?v=branches-r25';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=skill-audit-r26';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=skill-audit-r26';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=skill-audit-r26';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=skill-audit-r26';
+import {validateSnapshot} from './snapshot-validation.js?v=skill-audit-r26';
+import {normalizeSettings} from './controls.js?v=skill-audit-r26';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';
@@ -56,6 +57,7 @@ export function createSaveSlots(storage){
     if(overrides.profile!==undefined){const live=normalizeCampaignProfile(overrides.profile);if(!live)throw new Error('The current armory profile could not be backed up.');profile=live;}
     const campaign=overrides.campaign!==undefined?normalizeCampaignProgress(overrides.campaign):createCampaignProgress(storage).serialize();
     if(overrides.settings!==undefined)settings=normalizeSettings(overrides.settings);
+    const fieldSkill=overrides.fieldSkill!==undefined?normalizeFieldSkill(overrides.fieldSkill,campaign.completed):createFieldSkills(storage).serialize(campaign.completed);
     let checkpoint=readCheckpoint();
     if(overrides.checkpoint!==undefined){
       const live=overrides.checkpoint;
@@ -63,7 +65,7 @@ export function createSaveSlots(storage){
       const meta=live.metadata??{},config=live.snapshot.config;
       checkpoint={metadata:{slot:'checkpoint',name:typeof meta.name==='string'&&meta.name.trim()?meta.name.trim().slice(0,100):'Session backup',time:new Date().toISOString(),mission:config.mission,difficulty:config.difficulty,summary:typeof meta.summary==='string'?meta.summary.slice(0,1000):''},snapshot:copy(live.snapshot)};
     }
-    return {format:'nulldelve-backup',version:1,createdAt:new Date().toISOString(),saves:read(),checkpoint,settings,campaign,profile};
+    return {format:'nulldelve-backup',version:1,createdAt:new Date().toISOString(),saves:read(),checkpoint,settings,campaign,profile,fieldSkill};
   }
   function exportBackup(overrides){return JSON.stringify(backupDocument(overrides),null,2);}
   function previewBackup(text){
@@ -84,8 +86,11 @@ export function createSaveSlots(storage){
     if(hasCampaign&&(!data.campaign||data.campaign.version!==1||!Array.isArray(data.campaign.completed)||!data.campaign.completed.every(id=>typeof id==='string')))throw new Error('This backup contains invalid campaign progress.');
     const hasProfile=Object.prototype.hasOwnProperty.call(data,'profile'),profile=hasProfile?normalizeCampaignProfile(data.profile):null;
     if(hasProfile&&!profile)throw new Error('This backup contains an invalid armory profile.');
-    pendingBackup={id:++previewSequence,saves:{version:VERSION,slots},checkpoint,settings:data.settings===null?null:normalizeSettings(data.settings),campaign:hasCampaign?normalizeCampaignProgress(data.campaign):null,profile};
-    return {id:pendingBackup.id,slots:slots.map(e=>e?copy(e.metadata):null),checkpoint:checkpoint?copy(checkpoint.metadata):null,hasSettings:pendingBackup.settings!==null,hasProfile:pendingBackup.profile!==null,hasCampaign:pendingBackup.campaign!==null,completedCampaign:pendingBackup.campaign?[...pendingBackup.campaign.completed]:null};
+    const hasFieldSkill=Object.prototype.hasOwnProperty.call(data,'fieldSkill');
+    if(hasFieldSkill&&(!hasCampaign||![1,2].includes(data.fieldSkill?.version)||typeof data.fieldSkill.selected!=='string'||data.fieldSkill.version===2&&(!Array.isArray(data.fieldSkill.learned)||!data.fieldSkill.learned.every(id=>typeof id==='string'))))throw new Error('This backup contains invalid skill development.');
+    const fieldSkill=hasFieldSkill?normalizeFieldSkill(data.fieldSkill,normalizeCampaignProgress(data.campaign).completed):null;
+    pendingBackup={id:++previewSequence,saves:{version:VERSION,slots},checkpoint,settings:data.settings===null?null:normalizeSettings(data.settings),campaign:hasCampaign?normalizeCampaignProgress(data.campaign):null,profile,fieldSkill};
+    return {id:pendingBackup.id,slots:slots.map(e=>e?copy(e.metadata):null),checkpoint:checkpoint?copy(checkpoint.metadata):null,hasSettings:pendingBackup.settings!==null,hasProfile:pendingBackup.profile!==null,hasFieldSkill:pendingBackup.fieldSkill!==null,hasCampaign:pendingBackup.campaign!==null,completedCampaign:pendingBackup.campaign?[...pendingBackup.campaign.completed]:null};
   }
   function importBackup(id){
     if(!pendingBackup||pendingBackup.id!==id)throw new Error('Preview a backup before restoring it.');
@@ -95,6 +100,7 @@ export function createSaveSlots(storage){
     if(backup.settings)updates.push(['nulldelve.settings.v1',JSON.stringify(backup.settings)]);
     if(backup.campaign)updates.push([CAMPAIGN_PROGRESS_KEY,JSON.stringify(backup.campaign)]);
     if(backup.profile)updates.push([CAMPAIGN_PROFILE_KEY,JSON.stringify(backup.profile)]);
+    if(backup.fieldSkill)updates.push([FIELD_SKILLS_KEY,JSON.stringify(backup.fieldSkill)]);
     let old;try{old=updates.map(([key])=>[key,storage.getItem(key)]);}catch{throw new Error('Browser storage could not be read. Your saves have not changed.');}
     try{for(const [key,value] of updates){if(value===null)storage.removeItem(key);else storage.setItem(key,value);}}
     catch{for(const [key,value] of old){try{if(value===null)storage.removeItem(key);else storage.setItem(key,value);}catch{}}throw new Error('The backup could not be restored. Check browser storage and try again.');}

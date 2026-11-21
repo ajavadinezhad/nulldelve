@@ -1,6 +1,6 @@
-import {weaponThumbnail} from './weapon-preview.js?v=branches-r25';
-import {createItemIcon} from './item-icons.js?v=branches-r25';
-import {formatKey} from './controls.js?v=branches-r25';
+import {weaponThumbnail} from './weapon-preview.js?v=skill-audit-r26';
+import {createItemIcon} from './item-icons.js?v=skill-audit-r26';
+import {formatKey} from './controls.js?v=skill-audit-r26';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;

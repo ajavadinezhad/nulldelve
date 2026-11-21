@@ -1,5 +1,5 @@
 const {applyWeaponAttachment}=require('../src/weapon-attachments.js');
-const {createFieldSkills,fieldSkillEffects,normalizeFieldSkill}=require('../src/field-skills.js');
+const {SKILL_NODES,createFieldSkills,fieldSkillEffects,normalizeFieldSkill}=require('../src/field-skills.js');
 const {upgradeWorldSnapshot,WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT}=require('../src/world-layout.js');
 const {compatibleStorage}=require('../src/storage-compat.js');
 const {test}=require('node:test');
@@ -28,7 +28,7 @@ function session({expanded=false}={}){
  const elements=new Map();const $=selector=>{if(!elements.has(selector))elements.set(selector,{textContent:''});return elements.get(selector);};
  const economy=createEconomy(),puzzle=createPressurePuzzle(),enemies=[],doors=Array.from({length:expanded?WORLD_DOOR_COUNT:18},()=>({open:false,slide:0,unlocked:false}));
  const difficultyRules={easy:{maxHp:150,speed:.85,damage:.65,hp:.8,magazine:40},normal:{maxHp:100,speed:1,damage:1,hp:1,magazine:30},hard:{maxHp:80,speed:1.12,damage:1.35,hp:1.15,magazine:24}};
- const ctx={fieldSkills:createFieldSkills(null),applyWeaponAttachment,normalizeFieldSkill,activeFieldSkill:'none',barrelSystem:{state:[],serialize:()=>[],restore:noop},doorHint:{serializeSeen:()=>[],restoreSeen:noop,skip:noop},fireZones:createFireZones(null),campaignProgress:createCampaignProgress(null),active:false,ended:false,menu:{settings:{aimMode:'auto'}},lastPointer:null,campaignProfile:createCampaignProfile({storage:null,economy}),primaryWeapon,primaryReserve,updateOperationEnvironment:noop,operationStats:createOperationStats(),createOperationStats,validateSnapshot,upgradeWorldSnapshot,W:expanded?WORLD_WIDTH:101,H:WORLD_HEIGHT,runConfig:{mission:'campaign',difficulty:'normal',operation:null,remix:false},difficultyRules,rules:difficultyRules.normal,economy,puzzle,enemies,doors,loot:createLootState(),lootView:{clear:noop},createLootState,
+ const ctx={fieldSkills:createFieldSkills(null),applyWeaponAttachment,normalizeFieldSkill,activeFieldSkill:'none',activeFieldSkillState:null,barrelSystem:{state:[],serialize:()=>[],restore:noop},doorHint:{serializeSeen:()=>[],restoreSeen:noop,skip:noop},fireZones:createFireZones(null),campaignProgress:createCampaignProgress(null),active:false,ended:false,menu:{settings:{aimMode:'auto'}},lastPointer:null,campaignProfile:createCampaignProfile({storage:null,economy}),primaryWeapon,primaryReserve,updateOperationEnvironment:noop,operationStats:createOperationStats(),createOperationStats,validateSnapshot,upgradeWorldSnapshot,W:expanded?WORLD_WIDTH:101,H:WORLD_HEIGHT,runConfig:{mission:'campaign',difficulty:'normal',operation:null,remix:false},difficultyRules,rules:difficultyRules.normal,economy,puzzle,enemies,doors,loot:createLootState(),lootView:{clear:noop},createLootState,
   player:{x:7,z:29,hp:100,maxHp:100,ammo:30,intel:false,angle:0,hurtGrace:0},selected:'rifle',reload:0,nextEnemyId:1,
   weapons:{rifle:{baseCapacity:30,capacity:30,ammo:30,reserve:120,baseReload:1.7,reload:1.7,baseDamage:1,interval:.11},pistol:{baseCapacity:12,capacity:12,ammo:12,reserve:60,baseReload:1.1,reload:1.1,baseDamage:2,interval:.29}},
   explored:new Set(),seenRooms:new Set(),rewardedZones:new Set(),fogPixels:new Uint8Array((expanded?WORLD_WIDTH:101)*WORLD_HEIGHT*4),previousVisible:[1],focus:{x:0,z:0},keyboardAim:{x:0,z:-1},aimMode:'mouse',guidanceKey:'',
@@ -96,3 +96,29 @@ test('attachments apply once across repeated upgrades and checkpoint restore pre
 test('largest demolition fire survives actual snapshot validation and restoration',()=>{const first=session({expanded:true});for(const id of ['breach','command','research','containment','nest','hospital','freight'])first.ctx.campaignProgress.complete(id);for(const id of ['demolition','ordnance','widearea'])assert.ok(first.ctx.fieldSkills.learn(id,first.ctx.campaignProgress.completed()).ok);first.ctx.activeFieldSkill='widearea';first.ctx.fireZones.burst(30,30,1.25);const saved=first.capture();assert.equal(saved.fireZones.zones[0].radius,3.25);const second=session({expanded:true});for(const id of ['breach','command','research','containment','nest','hospital','freight'])second.ctx.campaignProgress.complete(id);assert.equal(second.restore(saved),true);assert.equal(second.ctx.activeFieldSkill,'widearea');assert.equal(second.ctx.fireZones.serialize().zones[0].radius,3.25);const invalid=plain(saved);invalid.fireZones.zones[0].radius=3.26;assert.equal(second.restore(invalid),false);assert.equal(second.ctx.fireZones.serialize().zones[0].radius,3.25);});
 
 test('quickloader checkpoint keeps remaining reload time and matching animation duration',()=>{const first=session({expanded:true});for(const id of ['breach','command','research','containment','nest','hospital'])first.ctx.campaignProgress.complete(id);for(const id of ['runner','pathfinder','quickloader'])assert.ok(first.ctx.fieldSkills.learn(id,first.ctx.campaignProgress.completed()).ok);first.ctx.activeFieldSkill='quickloader';first.ctx.skillEffects=()=>fieldSkillEffects(first.ctx.activeFieldSkill);first.ctx.audio={reload:noop};first.ctx.player.ammo=0;vm.runInContext(fragment('function beginReload','function resumeRun'),first.ctx);vm.runInContext('beginReload()',first.ctx);const duration=first.ctx.weapons.rifle.reload*.88;assert.ok(Math.abs(first.ctx.reload-duration)<1e-8);first.ctx.reload-=.25;const saved=first.capture(),second=session({expanded:true});for(const id of ['breach','command','research','containment','nest','hospital'])second.ctx.campaignProgress.complete(id);second.ctx.skillEffects=()=>fieldSkillEffects(second.ctx.activeFieldSkill);vm.runInContext(fragment('function beginReload','function resumeRun'),second.ctx);assert.equal(second.restore(saved),true);assert.equal(second.ctx.activeFieldSkill,'quickloader');assert.ok(Math.abs(second.ctx.reload-(duration-.25))<1e-8);assert.ok(Math.abs(vm.runInContext('1-reload/reloadDuration()',second.ctx)-.25/duration)<1e-8);assert.ok(source.includes('progress:1-reload/reloadDuration()'));});
+
+
+test('all twelve skill paths survive two actual checkpoint captures across seven operations and all difficulties',()=>{
+ const {deployCampaignOperation}=require('../src/campaign-operations.js'),operations=['breach','command','research','containment','nest','hospital','freight'];let combinations=0;
+ for(const node of SKILL_NODES)for(const operation of operations)for(const difficulty of ['easy','normal','hard']){
+  const first=session({expanded:true});for(const id of operations)first.ctx.campaignProgress.complete(id);
+  const path=[];for(let current=node;current;current=SKILL_NODES.find(n=>n.id===current.requires))path.unshift(current.id);
+  for(const id of path)assert.ok(first.ctx.fieldSkills.learn(id,operations).ok);first.ctx.activeFieldSkill=node.id;
+  Object.assign(first.ctx.runConfig,{operation,difficulty});deployCampaignOperation(operation,{player:first.ctx.player,puzzle:first.ctx.puzzle,progression:first.ctx.progression,doors:first.ctx.doors});
+  const saved=first.capture(),fresh=session({expanded:true});for(const id of operations)fresh.ctx.campaignProgress.complete(id);
+  assert.equal(fresh.restore(saved),true,`${node.id}/${operation}/${difficulty} first restore`);assert.equal(fresh.ctx.activeFieldSkill,node.id);
+  assert.equal(fresh.ctx.fieldSkills.selected(operations),'none','checkpoint does not replace independent base selection');
+  const second=fresh.capture();assert.deepEqual(second.fieldSkill,saved.fieldSkill,'recapture retains learned prerequisites from the running checkpoint');
+  assert.equal(fresh.restore(second),true);assert.equal(fresh.ctx.activeFieldSkill,node.id);assert.deepEqual(fieldSkillEffects(fresh.ctx.activeFieldSkill),fieldSkillEffects(node.id));combinations++;
+ }
+ assert.equal(combinations,252);
+});
+
+test('resuming an older skill checkpoint preserves newer base development separately',()=>{
+ const operations=['breach','command','research','containment','nest','hospital','freight'],first=session({expanded:true}),fresh=session({expanded:true});
+ for(const ctx of [first.ctx,fresh.ctx])for(const id of operations)ctx.campaignProgress.complete(id);
+ for(const id of ['demolition','ordnance','widearea'])assert.ok(first.ctx.fieldSkills.learn(id,operations).ok);first.ctx.activeFieldSkill='widearea';const checkpoint=first.capture();
+ for(const id of ['runner','pathfinder','quickloader'])assert.ok(fresh.ctx.fieldSkills.learn(id,operations).ok);const base=fresh.ctx.fieldSkills.serialize(operations);
+ assert.ok(fresh.restore(checkpoint));assert.equal(fresh.ctx.activeFieldSkill,'widearea');assert.deepEqual(fresh.ctx.fieldSkills.serialize(operations),base);
+ const next=fresh.capture();assert.equal(next.fieldSkill.selected,'widearea');assert.ok(next.fieldSkill.learned.includes('widearea'));assert.ok(fresh.restore(next));assert.equal(fresh.ctx.activeFieldSkill,'widearea');assert.deepEqual(fresh.ctx.fieldSkills.serialize(operations),base);
+});

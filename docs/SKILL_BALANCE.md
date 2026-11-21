@@ -1,4 +1,4 @@
-# Field skill balance — r25
+# Field skill balance — r26
 
 Twelve nodes form three depth-three branches. The existing first and second ranks remain unchanged; each second rank leads to two specializations. Every node costs one point. Seven unique operation clears yield seven points, so one campaign cannot develop all twelve. One developed skill is equipped per deployment; parents unlock children but their effects do not stack.
 
@@ -14,3 +14,11 @@ Twelve nodes form three depth-three branches. The existing first and second rank
 Specializations require their parent and late campaign milestones. Existing skills and balances are preserved. Changing equipped skills remains a base action, not a mid-combat toggle. Imported stale development cannot displace already-developed skills when the point budget is full.
 
 Regression checks exercise real game functions for healing, armor, melee and reloads, real grenade actions and fire-zone persistence, graph prerequisites, non-stacking effects, point limits and stale-import protection. These checks establish implementation bounds, not human enjoyment or survival difficulty. Physical-phone and extended human combat playtesting remain useful follow-up work.
+
+## Review changes and evidence
+
+Close Quarters and Blast Control now unlock after Hospital, allowing first-clear use during Freight. Effects were not numerically increased or reduced: all skills retain resource costs, one-equipped limits and prerequisites. Reload full-cycle projections for base guns show approximately 3.8–7.5% sustained-fire benefit, with the 0.5-second duration floor and no changes to damage, magazine size or weapon stats. Armor still protects only while existing armor remains.
+
+Runtime coverage now includes 252 double-checkpoint combinations (12 skills × seven deployed operations × three difficulties). Restored run development is retained separately from newer base development, so a fresh/imported checkpoint does not lose its skill on the next save. Backups include base development and selection, with rollback on failed import; old backups without skill data remain accepted. Phone node inspection brings its detail/action into view and provides a return-to-tree control. Short landscape screens use a compact skill-menu frame.
+
+These are deterministic runtime, availability, resource-bound and persistence checks. They do not establish human mission survival, optimal play or equal player preference among skills.
