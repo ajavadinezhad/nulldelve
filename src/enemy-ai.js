@@ -7,7 +7,7 @@ export function applyEnemyStagger(enemy,duration){
  }
  enemy.staggerTime=Math.max(enemy.staggerTime??0,duration);return true;
 }
-export const CHARGER_RUSH={windup:.9,speed:10,duration:.62,cooldown:4.5,damage:18};
+export const CHARGER_RUSH={windup:.9,speed:10,duration:.62,cooldown:4.5,damage:18,hitRadius:.85};
 export const NEST_PULSE={radius:5.5,windup:1.1,cooldown:6,safeHalfAngle:.6,damage:20};
 const angleDifference=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 /** Roaches announce a bite before striking. Stats may live directly on enemy or in stats. */
@@ -34,9 +34,19 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,allowM
     const step=Math.min(dt,enemy.chargeRemaining)*CHARGER_RUSH.speed,tx=enemy.x+enemy.chargeX*step,tz=enemy.z+enemy.chargeZ*step;
     enemy.chargeRemaining=Math.max(0,enemy.chargeRemaining-dt);
     if(!allowMovement||!lineOfSight(enemy.x,enemy.z,tx,tz)){enemy.chargeRemaining=0;enemy.chargeCooldown=CHARGER_RUSH.cooldown;return;}
-    const px=player.x-enemy.x,pz=player.z-enemy.z,t=Math.max(0,Math.min(step,px*enemy.chargeX+pz*enemy.chargeZ));
-    if(!enemy.chargeHit&&Math.hypot(px-enemy.chargeX*t,pz-enemy.chargeZ*t)<.85&&lineOfSight(enemy.x,enemy.z,player.x,player.z)){onBite(CHARGER_RUSH.damage);enemy.chargeHit=true;}
-    move(enemy,enemy.chargeX*step,enemy.chargeZ*step);if(enemy.chargeRemaining===0)enemy.chargeCooldown=CHARGER_RUSH.cooldown;return;
+    const startX=enemy.x,startZ=enemy.z;
+    move(enemy,enemy.chargeX*step,enemy.chargeZ*step);
+    const actualX=enemy.x-startX,actualZ=enemy.z-startZ,travel=Math.hypot(actualX,actualZ);
+    // Body collision is authoritative: a centre ray can be clear while an
+    // antenna-sized opening is too narrow for the charger. Never project a hit
+    // beyond the movement that collision actually allowed, or slide a rush.
+    const blocked=Math.abs(actualX-enemy.chargeX*step)>.001||Math.abs(actualZ-enemy.chargeZ*step)>.001;
+    if(travel>.001&&!blocked){
+      const px=player.x-startX,pz=player.z-startZ,t=Math.max(0,Math.min(1,(px*actualX+pz*actualZ)/(travel*travel)));
+      if(!enemy.chargeHit&&Math.hypot(px-actualX*t,pz-actualZ*t)<CHARGER_RUSH.hitRadius&&lineOfSight(startX,startZ,player.x,player.z)){onBite(CHARGER_RUSH.damage);enemy.chargeHit=true;}
+    }
+    if(blocked)enemy.chargeRemaining=0;
+    if(enemy.chargeRemaining===0)enemy.chargeCooldown=CHARGER_RUSH.cooldown;return;
   }
   const speed=stat('speed',2.7),biteRange=stat('biteRange',1.05),stopDistance=stat('stopDistance',.78);
   const dx=player.x-enemy.x,dz=player.z-enemy.z,d=Math.hypot(dx,dz);

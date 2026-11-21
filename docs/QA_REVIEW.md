@@ -69,3 +69,7 @@ Retired the low-frame-rate automated gameplay GIF; it is not promotional footage
 Added articulated reload hands and removable magazines; charged grenade controls, visible aim arc, windup and projectile travel; compact checkpoint-first results with expandable statistics. Grenade charging cancels on lost input or pause, and safe checkpoints defer while a throw is pending.
 
 R9 automated validation: **299 checks across 56 files pass**. Browser checks verified charged input/inventory, compact failure layout, and continuous video playback at both export resolutions.
+
+## Balance audit r11
+
+Three focused agent reviews covered mission progression and duration, weapons and ammunition economy, and stronger enemies. All58 regression test files pass. Coverage includes42 collision-aware mission configurations and420 ammunition projections at75–80% modeled accuracy. Fixed Command interaction overlap, post-phase respite timing, collision-authorized charger damage/full warning footprint, checkpoint health/cooldown compatibility, TWIN close-range spread, and Hard-only emergency ammo starvation. See [mission balance audit](MISSION_BALANCE_AUDIT.md) for estimated durations, methodology and limitations. These are automated tests and models, not completed human playtests.

@@ -6,7 +6,7 @@ export const PRIMARY_WEAPONS=Object.freeze([
  {id:'marksman',name:'SABLE DMR',capacity:10,reload:2.1,interval:.48,baseDamage:4,range:28,stagger:.18,pellets:1,spread:0,cost:450,description:'Scoped rifle. High single-shot damage and long reach.'},
  {id:'lmg',name:'M60 WARDEN LMG',capacity:60,reload:3.6,interval:.085,baseDamage:1,range:21,stagger:0,pellets:1,spread:0,cost:650,description:'Heavy automatic weapon. Large belt box and slow reload.'},
  {id:'hush',name:'HUSH-9 Precision Carbine',capacity:18,reload:2,interval:.24,baseDamage:2,range:23,stagger:.08,pellets:1,spread:0,cost:380,description:'Measured precision fire. Efficient single shots; less effective when surrounded.'},
- {id:'scattergun',name:'TWIN Drum Scattergun',capacity:8,reload:2.8,interval:.44,baseDamage:1,range:7,stagger:.12,pellets:3,spread:.36,cost:520,description:'Rapid three-pellet bursts for tight corridors. Short reach and a slow drum reload.'},
+ {id:'scattergun',name:'TWIN Drum Scattergun',capacity:8,reload:2.8,interval:.44,baseDamage:1,range:7,stagger:.12,pellets:3,spread:.20,cost:520,description:'Rapid three-pellet bursts for tight corridors. Short reach and a slow drum reload.'},
 ].map(Object.freeze));
 export function primaryWeapon(id){return PRIMARY_WEAPONS.find(w=>w.id===id)??PRIMARY_WEAPONS[0];}
 /** Deterministic fan in radians. The central pellet follows the exact aim direction. */

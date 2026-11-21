@@ -23,3 +23,5 @@ test('large imported pickup counters wrap safely without repeating IDs or losing
  for(let i=0;i<3;i++)dropEnemyLoot(maxed,{x:0,z:0,variant:'brute'},{player,weapons,selected:'rifle'});
  assert.equal(new Set(maxed.drops.map(drop=>drop.id)).size,maxed.drops.length);assert.ok(Number.isSafeInteger(maxed.nextId));
 });
+
+test('hard emergency salvage covers expensive mutations only when both guns are low and pending piles suppress it',()=>{const c={...context(),difficulty:'hard'};c.player.ammo=0;c.weapons.rifle={reserve:0,ammo:0,damage:1,pellets:1};c.weapons.pistol={reserve:0,ammo:0};const s=createLootState(),sentinel={...enemy('sentinel'),maxHp:21};const aid=dropEnemyLoot(s,sentinel,c)[0];assert.equal(aid.rifle,16);assert.equal(aid.pistol,3);const ordinary=dropEnemyLoot(s,enemy(),c);assert.equal(ordinary.length,1);dropEnemyLoot(s,{...enemy('sentinel'),maxHp:21},c);const after=dropEnemyLoot(s,{...enemy('sentinel'),maxHp:21},c)[0];assert.equal(after.rifle,6);assert.equal(after.pistol,2);const stocked={...context(),difficulty:'hard'};assert.equal(dropEnemyLoot(createLootState(),{...enemy('sentinel'),maxHp:21},stocked)[0].rifle,6);});

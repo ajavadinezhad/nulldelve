@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=depth-r10';
+import {compatibleStorage} from './storage-compat.js?v=balance-r11';
 const KEY='nulldelve.records.v1';
 // Keep legacy normal keys readable; alternate puzzle layouts have separate best times.
 export function operationRecordKey(config){return config.mission+(config.operation?':'+config.operation:'')+':'+config.difficulty+(config.remix?':remix':'');}

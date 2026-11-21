@@ -1,4 +1,4 @@
-import {normalizeCampaignOperation} from './campaign-operations.js?v=depth-r10';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=balance-r11';
 /** Session rules shared by the browser game and its regression checks. */
 export function createFixedStepper(step=1/60,maxCatchup=.5){
  let accumulator=0;

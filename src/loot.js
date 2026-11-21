@@ -1,3 +1,4 @@
+import {DIFFICULTY_RULES} from './difficulty.js?v=balance-r11';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;
@@ -24,7 +25,7 @@ export function createLootState(saved){
  }
  return state;
 }
-export function dropEnemyLoot(state,enemy,{player,weapons,selected}={}){
+export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='normal'}={}){
  if(enemy.lootDropped)return [];enemy.lootDropped=true;state.kills++;
  const big=['brute','charger','sentinel'].includes(enemy.variant),boss=enemy.variant==='boss';
  // Count nearby uncollected supplies in the aid budget: ignoring drops must not
@@ -32,10 +33,19 @@ export function dropEnemyLoot(state,enemy,{player,weapons,selected}={}){
  const nearby=player?state.drops.filter(d=>Math.hypot(d.x-player.x,d.z-player.z)<=8):[];
  const held=selected??player?.selected;
  const supply=gun=>Math.max(0,Number(weapons?.[gun]?.reserve)||0)+Math.max(0,Number(held===gun?player?.ammo:weapons?.[gun]?.ammo)||0)+nearby.reduce((n,d)=>n+(d.kind==='ammo'?Math.max(0,Number(d[gun])||0):0),0);
- const lowAmmo=!!weapons&&supply('rifle')<18&&supply('pistol')<8;
+ const primaryDamage=Math.max(1,Number(weapons?.rifle?.damage??weapons?.rifle?.baseDamage)||1),primaryPellets=Math.max(1,Number(weapons?.rifle?.pellets)||1);
+ const primaryLowThreshold=difficulty==='hard'?Math.ceil(28/(primaryDamage*primaryPellets)):18;
+ const lowAmmo=!!weapons&&supply('rifle')<primaryLowThreshold&&supply('pistol')<(difficulty==='hard'?14:8);
  const added=[];
  if(big||boss||state.kills%3===0||lowAmmo){
-  const baseRifle=boss?12:big?6:lowAmmo?2:3,rifle=weapons?.rifle?.pellets>1?Math.max(1,Math.round(baseRifle/3)):baseRifle,pistol=boss?4:big?2:1;
+  const baseRifle=boss?12:big?6:lowAmmo?(difficulty==='hard'?3:2):3;let rifle=weapons?.rifle?.pellets>1?Math.max(1,Math.round(baseRifle/3)):baseRifle,pistol=boss?4:big?2:1;
+  if(difficulty==='hard'&&lowAmmo&&(big||boss)){
+   // Recover a bounded fighting chance after an expensive mutation, only when
+   // both weapons (including nearby uncollected drops) are running dry.
+   const baseHp=({brute:6,charger:8,sentinel:14,boss:24})[enemy.variant]??2,hp=Math.max(1,Number(enemy.maxHp)||Math.ceil(baseHp*(DIFFICULTY_RULES[difficulty]?.hp??1))),gun=weapons?.rifle??{},pellets=Math.max(1,Number(gun.pellets)||1),damage=Math.max(1,Number(gun.damage??gun.baseDamage)||1);
+   rifle=Math.max(rifle,Math.min(pellets>1?6:16,primaryLowThreshold-supply('rifle'),Math.ceil(hp/(damage*pellets)*1.25)));
+   pistol=Math.max(pistol,Math.min(4,Math.ceil(hp/8)));
+  }
   added.push({id:allocatePickupId(state),kind:'ammo',x:enemy.x+.24,z:enemy.z+.12,rifle,pistol,amount:0});
  }
  const hp=Math.max(0,Number(player?.hp)||0),maxHp=Math.max(0,Number(player?.maxHp)||0);

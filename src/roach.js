@@ -111,7 +111,8 @@ export function createRoach(scene,variant='normal'){
   const safe=new THREE.Mesh(new THREE.CircleGeometry(5.5,16,-.6,1.2),safeMaterial);safe.rotation.x=-Math.PI/2;safe.position.y=.006;telegraph.add(safe);
   root.userData.pulseTelegraph=telegraph;root.userData.pulseMaterial=dangerMaterial;
  }
- if(variant==='charger'){const warning=new THREE.Mesh(new THREE.PlaneGeometry(.8,6.2),new THREE.MeshBasicMaterial({color:0xffaa46,transparent:true,opacity:.25,depthWrite:false,side:THREE.DoubleSide}));warning.name='charge-warning';warning.rotation.x=-Math.PI/2;warning.position.set(0,.025,-3.1/stats.scale);warning.scale.set(1/stats.scale,1/stats.scale,1);warning.visible=false;root.add(warning);root.userData.chargeTelegraph=warning;}
+ // Conservative 1.7 × 7.9m warning covers the 6.2m rush plus its .85m hit radius at both ends.
+ if(variant==='charger'){const warning=new THREE.Mesh(new THREE.PlaneGeometry(1.7,7.9),new THREE.MeshBasicMaterial({color:0xffaa46,transparent:true,opacity:.25,depthWrite:false,side:THREE.DoubleSide}));warning.name='charge-warning';warning.rotation.x=-Math.PI/2;warning.position.set(0,.025,-3.1/stats.scale);warning.scale.set(1/(.94*stats.scale),1/stats.scale,1);warning.visible=false;root.add(warning);root.userData.chargeTelegraph=warning;}
  Object.assign(root.userData,{variant,body,legs,antennae,phase:0,time:0,lastPosition:null,speed:0,animationRate:variant==='runner'?1.3:variant==='boss'?.65:variant==='brute'?.8:1});
  scene.add(root);return root;
 }
