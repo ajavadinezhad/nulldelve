@@ -62,3 +62,15 @@ test('desktop node inspection keeps focus on the inspected circle',async()=>{
  const node=h.overlay.querySelectorAll('button').find(n=>n.dataset.focusKey==='skill-node-widearea');node.focus();node.listeners.click[0]();
  assert.equal(h.doc.activeElement.dataset.focusKey,'skill-node-widearea');
 });
+
+test('result dialogs retain keyboard focus after the game menu has closed',()=>{
+ const h=harness();h.menu.hide();const panel=h.doc.createElement('section'),retry=h.doc.createElement('button'),menu=h.doc.createElement('button'),details=h.doc.createElement('summary');panel.className='result-panel';panel.append(retry,menu,details);h.overlay.replaceChildren(panel);
+ const oldQuery=h.overlay.querySelector.bind(h.overlay);h.overlay.querySelector=selector=>selector==='.result-panel'?panel:oldQuery(selector);
+ const tab=(shiftKey=false)=>{const event={key:'Tab',shiftKey,prevented:false,preventDefault(){this.prevented=true;}};for(const listener of h.overlay.listeners.keydown??[])listener(event);return event;};
+ details.focus();assert.equal(tab().prevented,true);assert.equal(h.doc.activeElement,retry);
+ assert.equal(tab(true).prevented,true);assert.equal(h.doc.activeElement,details);
+ h.doc.activeElement=h.doc.createElement('button');assert.equal(tab().prevented,true);assert.equal(h.doc.activeElement,retry);
+ h.overlay.replaceChildren();h.overlay.querySelector=oldQuery;assert.equal(tab().prevented,false,'hidden result markup must not capture gameplay focus');
+});
+
+test('Tab ignores hidden footer and branch controls in compact landscape menus',()=>{const h=harness();const controls=h.overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,iframe,a[href]');const first=controls[0],last=controls.at(-1),hidden=h.doc.createElement('button');hidden.getClientRects=()=>[];h.overlay.append(hidden);const tab=(shiftKey=false)=>{const event={key:'Tab',shiftKey,prevented:false,preventDefault(){this.prevented=true;}};for(const listener of h.overlay.listeners.keydown??[])listener(event);return event;};last.focus();assert.equal(tab().prevented,true);assert.equal(h.doc.activeElement,first);first.focus();assert.equal(tab(true).prevented,true);assert.equal(h.doc.activeElement,last);});

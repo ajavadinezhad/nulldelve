@@ -1,13 +1,13 @@
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=skill-audit-r26';
-import {compatibleStorage} from './storage-compat.js?v=skill-audit-r26';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=skill-audit-r26';
-import {DIFFICULTY_RULES} from './difficulty.js?v=skill-audit-r26';
-import {createCampaignMap} from './campaign-map.js?v=skill-audit-r26';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=skill-audit-r26';
-import {createItemIcon} from './item-icons.js?v=skill-audit-r26';
-import {buildMissionPreview} from './mission-previews.js?v=skill-audit-r26';
-import {renderShop} from './shop-ui.js?v=skill-audit-r26';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=skill-audit-r26';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=whole-audit-r27';
+import {compatibleStorage} from './storage-compat.js?v=whole-audit-r27';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=whole-audit-r27';
+import {DIFFICULTY_RULES} from './difficulty.js?v=whole-audit-r27';
+import {createCampaignMap} from './campaign-map.js?v=whole-audit-r27';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=whole-audit-r27';
+import {createItemIcon} from './item-icons.js?v=whole-audit-r27';
+import {buildMissionPreview} from './mission-previews.js?v=whole-audit-r27';
+import {renderShop} from './shop-ui.js?v=whole-audit-r27';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=whole-audit-r27';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -214,7 +214,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r26'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r27'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){
@@ -242,11 +242,11 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  // Keep keyboard focus inside the modal while it is visible. Gameplay key filtering
  // belongs to the owner, which can query isOpen() before processing input.
  overlay.addEventListener('keydown',event=>{
-  if(!open||event.key!=='Tab')return;
-  const controls=[...overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,iframe,a[href]')];if(!controls.length)return;
+  if(event.key!=='Tab')return;const panel=open?overlay:overlay.querySelector('.result-panel');if(!panel)return;
+  const controls=[...panel.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,iframe,a[href]')].filter(node=>!node.hidden&&node.getAttribute?.('aria-hidden')!=='true'&&(!node.getClientRects||node.getClientRects().length>0));if(!controls.length)return;
   const first=controls[0],last=controls.at(-1);
-  if(event.shiftKey&&(document.activeElement===first||!overlay.contains(document.activeElement))){event.preventDefault();last.focus();}
-  else if(!event.shiftKey&&(document.activeElement===last||!overlay.contains(document.activeElement))){event.preventDefault();first.focus();}
+  if(event.shiftKey&&(document.activeElement===first||!panel.contains(document.activeElement))){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&(document.activeElement===last||!panel.contains(document.activeElement))){event.preventDefault();first.focus();}
  });
  show('main');
  return {show,hide,refresh:()=>render(false),isOpen:()=>open,settings};

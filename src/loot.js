@@ -1,4 +1,4 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=skill-audit-r26';
+import {DIFFICULTY_RULES} from './difficulty.js?v=whole-audit-r27';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;
@@ -25,12 +25,13 @@ export function createLootState(saved){
  }
  return state;
 }
-export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='normal'}={}){
+export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='normal',reachable=()=>true}={}){
  if(enemy.lootDropped)return [];enemy.lootDropped=true;state.kills++;
  const big=['brute','charger','sentinel','screecher','leaper'].includes(enemy.variant),boss=enemy.variant==='boss';
  // Count nearby uncollected supplies in the aid budget: ignoring drops must not
- // create an unlimited pile, while supplies left in older rooms do not block aid.
- const nearby=player?state.drops.filter(d=>Math.hypot(d.x-player.x,d.z-player.z)<=8):[];
+ // create an unlimited pile, while supplies behind closed geometry or left in
+ // older rooms do not block aid the player can actually collect.
+ const nearby=player?state.drops.filter(d=>Math.hypot(d.x-player.x,d.z-player.z)<=8&&reachable(player.x,player.z,d.x,d.z)):[];
  const held=selected??player?.selected;
  const supply=gun=>Math.max(0,Number(weapons?.[gun]?.reserve)||0)+Math.max(0,Number(held===gun?player?.ammo:weapons?.[gun]?.ammo)||0)+nearby.reduce((n,d)=>n+(d.kind==='ammo'?Math.max(0,Number(d[gun])||0):0),0);
  const primaryDamage=Math.max(1,Number(weapons?.rifle?.damage??weapons?.rifle?.baseDamage)||1),primaryPellets=Math.max(1,Number(weapons?.rifle?.pellets)||1);

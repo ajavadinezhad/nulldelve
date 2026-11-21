@@ -1,4 +1,4 @@
-import {progressionSequences,hospitalAirlockTarget,freightTrackTarget,ARTIFACTS} from './progression.js?v=skill-audit-r26';
+import {progressionSequences,hospitalAirlockTarget,freightTrackTarget,ARTIFACTS} from './progression.js?v=whole-audit-r27';
 /** Player-requested hints reveal one layer at a time, only for the nearby puzzle. */
 const PUZZLES=[
  {id:'freight-drain',title:'Freight flood control',bounds:[154,171,23,37],unsolved:c=>c.state.operationId==='freight'&&!c.state.operationTasks?.freightDrain,hints:['The flooded track depends on machinery in this hall. Stabilize the area before touching its supply.','Clear the Pump Hall breach, then inspect its flood pump breaker. The adjacent routing plate explains where the cargo must go next.','After the Pump Hall swarm is cleared, use Interact at the flood pump breaker in the west of the hall. This drains the route to Loading Yard.']},

@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=skill-audit-r26';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=skill-audit-r26';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=skill-audit-r26';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=skill-audit-r26';
-import {validateSnapshot} from './snapshot-validation.js?v=skill-audit-r26';
-import {normalizeSettings} from './controls.js?v=skill-audit-r26';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=whole-audit-r27';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=whole-audit-r27';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=whole-audit-r27';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=whole-audit-r27';
+import {validateSnapshot} from './snapshot-validation.js?v=whole-audit-r27';
+import {normalizeSettings} from './controls.js?v=whole-audit-r27';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

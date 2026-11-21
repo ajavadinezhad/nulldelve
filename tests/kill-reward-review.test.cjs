@@ -31,3 +31,40 @@ test('legacy migration cannot replace an interrupted real payout with a zero-pay
  const id='kill.security.4',earned=profile.queueEnemyReward(id,'brute'),seed=profile.queueEnemyReward(id,'paid');
  assert.equal(JSON.parse(store.getItem(pending+id)).variant,'brute');release();await Promise.all([earned,seed]);assert.equal(profile.serialize().economy.credits,158);
 });
+test('quota-failed payout survives duplicate suppression and is recovered once after storage returns',async()=>{
+ const store=storage(),profile=createCampaignProfile({storage:store,locks:null});profile.persist();const write=store.setItem;let denied=true;
+ store.setItem=(key,value)=>{if(key===CAMPAIGN_PROFILE_KEY&&denied)throw Error('quota');write(key,value);};
+ const id='kill.freight-yard.19';assert.equal((await profile.queueEnemyReward(id,'brute')).persisted,false);assert.equal(profile.serialize().economy.credits,158);
+ assert.equal((await profile.queueEnemyReward(id,'normal')).alreadyClaimed,true);assert.ok(store.getItem(pending+id),'memory-only duplicate cannot delete recovery journal');
+ denied=false;const reopened=createCampaignProfile({storage:store,locks:null});await reopened.recoverRewards();assert.equal(reopened.serialize().economy.credits,158);assert.equal(store.getItem(pending+id),null);
+ await reopened.recoverRewards();assert.equal(reopened.serialize().economy.credits,158);
+});
+test('pending cache and first-clear rewards recover after interruption before profile locking',async()=>{
+ const store=storage(),original=createCampaignProfile({storage:store,locks:null});original.persist();
+ for(const id of ['contract.freight','salvage.freight.arrival'])store.setItem('nulldelve.cash-reward.pending.'+id,JSON.stringify({id}));
+ const recovered=createCampaignProfile({storage:store,locks:null});await recovered.recoverRewards();assert.equal(recovered.serialize().economy.credits,370);
+ for(const id of ['contract.freight','salvage.freight.arrival'])assert.equal(store.getItem('nulldelve.cash-reward.pending.'+id),null);
+ await recovered.recoverRewards();assert.equal(recovered.serialize().economy.credits,370);
+});
+test('backup reward flush waits for all earned payout types and returns a complete wallet',async()=>{
+ const store=storage();let release;const gate=new Promise(resolve=>release=resolve),locks={request:async(_name,_options,fn)=>{await gate;return fn();}},profile=createCampaignProfile({storage:store,locks});profile.persist();
+ const kill=profile.queueEnemyReward('kill.security.18','brute'),contract=profile.claimCashReward('contract.breach');let done=false;const flushed=profile.flushRewards().then(result=>{done=true;return result;});await Promise.resolve();assert.equal(done,false);
+ release();await Promise.all([kill,contract]);const saved=await flushed;assert.equal(saved.economy.credits,203);assert.equal(saved.economy.claimedRewards['kill.security.18'],true);assert.equal(saved.economy.claimedRewards['contract.breach'],true);
+});
+test('claiming a first-clear reward journals it before async locking and a new session can recover it once',async()=>{
+ const store=storage();let release;const gate=new Promise(resolve=>release=resolve),locks={request:async(_name,_options,fn)=>{await gate;return fn();}},old=createCampaignProfile({storage:store,locks});old.persist();
+ const id='contract.hospital',waiting=old.claimCashReward(id);assert.equal(JSON.parse(store.getItem('nulldelve.cash-reward.pending.'+id)).id,id);
+ const reopened=createCampaignProfile({storage:store,locks:null});await reopened.recoverRewards();assert.equal(reopened.serialize().economy.credits,300);
+ release();assert.equal((await waiting).alreadyClaimed,true);assert.equal(old.serialize().economy.credits,300);assert.equal(store.getItem('nulldelve.cash-reward.pending.'+id),null);
+});
+test('quota-failed exploration rewards retain their journal through a duplicate and preserve exact cash on reopen',async()=>{
+ const store=storage(),profile=createCampaignProfile({storage:store,locks:null});profile.persist();const write=store.setItem;let denied=true;
+ store.setItem=(key,value)=>{if(key===CAMPAIGN_PROFILE_KEY&&denied)throw Error('quota');write(key,value);};
+ const id='salvage.freight.coldchain';assert.equal((await profile.claimCashReward(id)).persisted,false);assert.equal((await profile.claimCashReward(id)).alreadyClaimed,true);assert.ok(store.getItem('nulldelve.cash-reward.pending.'+id));
+ denied=false;const reopened=createCampaignProfile({storage:store,locks:null});await reopened.recoverRewards();assert.equal(reopened.serialize().economy.credits,195);assert.equal(store.getItem('nulldelve.cash-reward.pending.'+id),null);
+});
+test('malformed recovery records cannot block backup flushing or award cash',async()=>{
+ const store=storage(),profile=createCampaignProfile({storage:store,locks:null});profile.persist();
+ for(const [key,entry]of [['nulldelve.cash-reward.pending.contract.unknown',{id:'contract.unknown'}],['nulldelve.enemy-reward.pending.kill.security.1',{id:'kill.security.1',variant:'unknown'}],['nulldelve.enemy-reward.pending.kill.bad.-1',{id:'kill.bad.-1',variant:'boss'}]])store.setItem(key,JSON.stringify(entry));
+ await profile.recoverRewards();const saved=await profile.flushRewards();assert.equal(saved.economy.credits,150);assert.deepEqual(saved.economy.claimedRewards,{});
+});

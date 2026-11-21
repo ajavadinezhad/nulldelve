@@ -1,66 +1,66 @@
-import {SALVAGE_CACHES} from './mission-salvage.js?v=skill-audit-r26';
-import {createSalvageArt} from './salvage-art.js?v=skill-audit-r26';
-import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=skill-audit-r26';
-import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=skill-audit-r26';
-import {applyWeaponAttachment} from './weapon-attachments.js?v=skill-audit-r26';
-import {createMutationNotes} from './mutation-notes.js?v=skill-audit-r26';
-import {grantHospitalAmmo} from './mission-supplies.js?v=skill-audit-r26';
-import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=skill-audit-r26';
-import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=skill-audit-r26';
-import {createGrenadeActions} from './grenade-actions.js?v=skill-audit-r26';
-import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=skill-audit-r26';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=skill-audit-r26';
-import {compatibleStorage} from './storage-compat.js?v=skill-audit-r26';
-import {createTouchControls} from './touch-controls.js?v=skill-audit-r26';
-import {createHudFeedback} from './hud-feedback.js?v=skill-audit-r26';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=skill-audit-r26';
+import {SALVAGE_CACHES} from './mission-salvage.js?v=whole-audit-r27';
+import {createSalvageArt} from './salvage-art.js?v=whole-audit-r27';
+import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=whole-audit-r27';
+import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=whole-audit-r27';
+import {applyWeaponAttachment} from './weapon-attachments.js?v=whole-audit-r27';
+import {createMutationNotes} from './mutation-notes.js?v=whole-audit-r27';
+import {grantHospitalAmmo} from './mission-supplies.js?v=whole-audit-r27';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=whole-audit-r27';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=whole-audit-r27';
+import {createGrenadeActions} from './grenade-actions.js?v=whole-audit-r27';
+import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=whole-audit-r27';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=whole-audit-r27';
+import {compatibleStorage} from './storage-compat.js?v=whole-audit-r27';
+import {createTouchControls} from './touch-controls.js?v=whole-audit-r27';
+import {createHudFeedback} from './hud-feedback.js?v=whole-audit-r27';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=whole-audit-r27';
 const puzzleDiscovery=createPuzzleDiscovery();
 const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=skill-audit-r26';
-import {soldier, animateSoldier} from './character.js?v=skill-audit-r26';
-import {weapon, createCombatEffects} from './weapons.js?v=skill-audit-r26';
-import {addRoomDetails} from './room-details.js?v=skill-audit-r26';
-import {createMinimap} from './minimap.js?v=skill-audit-r26';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=skill-audit-r26';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=skill-audit-r26';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=skill-audit-r26';
-import {createPuzzleArt} from './puzzle-art.js?v=skill-audit-r26';
-import {createWeaponPreview} from './weapon-preview.js?v=skill-audit-r26';
-import {createProgression} from './progression.js?v=skill-audit-r26';
-import {createProgressionArt} from './progression-art.js?v=skill-audit-r26';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=skill-audit-r26';
-import {buildWorld} from './world-render.js?v=skill-audit-r26';
-import {createNavigator} from './navigation.js?v=skill-audit-r26';
-import {createGameMenu} from './game-menu.js?v=skill-audit-r26';
-import {createSaveSlots} from './save-slots.js?v=skill-audit-r26';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=skill-audit-r26';
-import {createEconomy} from './economy.js?v=skill-audit-r26';
-import {createExplosions} from './explosion.js?v=skill-audit-r26';
-import {createGameAudio} from './audio.js?v=skill-audit-r26';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=skill-audit-r26';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=skill-audit-r26';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=skill-audit-r26';
-import {observeHudLayout} from './interface-layout.js?v=skill-audit-r26';
-import {createMapFocus} from './map-accessibility.js?v=skill-audit-r26';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=skill-audit-r26';
-import {placeLootDrops} from './loot-placement.js?v=skill-audit-r26';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=skill-audit-r26';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=skill-audit-r26';
-import {createFireZones} from './fire-grenades.js?v=skill-audit-r26';
-import {itemIconPath} from './item-icons.js?v=skill-audit-r26';
-import {createLootView} from './loot-view.js?v=skill-audit-r26';
-import {meleeTargets} from './melee.js?v=skill-audit-r26';
-import {createPuzzleHints} from './puzzle-hints.js?v=skill-audit-r26';
-import {createOnboarding} from './onboarding.js?v=skill-audit-r26';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=skill-audit-r26';
-import {validateSnapshot} from './snapshot-validation.js?v=skill-audit-r26';
-import {DIFFICULTY_RULES} from './difficulty.js?v=skill-audit-r26';
-import {createCampaignProfile} from './campaign-profile.js?v=skill-audit-r26';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=skill-audit-r26';
-import {createCampaignProgress} from './campaign-progress.js?v=skill-audit-r26';
-import {buildOperationEnvironment} from './operation-environments.js?v=skill-audit-r26';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=skill-audit-r26';
+import {buildArt} from './environment.js?v=whole-audit-r27';
+import {soldier, animateSoldier} from './character.js?v=whole-audit-r27';
+import {weapon, createCombatEffects} from './weapons.js?v=whole-audit-r27';
+import {addRoomDetails} from './room-details.js?v=whole-audit-r27';
+import {createMinimap} from './minimap.js?v=whole-audit-r27';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=whole-audit-r27';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=whole-audit-r27';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=whole-audit-r27';
+import {createPuzzleArt} from './puzzle-art.js?v=whole-audit-r27';
+import {createWeaponPreview} from './weapon-preview.js?v=whole-audit-r27';
+import {createProgression} from './progression.js?v=whole-audit-r27';
+import {createProgressionArt} from './progression-art.js?v=whole-audit-r27';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=whole-audit-r27';
+import {buildWorld} from './world-render.js?v=whole-audit-r27';
+import {createNavigator} from './navigation.js?v=whole-audit-r27';
+import {createGameMenu} from './game-menu.js?v=whole-audit-r27';
+import {createSaveSlots} from './save-slots.js?v=whole-audit-r27';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=whole-audit-r27';
+import {createEconomy} from './economy.js?v=whole-audit-r27';
+import {createExplosions} from './explosion.js?v=whole-audit-r27';
+import {createGameAudio} from './audio.js?v=whole-audit-r27';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=whole-audit-r27';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=whole-audit-r27';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=whole-audit-r27';
+import {observeHudLayout} from './interface-layout.js?v=whole-audit-r27';
+import {createMapFocus} from './map-accessibility.js?v=whole-audit-r27';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=whole-audit-r27';
+import {placeLootDrops} from './loot-placement.js?v=whole-audit-r27';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=whole-audit-r27';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=whole-audit-r27';
+import {createFireZones} from './fire-grenades.js?v=whole-audit-r27';
+import {itemIconPath} from './item-icons.js?v=whole-audit-r27';
+import {createLootView} from './loot-view.js?v=whole-audit-r27';
+import {meleeTargets} from './melee.js?v=whole-audit-r27';
+import {createPuzzleHints} from './puzzle-hints.js?v=whole-audit-r27';
+import {createOnboarding} from './onboarding.js?v=whole-audit-r27';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=whole-audit-r27';
+import {validateSnapshot} from './snapshot-validation.js?v=whole-audit-r27';
+import {DIFFICULTY_RULES} from './difficulty.js?v=whole-audit-r27';
+import {createCampaignProfile} from './campaign-profile.js?v=whole-audit-r27';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=whole-audit-r27';
+import {createCampaignProgress} from './campaign-progress.js?v=whole-audit-r27';
+import {buildOperationEnvironment} from './operation-environments.js?v=whole-audit-r27';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=whole-audit-r27';
 const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
@@ -375,7 +375,7 @@ menu=createGameMenu({overlay:$('#overlay'),
  onPurchase:async id=>{if(!isSafeToShop())return {ok:false,message:'Visit the armory before deployment.'};const result=await campaignProfile.purchaseOffer(id);if(result.ok){audio.purchase();applyPrimaryLoadout();hud();updateDeploymentTransfer();}return result;},
  onResume:resumeRun,onClose:()=>{if(active&&!ended)renderer.domElement.focus();},onLoad:queueLoad,onLoadCheckpoint:queueCheckpointLoad,
  onSave:slot=>{saveSlots.save(slot,captureSnapshot(),{name:operationTitle(),mission:runConfig.mission,difficulty:runConfig.difficulty,summary:`${$('#sector').textContent} · ${Math.ceil(player.hp)} HP · ${explorationPercent()}% mapped`});toast('OPERATION SAVED');},
- onExportBackup:()=>{persistCampaignProfile();return saveSlots.exportBackup({profile:campaignProfile.serialize(),campaign:campaignProgress.serialize(),fieldSkill:fieldSkills.serialize(campaignProgress.completed()),settings:menu.settings,...(active?{checkpoint:{snapshot:captureSnapshot(),metadata:{name:'Session recovery',summary:operationTitle()}}}:{})});},onPreviewBackup:text=>saveSlots.previewBackup(text),onImportBackup:id=>{const result=saveSlots.importBackup(id);finishBackupImport();return result;},
+ onExportBackup:async()=>{await campaignProfile.flushRewards();persistCampaignProfile();return saveSlots.exportBackup({profile:campaignProfile.serialize(),campaign:campaignProgress.serialize(),fieldSkill:fieldSkills.serialize(campaignProgress.completed()),settings:menu.settings,...(active?{checkpoint:{snapshot:captureSnapshot(),metadata:{name:'Session recovery',summary:operationTitle()}}}:{})});},onPreviewBackup:text=>saveSlots.previewBackup(text),onImportBackup:id=>{const result=saveSlots.importBackup(id);finishBackupImport();return result;},
  onSettings:applySettings
 });
 grenadeActions=createGrenadeActions({scene,getChargeDuration:()=>skillEffects().grenadeChargeMultiplier,onImpact:detonateGrenade,onPose:({charging,phase,power})=>{playerMesh.userData.grenadeCharging=charging;playerMesh.userData.throwPhase=phase;const button=$('#use-grenade');button.classList.toggle('charging-grenade',charging);button.style.setProperty('--throw-power',String(power));button.title=charging?`Throw power ${Math.round(power*100)}% · release to throw`:'Hold to set throw power; release to throw';}});
@@ -436,7 +436,7 @@ function refreshHelp(){
 }
 refreshGuidance(true);
 
-function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(()=>hud()).catch(()=>{});const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
+function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(()=>hud()).catch(()=>{});const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected,reachable:los});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
 
 function knifeStrike(){
  if(meleeCooldown>0)return;meleeCooldown=.55;

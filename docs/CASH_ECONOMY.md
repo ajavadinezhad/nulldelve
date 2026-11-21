@@ -2,7 +2,7 @@
 
 Cash now comes from three sources: modest combat income, two finite exploration stashes per operation, and one first-clear contract. Stashes use authored identities and positions; contracts use `contract.<operation>`. A persisted claim ledger makes each reward payable once. The profile transaction checks the current ledger under its existing synchronization, owns its revision increase, and preserves the earned balance and claim history across older checkpoint loads.
 
-Old saved balances and purchased upgrades are retained. Future kill payouts are $2 workers, $3 runners, $8 brutes, $10 chargers, $14 sentinels, $12 screechers, $9 leapers and $40 matriarchs. Stashes hold $20–45 and contracts pay $45–180. Repeated kills retain their normal reward; stashes and first-clear contracts cannot be farmed by reload or replay.
+Old saved balances and purchased upgrades are retained. Future kill payouts are $2 workers, $3 runners, $8 brutes, $10 chargers, $14 sentinels, $12 screechers, $9 leapers and $40 matriarchs. Stashes hold $20–45 and contracts pay $45–180. Since r24, repeated authored kills, stashes and first-clear contracts cannot be farmed by reload or replay.
 
 ## First-play Normal income model
 
@@ -45,3 +45,9 @@ Every authored encounter slot has a stable cash identity, shared across checkpoi
 Each pending payout is journaled before asynchronous profile locking. Closing the page after a final kill can recover the payout on next startup; claims and journal recovery are idempotent and synchronized across tabs. If browser storage is unavailable, cash remains protected only within the current session, consistent with the existing persistence warning.
 
 Existing balances are never reduced. Profiles created before the ledger mark completed operations' enemy slots paid once, and legacy checkpoints mark recorded dead enemies/cleared encounters paid without issuing replacement cash. An old profile cannot reconstruct unrecorded historical kills in an unfinished operation before this update; protection is exact for all kills recorded by the new ledger. New wave snapshots also save pending reward ordinals so missing-reference recovery does not reuse a surviving enemy's cash identity.
+
+## r27 payout interruption review
+
+Enemy, exploration and first-clear contract rewards now share a durable pending-payout queue. Claiming a reward records the pending identity before any asynchronous profile lock; startup recovers every reward type. This closes the first-clear/departure gap where progress could be saved before the contract payment finished. Backup export can flush the queue before capturing the wallet.
+
+A duplicate claim after a storage quota failure no longer deletes its recovery journal simply because the reward exists in memory. Journal cleanup now requires the stored profile to confirm the claim. Enemy retries also retain the original pending mutation payout rather than replacing it with a different amount after replay. Regression cases cover quota failure → duplicate → reopen, real pending contract interruption, exploration recovery, and a delayed backup flush. Existing prices and bonus strengths are unchanged.

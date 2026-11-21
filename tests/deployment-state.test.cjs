@@ -8,3 +8,22 @@ test('blocked storage still carries a completed Breach and purchased gun into Co
 test('malformed deployment data fails safely and unknown unlock gaps cannot bypass progression',()=>{for(const value of ['', '#deployment=%bad','#deployment='+encodeURIComponent('{}'),'#deployment='+encodeURIComponent('{"version":99}')])assert.equal(decodeDeploymentState(value),null);const profile=createCampaignProfile({storage:null}).serialize(),hash=encodeDeploymentState({profile,progress:{version:1,completed:['breach','nest'],researchLogs:['unknown','log-lab']}}),decoded=decodeDeploymentState(hash);assert.deepEqual(decoded.progress.completed,['breach']);assert.deepEqual(decoded.progress.researchLogs,['log-lab']);});
 
 test('deployment transfer carries one unlocked field skill with blocked storage and rejects milestone gaps',()=>{const profile=createCampaignProfile({storage:null}).serialize(),progress={version:1,completed:['breach','command','research']};const decoded=decodeDeploymentState(encodeDeploymentState({profile,progress,fieldSkill:{version:1,selected:'demolition'}}));assert.equal(decoded.fieldSkill.selected,'demolition');const locked=decodeDeploymentState(encodeDeploymentState({profile,progress:{version:1,completed:['research']},fieldSkill:{version:1,selected:'demolition'}}));assert.equal(locked.fieldSkill.selected,'none');});
+test('fully migrated campaign enemy ledger remains compact and transfers every exact paid identity',()=>{
+ const {createProgression}=require('../src/progression.js'),zones=createProgression({doors:Array.from({length:32},()=>({})),enemies:[],spawnEnemy:()=>null}).state.zones;
+ const claimedRewards={'contract.freight':true,'salvage.freight.arrival':true};for(const zone of zones)for(let i=0;i<Math.ceil(Math.max(zone.total,120)*1.5);i++)claimedRewards[`kill.${zone.id}.${i}`]=true;
+ const profile=createCampaignProfile({storage:null,economy:createEconomy({credits:87654,claimedRewards,enemyRewardsVersion:1})}).serialize(),before=JSON.stringify(profile),progress={version:1,completed:['breach','command','research','containment','nest','hospital','freight']};
+ const hash=encodeDeploymentState({profile,progress});assert.ok(hash.length<15000,`compact hash length ${hash.length}`);const decoded=decodeDeploymentState(hash);assert.ok(decoded);assert.deepEqual(decoded.profile,profile);assert.equal(JSON.stringify(profile),before,'URL compaction does not mutate the live wallet');
+});
+test('sparse paid enemies retain holes and finite rewards with no omitted or extra claims',()=>{
+ const claimedRewards={'contract.breach':true};for(const zone of ['security','freight-cold','static'])for(const ordinal of [0,2,3,7,9,9999])claimedRewards[`kill.${zone}.${ordinal}`]=true;
+ const profile=createCampaignProfile({storage:null,economy:createEconomy({credits:71,claimedRewards})}).serialize(),hash=encodeDeploymentState({profile,progress:{version:1,completed:[]}}),decoded=decodeDeploymentState(hash);
+ assert.deepEqual(decoded.profile.economy.claimedRewards,claimedRewards);assert.equal(decoded.profile.economy.credits,71);assert.equal(decoded.profile.economy.claimedRewards['kill.security.1'],undefined);assert.equal(decoded.profile.economy.claimedRewards['kill.security.8'],undefined);
+});
+test('range transfers reject malformed, overlapping, duplicate and excessive expansions',()=>{
+ const profile=createCampaignProfile({storage:null}).serialize(),base=JSON.parse(decodeURIComponent(encodeDeploymentState({profile,progress:{version:1,completed:[]}}).slice('#deployment='.length)));
+ const invalid=[null,{},[['security',[]]],[['__proto__',[[0,2]]]],[['security',[[0,1],[1,2]]]],[['security',[[2,3],[0,1]]]],[['security',[[0,2]]],['security',[[4,6]]]],[['security',[[-1,2]]]],[['security',[[0,10000]]]],[['security',[[0.5,2]]]],[['security',[[3,2]]]],[['security',[[0,1,2]]]],[['a',[[0,9999]]],['b',[[0,9999]]],['c',[[0,9999]]]]];
+ for(const killClaims of invalid){const hash='#deployment='+encodeURIComponent(JSON.stringify({...base,killClaims}));assert.equal(decodeDeploymentState(hash),null,JSON.stringify(killClaims));}
+});
+test('legacy uncompressed version-one deployment hashes remain accepted',()=>{
+ const profile=createCampaignProfile({storage:null,economy:createEconomy({credits:333,claimedRewards:{'kill.security.2':true,'contract.breach':true}})}).serialize(),hash='#deployment='+encodeURIComponent(JSON.stringify({version:1,profile,progress:{version:1,completed:['breach']}}));assert.deepEqual(decodeDeploymentState(hash).profile,profile);
+});

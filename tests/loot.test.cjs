@@ -28,3 +28,11 @@ test('hard emergency salvage covers expensive mutations only when both guns are 
 
 test('ordinary ammo respects heavy round value and damage purchases never shrink physical drops',()=>{const {primaryWeapon}=require('../src/arsenal.js');const drop=(id,upgrade=0)=>{const c=context(),gun=primaryWeapon(id);c.weapons.rifle={...gun,damage:gun.baseDamage+upgrade,reserve:60,ammo:gun.capacity};return dropEnemyLoot(createLootState(),enemy('screecher'),c)[0].rifle;};assert.equal(drop('carbine'),6);assert.equal(drop('mantis'),2);assert.equal(drop('marksman'),2);assert.equal(drop('kestrel'),3);assert.equal(drop('shotgun'),2);for(const id of ['carbine','mantis','marksman','kestrel','shotgun'])assert.equal(drop(id,1),drop(id));});
 test('Hard AMR emergency aid remains bounded and only activates with both guns low',()=>{const {primaryWeapon}=require('../src/arsenal.js'),c=context();c.difficulty='hard';c.player.ammo=0;c.weapons.rifle={...primaryWeapon('mantis'),damage:8,reserve:0,ammo:0};c.weapons.pistol={ammo:0,reserve:0};const emergency=dropEnemyLoot(createLootState(),{...enemy('sentinel'),maxHp:21},c)[0];assert.equal(emergency.rifle,4);assert.equal(emergency.pistol,3);c.weapons.pistol.reserve=20;assert.equal(dropEnemyLoot(createLootState(),{...enemy('sentinel'),maxHp:21},c)[0].rifle,2);});
+
+test('supplies behind a closed barrier do not suppress reachable emergency ammo or health aid',()=>{
+ const blocked={...context(20),reachable:(_x,_z,x)=>x<2};blocked.player.ammo=0;blocked.weapons={rifle:{ammo:0,reserve:0},pistol:{ammo:0,reserve:0}};
+ const saved={drops:[{id:'drop1',kind:'ammo',x:3,z:0,rifle:100,pistol:40,amount:0},{id:'drop2',kind:'health',x:3,z:0,rifle:0,pistol:0,amount:100}]};
+ const isolated=createLootState(saved),drops=dropEnemyLoot(isolated,enemy('brute'),blocked);assert.equal(drops.filter(d=>d.kind==='ammo').length,1);assert.equal(drops.filter(d=>d.kind==='health').length,1);
+ const ordinary=createLootState(saved);assert.deepEqual(dropEnemyLoot(ordinary,enemy(),{...blocked,reachable:()=>true}),[],'reachable pending supplies still prevent unnecessary aid');
+ const lowAmmo=createLootState(saved);assert.equal(dropEnemyLoot(lowAmmo,enemy(),blocked)[0].kind,'ammo','an inaccessible reserve pile cannot starve a depleted loadout');
+});

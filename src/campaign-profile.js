@@ -1,9 +1,11 @@
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=skill-audit-r26';
-import {compatibleStorage} from './storage-compat.js?v=skill-audit-r26';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=skill-audit-r26';
-import {createEconomy} from './economy.js?v=skill-audit-r26';
+import {cashReward} from './mission-salvage.js?v=whole-audit-r27';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=whole-audit-r27';
+import {compatibleStorage} from './storage-compat.js?v=whole-audit-r27';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=whole-audit-r27';
+import {createEconomy} from './economy.js?v=whole-audit-r27';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
+const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';
 const ids=()=>PRIMARY_WEAPONS.map(weapon=>weapon.id);
 const revision=value=>Number.isSafeInteger(value)&&value>=0?value:0;
@@ -106,39 +108,58 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   if(!locks?.request)return transaction();
   let started=false;try{return await locks.request(CAMPAIGN_PROFILE_KEY,{mode:'exclusive'},()=>{started=true;return transaction();});}catch(error){if(started)throw error;return transaction();}
  }
- const pendingEnemies=new Map();let rewardQueue=Promise.resolve();
- function queueEnemyReward(id,variant){
-  if(typeof id!=='string'||!/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(id)||!['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(variant))return Promise.resolve({ok:false,message:'Unknown enemy reward.'});
-  const key=PENDING_PREFIX+id;
-  // A legacy zero-payment seed must not overwrite a real kill interrupted before commit.
-  if(variant==='paid')try{const queued=pendingEnemies.get(key)??JSON.parse(journalStorage?.getItem(key)||'null');if(queued?.id===id&&queued.variant!=='paid')variant=queued.variant;}catch{}
-  const entry={id,variant};pendingEnemies.set(key,entry);
+ const pendingRewards=new Map();let rewardQueue=Promise.resolve();
+ function queueReward(key,entry,offer){
+  pendingRewards.set(key,entry);
   try{journalStorage?.setItem(key,JSON.stringify(entry));}catch{sessionOnly=true;}
   rewardQueue=rewardQueue.catch(()=>{}).then(async()=>{
    let result;for(let attempt=0;attempt<12;attempt++){
-    result=await purchaseOffer('enemy.'+id+'.'+variant);
+    result=await purchaseOffer(offer);
     if(result.ok||result.alreadyClaimed)break;
     await new Promise(resolve=>setTimeout(resolve,25*(attempt+1)));
    }
-   if(result?.ok||result?.alreadyClaimed){pendingEnemies.delete(key);if(result.persisted!==false)try{journalStorage?.removeItem(key);}catch{}}
+   // An in-memory duplicate after a quota failure is not a durable payout.
+   // Keep its journal until storage itself confirms the wallet and claim.
+   if((result?.ok||result?.alreadyClaimed)&&read().saved?.economy.claimedRewards[entry.id]===true){
+    pendingRewards.delete(key);try{journalStorage?.removeItem(key);}catch{}
+   }
    return result;
   });return rewardQueue;
  }
- function recoverEnemyRewards(){
-  try{for(let i=0;i<(journalStorage?.length??0);i++){const key=journalStorage.key(i);if(!key?.startsWith(PENDING_PREFIX))continue;try{const entry=JSON.parse(journalStorage.getItem(key));if(entry&&typeof entry.id==='string'&&key===PENDING_PREFIX+entry.id)pendingEnemies.set(key,entry);}catch{}}}catch{}
-  for(const entry of [...pendingEnemies.values()])queueEnemyReward(entry.id,entry.variant);
+ function queueEnemyReward(id,variant){
+  if(typeof id!=='string'||!/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(id)||!['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(variant))return Promise.resolve({ok:false,message:'Unknown enemy reward.'});
+  const key=PENDING_PREFIX+id;
+  // Preserve the original payout value through retries, changed mutation mixes
+  // and legacy migration; a later duplicate must not replace the earned amount.
+  try{const queued=pendingRewards.get(key)??JSON.parse(journalStorage?.getItem(key)||'null');if(queued?.id===id&&['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(queued.variant))variant=queued.variant;}catch{}
+  return queueReward(key,{id,variant},'enemy.'+id+'.'+variant);
+ }
+ function claimCashReward(id){
+  if(!cashReward(id))return Promise.resolve({ok:false,message:'Unknown cash reward.'});
+  return queueReward(CASH_PENDING_PREFIX+id,{id},'reward.'+id);
+ }
+ function recoverRewards(){
+  try{for(let i=0;i<(journalStorage?.length??0);i++){const key=journalStorage.key(i);if(!key?.startsWith(PENDING_PREFIX)&&!key?.startsWith(CASH_PENDING_PREFIX))continue;try{const entry=JSON.parse(journalStorage.getItem(key));if(entry&&typeof entry.id==='string'&&(key===CASH_PENDING_PREFIX+entry.id&&cashReward(entry.id)||key===PENDING_PREFIX+entry.id&&/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(entry.id)&&['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(entry.variant)))pendingRewards.set(key,entry);}catch{}}}catch{}
+  for(const [key,entry] of [...pendingRewards]){if(key.startsWith(CASH_PENDING_PREFIX))claimCashReward(entry.id);else queueEnemyReward(entry.id,entry.variant);}
   return rewardQueue;
  }
+ // Keep the existing startup hook compatible while recovering all reward types.
+ function recoverEnemyRewards(){return recoverRewards();}
+ async function flushRewards(){
+  await rewardQueue;if(pendingRewards.size)await recoverRewards();
+  if([...pendingRewards.values()].some(entry=>!economy.state.claimedRewards[entry.id]))throw new Error('Cash rewards are still being saved. Please try again.');
+  return serialize();
+ }
+ function flushEnemyRewards(){return flushRewards();}
  function migrateEnemyRewards(ids=[]){if(!beginMutation())return false;const before=serialize();return finishMutation(economy.migrateEnemyRewards(ids),before,true).ok;}
  function restoreCheckpointEconomy(saved){
   const latest=read(),preserve=!!latest.saved||sessionOnly||state.revision>0,current=economy.serialize();
   economy.restore(saved);
   if(preserve){economy.state.credits=current.credits;economy.state.enemyRewardsVersion=current.enemyRewardsVersion;economy.state.claimedRewards={...economy.state.claimedRewards,...current.claimedRewards};}
  }
- async function claimCashReward(id){return purchaseOffer('reward.'+id);}
  function restoreLoadout(saved={}){const primary=ids().includes(saved.primary)?saved.primary:'carbine';state.unlocked=['carbine',...ids().filter(id=>id!=='carbine'&&(state.unlocked.includes(id)||saved.unlocked?.includes(id)||id===primary))];state.primary=primary;return true;}
  function restoreTransient(value){const saved=normalizeCampaignProfile(value);if(!saved)return false;const latest=read();if(latest.saved&&latest.saved.revision>saved.revision){observedRaw=latest.raw;apply(latest.saved);return false;}apply(saved);observedRaw=latest.raw;sessionOnly=true;return true;}
  reload();
- return {state,persist,reload,markPurchase,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,queueEnemyReward,recoverEnemyRewards,migrateEnemyRewards,restoreCheckpointEconomy,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
+ return {state,persist,reload,markPurchase,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,queueEnemyReward,recoverEnemyRewards,recoverRewards,flushRewards,flushEnemyRewards,migrateEnemyRewards,restoreCheckpointEconomy,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
 }
 export function defaultCampaignProfile(){return initial();}

@@ -131,3 +131,11 @@ Expanded to twelve nodes with three specialization forks. Actual-function gamepl
 ## r26 skill audit
 
 Three agents reviewed skill balance, runtime persistence and phone navigation. Fixed post-final-mission unlocks for two skills, invalid effect-name fallback, checkpoint recapture losing skill prerequisites, missing skill development in exported backups, and phone node details remaining below the viewport. Short landscape skill menus now devote more height to the internally scrolling content. Runtime regressions cover all twelve skills across seven missions and three difficulties (252 double roundtrips), all mutation attacks and all guns with reload upgrades/attachments. Numerical bonus strengths remain unchanged; no human difficulty or physical-phone claim is made.
+
+## r27 whole-game audit
+
+Three agents checked missions/combat, cash/skills/persistence, and phone/desktop menus. Fixed pending supplies behind blocked geometry suppressing nearby aid, Medicine75/85 healing labels showing50, result-dialog focus escaping into gameplay, and focus targeting CSS-hidden controls. Drop amounts and numerical weapon/skill bonuses remain unchanged.
+
+Cash recovery now journals enemy, salvage and first-clear rewards before asynchronous transactions. A duplicate after a quota failure cannot delete an uncommitted payout; retries preserve its original amount. Backup export waits for pending rewards. Malformed journals cannot award cash or prevent backup. Large paid-enemy transfer ledgers use validated ordinal ranges; a2,880claim case shrinks from over100k characters to2,932 and roundtrips exactly, including sparse unpaid holes. Old transfer links remain supported.
+
+Coverage retains42campaign+12legacy collision-aware route configurations,2,772ammunition projections,252skill checkpoint combinations, and the full regression suite. Browser smoke checks cover a Freight deployment, movement, virtual sticks/fire/reload, map/help/pause and portrait/landscape layouts. These are desktop browser viewport checks, not physical-phone multitouch or human full-campaign survival tests.
