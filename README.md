@@ -84,4 +84,10 @@ Desktop browsers are the primary preview target. Touch controls are available ex
 
 [Report a bug or confusing interaction](https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml). Include the operation, difficulty, device/browser, and what happened.
 
-Preview assets: [share image](assets/preview/share-card.jpg), [actual gameplay sample](assets/preview/gameplay-preview.gif). The silent animation captures a real Nest arena play session; it is not a promise of final art or balance. The share card can be regenerated from `tools/preview-card.html`.
+Preview asset: [share image](assets/preview/share-card.jpg). The low-frame-rate automated GIF has been retired.
+
+For a human-played video, open [capture mode](https://ajavadinezhad.github.io/nulldelve/?capture=1), deploy, and press F9 to start/stop. Select 1080p or 4K; both request 60 fps, with 20/50 Mbps video targets and game audio (takes up to 90 seconds). Recording excludes the HUD and recording toolbar, pauses with play, and offers an MP4 download when supported (WebM otherwise). Actual frame rate depends on the device. No microphone or screen sharing is used. Record short, deliberate exploration/puzzle/combat takes; no automated movement is included. The share card can be regenerated from `tools/preview-card.html`.
+
+## Grenades and operator actions
+
+Hold G (or hold the grenade icon) to build throw strength and preview its arc; release to throw. Quick taps lob nearby, longer holds reach farther. Walls limit the landing point. Detonation follows the visible flight. Reloads use phased hand and magazine motion; grenade throws have windup, release and recovery. Result screens keep checkpoint restart prominent and put statistics under Run details.

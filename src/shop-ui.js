@@ -1,5 +1,5 @@
-import {createItemIcon} from './item-icons.js?v=preview-r8';
-import {formatKey} from './controls.js?v=preview-r8';
+import {createItemIcon} from './item-icons.js?v=actions-r9';
+import {formatKey} from './controls.js?v=actions-r9';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
@@ -25,7 +25,7 @@ function icon(type){
  for(const d of paths[type]??paths.gear){const path=document.createElementNS(SVG_NS,'path');path.setAttribute('d',d);svg.append(path);}wrapper.append(svg);return wrapper;
 }
 const TITLES={damage:'Damage',magazine:'Magazine',reload:'Reload',medkit:'Medkit',grenade:'Frag grenade',fireGrenade:'Fire grenade',armor:'Armor'};
-const EFFECTS={damage:'+1 damage / shot',magazine:'+6 rounds',reload:'−0.18s · 0.5s minimum',medkit:'+50 health',grenade:'Blast area',fireGrenade:'Burn area',armor:'+40 armor · 60 maximum'};
+const EFFECTS={damage:'+1 damage / shot',magazine:'+6 rounds',reload:'−0.18s · 0.5s minimum',medkit:'+50 health',grenade:'Blast area · hold for range',fireGrenade:'Burn area · hold for range',armor:'+40 armor · 60 maximum'};
 const SUPPLIES=new Set(['medkit','grenade','fireGrenade','armor']);
 function purchaseButton(offer,onPurchase,{label,name,maxed=false,full=false}={}){
  const cost=integer(offer.cost),button=element('button','shop-buy menu-button primary',maxed?'Maxed':full?'Full':label??`$${cost.toLocaleString()}`);button.type='button';button.disabled=maxed||full||offer.available===false;if(!maxed&&!full&&(label===undefined||String(label).startsWith('$'))){const cash=element('img','cash-icon');cash.src='./assets/cash.svg';cash.alt='';cash.setAttribute('aria-hidden','true');button.append(cash);}

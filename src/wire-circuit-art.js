@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {WIRE_LAYOUT,WIRE_LINKS,junctionPorts,evaluateCircuit} from './wire-circuit.js?v=preview-r8';
+import {WIRE_LAYOUT,WIRE_LINKS,junctionPorts,evaluateCircuit} from './wire-circuit.js?v=actions-r9';
 
 /** The actual cross-room cable follows the same authored port graph as the puzzle. */
 export function createWireCircuitArt(scene,state){

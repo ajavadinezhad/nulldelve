@@ -61,3 +61,11 @@ Manual acceptance checklist (pending human/device access, not claimed as complet
 - Keep mobile labelled experimental until these checks pass. No accounts or additional campaign content are needed for this early preview.
 
 Final automated validation: **284 checks across 52 files pass**. Browser verification covered touch training layout, the preview/footer flow, startup/loading replacement, and captured real gameplay. Physical-device and uncoached-human checks above remain pending.
+
+## Actions and capture r9
+
+Retired the low-frame-rate automated gameplay GIF; it is not promotional footage. Optional `?capture=1` mode records continuous clean gameplay and game audio at 1080p/4K with60fps targets, subject to hardware. Browser playback validated actual1920×1080 and3840×2160 MP4 files. The final promotional run still needs a human player. No microphone or screen sharing is used.
+
+Added articulated reload hands and removable magazines; charged grenade controls, visible aim arc, windup and projectile travel; compact checkpoint-first results with expandable statistics. Grenade charging cancels on lost input or pause, and safe checkpoints defer while a throw is pending.
+
+R9 automated validation: **299 checks across 56 files pass**. Browser checks verified charged input/inventory, compact failure layout, and continuous video playback at both export resolutions.

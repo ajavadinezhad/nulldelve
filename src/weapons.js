@@ -32,7 +32,7 @@ export function weapon(type='rifle'){
     block(group,'polymer',0,-.015,.33,.145,.17,.29);
     block(group,'black',0,-.015,.49,.16,.2,.04);
     block(group,'polymer',0,-.16,.01,.105,.25,.13).rotation.x=-.2;
-    const magazine=block(group,'black',0,-.21,-.28,.12,.32,.19);magazine.rotation.x=-.13;
+    const magazine=block(group,'black',0,-.21,-.28,.12,.32,.19);magazine.rotation.x=-.13;group.userData.magazine=magazine;
     for(const z of [-.33,-.25])block(group,'steel',.065,-.22,z,.01,.22,.016);
     // Trigger guard, charging handle, ejection port, and optic.
     block(group,'steel',.104,.005,-.16,.018,.07,.12);
@@ -47,7 +47,7 @@ export function weapon(type='rifle'){
     block(group,'receiver',0,0,-.2,.16,.19,.43);block(group,'black',0,.115,-.2,.13,.035,.47);
     tube(group,'steel',0,0,-.52,.035,.24);tube(group,'black',0,0,-.68,.05,.10);
     block(group,'black',0,-.02,-.4,.18,.17,.18);block(group,'polymer',0,-.18,-.02,.10,.26,.12).rotation.x=-.12;
-    block(group,'black',0,-.28,-.23,.10,.43,.12);block(group,'steel',.055,-.28,-.23,.014,.30,.05);
+    group.userData.magazine=block(group,'black',0,-.28,-.23,.10,.43,.12);block(group,'steel',.055,-.28,-.23,.014,.30,.05);
     for(const x of [-.065,.065])tube(group,'steel',x,0,.20,.02,.43);
     block(group,'black',0,-.02,.42,.17,.2,.035);block(group,'black',0,.16,-.12,.09,.055,.13);
     tube(group,'glass',0,.20,-.19,.04,.008);block(group,'black',0,.14,-.46,.03,.06,.035);
@@ -65,7 +65,7 @@ export function weapon(type='rifle'){
     block(group,'polymer',0,-.01,-.68,.16,.16,.37);for(const z of [-.56,-.65,-.74])block(group,'black',.087,0,z,.018,.06,.035);
     tube(group,'steel',0,0,-1.10,.027,.53);tube(group,'black',0,0,-1.42,.047,.12);tube(group,'black',0,0,-1.49,.023,.025);
     block(group,'polymer',0,-.02,.32,.14,.16,.40);block(group,'black',0,-.025,.54,.16,.21,.045);block(group,'polymer',0,.085,.30,.12,.07,.20);
-    block(group,'black',0,-.16,.025,.10,.25,.12).rotation.x=-.22;block(group,'black',0,-.19,-.24,.12,.24,.14);block(group,'steel',.065,-.19,-.24,.01,.15,.04);
+    block(group,'black',0,-.16,.025,.10,.25,.12).rotation.x=-.22;group.userData.magazine=block(group,'black',0,-.19,-.24,.12,.24,.14);block(group,'steel',.065,-.19,-.24,.01,.15,.04);
     for(const z of [-.12,-.47])block(group,'black',0,.15,z,.08,.11,.055);
     tube(group,'receiver',0,.235,-.30,.065,.48);tube(group,'black',0,.235,-.59,.091,.14);tube(group,'glass',0,.235,-.665,.073,.009);tube(group,'black',0,.235,-.02,.077,.09);tube(group,'glass',0,.235,.03,.056,.009);
     block(group,'black',.075,.235,-.29,.065,.09,.09);block(group,'black',0,.315,-.29,.08,.07,.08);block(group,'steel',.1,.015,-.06,.055,.035,.13);
@@ -77,7 +77,7 @@ export function weapon(type='rifle'){
     tube(group,'steel',0,.035,-.98,.047,.42);tube(group,'black',0,.035,-1.24,.062,.11);tube(group,'black',0,.035,-1.31,.036,.025);
     tube(group,'black',0,-.08,-.99,.028,.40);block(group,'receiver',0,.15,-1.12,.04,.18,.06);
     block(group,'polymer',0,-.025,.33,.18,.21,.36);block(group,'black',0,-.025,.53,.20,.24,.04);block(group,'black',0,-.17,.02,.12,.26,.14).rotation.x=-.2;
-    block(group,'polymer',0,-.29,-.27,.32,.40,.31);block(group,'black',0,-.50,-.27,.34,.035,.33);for(const x of [-.10,0,.10])block(group,'steel',x,-.30,-.435,.018,.25,.015);
+    group.userData.magazine=block(group,'polymer',0,-.29,-.27,.32,.40,.31);block(group,'black',0,-.50,-.27,.34,.035,.33);for(const x of [-.10,0,.10])block(group,'steel',x,-.30,-.435,.018,.25,.015);
     block(group,'receiver',.15,.055,-.20,.07,.07,.18);for(let i=0;i<5;i++){const belt=block(group,'brass',.18+i*.033,.025-i*.025,-.20,.025,.025,.12);belt.rotation.z=-.2;}
     block(group,'black',0,.24,-.44,.10,.055,.27);for(const z of [-.56,-.33])block(group,'steel',0,.18,z,.04,.13,.045);
     for(const side of [-1,1]){const leg=block(group,'steel',side*.085,-.10,-.91,.025,.035,.48);leg.rotation.y=side*.13;block(group,'black',side*.115,-.12,-.66,.055,.05,.09);}
@@ -87,7 +87,7 @@ export function weapon(type='rifle'){
     block(group,'black',0,-.035,-.16,.14,.12,.34);
     block(group,'steel',0,.04,-.21,.15,.105,.44);
     block(group,'black',0,-.17,-.015,.13,.24,.15).rotation.x=-.22;
-    block(group,'black',0,-.30,.015,.15,.03,.16);
+    group.userData.magazine=block(group,'black',0,-.30,.015,.15,.03,.16);
     tube(group,'black',0,.035,-.445,.035,.03);
     block(group,'black',0,.108,-.38,.035,.035,.045);
     block(group,'black',0,.108,-.035,.11,.035,.04);
@@ -96,6 +96,7 @@ export function weapon(type='rifle'){
     for(const z of [-.07,-.025,.02])block(group,'black',.077,.045,z,.009,.07,.012);
     group.userData.muzzle=new THREE.Vector3(0,.035,-.46);
   }
+  if(group.userData.magazine){group.userData.magazine.name='weapon-magazine';group.userData.magazine.userData.restPosition=group.userData.magazine.position.clone();}
   return group;
 }
 

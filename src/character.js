@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { weapon } from './weapons.js?v=preview-r8';
+import { weapon } from './weapons.js?v=actions-r9';
 
 const sphere = new THREE.SphereGeometry(1, 14, 10);
 const cube = new THREE.BoxGeometry(1, 1, 1);
@@ -24,6 +24,26 @@ function limb(g,a,b,r,color) {
   // CapsuleGeometry(1,1) has total length 3: stretch the shaft to the measured segment.
   mesh.scale.y = v.length()/3;
   mesh.quaternion.setFromUnitVectors(up,v.normalize()); return mesh;
+}
+
+// Reused scratch vectors keep articulated motion allocation-free per frame.
+const delta=new THREE.Vector3(),direction=new THREE.Vector3(),bend=new THREE.Vector3(),joint=new THREE.Vector3(),target=new THREE.Vector3(),inverseUpper=new THREE.Quaternion();
+const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
+const RELOAD_HAND=[[0,.08,.24,-.64],[.14,.25,.04,-.51],[.32,.18,-.12,-.38],[.48,-.24,-.04,-.04],[.65,.23,.05,-.49],[.79,.25,.25,-.34],[1,.08,.24,-.64]];
+const THROW_HAND=[[0,.40,.39,.10],[.19,.48,.59,.18],[.367,.32,.42,-.66],[.60,.28,.22,-.75],[1,.28,.24,-.30]];
+function handPath(frames,progress,out){let i=1;while(i<frames.length-1&&progress>frames[i][0])i++;const a=frames[i-1],b=frames[i],t=smooth((progress-a[0])/(b[0]-a[0]));return out.set(a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t,a[3]+(b[3]-a[3])*t);}
+function segment(mesh,a,b){delta.copy(b).sub(a);mesh.position.copy(a).addScaledVector(delta,.5);mesh.scale.y=delta.length()/3;mesh.quaternion.setFromUnitVectors(up,delta.normalize());}
+function poseArm(rig,x,y,z){
+ target.set(x,y,z);direction.copy(target).sub(rig.shoulder);const distance=Math.max(.03,Math.min(rig.upperLength+rig.foreLength-.005,direction.length()));direction.normalize();target.copy(rig.shoulder).addScaledVector(direction,distance);
+ const along=(rig.upperLength**2-rig.foreLength**2+distance**2)/(2*distance),height=Math.sqrt(Math.max(0,rig.upperLength**2-along**2));
+ bend.copy(rig.pole).addScaledVector(direction,-rig.pole.dot(direction)).normalize();joint.copy(rig.shoulder).addScaledVector(direction,along).addScaledVector(bend,height);
+ segment(rig.upperArm,rig.shoulder,joint);segment(rig.forearm,joint,target);rig.elbow.position.copy(joint);rig.hand.position.copy(target);rig.hand.rotation.set(0,Math.atan2(target.x-joint.x,-(target.z-joint.z))*.25,0);
+}
+function armRig(parent,side,cloth,trim){
+ const shoulder=new THREE.Vector3(side*.30,.38,-.03),upperLength=side<0?.34:.28,foreLength=side<0?.40:.25;
+ const upperArm=limb(parent,shoulder.toArray(),[side*.36,.18,-.24],.085,cloth),forearm=limb(parent,[side*.36,.18,-.24],[side*.1,.24,-.6],.067,cloth),elbow=round(parent,trim,[0,0,0],[.085,.08,.09]),hand=new THREE.Group();hand.name=side<0?'support-hand':'throwing-hand';parent.add(hand);
+ round(hand,trim,[0,0,0],[.07,.055,.085]);for(const x of [-.04,0,.04])block(hand,0x37413c,[x,-.012,-.065],[.025,.04,.055]);
+ const rig={shoulder,upperLength,foreLength,upperArm,forearm,elbow,hand,pole:new THREE.Vector3(side*.9,-.7,.25)};poseArm(rig,side<0?.08:.28,.24,side<0?-.64:-.30);return rig;
 }
 
 /** A compact tactical operator built in metres, facing local -Z. */
@@ -94,17 +114,12 @@ export function soldier(color, scene) {
   }
   limb(upper,[-.2,.71,-.02],[-.14,.66,-.17],.012,trim);
   round(upper,trim,[-.13,.66,-.18],[.025,.02,.025]);
-  // Bent elbows and gloved hands form a deliberate two-handed firing stance.
+  // Independent shoulder/elbow/hand chains bend toward their action targets.
   const arms=new THREE.Group();upper.add(arms);
   for(const side of [-1,1])round(arms,cloth,[side*.29,.4,-.01],[.115,.13,.12]);
-  limb(arms,[.30,.38,-.03],[.37,.22,-.22],.085,cloth);
-  round(arms,trim,[.37,.22,-.22],[.085,.08,.09]);
-  limb(arms,[.37,.22,-.22],[.28,.31,-.52],.07,cloth);
-  round(arms,trim,[.28,.31,-.53],[.075,.065,.095]);
-  limb(arms,[-.30,.38,-.03],[-.30,.20,-.25],.085,cloth);
-  round(arms,trim,[-.30,.20,-.25],[.085,.08,.09]);
-  limb(arms,[-.30,.20,-.25],[.20,.30,-.73],.067,cloth);
-  round(arms,trim,[.20,.30,-.75],[.075,.065,.095]);
+  const rig={left:armRig(arms,-1,cloth,trim),right:armRig(arms,1,cloth,trim)};
+  const heldGrenade=new THREE.Group();heldGrenade.name='held-grenade';rig.right.hand.add(heldGrenade);heldGrenade.position.set(0,-.025,-.055);
+  round(heldGrenade,0x70734a,[0,0,0],[.065,.085,.065]);block(heldGrenade,trim,[0,.09,0],[.04,.04,.045]);block(heldGrenade,0x989b8b,[.025,.06,0],[.018,.085,.055],.5);heldGrenade.visible=false;
   // Muted identification panels distinguish allies without making armour fluorescent.
   block(arms,friendly?0x91bba1:0xb0795e,[-.397,.42,-.015],[.025,.09,.13]);
   block(upper,friendly?0xaccbb1:0xb48972,[0,.40,.365],[.11,.055,.012]);
@@ -112,7 +127,7 @@ export function soldier(color, scene) {
   const gun=weapon('rifle');gun.position.copy(gunMount);g.add(gun);
   const flash=new THREE.Mesh(new THREE.ConeGeometry(.15,.48,6),new THREE.MeshBasicMaterial({color:0xffd386}));
   flash.rotation.x=-Math.PI/2;flash.position.set(.28,1.18,-1.56);flash.visible=false;g.add(flash);
-  Object.assign(g.userData,{flash,flashTime:0,gunMount,upper,hips,legs,arms,phase:0,idle:0,lastPosition:null,moveBlend:0,recoil:0,helmet,helmetRim});
+  Object.assign(g.userData,{flash,flashTime:0,gunMount,upper,hips,legs,arms,armRig:rig,heldGrenade,throwPhase:null,grenadeCharging:false,chargeStart:new THREE.Vector3(),throwStart:new THREE.Vector3(),chargeElapsed:0,wasCharging:false,wasThrowing:false,reloadElapsed:0,phase:0,idle:0,lastPosition:null,moveBlend:0,recoil:0,helmet,helmetRim});
   scene.add(g);return g;
 }
 
@@ -140,7 +155,29 @@ export function animateSoldier(mesh,dt,reloading=false) {
   if(u.flashTime>0)u.recoil=.055;
   u.recoil*=Math.exp(-23*dt);
   const gun=mesh.getObjectByName('weapon');
-  if(gun){gun.position.copy(u.gunMount);gun.position.z+=u.recoil;gun.rotation.x=reloading?-.28+Math.sin(u.idle*7)*.06:0;gun.rotation.z=reloading?-.22:0;}
-  u.arms.rotation.x=reloading?-.16:0;
-  u.upper.position.z=u.recoil*.35;
+  let reloadProgress=null;
+  if(reloading&&typeof reloading==='object'&&Number.isFinite(reloading.progress)){reloadProgress=Math.max(0,Math.min(1,reloading.progress));u.reloadElapsed=0;}
+  else if(reloading){u.reloadElapsed+=dt;reloadProgress=Math.min(.98,u.reloadElapsed/1.7);}else u.reloadElapsed=0;
+  const throwing=Number.isFinite(u.throwPhase)&&u.throwPhase>=0&&u.throwPhase<=1,charging=!!u.grenadeCharging&&!throwing;
+  if(charging&&!u.wasCharging){u.chargeStart.copy(u.armRig.right.hand.position);u.chargeElapsed=0;}if(charging)u.chargeElapsed+=dt;
+  if(throwing&&!u.wasThrowing)u.throwStart.copy(u.armRig.right.hand.position);
+  const throwProgress=throwing?u.throwPhase:charging?.16:null;
+  const reloadBlend=reloadProgress===null?0:Math.sin(Math.PI*reloadProgress),throwBlend=throwProgress===null?0:throwProgress<.367?1:1-smooth((throwProgress-.367)/.633);
+  u.arms.rotation.set(0,0,0);u.upper.position.z=u.recoil*.35;
+  if(gun){
+    gun.position.copy(u.gunMount);gun.position.z+=u.recoil+reloadBlend*.10+throwBlend*.10;gun.position.y-=reloadBlend*.07+throwBlend*.10;gun.position.x-=reloadBlend*.04+throwBlend*.17;
+    gun.rotation.set(-reloadBlend*.34-throwBlend*.24,throwBlend*.08,-reloadBlend*.50+throwBlend*.16);
+    const magazine=gun.userData.magazine;if(magazine){const rest=magazine.userData.restPosition;magazine.position.copy(rest);magazine.rotation.z=0;if(reloadProgress!==null){const p=reloadProgress,pull=smooth((p-.14)/.16)*(1-smooth((p-.55)/.15));magazine.position.y-=pull*.23;magazine.position.x-=pull*.08;magazine.rotation.z=pull*.25;magazine.visible=!(p>.37&&p<.56);}else magazine.visible=true;}
+  }
+  if(u.armRig){
+    if(reloadProgress!==null){handPath(RELOAD_HAND,reloadProgress,target);poseArm(u.armRig.left,target.x,target.y,target.z);}
+    else if(throwProgress!==null)poseArm(u.armRig.left,.08-.04*throwBlend,.24-.03*throwBlend,-.64+.16*throwBlend);
+    else poseArm(u.armRig.left,.08,.24,-.64);
+    if(throwProgress!==null&&throwProgress<1){handPath(THROW_HAND,throwProgress,target);if(charging)target.lerpVectors(u.chargeStart,target,smooth(u.chargeElapsed/.18));else if(throwProgress<.19)target.lerpVectors(u.throwStart,target,smooth(throwProgress/.19));poseArm(u.armRig.right,target.x,target.y,target.z);}
+    else if(gun){target.set(0,-.15,.01).applyEuler(gun.rotation).add(gun.position).sub(u.upper.position);inverseUpper.copy(u.upper.quaternion).invert();target.applyQuaternion(inverseUpper);poseArm(u.armRig.right,target.x,target.y,target.z);}
+    else poseArm(u.armRig.right,.28,.24,-.30);
+    u.heldGrenade.visible=charging||throwing&&throwProgress<.367;
+    if(throwProgress!==null&&throwProgress<1)u.armRig.right.hand.rotation.x=(-.4+throwProgress*.6)*throwBlend;
+  }
+  u.wasCharging=charging;u.wasThrowing=throwing;
 }
