@@ -1,4 +1,4 @@
-import {progressionSequences,hospitalAirlockTarget,ARTIFACTS} from './progression.js?v=armory-r20';
+import {progressionSequences,hospitalAirlockTarget,ARTIFACTS} from './progression.js?v=audit-r21';
 /** Player-requested hints reveal one layer at a time, only for the nearby puzzle. */
 const PUZZLES=[
  ...[[104,121,43,62],[104,121,23,37]].map(bounds=>({id:'hospital-power',title:'Hospital emergency supply',bounds,unsolved:c=>c.state.operationId==='hospital'&&!c.state.operationTasks?.hospitalPower,hints:['The emergency supply is missing a part. Inspect the service equipment in the adjoining department.','Search the western Pharmacy cabinet for a fuse, then return south to the Admission supply console.','Recover the fuse from the western Pharmacy service cabinet, then use Interact at the emergency supply in southeast Admission.']})),

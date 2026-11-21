@@ -1,13 +1,13 @@
-import {FIELD_SKILLS,fieldSkillUnlocked} from './field-skills.js?v=armory-r20';
-import {compatibleStorage} from './storage-compat.js?v=armory-r20';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=armory-r20';
-import {DIFFICULTY_RULES} from './difficulty.js?v=armory-r20';
-import {createCampaignMap} from './campaign-map.js?v=armory-r20';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=armory-r20';
-import {createItemIcon} from './item-icons.js?v=armory-r20';
-import {buildMissionPreview} from './mission-previews.js?v=armory-r20';
-import {renderShop} from './shop-ui.js?v=armory-r20';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=armory-r20';
+import {FIELD_SKILLS,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=audit-r21';
+import {compatibleStorage} from './storage-compat.js?v=audit-r21';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=audit-r21';
+import {DIFFICULTY_RULES} from './difficulty.js?v=audit-r21';
+import {createCampaignMap} from './campaign-map.js?v=audit-r21';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=audit-r21';
+import {createItemIcon} from './item-icons.js?v=audit-r21';
+import {buildMissionPreview} from './mission-previews.js?v=audit-r21';
+import {renderShop} from './shop-ui.js?v=audit-r21';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=audit-r21';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -30,12 +30,13 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  const settings=readSettings();
  let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',backupPreview=null,keyboardOpen=null;
  let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems';
+ const nestedScrollPositions=new Map();
  function status(){try{return getStatus()??{active:false,slots:[],canContinue:false};}catch{return {active:false,slots:[],canContinue:false};}}
  function notice(message){statusText=message;if(statusNode)statusNode.textContent=message;}
  async function action(callback,args=[],{close=true,message=''}={}){
   if(busy)return;busy=true;notice('');shell?.setAttribute('aria-busy','true');
-  try{const initialView=view;const result=await callback(...args);if(result===false||result?.ok===false){notice(result?.reason??result?.message??'That action could not be completed. Please try again.');return;}if(close){hide();}else{render(view!==initialView);notice(result?.message??message);}}
-  catch(error){notice(typeof error?.message==='string'&&error.message.trim()?error.message:'That action could not be completed. Please try again.');}
+  try{const initialView=view;const result=await callback(...args);if(result===false||result?.ok===false){if(!close)render(false);notice(result?.reason??result?.message??'That action could not be completed. Please try again.');return;}if(close){hide();}else{render(view!==initialView);notice(result?.message??message);}}
+  catch(error){if(!close)render(false);notice(typeof error?.message==='string'&&error.message.trim()?error.message:'That action could not be completed. Please try again.');}
   finally{busy=false;shell?.removeAttribute('aria-busy');}
  }
  function changeView(next){if(busy)return;captureAction=null;statusText='';view=next;if(next==='missions')returnView='main';render();}
@@ -144,7 +145,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function drawArmory(current){
   heading('','Armory');
   if(current.armory?.available===false){content.append(element('p','shop-status',current.armory.reason||'Available before deployment.'));addBack();return;}
-  renderShop(content,{...current.armory,bindings:settings.bindings},id=>action(onPurchase,[id],{close:false,message:'Armory updated.'}),{group:shopTab,onGroupChange:group=>{shopTab=group;render(false);},selectedWeapon:shopSelectedWeapon,onWeaponSelect:id=>{shopSelectedWeapon=id;shopDetailTab='upgrades';render(false);},detailTab:shopDetailTab,onDetailTab:tab=>{shopDetailTab=tab;render(false);}});
+  renderShop(content,{...current.armory,medkitHealing:fieldSkillEffects(current.fieldSkill).medkitHealing,bindings:settings.bindings},id=>action(onPurchase,[id],{close:false,message:'Armory updated.'}),{group:shopTab,onGroupChange:group=>{shopTab=group;render(false);},selectedWeapon:shopSelectedWeapon,onWeaponSelect:id=>{shopSelectedWeapon=id;shopDetailTab='upgrades';render(false);},detailTab:shopDetailTab,onDetailTab:tab=>{shopDetailTab=tab;render(false);}});
   if(shopTab==='skills'){const skills=element('div','field-skill-options');for(const skill of FIELD_SKILLS){const unlocked=fieldSkillUnlocked(skill.id,current.completedOperations??[]),choice=button('',()=>action(onFieldSkill,[skill.id],{close:false}), 'menu-button secondary');choice.disabled=!unlocked;choice.setAttribute('aria-pressed',String((current.fieldSkill??'none')===skill.id));choice.setAttribute('aria-label',`${skill.name}${unlocked?'':', locked'}`);choice.append(element('strong','',skill.name),element('small','',unlocked?skill.description:`Complete ${skill.unlockAfter} to unlock`));skills.append(choice);}content.append(skills);}
 
   addBack();
@@ -174,13 +175,14 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  }
 
  function render(focus=true){
-  if(!open)return;const oldFocus=document.activeElement,oldScroll=content?.scrollTop??0;const focusKey=oldFocus?.dataset?.focusKey??oldFocus?.dataset?.offerId??oldFocus?.dataset?.action??oldFocus?.id;const focusIndex=content?[...content.querySelectorAll('button,input,select,summary')].indexOf(oldFocus):-1;captureAction=null;const current=status();overlay.replaceChildren();overlay.classList.add('menu-overlay');
+  if(!open)return;for(const node of content?.querySelectorAll('nav')??[])if(node.dataset.scrollKey)nestedScrollPositions.set(node.dataset.scrollKey,{left:node.scrollLeft,top:node.scrollTop});const oldFocus=document.activeElement,oldScroll=content?.scrollTop??0;const focusKey=oldFocus?.dataset?.focusKey??oldFocus?.dataset?.offerId??oldFocus?.dataset?.action??oldFocus?.id;const focusIndex=content?[...content.querySelectorAll('button,input,select,summary')].indexOf(oldFocus):-1;captureAction=null;const current=status();overlay.replaceChildren();overlay.classList.add('menu-overlay');
   shell=element('div','game-menu');shell.dataset.view=view;shell.setAttribute('role','dialog');shell.setAttribute('aria-modal','true');shell.setAttribute('aria-label','Nulldelve game menu');
   const brand=element('header','menu-brand');brand.append(element('h1','','NULLDELVE'));shell.append(brand);drawPersistenceWarning(current);
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r20'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r21'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
  }
  function show(next='main'){

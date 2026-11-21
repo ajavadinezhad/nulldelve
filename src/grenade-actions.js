@@ -2,6 +2,13 @@ import * as THREE from '../vendor/three.module.js';
 export const GRENADE_CHARGE_SECONDS=1.25,THROW_RELEASE=.22,THROW_ANIMATION=.6;
 export const throwRange=power=>3+7*Math.max(0,Math.min(1,Number(power)||0));
 export function grenadeTarget(player,aim,power,solid=()=>false){let dx=aim.x-player.x,dz=aim.z-player.z,d=Math.hypot(dx,dz);if(d<.05){dx=-Math.sin(player.angle??0);dz=-Math.cos(player.angle??0);d=10;}else{dx/=d;dz/=d;}const length=Math.min(throwRange(power),d);let x=player.x,z=player.z;for(let step=.1;step<=length+.001;step+=.1){const nx=player.x+dx*step,nz=player.z+dz*step;if(solid(nx,nz,.15))break;x=nx;z=nz;}return {x,z};}
+/** Recheck from the actual release position after the operator's windup movement. */
+export function grenadeRelease(player,target,power,solid=()=>false){
+ const hand={x:player.x-Math.sin(player.angle??0)*.35,z:player.z-Math.cos(player.angle??0)*.35};
+ let clear=true;for(let i=1;i<=4;i++)if(solid(player.x+(hand.x-player.x)*i/4,player.z+(hand.z-player.z)*i/4,.15)){clear=false;break;}
+ const from=clear?hand:{x:player.x,z:player.z},to=Math.hypot(target.x-from.x,target.z-from.z)<.05?{...from}:grenadeTarget(from,target,power,solid);
+ return {from,to};
+}
 export function grenadeArc(from,to,t,power=0){t=Math.max(0,Math.min(1,t));return {x:from.x+(to.x-from.x)*t,z:from.z+(to.z-from.z)*t,y:1.25*(1-t)+.1*t+4*t*(1-t)*(.65+1.1*power)};}
 export function createGrenadeActions({scene=null,onImpact=()=>{},onPose=()=>{}}={}){
  let held=false,charge=0,action=null;const flights=[];
@@ -12,10 +19,10 @@ export function createGrenadeActions({scene=null,onImpact=()=>{},onPose=()=>{}}=
  if(scene){line.visible=marker.visible=false;marker.rotation.x=-Math.PI/2;scene.add(line,marker);}
  function pose(){onPose({charging:held,phase:action?Math.min(1,action.elapsed/THROW_ANIMATION):null,power:charge});}
  function cancel(){held=false;charge=0;if(line)line.visible=marker.visible=false;pose();}
- function releaseFlight(player){const from={x:player.x-Math.sin(player.angle??0)*.35,z:player.z-Math.cos(player.angle??0)*.35},to=action.to,duration=.42+Math.hypot(to.x-from.x,to.z-from.z)*.06;const mesh=scene?new THREE.Mesh(geometry,action.fire?fire:frag):null;if(mesh){mesh.castShadow=true;mesh.position.set(from.x,1.25,from.z);scene.add(mesh);}flights.push({from,to,power:action.power,fire:action.fire,duration,elapsed:0,mesh});action.released=true;}
- return {get charging(){return held;},get power(){return charge;},isAnimating:()=>!!action,isBusy:()=>held||!!action||flights.length>0,begin(){if(action||held)return false;held=true;charge=0;pose();return true;},cancel,launch(player,aim,power=.15,incendiary=false,solid){if(action)return false;held=false;charge=Math.max(0,Math.min(1,power));action={to:grenadeTarget(player,aim,charge,solid),power:charge,fire:incendiary,elapsed:0,released:false};if(line)line.visible=marker.visible=false;pose();return true;},update(dt,player,aim,solid){if(!Number.isFinite(dt)||dt<=0)return;
+ function releaseFlight(player,solid){const {from,to}=grenadeRelease(player,action.to,action.power,solid??action.solid),duration=.42+Math.hypot(to.x-from.x,to.z-from.z)*.06;const mesh=scene?new THREE.Mesh(geometry,action.fire?fire:frag):null;if(mesh){mesh.castShadow=true;mesh.position.set(from.x,1.25,from.z);scene.add(mesh);}flights.push({from,to,power:action.power,fire:action.fire,duration,elapsed:0,mesh});action.released=true;}
+ return {get charging(){return held;},get power(){return charge;},isAnimating:()=>!!action,isBusy:()=>held||!!action||flights.length>0,begin(){if(action||held)return false;held=true;charge=0;pose();return true;},cancel,launch(player,aim,power=.15,incendiary=false,solid){if(action)return false;held=false;charge=Math.max(0,Math.min(1,power));action={to:grenadeTarget(player,aim,charge,solid),power:charge,fire:incendiary,solid,elapsed:0,released:false};if(line)line.visible=marker.visible=false;pose();return true;},update(dt,player,aim,solid){if(!Number.isFinite(dt)||dt<=0)return;
   for(let i=flights.length-1;i>=0;i--){const f=flights[i];f.elapsed+=dt;const t=Math.min(1,f.elapsed/f.duration),p=grenadeArc(f.from,f.to,t,f.power);if(f.mesh){f.mesh.position.set(p.x,p.y,p.z);f.mesh.rotation.x+=dt*9;f.mesh.rotation.z+=dt*6;}if(t>=1){scene?.remove(f.mesh);flights.splice(i,1);onImpact(f.to.x,f.to.z,f.fire);}}
-  if(action){action.elapsed+=dt;if(!action.released&&action.elapsed>=THROW_RELEASE)releaseFlight(player);if(action.elapsed>=THROW_ANIMATION){action=null;charge=0;}pose();}
+  if(action){action.elapsed+=dt;if(!action.released&&action.elapsed>=THROW_RELEASE)releaseFlight(player,solid);if(action.elapsed>=THROW_ANIMATION){action=null;charge=0;}pose();}
   if(held){charge=Math.min(1,charge+dt/GRENADE_CHARGE_SECONDS);if(line){const target=grenadeTarget(player,aim,charge,solid),from={x:player.x,z:player.z};for(let i=0;i<=32;i++){const p=grenadeArc(from,target,i/32,charge);positions.set([p.x,p.y,p.z],i*3);}lineGeometry.attributes.position.needsUpdate=true;lineGeometry.computeBoundingSphere();line.computeLineDistances();line.visible=marker.visible=true;marker.position.set(target.x,.055,target.z);}pose();}
  },clear(){cancel();action=null;for(const f of flights)scene?.remove(f.mesh);flights.length=0;pose();},dispose(){this.clear();if(scene){scene.remove(line,marker);lineGeometry.dispose();line.material.dispose();marker.geometry.dispose();marker.material.dispose();geometry.dispose();frag.dispose();fire.dispose();}}};
 }

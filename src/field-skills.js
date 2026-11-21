@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=armory-r20';
+import {compatibleStorage} from './storage-compat.js?v=audit-r21';
 
 /** One milestone-unlocked passive choice, never an XP tree or supply generator. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
@@ -48,5 +48,10 @@ export function createFieldSkills(storage){
   if(saved?.version!==1||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
   memory=normalizeFieldSkill(saved,completed);volatile=true;return true;
  }
- return {selected,equip,serialize,restoreTransient,isSessionOnly:()=>volatile};
+ // A deployment is a new base choice, unlike a checkpoint's transient run state.
+ function restoreDeployment(saved,completed=[]){
+  if(saved?.version!==1||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
+  return equip(saved.selected,completed).ok;
+ }
+ return {selected,equip,serialize,restoreTransient,restoreDeployment,isSessionOnly:()=>volatile};
 }

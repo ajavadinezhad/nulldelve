@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=armory-r20';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=armory-r20';
-import {DIFFICULTY_RULES} from './difficulty.js?v=armory-r20';
+import {OPERATION_ROUTES} from './operation-routes.js?v=audit-r21';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=audit-r21';
+import {DIFFICULTY_RULES} from './difficulty.js?v=audit-r21';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -121,7 +121,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       target(6,point,label);
     }
     if(researchExitLocked){const point=!state.power.solved?state.clues.find(c=>c.id==='power'):devices.find(d=>d.task==='researchCoolant');target(17,point,!state.power.solved?'A Reactor maintenance clue':'The Transit coolant console');}
-    if(state.operationId==='hospital'){target(20,devices.find(d=>d.task===(!state.operationTasks.hospitalFuse?'hospitalFuse':'hospitalPower')),'An emergency hospital power supply');target(22,devices.find(d=>d.task===(!state.operationTasks.hospitalSample?'hospitalSample':'hospitalAuth')),'The quarantine diagnostics route');target(23,state.clues.find(clue=>clue.id==='hospital'),'A theatre supply routing plaque');}
+    if(state.operationId==='hospital'){target(20,devices.find(d=>d.task===(!state.operationTasks.hospitalFuse?'hospitalFuse':'hospitalPower')),'An emergency hospital power supply');target(22,devices.find(d=>d.task===(!state.operationTasks.hospitalSample?'hospitalSample':'hospitalAuth')),'The quarantine diagnostics route');const airlock=state.operationTasks.hospitalAirlock,cycleReady=airlock.settings.every((value,i)=>value===hospitalAirlockTarget(state.remix)[i]);target(23,airlock.running||cycleReady?devices.find(d=>d.id==='hospital-cycle'):state.clues.find(clue=>clue.id==='hospital'),airlock.running?'The sealed theatre cycle':cycleReady?'The theatre cycle console':'A theatre pressure specification');}
     for(const index of [8,11]){if(nestArtifactsLocked){const artifact=ARTIFACTS.find(a=>!state.artifacts.includes(a.id));target(index,artifact,'A trace of a missing relic');}else if(nestSignalLocked){const point=devices.find(d=>d.task===(state.operationTasks.nestRelay.linked?'nestDecode':state.operationTasks.nestRelay.started?'nestLink':'nestStart'));target(index,point,'A signal controlling the Nest shield');}}
   }
   const taskOperation={...Object.fromEntries(HOSPITAL_TASKS.map(task=>[task,'hospital'])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,route.operation])),commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
@@ -327,7 +327,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     }
     const defense=state.operationTasks.generatorDefense;
     if(defense.started&&!defense.completed){
-      const saboteur=generator.wave.find(enemy=>living(enemy)&&defense.saboteurIds.includes(enemy.id)&&distance(enemy,{x:35,z:56})<1.8);
+      const saboteur=generator.wave.find(enemy=>living(enemy)&&(enemy.spawnDelay??0)<=0&&defense.saboteurIds.includes(enemy.id)&&distance(enemy,{x:35,z:56})<1.8);
       if(saboteur)sabotage(saboteur);
       if(!defense.jammed&&inBounds(player,25,45,43,63))defense.progress=Math.min(22,defense.progress+Math.min(step,.5));
       const console=devices.find(d=>d.task==='commandRepair');console.progress=defense.progress/22;
@@ -415,6 +415,8 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(rawTasks?.generatorDefense===undefined)savedTasks.generatorDefense={started:!!savedTasks.genInserted,progress:savedTasks.genInserted?22:0,jammed:false,completed:!!savedTasks.genInserted,saboteurIds:[]};
     const defense=savedTasks.generatorDefense;
     if(!defense||['started','jammed','completed'].some(key=>typeof defense[key]!=='boolean')||!Number.isFinite(defense.progress)||defense.progress<0||defense.progress>22||!Array.isArray(defense.saboteurIds)||defense.saboteurIds.length>100||!defense.saboteurIds.every(id=>typeof id==='string')||defense.completed&&defense.progress!==22)return false;
+    if(defense.started!==savedTasks.genInserted||defense.jammed&&(!defense.started||defense.completed)||defense.completed&&!defense.started||!defense.started&&(defense.progress!==0||defense.saboteurIds.length!==0)||savedTasks.commandRepair&&!defense.completed)return false;
+    if(airlock.running&&airlock.remaining<=0||!airlock.running&&airlock.remaining!==0||savedTasks.hospitalSterile&&!airlock.settings.every((value,i)=>value===hospitalAirlockTarget(snapshot.remix===true)[i]))return false;
     const restoredCircuit=snapshot.circuit===undefined?(savedTasks.commandRepair?{rotations:[...WIRE_SOLUTION],powered:true,solved:true}:createWireCircuit()):createWireCircuit(snapshot.circuit);
     if(!restoredCircuit||restoredCircuit.solved!==savedTasks.commandRepair||restoredCircuit.powered&&!savedTasks.genInserted)return false;
     if(!savedTasks||typeof savedTasks!=='object'||[...HOSPITAL_TASKS,'commandFuse','genInserted','commandRepair','researchCoolant','evacPower'].some(key=>typeof savedTasks[key]!=='boolean')||!savedTasks.nestRelay||['started','linked','decoded'].some(key=>typeof savedTasks.nestRelay[key]!=='boolean')||!Number.isFinite(savedTasks.nestRelay.remaining)||savedTasks.nestRelay.remaining<0||savedTasks.nestRelay.remaining>30)return false;
@@ -473,7 +475,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     // the same wave rules as a full campaign without spawning in the menu.
     return true;
   }
-  function getSabotageTarget(enemy){const defense=state.operationTasks.generatorDefense;return defense.started&&!defense.completed&&!defense.jammed&&defense.saboteurIds.includes(enemy.id)?{x:35,z:56,hp:100,angle:0}:null;}
+  function getSabotageTarget(enemy){const defense=state.operationTasks.generatorDefense;return living(enemy)&&(enemy.spawnDelay??0)<=0&&defense.started&&!defense.completed&&!defense.jammed&&defense.saboteurIds.includes(enemy.id)?{x:35,z:56,hp:100,angle:0}:null;}
   function sabotage(enemy){const defense=state.operationTasks.generatorDefense;if(!getSabotageTarget(enemy)||distance(enemy,{x:35,z:56})>1.8)return false;defense.jammed=true;onToast('RESTART JAMMED · REPAIR THE CONSOLE');return true;}
   recomputeLocks();
   return {getSabotageTarget,sabotage,state,interact,getPrompt,refreshLocks:recomputeLocks,getDoorLead:index=>{recomputeLocks();return doors[index]?.hintTarget?{...doors[index].hintTarget}:null;},update,serializeState,restoreState,startMission,isMissionComplete:()=>state.mission==='siege'?state.evacuation.completed:state.mission==='nest'?nest.status==='cleared':false,canCollectIntel:()=>nest.status==='cleared'};

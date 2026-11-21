@@ -1,5 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=armory-r20';
-import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=armory-r20';
+import {compatibleStorage} from './storage-compat.js?v=audit-r21';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=audit-r21';
 export const CAMPAIGN_PROGRESS_KEY='nulldelve.campaign.v1';
 const ids=CAMPAIGN_OPERATIONS.map(operation=>operation.id);
 const logIds=['log-lab','log-containment','log-nest'];

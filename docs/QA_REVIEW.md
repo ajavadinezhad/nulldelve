@@ -101,3 +101,7 @@ Implemented field skills, trade-off attachments, Generator sabotage defense, enc
 ## r20 focused armory
 
 Replaced expanded rows and competing skill cards with a compact browsing roster and one selected-weapon workbench. Inspecting does not purchase or equip. Only the equipped primary/sidearm has upgrade actions; attachment controls are separate. Supplies and field skills have dedicated categories. Static actual-model thumbnails are cached, their temporary renderers disposed without disposing shared gameplay materials or geometry. Phone layout uses an internal horizontal roster and internal menu scrolling. Browser checks verify desktop and390×844 layout, inspect-only selection and attachment navigation. Regression checks cover exact purchase IDs, upgrade ownership, disabled/full states, magazine migration and independent category actions.
+
+## r21 follow-up audit
+
+Three source-review agents checked combat, mission state and armory usability. Fixed release-time grenade collision after operator movement or a closing door, hand origins inside cover, skill deployment persistence, Medic supply labels, nested weapon-roster scroll, authoritative attachment rollback after rejection/exception, stage-aware Hospital door guidance, first-gauge pressure discovery, and delayed/dead sabotage. Added regression checks for each and contradictory mission-state rejection before mutation. Existing mission traversal/supply models remain in use; this is not human combat or physical-phone validation.
