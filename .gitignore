@@ -1,6 +1,7 @@
 # Local assistant tools and credentials
 .agents/
 .codex/
+.codex-attachments/
 .aws/
 .env
 .env.*
