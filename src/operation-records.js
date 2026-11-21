@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=nulldelve-6';
+import {compatibleStorage} from './storage-compat.js?v=critic-review-7';
 const KEY='nulldelve.records.v1';
 export function createOperationStats(saved={}){return {elapsed:Math.max(0,Number(saved.elapsed)||0),kills:Math.max(0,Number(saved.kills)||0),shots:Math.max(0,Number(saved.shots)||0),medkits:Math.max(0,Number(saved.medkits)||0),grenades:Math.max(0,Number(saved.grenades)||0)};}
 export function recordResult(storage,config,stats,won,exploration){storage=compatibleStorage(storage);

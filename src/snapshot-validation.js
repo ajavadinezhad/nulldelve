@@ -1,7 +1,7 @@
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=nulldelve-6';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=nulldelve-6';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=nulldelve-6';
-import {createProgression} from './progression.js?v=nulldelve-6';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=critic-review-7';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=critic-review-7';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=critic-review-7';
+import {createProgression} from './progression.js?v=critic-review-7';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','boss']);

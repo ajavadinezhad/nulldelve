@@ -1,5 +1,5 @@
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=nulldelve-6';
-import {DIFFICULTY_RULES} from './difficulty.js?v=nulldelve-6';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=critic-review-7';
+import {DIFFICULTY_RULES} from './difficulty.js?v=critic-review-7';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -60,7 +60,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   function recomputeLocks(){
     const securityLocked=security.status!=='cleared',annexLocked=command.status!=='cleared';
     const active=zone=>zone.status==='active',nestSignalLocked=state.operationId==='nest'&&!state.operationTasks.nestRelay.decoded&&!nestExitAllowance,nestArtifactsLocked=state.mission==='campaign'&&state.artifacts.length<3&&!nestExitAllowance;
-    const nestLockReason=nestArtifactsLocked?`NEST SEAL · ${state.artifacts.length} / 3 SOCKETS FILLED`:nestSignalLocked?'NEST SIGNAL SHIELD · JAM THE THREE RELAYS':'SECTOR SEALED · ELIMINATE THE HORDE';
+    const nestLockReason=nestArtifactsLocked?`NEST SEAL · ${state.artifacts.length} / 3 SOCKETS FILLED`:nestSignalLocked?'NEST SIGNAL SHIELD · LINK RELAYS AND DECODE':'SECTOR SEALED · ELIMINATE THE HORDE';
     const commandPowerLocked=state.operationId==='command'&&!state.operationTasks.commandRepair,researchExitLocked=state.operationId==='research'&&(!state.operationTasks.researchCoolant||transit.status!=='cleared');
     const rules=[
       [1,!state.archive.solved,'ARCHIVE CIPHER · FOLLOW THE THREE GLYPHS'],
@@ -224,7 +224,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if(d.task==='evacPower'){if(tasks.evacPower){onToast('EVAC POWER RESTORED');return true;}if(containment.status!=='cleared'||!state.valves.solved){onToast('EVAC POWER LOCKED · CLEAR CONTAINMENT AND RELEASE PRESSURE');return true;}tasks.evacPower=true;launchWave(evacuationZone,player);return finish('EVAC POWER RESTORED · LOCKDOWN INCOMING','Clear the Evacuation lockdown, then return north to the Containment sector exit.');}
       if(d.task==='nestStart'){if(relay.linked){onToast('SIGNAL LINK ESTABLISHED · FIND THE BIO LAB DECODER');return true;}relay.started=true;relay.remaining=30;d.active=true;d.progress=1;onToast('SIGNAL A CHARGED · 30s');return true;}
       if(d.task==='nestLink'){if(relay.linked){onToast('SIGNAL LINK ALREADY ESTABLISHED');return true;}if(!relay.started||relay.remaining<=0){onToast('NO SIGNAL CHARGE · START RELAY A IN TRANSIT');return true;}relay.linked=true;relay.started=false;relay.remaining=0;return finish('NEST SIGNAL LINKED','Reach Bio Lab through Reactor. Use its decoder to lower the Nest shield.');}
-      if(d.task==='nestDecode'){if(relay.decoded){onToast('NEST SHIELD ALREADY DISABLED');return true;}if(!relay.linked){onToast('DECODER OFFLINE · LINK THE TRANSIT AND CONTAINMENT RELAYS');return true;}relay.decoded=true;return finish('NEST SIGNAL SHIELD DISABLED','The Nest approach is open. Enter from Bio Lab and destroy its guarded core.');}
+      if(d.task==='nestDecode'){if(relay.decoded){onToast('NEST SHIELD ALREADY DISABLED');return true;}if(!relay.linked){onToast('DECODER OFFLINE · LINK THE TRANSIT AND CONTAINMENT RELAYS');return true;}relay.decoded=true;const sealReady=state.artifacts.length===3;return finish(sealReady?'NEST APPROACH OPEN':'SIGNAL SHIELD DISABLED · RELIC SEAL STILL LOCKED',sealReady?'The Nest approach is open. Enter from Bio Lab and destroy its guarded core.':`Signal shield disabled. Recover the ${3-state.artifacts.length} missing relic${state.artifacts.length===2?'':'s'} to release the Nest seal.`);}
       return true;
     }
     if(d.kind==='log'){

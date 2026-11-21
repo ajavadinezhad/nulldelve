@@ -12,7 +12,7 @@ Run `python3 -m http.server 8000 --bind 127.0.0.1` from this folder, then open h
 
 ## Phone controls
 
-Touch devices automatically get two thumbsticks: left moves, right aims and fires. Interact, Reload, Swap and Melee are large tap targets; medkit, grenade and map remain available in the HUD. Touch controls can be set to Automatic, On or Off in Settings → Controls. Pause and cancelled touches release held input. Crates can be reset from Help.
+Touch devices automatically get two thumbsticks: left moves (push to the outer edge to sprint), right aims and fires. Interact, Reload, Swap and Melee are large tap targets; medkit, grenade and map remain available in the HUD. Touch controls can be set to Automatic, On or Off in Settings → Controls. Pause and cancelled touches release held input. Crates can be reset from Help.
 
 ## Controls
 
@@ -42,7 +42,7 @@ Kills earn money and drop ammunition. Regular ammunition appears about every thi
 
 Automatic checkpoints store the operator, ammunition, equipment, discovered map, puzzle states, and complete horde queue. They update after puzzle milestones, cleared hordes, safe room arrivals, and safe intervals during long operations. Continue resumes the automatic checkpoint; manual Save/Load actions are removed. Automatic saves are deferred during combat to protect the safe checkpoint. The armory is available at base before deployment. Existing legacy manual saves remain stored without being selected by Continue. Progress and settings live in this browser on this computer.
 
-The main menu has Continue, New operation, Armory, Saved games, and Settings. Pause puts Resume first, followed by Save / load, Settings, and Main menu. Escape goes back within a panel before resuming. Settings are divided into Controls, Audio, and Display; all gameplay keys can be remapped, and a reduced-effects option suppresses flashes. HUD size adapts to narrow viewports. Shared medkit and grenade icons appear in the HUD, menus, and armory; the HUD icons can be clicked to use an item. Procedural gun, reload, door, creature, explosion, puzzle, and wave sounds accompany a quiet atmospheric drone. Sound starts only after user interaction and pauses with play.
+The main menu has Continue, New operation, Armory, Field notes, and Settings. Pause puts Resume first, followed by Field notes, Settings, and Main menu. Escape goes back within a panel before resuming. Settings are divided into Controls, Audio, and Display; all gameplay keys can be remapped, and a reduced-effects option suppresses flashes. HUD size adapts to narrow viewports. Shared medkit and grenade icons appear in the HUD and armory; the HUD icons can be clicked to use an item. Procedural gun, reload, door, creature, explosion, puzzle, and wave sounds accompany a quiet atmospheric drone. Sound starts only after user interaction and pauses with play.
 
 The browser page stays fixed; long menus scroll within game panels. Mission cards use locally rendered 3D previews.
 

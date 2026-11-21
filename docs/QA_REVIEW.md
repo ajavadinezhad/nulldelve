@@ -18,7 +18,7 @@ Reviewed the HUD, menus, field notes, combat, enemy behavior, supplies, economy,
 
 ## Verification
 
-- 261 checks across 48 test files passed; no failures.
+- 271 checks across 49 test files passed; no failures.
 - Solving, saving and restoring all 20 preset controllers remains covered, including 960 seeded/variant/difficulty combinations.
 - Physical routes through all five operations pass against the furnished map and live barrel obstacles. Required consoles, wiring, relics and exits remain reachable; the timed signal route fits its time limit.
 - Browser checks: 360 × 740 portrait and 740 × 360 landscape with HUD at 150%; medkit, throw and type selector are disjoint, within the viewport, and have no internal horizontal overflow.
@@ -43,3 +43,9 @@ These checks cover the reviewed paths and regressions; they do not assert that e
 ## Nulldelve release preparation
 
 Renamed browser titles, menus, map captions, field notes, exports and documentation. Existing checkpoints, unlocks, weapons, settings and older backups remain readable through the isolated storage compatibility module. A fresh preview replaces the old branded image. Browser modules share a release revision to avoid mixed cached builds.
+
+## Story, gameplay, usability and visual critic pass
+
+Three independent reviewers completed targeted passes and follow-up checks. Fixed wrong-sector checkpoint restart, hidden minimap state after pausing, missing touch sprint, stale cash after damage-over-time kills, inaccurate capped healing feedback, empty grenade type fallback, contradictory Nest lock guidance, and phone keyboard settings reflow. Short campaign briefings connect adjacent sectors. Difficulty/remix selections and debriefs share the graphite/amber theme; phone utility icons use consistent SVG shapes. Green cash and world/power indicators remain semantic.
+
+Validated 271 checks across 49 files, including new item-use, touch sprint, checkpoint matching, story hints, and settings expansion regressions. Browser checks cover campaign selection, actual difficulty rules, compact phone settings and startup. The suggested boss-pulse balance change was deferred as a design choice, not treated as a proven bug.

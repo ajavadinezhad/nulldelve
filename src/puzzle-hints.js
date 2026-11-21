@@ -1,4 +1,4 @@
-import {progressionSequences,ARTIFACTS} from './progression.js?v=nulldelve-6';
+import {progressionSequences,ARTIFACTS} from './progression.js?v=critic-review-7';
 /** Player-requested hints reveal one layer at a time, only for the nearby puzzle. */
 const PUZZLES=[
  {id:'insertion',title:'Insertion door',bounds:[2,14,21,32],unsolved:c=>!c.puzzle?.solved,hints:['The door indicator is linked to two floor switches. Look around the room for something heavy.','Move a marked crate onto each floor switch. You can push crates by walking into them; reset misplaced crates if needed.','Seat one crate on each switch at the same time. Both door indicators turn green; approach the door and use Interact to open it.']},
@@ -25,6 +25,7 @@ function contextValues(context={}){return {...context,state:context.progression?
 function nearbyPuzzle(context){const c=contextValues(context),p=c.player;if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.z))return null;const local=PUZZLES.find(entry=>{const [x0,x1,z0,z1]=entry.bounds;return p.x>=x0&&p.x<=x1&&p.z>=z0&&p.z<=z1&&entry.unsolved(c);});if(local)return local;if(Array.isArray(c.state.artifacts)&&[[71,10],[86,20]].some(([x,z])=>Math.hypot(p.x-x,p.z-z)<6)){const missing=ARTIFACTS.find(a=>!c.state.artifacts.includes(a.id));return PUZZLES.find(entry=>entry.id===missing?.id)??null;}return null;}
 function explicitHint(id,context){
  const c=contextValues(context),sequences=progressionSequences(c.state.remix),title=value=>value[0].toUpperCase()+value.slice(1);
+ if(id==='nest-decoder'){const missing=Math.max(0,3-(c.state.artifacts?.length??0));return `After relay B accepts the Transit charge, use Interact at the decoder near the center of Bio Lab. ${missing?`This disables the signal shield; the Nest seal still needs ${missing} missing relic${missing===1?'':'s'}.`:'With all three relic sockets filled, the east Nest door will unlock.'}`;}
  if(id==='archive'){const order=c.state.archive?.sequence??sequences.archive;return `Activate ${order.map(title).join(', then ')}. A wrong choice resets the sequence, so start again from ${title(order[0])}.`;}
  if(id==='power'){const order=c.state.power?.sequence??sequences.power;return `Use Interact at power nodes ${order.map(value=>value.slice(-1).toUpperCase()).join(', then ')}. A is southwest, B northeast, and C south of Reactor.`;}
  if(id==='valves'){const order=c.state.valves?.sequence??sequences.valves;return `Use Interact at valves ${order.map(value=>value.slice(-1).toUpperCase()).join(', then ')}. A is southwest and B northeast in Containment.`;}

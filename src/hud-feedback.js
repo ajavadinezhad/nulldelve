@@ -3,6 +3,7 @@ export function feedbackFor(message){
  if(/^NO (?:RESERVE )?AMMO\b/.test(message))return {target:'.ammo-status',tone:'warning'};
  if(/^NO MEDKITS\b/.test(message))return {target:'#use-medkit',tone:'warning'};
  if(/^NO GRENADES\b/.test(message))return {target:'#use-grenade',tone:'warning'};
+ if(/^GRENADE READY\b/.test(message))return {target:'#use-grenade',tone:'success'};
  if(/^HEALTH IS ALREADY FULL\b/.test(message))return {target:'.vital',tone:'neutral'};
  if(/^MEDKIT USED\b|^\+\d+ HEALTH\b/.test(message))return {target:'.vital',tone:'success'};
  return null;

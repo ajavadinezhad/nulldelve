@@ -1,12 +1,12 @@
-import {compatibleStorage} from './storage-compat.js?v=nulldelve-6';
-import {formatDuration} from './operation-records.js?v=nulldelve-6';
-import {DIFFICULTY_RULES} from './difficulty.js?v=nulldelve-6';
-import {createCampaignMap} from './campaign-map.js?v=nulldelve-6';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=nulldelve-6';
-import {createItemIcon} from './item-icons.js?v=nulldelve-6';
-import {buildMissionPreview} from './mission-previews.js?v=nulldelve-6';
-import {renderShop} from './shop-ui.js?v=nulldelve-6';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=nulldelve-6';
+import {compatibleStorage} from './storage-compat.js?v=critic-review-7';
+import {formatDuration} from './operation-records.js?v=critic-review-7';
+import {DIFFICULTY_RULES} from './difficulty.js?v=critic-review-7';
+import {createCampaignMap} from './campaign-map.js?v=critic-review-7';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=critic-review-7';
+import {createItemIcon} from './item-icons.js?v=critic-review-7';
+import {buildMissionPreview} from './mission-previews.js?v=critic-review-7';
+import {renderShop} from './shop-ui.js?v=critic-review-7';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=critic-review-7';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -27,7 +27,7 @@ function formatTime(value){if(!value)return 'Time unavailable';try{const date=ne
 /** DOM-only game menu. The owning game controls gameplay, save storage and settings effects. */
 export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>{},onExportBackup=null,onPreviewBackup=null,onImportBackup=null,onContinue=()=>{},onLoad=()=>{},onLoadCheckpoint=()=>{},onSave=()=>{},onPurchase=()=>{},onResume=()=>{},onClose=()=>{},onSettings=()=>{},getStatus=()=>({active:false,slots:[],canContinue:false})}){
  const settings=readSettings();
- let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSidearmOpen=false,backupPreview=null;
+ let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSidearmOpen=false,backupPreview=null,keyboardOpen=null;
  let shell=null,content=null,statusNode=null,captureAction=null;
  function status(){try{return getStatus()??{active:false,slots:[],canContinue:false};}catch{return {active:false,slots:[],canContinue:false};}}
  function notice(message){statusText=message;if(statusNode)statusNode.textContent=message;}
@@ -104,7 +104,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const choices=element('div','difficulty-options'),difficultyStats=element('dl','difficulty-stats'),personalBest=element('p','operation-best');personalBest.setAttribute('role','status');personalBest.setAttribute('aria-label','Personal best for selected operation and difficulty');difficultyStats.setAttribute('role','status');difficultyStats.setAttribute('aria-live','polite');difficultyStats.setAttribute('aria-label','Selected difficulty effects');
   function updateDifficultyStats(){const rule=DIFFICULTY_RULES[difficulty]??DIFFICULTY_RULES.normal;difficultyStats.replaceChildren();difficultyStats.dataset.difficulty=difficulty;for(const [label,value]of [['Wave size',`${Math.round(rule.waveSize*100)}%`],['Enemy toughness',`${Math.round(rule.hp*100)}%`],['Enemy tactics',{direct:'Direct',pursue:'Pursuit',flank:'Flanking'}[rule.behavior]],['Reinforcements',`${rule.reinforcementInterval}s`]]){const stat=element('div','difficulty-stat');stat.append(element('dt','',label),element('dd','',String(value)));difficultyStats.append(stat);}const record=status().personalBests?.['campaign:'+selected.id+':'+difficulty];personalBest.replaceChildren();personalBest.hidden=!Number.isFinite(record?.elapsed);if(!personalBest.hidden){personalBest.append(element('span','','Personal best'),element('strong','',formatDuration(record.elapsed)));if(Number.isFinite(record.kills))personalBest.append(element('small','',`${Math.max(0,Math.floor(record.kills))} kills`));if(Number.isFinite(record.exploration))personalBest.append(element('small','',`${Math.round(Math.max(0,Math.min(100,record.exploration)))}% mapped`));}}
   for(const option of DIFFICULTIES){const label=element('label',`difficulty-option${difficulty===option.id?' selected':''}`),input=element('input');label.dataset.difficulty=option.id;input.type='radio';input.name='operation-difficulty';input.value=option.id;input.checked=difficulty===option.id;input.addEventListener('change',()=>{if(!input.checked)return;difficulty=option.id;for(const row of choices.children)row.className=`difficulty-option${row.dataset.difficulty===difficulty?' selected':''}`;updateDifficultyStats();});input.setAttribute('aria-label',option.name);const check=element('span','difficulty-check','✓');check.setAttribute('aria-hidden','true');label.append(input,element('strong','',option.name),check);choices.append(label);}
-  updateDifficultyStats();fieldset.append(choices,difficultyStats,personalBest);briefing.append(fieldset);const remixLabel=element('label','remix-option'),remixInput=element('input');remixInput.id='campaign-remix';remixInput.type='checkbox';remixInput.checked=remix;remixInput.addEventListener('change',()=>{remix=remixInput.checked;});remixLabel.append(remixInput,element('span','','Remixed operation'));remixLabel.title='Alternate puzzle setup';briefing.append(remixLabel);
+  updateDifficultyStats();fieldset.append(choices,difficultyStats,personalBest);briefing.append(fieldset);const remixLabel=element('label','remix-option'),remixInput=element('input');remixInput.id='campaign-remix';remixInput.type='checkbox';remixInput.checked=remix;remixInput.addEventListener('change',()=>{remix=remixInput.checked;});remixLabel.append(remixInput,element('span','','Remixed puzzles & swarms'));remixLabel.title='Alternate puzzle patterns and swarm composition';briefing.append(remixLabel);
   const deployActions=element('div','menu-actions');briefing.append(deployActions);deployActions.append(button('Deploy',()=>{if(!isCampaignOperationUnlocked(operation,status().completedOperations??[])){notice('Complete the previous operation before deploying here.');return;}action(onNewGame,[{mission:'campaign',difficulty,operation,remix}]);},'menu-button primary'),button('Armory',()=>prepareView('armory','campaign-map'),'menu-button secondary'),button('Back',()=>changeView('missions'),'menu-button secondary'));
  }
  function drawSlots(mode,current){
@@ -155,14 +155,15 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   if(settingsTab==='display'){range('brightness','Brightness',.7,1.5,.05,value=>`${Math.round(value*100)}%`);
   choice('quality','Render quality',[['low','Low'],['medium','Medium'],['high','High']]);
   range('zoom','Camera view size',14,32,1,value=>`${value} · ${value<22?'closer':'wider'}`);
-  range('hudScale','HUD size',.85,1.5,.05,value=>`${Math.round(value*100)}%`);toggle('showMinimap','Show minimap');toggle('reducedEffects','Reduce flashes and effects');}
+  range('hudScale','Desktop HUD size',.85,1.5,.05,value=>`${Math.round(value*100)}%`);toggle('showMinimap','Show minimap');toggle('reducedEffects','Reduce flashes and effects');}
   if(settingsTab==='audio'){toggle('muted','Mute all sound');
   for(const [key,title] of [['masterVolume','Master volume'],['sfxVolume','Effects volume'],['musicVolume','Music volume']])range(key,title,0,1,.05,value=>`${Math.round(value*100)}%`);}
   if(settingsTab==='controls'){choice('touchControls','Touch controls',[['auto','Automatic'],['on','On'],['off','Off']]);choice('aimMode','Aiming preference',[['auto','Mouse + keyboard'],['mouse','Mouse only'],['keyboard','Keyboard only']]);
-  const note=element('p','settings-controls-note','Select a control, then press a key. Esc cancels.');grid.append(note);
+  const keyboard=element('details','keyboard-controls');if(keyboardOpen===null)keyboardOpen=!(settings.touchControls==='on'||settings.touchControls!=='off'&&(globalThis.matchMedia?.('(pointer: coarse)')?.matches||globalThis.navigator?.maxTouchPoints>0));keyboard.open=keyboardOpen;keyboard.addEventListener('toggle',()=>{keyboardOpen=keyboard.open;});keyboard.append(element('summary','','Keyboard controls'));
+  const note=element('p','settings-controls-note','Select a control, then press a key. Esc cancels.');keyboard.append(note);
   const bindings=element('div','binding-grid');
   for(const key of BINDING_ACTIONS){const row=element('div','binding-row');row.append(element('span','',ACTION_LABELS[key]));const control=button(formatKey(settings.bindings[key]),()=>{captureAction=key;for(const other of bindings.querySelectorAll('button'))other.classList.remove('capturing');control.classList.add('capturing');control.textContent='Press a key…';notice(`Choose a key for ${ACTION_LABELS[key].toLowerCase()}. Escape cancels.`);},'menu-button secondary binding-button');control.dataset.action=key;control.dataset.focusKey='binding-'+key;control.setAttribute('aria-label',`Change ${ACTION_LABELS[key].toLowerCase()} key, currently ${formatKey(settings.bindings[key])}`);row.append(control);bindings.append(row);}
-  grid.append(bindings);}content.append(grid);
+  keyboard.append(bindings);grid.append(keyboard);}content.append(grid);
   actions().append(button('Restore defaults',()=>{captureAction=null;const defaults=normalizeSettings();const keys=settingsTab==='controls'?['bindings','aimMode','touchControls']:settingsTab==='audio'?['muted','masterVolume','sfxVolume','musicVolume']:['brightness','quality','zoom','hudScale','showMinimap','reducedEffects'];for(const key of keys)if(key in defaults)settings[key]=defaults[key];persist();render(false);},'menu-button secondary'),button('Back',()=>changeView(returnView),'menu-button primary'));
  }
 

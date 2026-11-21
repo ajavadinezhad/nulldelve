@@ -1,12 +1,12 @@
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=nulldelve-6';
-import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=nulldelve-6';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=critic-review-7';
+import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=critic-review-7';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
- {id:'breach',name:'Breach',description:'Power the ruins, decode the Archive, break Security, and survive the Storage ambush before crossing Extraction.',x:18,y:73},
- {id:'command',name:'Command',description:'Defeat Command, retrieve a service fuse in Maintenance, and defend the Generator restart.',x:35,y:49},
- {id:'research',name:'Research',description:'Clear Bio Lab, restore Reactor routing, and defend a coolant purge through lower Transit.',x:54,y:64},
- {id:'containment',name:'Containment',description:'Contain the breach, release the pressure valves, and restore Evacuation power through a second lockdown.',x:71,y:43},
- {id:'nest',name:'Nest & evacuation',description:'Link signals across Transit and Containment, decode the shield in Bio Lab, then assault Nest Core and evacuate.',x:84,y:20},
+ {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},
+ {id:'command',name:'Command',description:'Clear Command, recover a Maintenance fuse, and restart the Power House to reopen the Bio Lab route.',x:35,y:49},
+ {id:'research',name:'Research',description:'Secure Bio Lab, restore Reactor power, and purge Transit to reach Containment.',x:54,y:64},
+ {id:'containment',name:'Containment',description:'Stabilize Containment and restore Evacuation power before approaching the sealed Nest.',x:71,y:43},
+ {id:'nest',name:'Nest & evacuation',description:'Break the Nest’s locks, destroy its core, recover the research intel, and evacuate.',x:84,y:20},
 ].map(Object.freeze));
 const definitions={
  breach:{spawn:[7,29],prior:[],zones:['security','storage']},

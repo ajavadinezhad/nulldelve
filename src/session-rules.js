@@ -1,10 +1,15 @@
-import {normalizeCampaignOperation} from './campaign-operations.js?v=nulldelve-6';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=critic-review-7';
 /** Session rules shared by the browser game and its regression checks. */
 export function createFixedStepper(step=1/60,maxCatchup=.5){
  let accumulator=0;
  return {advance(elapsed,update,running=true){if(!running){accumulator=0;return 0;}accumulator+=Math.max(0,Math.min(maxCatchup,Number(elapsed)||0));let count=0;while(accumulator+1e-9>=step){update(step);accumulator=Math.max(0,accumulator-step);count++;}return count;},reset(){accumulator=0;}};
 }
 export function restartOperationUrl(path,config){const mission=['campaign','siege','nest'].includes(config?.mission)?config.mission:'campaign',difficulty=['easy','normal','hard'].includes(config?.difficulty)?config.difficulty:'normal';const operation=mission==='campaign'?normalizeCampaignOperation(config?.operation):null;return `${path}?mission=${mission}&difficulty=${difficulty}${operation?'&operation='+operation:''}${config?.remix?'&remix=1':''}&play=1`;}
+/** A safe checkpoint from another sector or remix must not masquerade as this run. */
+export function checkpointMatchesOperation(snapshot,config){
+ const saved=snapshot?.config;if(!saved||!config)return false;
+ return saved.mission===config.mission&&saved.difficulty===config.difficulty&&(saved.operation??null)===(config.operation??null)&&!!saved.remix===!!config.remix;
+}
 export function combatIsActive(player,enemies,zones){return zones.some(z=>z.status==='active')||enemies.some(e=>e.hp>0&&Math.hypot(e.x-player.x,e.z-player.z)<8);}
 export function canCheckpoint({active,ended,player,enemies,zones}){return !!active&&!ended&&player.hp>0&&!combatIsActive(player,enemies,zones);}
 export function missionGuidance({mission,player,puzzle,progression}){
