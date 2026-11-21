@@ -28,7 +28,7 @@ function hospitalQueues(difficulty){
  const use=id=>{const device=progression.state.devices.find(d=>d.id===id);assert.ok(device,id);Object.assign(player,{x:device.x,z:device.z});assert.equal(progression.interact(player),true,id);};
  const capture=(id,x,z)=>{Object.assign(player,{x,z});progression.update(player,.01);const zone=progression.state.zones.find(zone=>zone.id===id);assert.equal(zone.status,'active',id);queues[id]=[...zone.wave.map(enemy=>enemy.variant),...zone.queue];for(let i=0;i<1000&&zone.status==='active';i++){zone.wave.forEach(enemy=>enemy.hp=0);progression.update(player,.1);}assert.equal(zone.status,'cleared',id);};
  use('hospital-fuse');use('hospital-power');capture('hospital-triage',112,10);use('hospital-sample');capture('hospital-ward',136,10);use('hospital-auth');
- for(const task of hospitalFlowSequence(false)){const device=progression.state.devices.find(d=>d.task===task);use(device.id);}
+ for(const [i,target]of require('../src/progression.js').hospitalAirlockTarget(false).entries())for(let n=0;n<target;n++)use(['hospital-oxygen','hospital-filter','hospital-saline'][i]);use('hospital-cycle');for(let n=0;n<24;n++)progression.update(player,.5);
  capture('hospital-isolation',136,52);return queues;
 }
 // Economy-only projection: no enemy damage, grenades, barrels or melee; all drops

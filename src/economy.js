@@ -1,3 +1,4 @@
+import {normalizeAttachments} from './weapon-attachments.js?v=features-r19';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','pistol'],UPGRADES=['damage','magazine','reload'];
@@ -10,13 +11,14 @@ const clamp=(value,min,max,fallback=0)=>typeof value==='number'&&Number.isFinite
 const integer=(value,min,max,fallback=0)=>Math.floor(clamp(value,min,max,fallback));
 
 export function createEconomy(snapshot){
-  const state={credits:150,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{damage:0,magazine:0,reload:0}])),magazineBonuses:Object.fromEntries(GUNS.map(gun=>[gun,0])),items:{medkit:0,grenade:0,fireGrenade:0},grenadeType:'frag',shield:0};
+  const state={attachments:normalizeAttachments(),credits:150,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{damage:0,magazine:0,reload:0}])),magazineBonuses:Object.fromEntries(GUNS.map(gun=>[gun,0])),items:{medkit:0,grenade:0,fireGrenade:0},grenadeType:'frag',shield:0};
   function restore(saved){
     // An older save with no economy starts at the normal allowance. An explicit
     // economy object with malformed/zero credits never silently grants more money.
     const legacy=saved===undefined||saved===null;
     const data=!legacy&&typeof saved==='object'&&!Array.isArray(saved)?saved:{};
     state.credits=legacy?150:integer(data.credits,0,CREDIT_LIMIT);
+    state.attachments=normalizeAttachments(data.attachments);
     for(const gun of GUNS)for(const upgrade of UPGRADES)state.upgrades[gun][upgrade]=integer((gun==='rifle'?(data.upgrades?.rifle??data.upgrades?.carbine):data.upgrades?.[gun])?.[upgrade],0,3);
     // Existing purchases used six rounds per tier. Preserve that paid capacity
     // and any loaded ammunition; new purchases add the weapon-specific step.
@@ -26,7 +28,7 @@ export function createEconomy(snapshot){
     state.shield=clamp(data.shield,0,60);
     return state;
   }
-  function serialize(){return {credits:state.credits,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{...state.upgrades[gun]}])),magazineBonuses:{...state.magazineBonuses},items:{...state.items},grenadeType:state.grenadeType,shield:state.shield};}
+  function serialize(){return {attachments:{...state.attachments},credits:state.credits,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{...state.upgrades[gun]}])),magazineBonuses:{...state.magazineBonuses},items:{...state.items},grenadeType:state.grenadeType,shield:state.shield};}
   function getOffers(){
     const offers=[];
     for(const gun of GUNS)for(const upgrade of UPGRADES){

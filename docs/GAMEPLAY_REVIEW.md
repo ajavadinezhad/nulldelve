@@ -9,7 +9,11 @@ Three independent source reviews covered player progression/skills, weapons/econ
 - Weapon switching cancels a reload without refilling a magazine, consuming reserve or resetting the shared shot cooldown. Selecting the same weapon leaves its reload intact.
 - Ordinary primary-ammo drops now scale with base weapon value, with a bounded normalization cap to preserve precision-weapon viability. On a heavy kill, MANTIS receives two rounds rather than six. Hard-only emergency aid remains gated on both guns being low. New magazine purchases use weapon-specific increments (MANTIS +1, pump/DMR/TWIN/sidearm +2, HUSH +3, KESTREL +4, carbine/SMG +6, LMG +10). Explicit saved bonuses preserve legacy paid magazine capacity and loaded-round budgets.
 
-## Next features, in order
+## Implemented follow-up (r19)
+
+The first five priorities below are implemented: one milestone-unlocked field skill, one attachment slot per primary, the Generator sabotage defense, encountered mutation notes, and the Hospital pressure interlock. Optional mastery objectives remain a future idea. Field skills use Medic, Rapid Response and Demolition; basic fast weapon switching stays available to everyone.
+
+## Original priorities
 
 | Priority | Feature | Player benefit | Constraints |
 |---|---|---|---|

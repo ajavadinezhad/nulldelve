@@ -1,8 +1,8 @@
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=review-r18';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=review-r18';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=review-r18';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=review-r18';
-import {createProgression} from './progression.js?v=review-r18';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=features-r19';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=features-r19';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=features-r19';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=features-r19';
+import {createProgression} from './progression.js?v=features-r19';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','boss']);
@@ -19,7 +19,7 @@ export function validateSnapshot(data,{width,height,doorCount,crateCount=2,plate
   if(data.config.remix!==undefined&&typeof data.config.remix!=='boolean')return false;
   if(!validateBarrelSnapshot(data.barrels,barrelIds))return false;
   if(data.doorHints!==undefined&&(!Array.isArray(data.doorHints)||data.doorHints.length>200||!data.doorHints.every(id=>typeof id==='string'&&id.length<500)))return false;
-  if(data.fireZones!==undefined){const f=data.fireZones;if(!object(f)||f.version!==1||!finite(f.phase,0,.6)||!Number.isInteger(f.nextId)||f.nextId<1||!Array.isArray(f.zones)||f.zones.length>100||new Set(f.zones.map(z=>z?.id)).size!==f.zones.length||!f.zones.every(z=>object(z)&&Number.isInteger(z.id)&&z.id>0&&z.id<f.nextId&&finite(z.x,0,width)&&finite(z.z,0,height)&&finite(z.remaining,0,5.5)))return false;}
+  if(data.fireZones!==undefined){const f=data.fireZones;if(!object(f)||f.version!==1||!finite(f.phase,0,.6)||!Number.isInteger(f.nextId)||f.nextId<1||!Array.isArray(f.zones)||f.zones.length>100||new Set(f.zones.map(z=>z?.id)).size!==f.zones.length||!f.zones.every(z=>object(z)&&Number.isInteger(z.id)&&z.id>0&&z.id<f.nextId&&finite(z.x,0,width)&&finite(z.z,0,height)&&finite(z.remaining,0,5.5)&&(z.radius===undefined||finite(z.radius,2.6,2.99))))return false;}
   if(data.config.operation!=null&&!normalizeCampaignOperation(data.config.operation))return false;
   if(data.profileRevision!==undefined&&(!Number.isSafeInteger(data.profileRevision)||data.profileRevision<0))return false;
   if(data.loadout!==undefined&&(!object(data.loadout)||!PRIMARY_WEAPONS.some(w=>w.id===data.loadout.primary)||!Array.isArray(data.loadout.unlocked)||!data.loadout.unlocked.every(id=>PRIMARY_WEAPONS.some(w=>w.id===id))))return false;

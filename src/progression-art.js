@@ -1,5 +1,5 @@
-import {hospitalFlowSequence} from './progression.js?v=review-r18';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=review-r18';
+import {hospitalAirlockTarget} from './progression.js?v=features-r19';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=features-r19';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */
@@ -43,7 +43,7 @@ export function createProgressionArt(scene, box, state) {
        ctx.strokeStyle='#c5dbe5';ctx.fillStyle='#c5dbe5';
        if(device.task==='hospitalSample'){ctx.strokeRect(48,30,32,55);ctx.strokeRect(43,23,42,9);ctx.fillStyle='#b76c7c';ctx.fillRect(53,55,22,24);}
        else if(device.task==='hospitalAuth'){ctx.beginPath();ctx.moveTo(23,60);ctx.lineTo(42,60);ctx.lineTo(52,37);ctx.lineTo(66,82);ctx.lineTo(78,53);ctx.lineTo(104,53);ctx.stroke();}
-       else if(device.task.startsWith('hospitalValve')){ctx.beginPath();ctx.arc(64,55,29,0,Math.PI*2);ctx.stroke();ctx.font='bold 33px monospace';ctx.textAlign='center';ctx.fillText(device.task.slice(-1)==='A'?'O':device.task.slice(-1)==='B'?'F':'S',64,67);}
+       else if(device.task.startsWith('hospitalValve')){ctx.beginPath();ctx.arc(64,55,29,0,Math.PI*2);ctx.stroke();ctx.font='bold 33px monospace';ctx.textAlign='center';ctx.fillText(device.task.slice(-1)==='A'?'O':device.task.slice(-1)==='B'?'F':'E',64,67);}
        else{ctx.beginPath();ctx.moveTo(71,22);ctx.lineTo(46,60);ctx.lineTo(65,60);ctx.lineTo(55,90);ctx.lineTo(84,49);ctx.lineTo(65,49);ctx.closePath();ctx.stroke();}
       }
       else if(device.task==='commandFuse'){ctx.strokeRect(32,41,64,28);for(const x of [39,85]){ctx.beginPath();ctx.moveTo(x,30);ctx.lineTo(x,80);ctx.stroke();}}
@@ -69,7 +69,7 @@ export function createProgressionArt(scene, box, state) {
   let clueVersion='';
   function updateClues(){
     const version=JSON.stringify([state.archive.sequence,state.power.sequence,state.valves.sequence,state.remix]);if(version===clueVersion)return;clueVersion=version;
-    const hc=hospitalPlaque.ctx;hc.clearRect(0,0,512,160);hc.fillStyle='#243540';hc.fillRect(0,0,512,160);hc.strokeStyle='#a5bbc8';hc.lineWidth=4;hc.strokeRect(4,4,504,152);hc.textAlign='center';hc.fillStyle='#e0e9e9';hc.font='bold 24px monospace';hc.fillText('THEATRE STERILIZATION',256,48);hc.font='bold 22px monospace';hc.fillText(hospitalFlowSequence(state.remix).map(task=>({hospitalValveA:'OXYGEN',hospitalValveB:'FILTER',hospitalValveC:'SALINE'})[task]).join(' → '),256,106);hospitalPlaque.texture.needsUpdate=true;
+    const hc=hospitalPlaque.ctx;hc.clearRect(0,0,512,160);hc.fillStyle='#243540';hc.fillRect(0,0,512,160);hc.strokeStyle='#a5bbc8';hc.lineWidth=4;hc.strokeRect(4,4,504,152);hc.textAlign='center';hc.fillStyle='#e0e9e9';hc.font='bold 24px monospace';hc.fillText('QUARANTINE PRESSURE',256,48);hc.font='bold 22px monospace';hc.fillText('O / F / E: '+hospitalAirlockTarget(state.remix).join(' / '),256,106);hospitalPlaque.texture.needsUpdate=true;
     const c=clue.ctx;c.clearRect(0,0,512,160);c.fillStyle='#222e29';c.fillRect(0,0,512,160);c.strokeStyle='#8e967b';c.lineWidth=4;c.strokeRect(4,4,504,152);
     c.fillStyle='#a4b59b';c.textAlign='center';c.font='bold 17px monospace';c.fillText('ARCHIVE OVERRIDE · INPUT ORDER',256,31);
     state.archive.sequence.forEach((kind,i)=>glyph(c,kind,100+i*157,94,61,'#ded4a6'));
@@ -78,6 +78,9 @@ export function createProgressionArt(scene, box, state) {
   }
   // Surface timer avoids adding an unaccounted-for obstacle between the relay stations.
   const timer=canvasTexture(512,128);plane(timer.texture,2.8,.7,24,.035,14.15);let lastTimer='';
+  const airlockScreen=canvasTexture(512,160);plane(airlockScreen.texture,4.4,1.2,136,.035,34.8);let lastAirlock='';
+  const restartScreen=canvasTexture(512,128);plane(restartScreen.texture,4.4,1,35,.035,54.8);let lastRestart='';
+  const sabotageMarkers=new Map();
   const zoneMaterials=[];
   const stripe=canvasTexture(256,64);stripe.ctx.fillStyle='#8f8753';stripe.ctx.fillRect(0,0,256,64);stripe.ctx.strokeStyle='#14221c';stripe.ctx.lineWidth=24;for(let x=-64;x<320;x+=64){stripe.ctx.beginPath();stripe.ctx.moveTo(x,0);stripe.ctx.lineTo(x+64,64);stripe.ctx.stroke();}
   stripe.texture.wrapS=THREE.RepeatWrapping;stripe.texture.repeat.x=4;
@@ -96,6 +99,11 @@ export function createProgressionArt(scene, box, state) {
   }
   function update(time=0){
     updateClues();circuitArt.update();
+    const airlock=state.operationTasks?.hospitalAirlock,target=hospitalAirlockTarget(state.remix),defense=state.operationTasks?.generatorDefense;
+    if(airlock){const label=state.operationTasks.hospitalSterile?'AIRLOCK STERILE':airlock.running?`SEALED CYCLE ${Math.ceil(airlock.remaining)}s`:`O ${airlock.settings[0]}/2  F ${airlock.settings[1]}/2  E ${airlock.settings[2]}/2`;if(label!==lastAirlock){const c=airlockScreen.ctx;c.clearRect(0,0,512,160);c.fillStyle='#1a2a38';c.fillRect(0,0,512,160);c.textAlign='center';c.font='bold 26px monospace';c.fillStyle='#b7cbd8';c.fillText(label,256,53);c.font='bold 22px monospace';c.fillStyle='#ecc17c';c.fillText('OXYGEN / FILTER / EXHAUST',256,98);c.font='18px monospace';c.fillText('MATCH GAUGES · THEN START CYCLE',256,133);airlockScreen.texture.needsUpdate=true;lastAirlock=label;}}
+    if(defense){const label=defense.completed?'RESTART STABLE':defense.jammed?'JAMMED · INTERACT TO REPAIR':defense.started?`DEFEND RESTART ${Math.floor(defense.progress/22*100)}%`:'EMERGENCY RESTART';if(label!==lastRestart){const c=restartScreen.ctx;c.clearRect(0,0,512,128);c.fillStyle='#202a35';c.fillRect(0,0,512,128);c.fillStyle=defense.jammed?'#ef997c':'#edc17c';c.textAlign='center';c.font='bold 24px monospace';c.fillText(label,256,64);c.font='17px monospace';c.fillText('AMBER RINGS: CONSOLE SABOTEURS',256,102);restartScreen.texture.needsUpdate=true;lastRestart=label;}
+     for(const marker of sabotageMarkers.values())marker.visible=false;const wave=state.zones.find(z=>z.id==='generator')?.wave??[];for(const e of wave){if(!defense.saboteurIds.includes(e.id))continue;let marker=sabotageMarkers.get(e.id);if(!marker){marker=new THREE.Mesh(new THREE.RingGeometry(.48,.57,20),new THREE.MeshBasicMaterial({color:0xf0bb64,side:THREE.DoubleSide,transparent:true,opacity:.8}));marker.rotation.x=-Math.PI/2;root.add(marker);sabotageMarkers.set(e.id,marker);}marker.visible=e.hp>0&&e.mesh?.visible!==false&&!defense.completed;marker.position.set(e.x,.07,e.z);}}
+
     for(const socket of sealMaterials)socket.material.color.set(state.artifacts?.includes(socket.id)?0x8be4b3:0x725c40);
     for(const entry of devices){const {device,status,screenMaterial}=entry;if(device.kind==='artifact'){const collected=state.artifacts?.includes(device.id);entry.artifact.visible=!collected;device.active=!!collected;}status.color.set(device.active?0x86e5a3:device.kind==='relay'&&device.progress>0?0xa8cecc:0xdfab61);screenMaterial.color.set(device.active?0x8bedb2:0xffffff);}
     const relay=state.relay,completed=relay.completed||relay.solved;

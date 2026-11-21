@@ -14,7 +14,7 @@ export function createFireZones(scene,{isVisible=()=>true,lineOfSight=()=>true,o
  }:null;
  function build(zone){
   if(!scene)return;
-  const group=new THREE.Group();group.name='incendiary-ground-fire';group.position.set(zone.x,0,zone.z);
+  const group=new THREE.Group();group.name='incendiary-ground-fire';group.position.set(zone.x,0,zone.z);group.scale.set((zone.radius??FIRE_RADIUS)/FIRE_RADIUS,1,(zone.radius??FIRE_RADIUS)/FIRE_RADIUS);
   const floor=new THREE.Mesh(geometry.floor,materials.floor),ring=new THREE.Mesh(geometry.ring,materials.ring);floor.rotation.x=ring.rotation.x=-Math.PI/2;floor.position.y=.022;ring.position.y=.028;group.add(floor,ring);
   const flames=new THREE.InstancedMesh(geometry.flame,materials.flame,14),embers=new THREE.InstancedMesh(geometry.ember,materials.ember,10);flames.frustumCulled=embers.frustumCulled=false;group.add(flames,embers);scene.add(group);views.set(zone.id,{group,flames,embers});
  }
@@ -35,12 +35,12 @@ export function createFireZones(scene,{isVisible=()=>true,lineOfSight=()=>true,o
    view.flames.instanceMatrix.needsUpdate=true;view.embers.instanceMatrix.needsUpdate=true;
   }
  }
- function burst(x,z){if(!finite(x,-10000,10000)||!finite(z,-10000,10000))return null;const zone={id:nextId++,x,z,remaining:FIRE_DURATION};zones.push(zone);build(zone);render();return zone.id;}
+ function burst(x,z,multiplier=1){if(!finite(x,-10000,10000)||!finite(z,-10000,10000))return null;const zone={id:nextId++,x,z,remaining:FIRE_DURATION,...(multiplier>1?{radius:FIRE_RADIUS*Math.min(1.15,multiplier)}:{})};zones.push(zone);build(zone);render();return zone.id;}
  function tick(){
   // One global interval and one pass over actors prevent overlapping fire stacking.
   const damaged=new Set();
   for(const enemy of enemiesForTick){if(!enemy||damaged.has(enemy)||enemy.hp<=0||(enemy.spawnDelay??0)>0)continue;
-   if(zones.some(zone=>zone.remaining>0&&Math.hypot(enemy.x-zone.x,enemy.z-zone.z)<=FIRE_RADIUS&&lineOfSight(zone.x,zone.z,enemy.x,enemy.z))){damaged.add(enemy);onDamage(enemy,1);}
+   if(zones.some(zone=>zone.remaining>0&&Math.hypot(enemy.x-zone.x,enemy.z-zone.z)<=(zone.radius??FIRE_RADIUS)&&lineOfSight(zone.x,zone.z,enemy.x,enemy.z))){damaged.add(enemy);onDamage(enemy,1);}
   }
  }
  let enemiesForTick=[];
@@ -59,7 +59,7 @@ export function createFireZones(scene,{isVisible=()=>true,lineOfSight=()=>true,o
  function restore(saved){
   if(!saved||saved.version!==1||!Array.isArray(saved.zones)||saved.zones.length>256||!finite(saved.phase,0,FIRE_TICK)||!Number.isSafeInteger(saved.nextId)||saved.nextId<1)return false;
   const ids=new Set(),restored=[];
-  for(const zone of saved.zones){if(!zone||!Number.isSafeInteger(zone.id)||zone.id<1||ids.has(zone.id)||!finite(zone.x,-10000,10000)||!finite(zone.z,-10000,10000)||!Number.isFinite(zone.remaining))return false;ids.add(zone.id);if(zone.remaining>0)restored.push({id:zone.id,x:zone.x,z:zone.z,remaining:Math.min(FIRE_DURATION,zone.remaining)});}
+  for(const zone of saved.zones){if(!zone||!Number.isSafeInteger(zone.id)||zone.id<1||ids.has(zone.id)||!finite(zone.x,-10000,10000)||!finite(zone.z,-10000,10000)||!Number.isFinite(zone.remaining))return false;ids.add(zone.id);if(zone.radius!==undefined&&!finite(zone.radius,FIRE_RADIUS,FIRE_RADIUS*1.15))return false;if(zone.remaining>0)restored.push({id:zone.id,x:zone.x,z:zone.z,remaining:Math.min(FIRE_DURATION,zone.remaining),...(zone.radius?{radius:zone.radius}:{})});}
   clear();zones=restored;phase=Math.min(FIRE_TICK-1e-8,saved.phase);nextId=Math.max(saved.nextId,...restored.map(zone=>zone.id+1));for(const zone of zones)build(zone);render();return true;
  }
  function setReducedEffects(value){reducedEffects=!!value;render();}

@@ -109,3 +109,11 @@ Settings → Display → Graphics offers Battery saver, Balanced and Sharp. Bala
 Silent hospital unlocks after Nest. Six clinical departments connect a pharmacy fuse, emergency power, sample recovery, diagnostics, a readable sterilisation flow puzzle and quarantine extraction. Three escalating encounters field 26, 44 and 70 creatures on Operator. Two required milestones award finite ammunition before checkpointing; revisiting them cannot farm supplies. Older checkpoints retain inventory, doors and explored coordinates when migrated to the larger map.
 
 The armory adds the KESTREL battle rifle ($820) and MANTIS anti-materiel rifle ($900), each with its own upgrades and weapon model. Screechers telegraph a cover-blocked radial attack; leapers mark a landing point before jumping. Both can be interrupted with stagger.
+
+## Field kit and encounter update (r19)
+
+Armory has one field-skill slot: Field Medic (65 healing per finite medkit, after Breach), Rapid Response (+10% sprint, after Command), or Demolition Harness (+15% grenade area, after Research). Walking and crate movement are unchanged. Skills do not stack or generate supplies. Your active skill is stored in checkpoints. Explosives and ground fire also threaten the operator; Demolition expands that danger area too.
+
+Each equipped primary has one free attachment choice. Single-projectile guns trade reload speed for range or range for slower cadence. Pellet weapons trade spread against stagger. Attachments preserve paid damage, magazine upgrades and loaded ammo.
+
+Field notes adds discovered mutations with their warning and one counter. Entries appear only after seeing living spawned creatures. Generator has a defended restart that amber-ringed saboteurs can jam; repair the console to continue. Hospital now has an Oxygen/Filter/Exhaust pressure interlock: set all gauges to the Pharmacy specification and start the sealed cycle, rather than memorizing a console order. It has a matching encountered Field notes entry.

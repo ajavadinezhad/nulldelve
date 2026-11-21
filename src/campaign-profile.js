@@ -1,6 +1,7 @@
-import {compatibleStorage} from './storage-compat.js?v=review-r18';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=review-r18';
-import {createEconomy} from './economy.js?v=review-r18';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=features-r19';
+import {compatibleStorage} from './storage-compat.js?v=features-r19';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=features-r19';
+import {createEconomy} from './economy.js?v=features-r19';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';
 const ids=()=>PRIMARY_WEAPONS.map(weapon=>weapon.id);
@@ -39,7 +40,8 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   }catch{sessionOnly=true;lastFailure='storage';return false;}
  }
  function markPurchase(){state.revision=Math.min(Number.MAX_SAFE_INTEGER,revision(state.revision)+1);persist();return state.revision;}
- function getWeaponOffers(){return PRIMARY_WEAPONS.map(weapon=>{const owned=state.unlocked.includes(weapon.id),equipped=state.primary===weapon.id;return {id:'weapon.'+weapon.id,weaponId:weapon.id,kind:'weapon',label:weapon.name??weapon.label??weapon.id,description:weapon.description??'Primary weapon for your next deployment.',cost:weapon.cost,stats:{...economy.stats(weapon.id,{damage:weapon.baseDamage,capacity:weapon.capacity,interval:weapon.interval,reload:weapon.reload}),pellets:weapon.pellets,range:weapon.range},owned,equipped,available:!equipped&&(owned||economy.state.credits>=weapon.cost)};});}
+ function getWeaponOffers(){return PRIMARY_WEAPONS.map(weapon=>{const owned=state.unlocked.includes(weapon.id),equipped=state.primary===weapon.id,attachment=economy.state.attachments[weapon.id]??'standard',stats=applyWeaponAttachment({...weapon,...economy.stats(weapon.id,{damage:weapon.baseDamage,capacity:weapon.capacity,interval:weapon.interval,reload:weapon.reload})},attachment);return {id:'weapon.'+weapon.id,weaponId:weapon.id,kind:'weapon',label:weapon.name??weapon.label??weapon.id,description:weapon.description??'Primary weapon for your next deployment.',cost:weapon.cost,stats:{damage:stats.damage,capacity:stats.capacity,interval:stats.interval,reload:stats.reload,pellets:stats.pellets,range:stats.range},attachment,attachmentOptions:attachmentOptions(weapon.id),owned,equipped,available:!equipped&&(owned||economy.state.credits>=weapon.cost)};});}
+ function setAttachment(value){const [,weaponId,attachmentId,...extra]=String(value).split('.');if(extra.length||!state.unlocked.includes(weaponId)||state.primary!==weaponId)return {ok:false,message:'Equip an owned weapon before modifying it.'};const option=attachmentOptions(weaponId).find(option=>option.id===attachmentId);if(!option)return {ok:false,message:'That attachment is not available for this weapon.'};economy.state.attachments[weaponId]=attachmentId;return {ok:true,message:`${option.name} fitted.`};}
  function mutate(value,equipOnly=false){
   const id=String(value).replace(/^(weapon|equip)\./,''),weapon=PRIMARY_WEAPONS.find(item=>item.id===id);
   if(!weapon)return {ok:false,message:'That weapon is not available.'};
@@ -86,6 +88,7 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
     const before=serialize();let result;
     if(String(id).startsWith('weapon.'))result=mutate(id);
     else if(String(id).startsWith('equip.'))result=mutate(id,true);
+    else if(String(id).startsWith('attachment.'))result=setAttachment(id);
     else result=economy.purchase(id);
     return finishMutation(result,before,true);
    }finally{releaseLease();}

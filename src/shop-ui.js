@@ -1,5 +1,5 @@
-import {createItemIcon} from './item-icons.js?v=review-r18';
-import {formatKey} from './controls.js?v=review-r18';
+import {createItemIcon} from './item-icons.js?v=features-r19';
+import {formatKey} from './controls.js?v=features-r19';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
@@ -47,13 +47,13 @@ export function renderShop(target,armory,onPurchase,{group:selectedGroup='weapon
   const id=gun.weaponId??String(gun.id).replace(/^weapon\./,''),name=String(gun.name??gun.label??id),owned=!!gun.owned,equipped=owned&&(armory.primary?armory.primary===id:!!gun.equipped),cost=integer(gun.cost);
   const row=element('article',`weapon-row${equipped?' equipped':''}`);row.setAttribute('data-weapon-id',id);const main=element('div','weapon-row-main'),copy=element('div','weapon-row-copy');copy.append(element('h3','weapon-row-name',name),weaponStats(gun.stats??{}));main.append(icon(id),copy);
   const actionId=(owned?'equip.':'weapon.')+id,available=!equipped&&gun.available!==false&&(owned||credits>=cost),control=purchaseButton({id:actionId,cost,available},onPurchase,{label:equipped?'Equipped':owned?'Equip':`$${cost.toLocaleString()}`,name:equipped?`${name}, equipped`:owned?`Equip ${name}`:`Buy ${name}`});control.disabled=!available;if(equipped)control.setAttribute('aria-label',`${name}, equipped`);if(owned&&!equipped)control.setAttribute('aria-label',`Equip ${name}`);main.append(control);row.append(main);
-  if(equipped)renderUpgrades(row,{offers,prefix:id==='carbine'?'rifle':id,name,stats:gun.stats??{},credits,onPurchase});
+  if(equipped){renderUpgrades(row,{offers,prefix:id==='carbine'?'rifle':id,name,stats:gun.stats??{},credits,onPurchase});renderAttachments(row,gun,onPurchase);}
   if(!owned&&credits<cost)row.append(element('small','shop-status weapon-shortfall',`$${(cost-credits).toLocaleString()} short`));list.append(row);
  }target.append(list);
  const sidearmOffers=offers.filter(offer=>String(offer.id).startsWith('pistol.'));if(sidearmOffers.length){const sidearm=element('details','sidearm-row');sidearm.open=sidearmOpen;sidearm.dataset.focusKey='sidearm';sidearm.addEventListener('toggle',()=>onSidearmToggle(sidearm.open));const summary=element('summary','sidearm-summary');summary.dataset.focusKey='sidearm-summary';summary.append(icon('pistol'),element('strong','','P9 Sidearm'),element('span','','Upgrades'));sidearm.append(summary);renderUpgrades(sidearm,{offers:sidearmOffers,prefix:'pistol',name:'P9 Sidearm',stats:armory.sidearm?.stats??{},credits,onPurchase});target.append(sidearm);}
  if(!list.children.length)target.append(element('p','shop-status','No weapons available.'));
 }
-function weaponStats(stats){const list=element('dl','weapon-row-stats');for(const [label,value]of [['Damage',Number.isFinite(stats.damage)?`${stats.damage}${stats.pellets>1?' × '+stats.pellets:''}`:null],['Rounds',stats.capacity??stats.magazine],['Rate',stats.interval>0?`${(1/stats.interval).toFixed(1)}/s`:null],['Reload',Number.isFinite(stats.reload)?`${stats.reload}s`:null],['Range',Number.isFinite(stats.range)?`${stats.range}m`:null]]){if(value===null||value===undefined)continue;const stat=element('div');stat.append(element('dt','',label),element('dd','',String(value)));list.append(stat);}return list;}
+function weaponStats(stats){const list=element('dl','weapon-row-stats');for(const [label,value]of [['Damage',Number.isFinite(stats.damage)?`${stats.damage}${stats.pellets>1?' × '+stats.pellets:''}`:null],['Rounds',stats.capacity??stats.magazine],['Rate',stats.interval>0?`${(1/stats.interval).toFixed(1)}/s`:null],['Reload',Number.isFinite(stats.reload)?`${Number(stats.reload.toFixed(2))}s`:null],['Range',Number.isFinite(stats.range)?`${Number(stats.range.toFixed(2))}m`:null]]){if(value===null||value===undefined)continue;const stat=element('div');stat.append(element('dt','',label),element('dd','',String(value)));list.append(stat);}return list;}
 function upgradeEffect(kind,stats,maxed,increment=6){const current=kind==='damage'?stats.damage:kind==='magazine'?stats.capacity??stats.magazine:stats.reload;if(!Number.isFinite(current))return EFFECTS[kind]??'';if(maxed)return kind==='reload'?`${Number(current.toFixed(2))}s`:String(current);const next=kind==='damage'?current+1:kind==='magazine'?current+increment:Math.max(.5,current-.18);if(kind==='damage'&&stats.pellets>1)return `${current}×${stats.pellets} → ${next}×${stats.pellets}`;return `${Number(current.toFixed(2))}${kind==='reload'?'s':''} → ${Number(next.toFixed(2))}${kind==='reload'?'s':''}`;}
 function renderUpgrades(target,{offers,prefix,name,stats,credits,onPurchase}){
  const panel=element('div','inline-upgrades');panel.setAttribute('aria-label',`${name} upgrades`);panel.setAttribute('data-upgrade-weapon',prefix);
@@ -61,3 +61,10 @@ function renderUpgrades(target,{offers,prefix,name,stats,credits,onPurchase}){
  }if(panel.children.length)target.append(panel);
 }
 function renderSupplies(target,armory,offers,onPurchase){const list=element('div','supply-list'),credits=integer(armory.credits);for(const offer of offers.filter(item=>SUPPLIES.has(item.id))){const kind=offer.id,owned=integer(offer.owned),full=kind==='armor'?owned>=60:owned>=5,cost=integer(offer.cost),available=!full&&offer.available!==false&&credits>=cost,row=element('article','supply-row'),copy=element('div','supply-row-copy');row.title=offer.description??'';copy.append(element('h3','',TITLES[kind]),element('span','',EFFECTS[kind]),element('small','',`${owned}/${kind==='armor'?60:5}`));row.append(icon(kind),copy,purchaseButton({...offer,available},onPurchase,{full,name:`Buy ${offer.label??TITLES[kind]}`}));list.append(row);}target.append(list);if(!list.children.length)target.append(element('p','shop-status','No supplies available.'));}
+
+function renderAttachments(target,gun,onPurchase){
+ if(!Array.isArray(gun.attachmentOptions)||!gun.attachmentOptions.length)return;
+ const row=element('label','setting-row attachment-choice'),copy=element('span','');copy.append(element('strong','','Attachment'));const select=element('select');select.setAttribute('aria-label',`${gun.label??gun.weaponId} attachment`);select.dataset.focusKey='attachment-'+gun.weaponId;
+ for(const option of gun.attachmentOptions){const item=element('option','',option.name);item.value=option.id;item.selected=option.id===(gun.attachment??'standard');select.append(item);}select.value=gun.attachment??'standard';select.addEventListener('change',()=>onPurchase(`attachment.${gun.weaponId}.${select.value}`));row.append(copy,select);target.append(row);
+ const selected=gun.attachmentOptions.find(option=>option.id===(gun.attachment??'standard'));target.append(element('small','shop-status attachment-effect',selected?.description??''));
+}
