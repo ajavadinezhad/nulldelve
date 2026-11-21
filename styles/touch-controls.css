@@ -61,3 +61,5 @@
 
 /* Training owns the feedback slot; a live wave counter stays out of its way. */
 .touch-controls-enabled .hud:has(#tutorial:not([hidden])) #horde-status{display:none}
+/* Keep training below the operator after rotating into a short landscape view. */
+@media(min-width:600px) and (max-height:520px){.touch-controls-enabled .hud-feedback{bottom:68px;left:50%;transform:translateX(-50%);width:min(420px,calc(100vw - 240px));max-height:86px}}

@@ -81,3 +81,7 @@ Added held Interact dragging on keyboard/touch without adding another action but
 ## High-density rendering r13
 
 The previous Medium phone default forced1× CSS-resolution rendering; High capped at1.5×. Balanced now supports up to2× screen density and Sharp up to3×, bounded to2.4M/4M framebuffer pixels; Battery saver retains the0.75× option and a1M limit. Resize recomputes resolution, including orientation/display-density changes. Shadow resolution changes dispose/rebuild the old map. Unit checks cover393×707 high-density policy and large-display budgets; external-browser checks at393×707 verified preset switching, canvas buffer resize and no errors on the available1× desktop display. This is not a measurement of the user’s physical phone performance. All58 test files pass.
+
+## Rotation framing r14
+
+Touch framing now applies symmetric aspect compensation in portrait and landscape. With a393×707 viewport rotated to707×393 at base zoom22, both orientations render approximately23.96 CSS pixels per world unit; previously landscape fell to17.86. Tests cover multiple phone/tablet dimensions and all saved zoom endpoints, preserving desktop framing and bounding extreme aspect ratios. Landscape training feedback moved below the operator to avoid obscuring the play center. All58 regression files pass; browser viewport checks verified both orientations without errors.
