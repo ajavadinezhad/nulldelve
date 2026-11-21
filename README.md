@@ -99,3 +99,7 @@ Each operation includes a two-stage return route: Archive authorization, backup 
 ## Recovering crates
 
 Hold your Interact key (E by default) next to an unseated crate, then move to drag it away from a wall or corner. Release to let go. On phones, hold the contextual Grab button while moving with the left stick. Dragging is slower than walking; seated switch crates remain locked. Reset crates remains available with T or in touch Help. Pausing, losing input, and loading a checkpoint drop the grip.
+
+## Display sharpness
+
+Settings → Display → Graphics offers Battery saver, Balanced and Sharp. Balanced respects phone screen density up to2×, Sharp up to3×, with total render-buffer budgets to bound GPU cost. Camera framing is unchanged. Presets also rebuild shadow maps when their resolution changes. Actual phone frame rate and thermal behavior depend on the device.

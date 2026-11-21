@@ -1,5 +1,5 @@
-import {normalizeCampaignProfile} from './campaign-profile.js?v=crate-r12';
-import {normalizeCampaignProgress} from './campaign-progress.js?v=crate-r12';
+import {normalizeCampaignProfile} from './campaign-profile.js?v=phone-r13';
+import {normalizeCampaignProgress} from './campaign-progress.js?v=phone-r13';
 const PREFIX='#deployment=';
 /** Game-only session transfer survives document navigation when storage is blocked. */
 export function encodeDeploymentState({profile,progress}={}){

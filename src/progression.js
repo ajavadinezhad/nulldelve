@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=crate-r12';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=crate-r12';
-import {DIFFICULTY_RULES} from './difficulty.js?v=crate-r12';
+import {OPERATION_ROUTES} from './operation-routes.js?v=phone-r13';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=phone-r13';
+import {DIFFICULTY_RULES} from './difficulty.js?v=phone-r13';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.

@@ -77,3 +77,7 @@ Three focused agent reviews covered mission progression and duration, weapons an
 ## Crate recovery r12
 
 Added held Interact dragging on keyboard/touch without adding another action button. Tested wall/corner recovery, body/crate/connector collision, seated crate locking, reset and input cancellation, checkpoint grip clearing and recovery into the opening door solution. Browser input reproduced the second crate trapped against the Insertion north wall, then pulled it free using held E plus backward movement and verified release stopped dragging. All58 regression files pass. Physical phone multi-finger validation remains pending.
+
+## High-density rendering r13
+
+The previous Medium phone default forced1× CSS-resolution rendering; High capped at1.5×. Balanced now supports up to2× screen density and Sharp up to3×, bounded to2.4M/4M framebuffer pixels; Battery saver retains the0.75× option and a1M limit. Resize recomputes resolution, including orientation/display-density changes. Shadow resolution changes dispose/rebuild the old map. Unit checks cover393×707 high-density policy and large-display budgets; external-browser checks at393×707 verified preset switching, canvas buffer resize and no errors on the available1× desktop display. This is not a measurement of the user’s physical phone performance. All58 test files pass.
