@@ -109,7 +109,3 @@ Settings → Display → Graphics offers Battery saver, Balanced and Sharp. Bala
 Silent hospital unlocks after Nest. Six clinical departments connect a pharmacy fuse, emergency power, sample recovery, diagnostics, a readable sterilisation flow puzzle and quarantine extraction. Three escalating encounters field 26, 44 and 70 creatures on Operator. Two required milestones award finite ammunition before checkpointing; revisiting them cannot farm supplies. Older checkpoints retain inventory, doors and explored coordinates when migrated to the larger map.
 
 The armory adds the KESTREL battle rifle ($820) and MANTIS anti-materiel rifle ($900), each with its own upgrades and weapon model. Screechers telegraph a cover-blocked radial attack; leapers mark a landing point before jumping. Both can be interrupted with stagger.
-
-## Player identity
-
-First-time players can set a display name and choose from six avatars, or skip setup. Select the avatar/name in the menu header to edit it. Identity is stored locally in this browser, independently of campaign inventory and checkpoints. It is not an online login or cloud-synced account.

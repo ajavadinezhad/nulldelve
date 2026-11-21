@@ -1,4 +1,4 @@
-import {initialQuality} from './device-presentation.js?v=identity-r16';
+import {initialQuality} from './device-presentation.js?v=preview-r17';
 export const DEFAULT_BINDINGS=Object.freeze({moveUp:'KeyW',moveDown:'KeyS',moveLeft:'KeyA',moveRight:'KeyD',interact:'KeyE',reload:'KeyR',medkit:'KeyQ',grenade:'KeyG',cycleGrenade:'KeyC',sprint:'ShiftLeft',fire:'Space',knife:'KeyF',rifle:'Digit1',pistol:'Digit2',map:'KeyM',help:'KeyH',resetPuzzle:'KeyT',aimUp:'ArrowUp',aimDown:'ArrowDown',aimLeft:'ArrowLeft',aimRight:'ArrowRight'});
 export const ACTION_LABELS=Object.freeze({moveUp:'Move up',moveDown:'Move down',moveLeft:'Move left',moveRight:'Move right',interact:'Interact',reload:'Reload',medkit:'Use medkit',grenade:'Throw grenade',cycleGrenade:'Switch grenade type',sprint:'Sprint',fire:'Fire',knife:'Knife strike',rifle:'Equip rifle',pistol:'Equip pistol',map:'Full map',help:'Controls help',resetPuzzle:'Reset crates',aimUp:'Aim up',aimDown:'Aim down',aimLeft:'Aim left',aimRight:'Aim right'});
 export const BINDING_ACTIONS=Object.freeze(Object.keys(DEFAULT_BINDINGS));

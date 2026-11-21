@@ -1,8 +1,8 @@
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=identity-r16';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=identity-r16';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=identity-r16';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=identity-r16';
-import {createProgression} from './progression.js?v=identity-r16';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=preview-r17';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=preview-r17';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=preview-r17';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=preview-r17';
+import {createProgression} from './progression.js?v=preview-r17';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','boss']);

@@ -1,13 +1,12 @@
-import {AVATARS,normalizeIdentity,readIdentity,saveIdentity} from './player-identity.js?v=identity-r16';
-import {compatibleStorage} from './storage-compat.js?v=identity-r16';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=identity-r16';
-import {DIFFICULTY_RULES} from './difficulty.js?v=identity-r16';
-import {createCampaignMap} from './campaign-map.js?v=identity-r16';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=identity-r16';
-import {createItemIcon} from './item-icons.js?v=identity-r16';
-import {buildMissionPreview} from './mission-previews.js?v=identity-r16';
-import {renderShop} from './shop-ui.js?v=identity-r16';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=identity-r16';
+import {compatibleStorage} from './storage-compat.js?v=preview-r17';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=preview-r17';
+import {DIFFICULTY_RULES} from './difficulty.js?v=preview-r17';
+import {createCampaignMap} from './campaign-map.js?v=preview-r17';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=preview-r17';
+import {createItemIcon} from './item-icons.js?v=preview-r17';
+import {buildMissionPreview} from './mission-previews.js?v=preview-r17';
+import {renderShop} from './shop-ui.js?v=preview-r17';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=preview-r17';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -28,8 +27,6 @@ function formatTime(value){if(!value)return 'Time unavailable';try{const date=ne
 /** DOM-only game menu. The owning game controls gameplay, save storage and settings effects. */
 export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>{},onExportBackup=null,onPreviewBackup=null,onImportBackup=null,onContinue=()=>{},onLoad=()=>{},onLoadCheckpoint=()=>{},onSave=()=>{},onPurchase=()=>{},onResume=()=>{},onClose=()=>{},onSettings=()=>{},getStatus=()=>({active:false,slots:[],canContinue:false})}){
  const settings=readSettings();
- let identityStorage=null;try{identityStorage=globalThis.localStorage;}catch{}
- let identity=readIdentity(identityStorage),identityDraft=null;
  let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSidearmOpen=false,backupPreview=null,keyboardOpen=null;
  let shell=null,content=null,statusNode=null,captureAction=null;
  function status(){try{return getStatus()??{active:false,slots:[],canContinue:false};}catch{return {active:false,slots:[],canContinue:false};}}
@@ -48,15 +45,6 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  async function prepareView(next,back='main'){await action(async()=>{const result=await onPrepareOperation();if(result===false||result?.ok===false)return result;returnView=back;view=next;if(next==='campaign-map'){const done=status().completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;}return result;},[],{close:false});}
  function homeAction(row,label,callback,detail,primary=false){const control=button('',callback,`menu-button home-action${primary?' primary':''}`);control.append(element('strong','',label));if(detail)control.append(element('small','',detail));const symbols={'Continue':'play','Resume':'play','New operation':'operation','Armory':'armory','Field notes':'notes','Saved games':'saves','Save / load':'saves','Settings':'settings','Main menu':'home'},icon=element('img','menu-action-icon');icon.src='./assets/menu-'+(symbols[label]??'operation')+'.svg';icon.alt='';icon.setAttribute('aria-hidden','true');icon.width=32;icon.height=32;control.append(icon);row.append(control);return control;}
  function latestSave(current){return current.checkpoint??null;}
- function drawProfile(){
-  heading('','Player profile');
-  const draft=identityDraft??{displayName:identity?.displayName??'',avatar:identity?.avatar??'scout'};identityDraft=draft;
-  const form=element('form','identity-form'),label=element('label','','Display name'),input=element('input','identity-name');input.id='player-display-name';input.name='displayName';input.maxLength=24;input.required=true;input.autocomplete='nickname';input.value=draft.displayName;label.htmlFor=input.id;input.addEventListener('input',()=>draft.displayName=input.value);form.append(label,input);
-  const choices=element('fieldset','identity-avatars');choices.append(element('legend','','Avatar'));
-  for(const id of AVATARS){const tile=element('label','identity-avatar'),radio=element('input');radio.type='radio';radio.name='avatar';radio.value=id;radio.checked=draft.avatar===id;radio.setAttribute('aria-label',id[0].toUpperCase()+id.slice(1));radio.addEventListener('change',()=>draft.avatar=id);const portrait=element('img');portrait.src=`assets/avatar-${id}.svg`;portrait.alt='';tile.append(radio,portrait);choices.append(tile);}form.append(choices);
-  const controls=element('div','menu-actions'),save=element('button','menu-button primary','Save profile');save.type='submit';controls.append(save,button(identity?'Cancel':'Not now',()=>{identityDraft=null;changeView(returnView);},'menu-button secondary'));form.append(controls,element('p','identity-local-note','Saved on this device. No online account.'));
-  form.addEventListener('submit',event=>{event.preventDefault();const value=normalizeIdentity({version:1,...draft});if(!value){notice('Enter a display name.');input.focus();return;}if(!saveIdentity(identityStorage,value)){notice('Your profile could not be saved. Check browser storage and try again.');return;}identity=value;identityDraft=null;changeView(returnView);});content.append(form);
- }
  function drawMain(current){
   const hero=element('div','menu-hero');const heroCopy=element('div','menu-hero-copy');heroCopy.append(element('strong','','Every room is unknown'));const artwork=element('img','menu-keyart');artwork.src='./assets/facility-keyart.svg';artwork.alt='A lone operative facing the sealed doors of a ruined facility';hero.append(artwork,heroCopy);content.append(hero);
   const row=actions();row.classList.add('home-actions');const save=latestSave(current),missionName=MISSIONS.find(m=>m.id===save?.mission)?.name??'Saved operation';
@@ -182,17 +170,17 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function render(focus=true){
   if(!open)return;const oldFocus=document.activeElement,oldScroll=content?.scrollTop??0;const focusKey=oldFocus?.dataset?.focusKey??oldFocus?.dataset?.offerId??oldFocus?.dataset?.action??oldFocus?.id;const focusIndex=content?[...content.querySelectorAll('button,input,select,summary')].indexOf(oldFocus):-1;captureAction=null;const current=status();overlay.replaceChildren();overlay.classList.add('menu-overlay');
   shell=element('div','game-menu');shell.dataset.view=view;shell.setAttribute('role','dialog');shell.setAttribute('aria-modal','true');shell.setAttribute('aria-label','Nulldelve game menu');
-  const brand=element('header','menu-brand');brand.append(element('h1','','NULLDELVE'));const player=button('',()=>{identityDraft=null;openPanel('profile',view==='pause'?'pause':'main');},'player-chip');player.setAttribute('aria-label',identity?`Edit profile: ${identity.displayName}`:'Create player profile');const portrait=element('img');portrait.src=`assets/avatar-${identity?.avatar??'scout'}.svg`;portrait.alt='';player.append(portrait,element('span','',identity?.displayName??'Create profile'));brand.append(player);shell.append(brand);drawPersistenceWarning(current);
+  const brand=element('header','menu-brand');brand.append(element('h1','','NULLDELVE'));shell.append(brand);drawPersistenceWarning(current);
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
-  if(view==='profile')drawProfile();else if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
+  if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r16'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r17'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
  }
  function show(next='main'){
   if(!open)previousFocus=document.activeElement;
   if(next==='campaign-map'){const done=status().completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;}
-  open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory','profile'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
+  open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
  }
  function hide(){captureAction=null;open=false;overlay.style.display='none';overlay.classList.remove('menu-overlay');if(previousFocus?.isConnected)previousFocus.focus?.({preventScroll:true});onClose();}
  overlay.addEventListener('keydown',event=>{
@@ -215,6 +203,6 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   if(event.shiftKey&&(document.activeElement===first||!overlay.contains(document.activeElement))){event.preventDefault();last.focus();}
   else if(!event.shiftKey&&(document.activeElement===last||!overlay.contains(document.activeElement))){event.preventDefault();first.focus();}
  });
- show(identity?'main':'profile');
+ show('main');
  return {show,hide,refresh:()=>render(false),isOpen:()=>open,settings};
 }
