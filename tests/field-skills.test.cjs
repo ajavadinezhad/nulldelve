@@ -12,3 +12,26 @@ test('serialization is detached and storage corruption is harmless',()=>{const s
 test('incoming deployment selection persists across reload while checkpoint restore remains transient',()=>{const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)},completed=['breach','command','research'],skills=createFieldSkills(storage);skills.learn('runner',completed);assert.equal(skills.restoreDeployment({version:1,selected:'medic'},completed),true);assert.equal(skills.isSessionOnly(),false);assert.equal(createFieldSkills(storage).selected(completed),'medic');assert.equal(skills.restoreTransient({version:1,selected:'demolition'},completed),true);assert.equal(skills.selected(completed),'demolition');assert.equal(createFieldSkills(storage).selected(completed),'medic');assert.equal(skills.restoreDeployment({version:1,selected:'demolition'},[]),false);});
 
 test('advanced skills require development of their parent and spend one finite training point',()=>{const completed=['breach','command','research','containment','nest','hospital'],skills=createFieldSkills(store());assert.equal(skills.learn('surgeon',completed).ok,false);assert.ok(skills.learn('medic',completed).ok);assert.ok(skills.learn('surgeon',completed).ok);assert.equal(skills.learn('surgeon',completed).ok,false);assert.equal(skills.selected(completed),'surgeon');assert.deepEqual(skills.serialize(completed).learned,['medic','surgeon']);assert.equal(fieldSkillEffects('surgeon').medkitHealing,75);assert.equal(createFieldSkills(null).equip('medic',completed).ok,false);const early=createFieldSkills(null);assert.ok(early.learn('medic',['breach']).ok);assert.equal(early.learn('runner',['breach']).ok,false);assert.equal(early.learn('surgeon',['breach']).ok,false);});
+
+
+test('legacy migration cannot introduce advanced skills absent from the old catalog',()=>{
+ const completed=['breach','command','research','containment','nest','hospital'];
+ for(const selected of ['surgeon','pathfinder','ordnance']){
+  const normalized=normalizeFieldSkill({version:1,selected},completed);
+  assert.equal(normalized.selected,'none');assert.deepEqual(normalized.learned,[]);
+ }
+ const advanced=normalizeFieldSkill({version:2,selected:'surgeon',learned:['surgeon']},completed);
+ assert.equal(advanced.selected,'none');assert.deepEqual(advanced.learned,[]);
+});
+
+test('stale deployment transfers preserve developed nodes and spent points across reload',()=>{
+ const completed=['breach','command','research','containment','nest','hospital'],storage=store(),skills=createFieldSkills(storage);
+ assert.ok(skills.learn('medic',completed).ok);const old=skills.serialize(completed);
+ assert.ok(skills.learn('surgeon',completed).ok);assert.ok(skills.learn('runner',completed).ok);
+ assert.ok(skills.restoreDeployment(old,completed));
+ const restored=createFieldSkills(storage).serialize(completed);
+ assert.equal(restored.selected,'medic');assert.deepEqual(restored.learned,['medic','runner','surgeon']);
+ assert.ok(skills.restoreDeployment({version:1,selected:'demolition'},completed));
+ const imported=skills.serialize(completed);assert.deepEqual(imported.learned,['medic','runner','demolition','surgeon']);
+ assert.equal(imported.selected,'demolition');
+});

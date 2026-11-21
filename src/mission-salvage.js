@@ -12,4 +12,5 @@ const PAYOUTS=Object.freeze({breach:45,command:60,research:75,containment:95,nes
 export const cacheById=id=>SALVAGE_CACHES.find(cache=>cache.id===id)??null;
 export const missionPayout=operation=>Object.prototype.hasOwnProperty.call(PAYOUTS,operation)?PAYOUTS[operation]:0;
 export function cashReward(id){const cache=cacheById(id);if(cache)return {id:cache.id,operation:cache.operation,amount:cache.amount,label:'Salvage cash'};if(typeof id==='string'&&id.startsWith('contract.')){const operation=id.slice(9),amount=missionPayout(operation);if(amount)return {id,operation,amount,label:'First-clear contract'};}return null;}
-export function normalizeRewardLedger(value){return Object.fromEntries(Object.keys(value&&typeof value==='object'&&!Array.isArray(value)?value:{}).filter(id=>value[id]===true&&cashReward(id)).map(id=>[id,true]));}
+export const validEnemyRewardId=id=>typeof id==='string'&&/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(id);
+export function normalizeRewardLedger(value){return Object.fromEntries(Object.keys(value&&typeof value==='object'&&!Array.isArray(value)?value:{}).filter(id=>value[id]===true&&(cashReward(id)||validEnemyRewardId(id))).map(id=>[id,true]));}

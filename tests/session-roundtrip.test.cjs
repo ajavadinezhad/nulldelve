@@ -73,7 +73,7 @@ test('actual browser capture/restore roundtrip preserves equipment, world discov
  assert.deepEqual(target.capture(),saved,'a second capture preserves all serialized session fields');
 });
 test('actual save restoration reconstructs the next puzzle instruction after room-entry flags were already saved',()=>{
- const saved=populatedSnapshot();saved.enemies=[];saved.progression.relay={started:false,remaining:0,completed:false};for(const zone of saved.progression.zones){zone.status='dormant';zone.waveIds=[];zone.waveVariants=[];zone.queue=[];zone.spawned=0;zone.spawnTimer=0;}
+ const saved=populatedSnapshot();saved.enemies=[];saved.progression.relay={started:false,remaining:0,completed:false};for(const zone of saved.progression.zones){zone.rewardQueue=[];zone.waveRewardIds=[];zone.status='dormant';zone.waveIds=[];zone.waveVariants=[];zone.queue=[];zone.spawned=0;zone.spawnTimer=0;}
  saved.progression.archiveEntered=true;saved.progression.securityEntered=true;const target=session();assert.equal(target.restore(saved),true);assert.equal(target.elements.get('#objective').textContent,'Link the security relays');assert.match(target.elements.get('#hint').textContent,/eight seconds/);
 });
 test('unsupported save versions are rejected before replacing the current session',()=>{const target=session(),saved=populatedSnapshot();saved.version=2;assert.equal(target.restore(saved),false);assert.equal(target.ctx.player.hp,100);assert.equal(target.ctx.enemies.length,0);});

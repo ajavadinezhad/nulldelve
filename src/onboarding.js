@@ -1,5 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=skills-r23';
-import {formatKey} from './controls.js?v=skills-r23';
+import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
+import {formatKey} from './controls.js?v=ledger-r24';
 const KEY='nulldelve.tutorial.v1';
 export function createOnboarding({storage,host,getBindings}){
  storage=compatibleStorage(storage);

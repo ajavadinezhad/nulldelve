@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=skills-r23';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=skills-r23';
-import {DIFFICULTY_RULES} from './difficulty.js?v=skills-r23';
+import {OPERATION_ROUTES} from './operation-routes.js?v=ledger-r24';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=ledger-r24';
+import {DIFFICULTY_RULES} from './difficulty.js?v=ledger-r24';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -55,7 +55,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   definitions.sort((a,b)=>a.total-b.total);
   const difficulty=()=>DIFFICULTY_RULES[getDifficulty()]??DIFFICULTY_RULES.normal;
   const scaledTotal=definition=>Math.max(1,Math.round(definition.total*(difficulty().waveSize??1)));
-  const zones=definitions.map(d=>({id:d.id,label:d.label,status:'dormant',wave:[],liveCap:d.liveCap,total:scaledTotal(d),spawned:0,queued:0,remaining:0,queue:[],spawnTimer:0,phaseRested:false}));
+  const zones=definitions.map(d=>({id:d.id,label:d.label,status:'dormant',wave:[],liveCap:d.liveCap,total:scaledTotal(d),spawned:0,queued:0,remaining:0,queue:[],rewardQueue:[],spawnTimer:0,phaseRested:false}));
   const state={devices,zones,clue:{x:9,z:13,label:'△ → ○ → □'},remix:!!remix,archive:{sequence:initialSequences.archive,input:[],solved:false},relay:{started:false,remaining:0,duration:8,completed:false},elapsed:0,totalEnemies:zones.reduce((sum,zone)=>sum+zone.total,0),liveCap:36,mission:'campaign',operationId:null,operationTasks:createOperationTasks(),circuit:createWireCircuit(),milestone:0,operationZoneIds:null,power:{sequence:initialSequences.power,input:[],solved:false},valves:{sequence:initialSequences.valves,input:[],solved:false},logs:[],artifacts:[],evacuation:{started:false,remaining:20,completed:false}};
   state.clue.id='archive';state.clue.kind='clue';
   state.clues=[state.clue,{id:'freight',kind:'clue',x:164,z:25,label:'CARGO ROUTING PLATE'},{id:'hospital',kind:'clue',x:118,z:31,label:'HOSPITAL FLOW PLAQUE'},{id:'power',kind:'clue',x:59,z:33,label:'REACTOR ROUTING PLAQUE'},{id:'valves',kind:'clue',x:86,z:32,label:'CONTAINMENT MAINTENANCE PLAQUE'}];
@@ -199,8 +199,8 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       const [x,z]=chooseSpawn(player,corner,definition.corners);
       // A blocked spawn stays queued. A transient collision must never silently
       // delete an enemy, release an arena early, or permanently stall the wave.
-      const variant=zone.queue[0],enemy=spawnEnemy(x,z,variant,{encounter:zone.id});
-      if(enemy){if(zone.id==='generator'&&enemy.variant==='runner'&&!zone.wave.some(e=>e.hp>0&&state.operationTasks.generatorDefense.saboteurIds.includes(e.id))){state.operationTasks.generatorDefense.saboteurIds.push(enemy.id);onToast('SABOTEUR APPROACHING · DEFEND THE RESTART CONSOLE');}zone.queue.shift();zone.wave.push(enemy);zone.spawned++;zone.phaseRested=false;spawnedNow++;}
+      const variant=zone.queue[0],enemy=spawnEnemy(x,z,variant,{encounter:zone.id,rewardIdentity:`kill.${zone.id}.${zone.rewardQueue[0]??zone.spawned}`});
+      if(enemy){enemy.rewardIdentity=`kill.${zone.id}.${zone.rewardQueue[0]??zone.spawned}`;if(zone.id==='generator'&&enemy.variant==='runner'&&!zone.wave.some(e=>e.hp>0&&state.operationTasks.generatorDefense.saboteurIds.includes(e.id))){state.operationTasks.generatorDefense.saboteurIds.push(enemy.id);onToast('SABOTEUR APPROACHING · DEFEND THE RESTART CONSOLE');}zone.queue.shift();zone.rewardQueue.shift();zone.wave.push(enemy);zone.spawned++;zone.phaseRested=false;spawnedNow++;}
     }
     refreshCounts(zone);
     zone.spawnTimer=spawnedNow>0?(difficulty().reinforcementInterval??3):.65;
@@ -228,7 +228,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if([hospitalTriage,hospitalWard,hospitalIsolation].includes(zone)){variant=i%4===1?'runner':'normal';if(i>zone.total*.4&&i%7===4)variant='leaper';if(zone!==hospitalTriage&&i>zone.total*.5&&i%9===6)variant='screecher';if(zone===hospitalIsolation&&i%10===8)variant='sentinel';}
       if([freightPumps,freightYard,freightCold].includes(zone)){variant=i%4===(remix?2:1)?'runner':'normal';if(i>zone.total*.4&&i%8===5)variant='leaper';if(zone!==freightPumps&&i%10===7)variant='screecher';if(zone===freightCold&&i===zone.total-12)variant='sentinel';}
       if(definition.boss&&i===0)variant='boss';
-      zone.queue.push(variant);
+      zone.queue.push(variant);zone.rewardQueue.push(i);
     }
     refreshCounts(zone);recomputeLocks();spawnBatch(zone,player);
   }
@@ -417,8 +417,8 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       version:1,remix:state.remix,operationId:state.operationId,operationTasks:JSON.parse(JSON.stringify(state.operationTasks)),circuit:{rotations:[...state.circuit.rotations],powered:state.circuit.powered,solved:state.circuit.solved},milestone:state.milestone,elapsed:state.elapsed,archiveEntered,securityEntered,mission:state.mission,operationZoneIds:state.operationZoneIds?[...state.operationZoneIds]:null,power:{input:[...state.power.input],solved:state.power.solved},valves:{input:[...state.valves.input],solved:state.valves.solved},logs:[...state.logs],artifacts:[...state.artifacts],evacuation:{...state.evacuation},
       archive:{input:[...state.archive.input],solved:state.archive.solved},
       relay:{started:state.relay.started,remaining:state.relay.remaining,completed:state.relay.completed},
-      zones:zones.map(zone=>({id:zone.id,status:zone.status,total:zone.total,spawned:zone.spawned,queue:[...zone.queue],spawnTimer:zone.spawnTimer,phaseRested:zone.phaseRested,
-        waveIds:zone.wave.map(enemy=>enemy.id),waveVariants:zone.wave.map(enemy=>enemy.variant||'normal')})),
+      zones:zones.map(zone=>({id:zone.id,status:zone.status,total:zone.total,spawned:zone.spawned,queue:[...zone.queue],rewardQueue:[...zone.rewardQueue],spawnTimer:zone.spawnTimer,phaseRested:zone.phaseRested,
+        waveIds:zone.wave.map(enemy=>enemy.id),waveRewardIds:zone.wave.map(enemy=>enemy.rewardIdentity),waveVariants:zone.wave.map(enemy=>enemy.variant||'normal')})),
     };
   }
   function restoreState(snapshot,enemyById){
@@ -432,6 +432,8 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       const saved=snapshot.zones.find(item=>item&&item.id===zone.id);
       const definition=definitions.find(d=>d.id===zone.id);if(!saved&&definition.interactive)continue;const total=saved?.total??definition.legacyTotal;
       const maximum=Math.ceil(Math.max(definition.total,definition.legacyTotal)*Math.max(1.35,...Object.values(DIFFICULTY_RULES).map(rule=>rule.waveSize??1)));
+      if(saved?.rewardQueue!==undefined&&(!Array.isArray(saved.rewardQueue)||saved.rewardQueue.length!==saved.queue?.length||!saved.rewardQueue.every(n=>Number.isInteger(n)&&n>=0&&n<total)||new Set(saved.rewardQueue).size!==saved.rewardQueue.length))return false;
+      if(saved?.waveRewardIds!==undefined&&(!Array.isArray(saved.waveRewardIds)||saved.waveRewardIds.length!==saved.waveIds?.length||!saved.waveRewardIds.every(id=>typeof id==='string'&&new RegExp('^kill\\.'+zone.id+'\\.(0|[1-9][0-9]{0,3})$').test(id)&&Number(id.split('.').at(-1))<total)))return false;
       if(saved?.phaseRested!==undefined&&typeof saved.phaseRested!=='boolean')return false;
       if(!saved||!Number.isInteger(total)||total<1||total>maximum||!statuses.has(saved.status)||!Array.isArray(saved.queue)||!saved.queue.every(v=>variants.has(v))||!Array.isArray(saved.waveIds)||!Number.isFinite(saved.spawned)||saved.spawned<0||saved.spawned>total||saved.queue.length>total)return false;
     }
@@ -484,17 +486,17 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       else{d.active=state.relay.completed||d.id==='relay-a'&&state.relay.started;d.progress=state.relay.completed?1:d.id==='relay-a'?state.relay.remaining/8:0;}
     }
     for(const zone of zones){
-      const saved=snapshot.zones.find(item=>item&&item.id===zone.id);if(!saved){zone.status='dormant';zone.total=scaledTotal(definitions.find(d=>d.id===zone.id));zone.spawned=0;zone.queue=[];zone.wave=[];zone.spawnTimer=0;zone.phaseRested=false;refreshCounts(zone);continue;}zone.total=saved.total??definitions.find(d=>d.id===zone.id).legacyTotal;zone.status=saved.status;zone.spawned=Math.floor(saved.spawned);zone.queue=[...saved.queue];zone.wave=[];
+      const saved=snapshot.zones.find(item=>item&&item.id===zone.id);if(!saved){zone.status='dormant';zone.total=scaledTotal(definitions.find(d=>d.id===zone.id));zone.spawned=0;zone.queue=[];zone.rewardQueue=[];zone.wave=[];zone.spawnTimer=0;zone.phaseRested=false;refreshCounts(zone);continue;}zone.total=saved.total??definitions.find(d=>d.id===zone.id).legacyTotal;zone.status=saved.status;zone.spawned=Math.floor(saved.spawned);zone.queue=[...saved.queue];zone.rewardQueue=zone.queue.map((_,i)=>Number.isInteger(saved.rewardQueue?.[i])&&saved.rewardQueue[i]>=0&&saved.rewardQueue[i]<zone.total?saved.rewardQueue[i]:zone.spawned+i);zone.wave=[];
       zone.spawnTimer=Number.isFinite(saved.spawnTimer)?Math.max(0,Math.min(6,saved.spawnTimer)):0;zone.phaseRested=!!saved.phaseRested;
       for(let i=0;i<saved.waveIds.length;i++){
         const id=saved.waveIds[i],enemy=enemyById instanceof Map?enemyById.get(id):enemyById?.[id];
-        if(enemy)zone.wave.push(enemy);
+        if(enemy){enemy.rewardIdentity??=saved.waveRewardIds?.[i]??`kill.${zone.id}.${Math.max(0,saved.spawned-saved.waveIds.length+i)}`;zone.wave.push(enemy);}
         else if(zone.status==='active'){
           // Requeue missing references rather than accidentally releasing an arena.
-          const variant=saved.waveVariants?.[i];zone.queue.push(variants.has(variant)?variant:'normal');zone.spawned=Math.max(0,zone.spawned-1);
+          const variant=saved.waveVariants?.[i];zone.queue.push(variants.has(variant)?variant:'normal');zone.rewardQueue.push(saved.waveRewardIds?.[i]?Number(saved.waveRewardIds[i].split('.').at(-1)):Math.max(0,saved.spawned-saved.waveIds.length+i));zone.spawned=Math.max(0,zone.spawned-1);
         }
       }
-      if(zone.status==='cleared'||zone.status==='dormant'){zone.queue.length=0;zone.wave.length=0;zone.phaseRested=false;}
+      if(zone.status==='cleared'||zone.status==='dormant'){zone.queue.length=0;zone.rewardQueue.length=0;zone.wave.length=0;zone.phaseRested=false;}
       refreshCounts(zone);
     }
     state.totalEnemies=zones.reduce((sum,zone)=>sum+zone.total,0);recomputeLocks();return true;
@@ -507,7 +509,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     for(const d of devices.filter(d=>['glyph','relay'].includes(d.kind))){d.active=true;d.progress=1;}
     for(const zone of zones){
       const skip=['security','storage','command'].includes(zone.id)||mission==='nest'&&zone.id!=='nest';
-      zone.status=skip?'cleared':'dormant';zone.spawned=skip?zone.total:0;zone.queue.length=0;zone.wave.length=0;zone.spawnTimer=0;zone.phaseRested=false;refreshCounts(zone);
+      zone.status=skip?'cleared':'dormant';zone.spawned=skip?zone.total:0;zone.queue.length=0;zone.rewardQueue.length=0;zone.wave.length=0;zone.spawnTimer=0;zone.phaseRested=false;refreshCounts(zone);
     }
     player.x=mission==='siege'?59:85;player.z=mission==='siege'?30:10;
     recomputeLocks();hint(mission==='siege'?'Restore Reactor routing, eliminate the swarm, then hold for evacuation.':'Destroy the nest horde and recover the research intel.');

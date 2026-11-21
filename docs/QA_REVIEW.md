@@ -115,3 +115,11 @@ Added seventh sequential Flooded freight operation, two specialist primary weapo
 Freight fresh-session checkpoint coverage spans all six difficulty/Remix combinations, including mid-transfer and missing Cold Chain enemy references. Locked track controls no longer advertise interaction. Primary upgrade transactions enforce owned/equipped guns. Cross-tab salvage claims pay once. Phone resize releases sticks and crate grip; grenade hold ownership ignores other fingers. Coarse-pointer purchase controls have 44px minimum targets.
 
 Skills now use three two-node branches. Each unique operation completion earns one training point; advanced nodes require their earlier node and a later mission milestone. Old selected skills migrate as developed nodes. One passive remains equipped at a time. Portrait/landscape menu checks use desktop viewport emulation, not physical-phone validation. Ordinary kill-cash checkpoint replay remains an economy limitation requiring a separate durable ledger.
+
+## r24 cash and skill review
+
+Enemy cash uses permanent encounter/ordinal claims, shared across checkpoint retries, repeat deployments, difficulty and Remix. A durable pending journal recovers interrupted payouts; claims and wallet changes are synchronized across tabs. Checkpoint restoration preserves the actual wallet and its spending rather than taking the larger of two balances. Available legacy checkpoint records seed paid identities without awarding or subtracting cash.
+
+Independent regression coverage includes interrupted reopen recovery, simultaneous claims, preserving earnings after reload, avoiding refunds after purchases, and migration seeds not replacing genuine pending payouts. Wave recovery preserves reward ordinals for missing enemy references.
+
+Skills use small connected icon circles with one selected detail panel. Locked nodes can be inspected, but development requires the parent and a point. Stale deployment transfers preserve developed nodes; legacy skill IDs cannot bypass prerequisites. Browser checks cover desktop and portrait viewport emulation; physical-phone verification remains outstanding.

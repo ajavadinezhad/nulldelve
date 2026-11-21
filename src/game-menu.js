@@ -1,13 +1,13 @@
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=skills-r23';
-import {compatibleStorage} from './storage-compat.js?v=skills-r23';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=skills-r23';
-import {DIFFICULTY_RULES} from './difficulty.js?v=skills-r23';
-import {createCampaignMap} from './campaign-map.js?v=skills-r23';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=skills-r23';
-import {createItemIcon} from './item-icons.js?v=skills-r23';
-import {buildMissionPreview} from './mission-previews.js?v=skills-r23';
-import {renderShop} from './shop-ui.js?v=skills-r23';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=skills-r23';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=ledger-r24';
+import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=ledger-r24';
+import {DIFFICULTY_RULES} from './difficulty.js?v=ledger-r24';
+import {createCampaignMap} from './campaign-map.js?v=ledger-r24';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=ledger-r24';
+import {createItemIcon} from './item-icons.js?v=ledger-r24';
+import {buildMissionPreview} from './mission-previews.js?v=ledger-r24';
+import {renderShop} from './shop-ui.js?v=ledger-r24';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=ledger-r24';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -23,12 +23,13 @@ const DIFFICULTIES=[
 function readSettings(){try{return normalizeSettings(JSON.parse(compatibleStorage(localStorage).getItem(SETTINGS_KEY)??'{}'));}catch{return normalizeSettings();}}
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 function button(text,action,className='menu-button'){const node=element('button',className,text);node.type='button';node.addEventListener('click',action);return node;}
+function skillIcon(node){if(node.icon!=='armory'&&node.icon!=='move')return createItemIcon(node.icon);const image=element('img','skill-icon');image.src=node.icon==='move'?'./assets/skill-mobility.svg':'./assets/menu-armory.svg';image.alt='';image.setAttribute('aria-hidden','true');image.width=28;image.height=28;image.draggable=false;return image;}
 function formatTime(value){if(!value)return 'Time unavailable';try{const date=new Date(value);return Number.isNaN(date.getTime())?'Time unavailable':date.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch{return 'Time unavailable';}}
 
 /** DOM-only game menu. The owning game controls gameplay, save storage and settings effects. */
 export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>{},onExportBackup=null,onPreviewBackup=null,onImportBackup=null,onContinue=()=>{},onLoad=()=>{},onLoadCheckpoint=()=>{},onSave=()=>{},onPurchase=()=>{},onFieldSkill=()=>{},onResume=()=>{},onClose=()=>{},onSettings=()=>{},getStatus=()=>({active:false,slots:[],canContinue:false})}){
  const settings=readSettings();
- let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',backupPreview=null,keyboardOpen=null;
+ let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,backupPreview=null,keyboardOpen=null;
  let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems';
  const nestedScrollPositions=new Map();
  function status(){try{return getStatus()??{active:false,slots:[],canContinue:false};}catch{return {active:false,slots:[],canContinue:false};}}
@@ -147,16 +148,27 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   if(current.armory?.available===false){content.append(element('p','shop-status',current.armory.reason||'Available before deployment.'));addBack();return;}
   renderShop(content,{...current.armory,medkitHealing:fieldSkillEffects(current.fieldSkill).medkitHealing,bindings:settings.bindings},id=>action(onPurchase,[id],{close:false,message:'Armory updated.'}),{group:shopTab,onGroupChange:group=>{shopTab=group;render(false);},selectedWeapon:shopSelectedWeapon,onWeaponSelect:id=>{shopSelectedWeapon=id;shopDetailTab='upgrades';render(false);},detailTab:shopDetailTab,onDetailTab:tab=>{shopDetailTab=tab;render(false);}});
   if(shopTab==='skills'){
-   const completed=current.completedOperations??[],state=current.skillState??{learned:[],selected:current.fieldSkill??'none'},skills=element('div','field-skill-options skill-tree');
-   skills.append(element('p','training-balance',`${trainingPoints(state,completed)} training points · 1 per operation cleared`));
-   const standard=button('Standard kit',()=>action(onFieldSkill,['none'],{close:false}),'menu-button secondary');standard.setAttribute('aria-pressed',String(current.fieldSkill==='none'));skills.append(standard);
-   for(const branch of SKILL_BRANCHES){const lane=element('section','skill-branch');lane.append(element('h3','',branch.name));for(const [index,id]of branch.nodes.entries()){
-    const node=SKILL_NODES.find(n=>n.id===id),learned=state.learned.includes(id),canLearn=skillLearnable(id,state,completed),choice=button('',()=>action(onFieldSkill,[learned?id:'learn:'+id],{close:false}),'menu-button secondary skill-node');
-    choice.disabled=!learned&&!canLearn;choice.setAttribute('aria-pressed',String(current.fieldSkill===id));choice.setAttribute('aria-label',`${node.name}, ${learned?'developed':canLearn?'develop for 1 point':'locked'}`);
-    choice.append(createItemIcon(node.icon),element('strong','',`${index+1}. ${node.name}`),element('small','',node.description));
-    const requirement=!fieldSkillUnlocked(id,completed)?`Complete ${node.unlockAfter}`:node.requires&&!state.learned.includes(node.requires)?`Develop ${SKILL_NODES.find(n=>n.id===node.requires).name}`:trainingPoints(state,completed)<1?'Earn a training point':'Develop · 1 point';
-    choice.append(element('span','skill-node-status',learned?(current.fieldSkill===id?'Equipped':'Equip'):requirement));lane.append(choice);
-   }skills.append(lane);}skills.append(element('small','','One developed skill equipped at a time. Advanced skills require the earlier node.'));content.append(skills);
+   const completed=current.completedOperations??[],state=current.skillState??{learned:[],selected:current.fieldSkill??'none'};
+   selectedSkill=[...SKILL_NODES,{id:'none'}].some(node=>node.id===selectedSkill)?selectedSkill:(current.fieldSkill??'none');
+   const skills=element('div','skill-tree'),map=element('div','skill-map'),details=element('section','skill-detail');
+   skills.append(element('p','training-balance',`${trainingPoints(state,completed)} training points`));
+   const nodeButton=(node,tier)=>{
+    const learned=node.id==='none'||state.learned.includes(node.id),available=node.id==='none'||skillLearnable(node.id,state,completed),equipped=current.fieldSkill===node.id;
+    const control=button('',()=>{selectedSkill=node.id;render(false);},'skill-circle'+(learned?' developed':'')+(available&&!learned?' available':'')+(equipped?' equipped':'')+(!learned&&!available?' locked':''));
+    control.dataset.focusKey='skill-node-'+node.id;control.setAttribute('aria-pressed',String(selectedSkill===node.id));control.setAttribute('aria-label',`${node.name}, ${equipped?'equipped':learned?'developed':available?'available':'locked'}`);control.setAttribute('aria-controls','skill-detail');
+    control.append(skillIcon(node));const badge=element('span','skill-circle-badge',equipped?'✓':!learned&&!available?'⌑':String(tier));badge.setAttribute('aria-hidden','true');control.append(badge);
+    return control;
+   };
+   const standard=FIELD_SKILLS.find(node=>node.id==='none'),root=element('div','skill-root');root.append(nodeButton(standard,0),element('span','','Standard kit'));map.append(root);
+   const branches=element('div','skill-branches');for(const branch of SKILL_BRANCHES){const lane=element('section','skill-branch');lane.append(element('h3','',branch.name));for(const [index,id]of branch.nodes.entries()){
+    const node=SKILL_NODES.find(n=>n.id===id),holder=element('div','skill-node-wrap');holder.append(nodeButton(node,index+1),element('span','skill-node-name',node.name));lane.append(holder);
+   }branches.append(lane);}map.append(branches);
+   const node=selectedSkill==='none'?standard:SKILL_NODES.find(n=>n.id===selectedSkill),learned=node.id==='none'||state.learned.includes(node.id),canLearn=skillLearnable(node.id,state,completed);
+   details.id='skill-detail';details.setAttribute('aria-label','Selected skill');details.append(skillIcon(node),element('h3','',node.name),element('p','',node.description));
+   const requirement=!fieldSkillUnlocked(node.id,completed)?`Complete ${node.unlockAfter}`:node.requires&&!state.learned.includes(node.requires)?`Develop ${SKILL_NODES.find(n=>n.id===node.requires).name} first`:trainingPoints(state,completed)<1?'Earn a training point from your next first clear':'1 training point';
+   if(!learned)details.append(element('p','skill-requirement',requirement));
+   const activate=button(current.fieldSkill===node.id?'Equipped':learned?'Equip':'Develop · 1 point',()=>action(onFieldSkill,[learned?node.id:'learn:'+node.id],{close:false}),'menu-button skill-activate');activate.disabled=current.fieldSkill===node.id||!learned&&!canLearn;activate.dataset.focusKey='skill-activate';details.append(activate,element('small','','One skill equipped. First clears earn training points.'));
+   skills.append(map,details);content.append(skills);
   }
 
   addBack();
@@ -192,7 +204,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r23'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r24'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
  }

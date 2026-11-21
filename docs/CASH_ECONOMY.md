@@ -36,4 +36,12 @@ The projections do not simulate human aiming, dodging, survival, reachable drop 
 
 Weapon upgrades now require the owned, equipped primary at the transaction boundary, matching the armory flow. Rejected requests leave cash, upgrade levels and profile revision untouched; the sidearm remains independently upgradeable. A two-tab simultaneous Freight cache test verifies one payment and the same persisted wallet/claim ledger after reload.
 
-The review retained current prices: JACKAL's short reach, four-round magazine and slow reload trade damage throughput for stagger; VESPER buys reach and suppression rather than a direct damage tier. Supply projections pass for both, but these checks do not establish human willingness to buy them or actual survival difficulty. Checkpoint replay of ordinary kill rewards is separate from finite cache/contract claims; ordinary kills still pay again on replay, as documented above.
+The review retained current prices: JACKAL's short reach, four-round magazine and slow reload trade damage throughput for stagger; VESPER buys reach and suppression rather than a direct damage tier. Supply projections pass for both, but these checks do not establish human willingness to buy them or actual survival difficulty. The ordinary-kill replay limitation identified in that review is addressed by the r24 ledger below.
+
+## r24 permanent enemy reward claims
+
+Every authored encounter slot has a stable cash identity, shared across checkpoint restores, difficulty/Remix changes and fresh deployments. Defeating the same slot again still counts as a gameplay kill and produces normal supply drops, but pays no additional cash. Successful payouts advance the durable profile revision. Checkpoint restores preserve the current wallet exactly, including purchases already deducted; they never select the larger of two balances.
+
+Each pending payout is journaled before asynchronous profile locking. Closing the page after a final kill can recover the payout on next startup; claims and journal recovery are idempotent and synchronized across tabs. If browser storage is unavailable, cash remains protected only within the current session, consistent with the existing persistence warning.
+
+Existing balances are never reduced. Profiles created before the ledger mark completed operations' enemy slots paid once, and legacy checkpoints mark recorded dead enemies/cleared encounters paid without issuing replacement cash. An old profile cannot reconstruct unrecorded historical kills in an unfinished operation before this update; protection is exact for all kills recorded by the new ledger. New wave snapshots also save pending reward ordinals so missing-reference recovery does not reuse a surviving enemy's cash identity.

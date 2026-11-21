@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=skills-r23';
+import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
@@ -41,7 +41,7 @@ export function normalizeFieldSkill(value,completed=[]){
  const valid=value?.version===1||value?.version===2;
  const selected=valid&&typeof value.selected==='string'&&fieldSkillUnlocked(value.selected,completed)?value.selected:'none';
  let learned=[];
- if(value?.version===1&&selected!=='none')learned=[selected];
+ if(value?.version===1&&selected!=='none'&&FIELD_SKILLS.some(node=>node.id===selected))learned=[selected];
  if(value?.version===2&&Array.isArray(value.learned))for(const node of SKILL_NODES){if(value.learned.includes(node.id)&&skillLearnable(node.id,{learned},completed))learned.push(node.id);}
  return {version:2,selected:selected==='none'||learned.includes(selected)?selected:'none',learned};
 }
@@ -80,7 +80,9 @@ export function createFieldSkills(storage){
  // A deployment is a new base choice, unlike a checkpoint's transient run state.
  function restoreDeployment(saved,completed=[]){
   if(![1,2].includes(saved?.version)||typeof saved.selected!=='string'||!fieldSkillUnlocked(saved.selected,completed))return false;
-  memory=normalizeFieldSkill(saved,completed);try{if(!storage?.setItem)throw Error('Unavailable');storage.setItem(FIELD_SKILLS_KEY,JSON.stringify(memory));volatile=false;}catch{volatile=true;}return true;
+  // A stale deployment link can change the equipped choice, but cannot erase development.
+  const incoming=normalizeFieldSkill(saved,completed),current=read(completed);
+  memory=normalizeFieldSkill({version:2,selected:incoming.selected,learned:[...new Set([...current.learned,...incoming.learned])]},completed);try{if(!storage?.setItem)throw Error('Unavailable');storage.setItem(FIELD_SKILLS_KEY,JSON.stringify(memory));volatile=false;}catch{volatile=true;}return true;
  }
  return {selected,equip,learn,serialize,restoreTransient,restoreDeployment,isSessionOnly:()=>volatile};
 }

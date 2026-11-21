@@ -1,8 +1,9 @@
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=skills-r23';
-import {compatibleStorage} from './storage-compat.js?v=skills-r23';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=skills-r23';
-import {createEconomy} from './economy.js?v=skills-r23';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=ledger-r24';
+import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=ledger-r24';
+import {createEconomy} from './economy.js?v=ledger-r24';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
+const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const LOCK_KEY=CAMPAIGN_PROFILE_KEY+'.lease';
 const ids=()=>PRIMARY_WEAPONS.map(weapon=>weapon.id);
 const revision=value=>Number.isSafeInteger(value)&&value>=0?value:0;
@@ -14,7 +15,7 @@ export function normalizeCampaignProfile(value){
 }
 /** One shared economy; shop mutations synchronize before charging and reject conflicts. */
 export function createCampaignProfile({storage,economy=createEconomy(),locks=globalThis.navigator?.locks,getCompleted=()=>[]}={}){
- if(storage===undefined){try{storage=globalThis.localStorage;}catch{storage=null;}}storage=compatibleStorage(storage);
+ if(storage===undefined){try{storage=globalThis.localStorage;}catch{storage=null;}}const journalStorage=storage;storage=compatibleStorage(storage);
  const state={primary:'carbine',unlocked:['carbine'],revision:0};
  let observedRaw=null,sessionOnly=false,leaseToken=null,lastFailure=null;
  const token=()=>`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -90,6 +91,7 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
     const before=serialize();let result;
     if(String(id).startsWith('weapon.'))result=mutate(id);
     else if(String(id).startsWith('equip.'))result=mutate(id,true);
+    else if(String(id).startsWith('enemy.')){const parts=String(id).slice(6).split('.'),variant=parts.pop();result=economy.claimEnemyReward(parts.join('.'),variant);}
     else if(String(id).startsWith('reward.'))result=economy.claimReward(String(id).slice(7));
     else if(String(id).startsWith('attachment.'))result=setAttachment(id);
     else {
@@ -104,10 +106,39 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   if(!locks?.request)return transaction();
   let started=false;try{return await locks.request(CAMPAIGN_PROFILE_KEY,{mode:'exclusive'},()=>{started=true;return transaction();});}catch(error){if(started)throw error;return transaction();}
  }
+ const pendingEnemies=new Map();let rewardQueue=Promise.resolve();
+ function queueEnemyReward(id,variant){
+  if(typeof id!=='string'||!/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(id)||!['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(variant))return Promise.resolve({ok:false,message:'Unknown enemy reward.'});
+  const key=PENDING_PREFIX+id;
+  // A legacy zero-payment seed must not overwrite a real kill interrupted before commit.
+  if(variant==='paid')try{const queued=pendingEnemies.get(key)??JSON.parse(journalStorage?.getItem(key)||'null');if(queued?.id===id&&queued.variant!=='paid')variant=queued.variant;}catch{}
+  const entry={id,variant};pendingEnemies.set(key,entry);
+  try{journalStorage?.setItem(key,JSON.stringify(entry));}catch{sessionOnly=true;}
+  rewardQueue=rewardQueue.catch(()=>{}).then(async()=>{
+   let result;for(let attempt=0;attempt<12;attempt++){
+    result=await purchaseOffer('enemy.'+id+'.'+variant);
+    if(result.ok||result.alreadyClaimed)break;
+    await new Promise(resolve=>setTimeout(resolve,25*(attempt+1)));
+   }
+   if(result?.ok||result?.alreadyClaimed){pendingEnemies.delete(key);if(result.persisted!==false)try{journalStorage?.removeItem(key);}catch{}}
+   return result;
+  });return rewardQueue;
+ }
+ function recoverEnemyRewards(){
+  try{for(let i=0;i<(journalStorage?.length??0);i++){const key=journalStorage.key(i);if(!key?.startsWith(PENDING_PREFIX))continue;try{const entry=JSON.parse(journalStorage.getItem(key));if(entry&&typeof entry.id==='string'&&key===PENDING_PREFIX+entry.id)pendingEnemies.set(key,entry);}catch{}}}catch{}
+  for(const entry of [...pendingEnemies.values()])queueEnemyReward(entry.id,entry.variant);
+  return rewardQueue;
+ }
+ function migrateEnemyRewards(ids=[]){if(!beginMutation())return false;const before=serialize();return finishMutation(economy.migrateEnemyRewards(ids),before,true).ok;}
+ function restoreCheckpointEconomy(saved){
+  const latest=read(),preserve=!!latest.saved||sessionOnly||state.revision>0,current=economy.serialize();
+  economy.restore(saved);
+  if(preserve){economy.state.credits=current.credits;economy.state.enemyRewardsVersion=current.enemyRewardsVersion;economy.state.claimedRewards={...economy.state.claimedRewards,...current.claimedRewards};}
+ }
  async function claimCashReward(id){return purchaseOffer('reward.'+id);}
  function restoreLoadout(saved={}){const primary=ids().includes(saved.primary)?saved.primary:'carbine';state.unlocked=['carbine',...ids().filter(id=>id!=='carbine'&&(state.unlocked.includes(id)||saved.unlocked?.includes(id)||id===primary))];state.primary=primary;return true;}
  function restoreTransient(value){const saved=normalizeCampaignProfile(value);if(!saved)return false;const latest=read();if(latest.saved&&latest.saved.revision>saved.revision){observedRaw=latest.raw;apply(latest.saved);return false;}apply(saved);observedRaw=latest.raw;sessionOnly=true;return true;}
  reload();
- return {state,persist,reload,markPurchase,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
+ return {state,persist,reload,markPurchase,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,queueEnemyReward,recoverEnemyRewards,migrateEnemyRewards,restoreCheckpointEconomy,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
 }
 export function defaultCampaignProfile(){return initial();}

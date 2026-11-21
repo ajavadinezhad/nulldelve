@@ -1,66 +1,66 @@
-import {SALVAGE_CACHES} from './mission-salvage.js?v=skills-r23';
-import {createSalvageArt} from './salvage-art.js?v=skills-r23';
-import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=skills-r23';
-import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=skills-r23';
-import {applyWeaponAttachment} from './weapon-attachments.js?v=skills-r23';
-import {createMutationNotes} from './mutation-notes.js?v=skills-r23';
-import {grantHospitalAmmo} from './mission-supplies.js?v=skills-r23';
-import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=skills-r23';
-import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=skills-r23';
-import {createGrenadeActions} from './grenade-actions.js?v=skills-r23';
-import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=skills-r23';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=skills-r23';
-import {compatibleStorage} from './storage-compat.js?v=skills-r23';
-import {createTouchControls} from './touch-controls.js?v=skills-r23';
-import {createHudFeedback} from './hud-feedback.js?v=skills-r23';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=skills-r23';
+import {SALVAGE_CACHES} from './mission-salvage.js?v=ledger-r24';
+import {createSalvageArt} from './salvage-art.js?v=ledger-r24';
+import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=ledger-r24';
+import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=ledger-r24';
+import {applyWeaponAttachment} from './weapon-attachments.js?v=ledger-r24';
+import {createMutationNotes} from './mutation-notes.js?v=ledger-r24';
+import {grantHospitalAmmo} from './mission-supplies.js?v=ledger-r24';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=ledger-r24';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=ledger-r24';
+import {createGrenadeActions} from './grenade-actions.js?v=ledger-r24';
+import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=ledger-r24';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=ledger-r24';
+import {compatibleStorage} from './storage-compat.js?v=ledger-r24';
+import {createTouchControls} from './touch-controls.js?v=ledger-r24';
+import {createHudFeedback} from './hud-feedback.js?v=ledger-r24';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=ledger-r24';
 const puzzleDiscovery=createPuzzleDiscovery();
 const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=skills-r23';
-import {soldier, animateSoldier} from './character.js?v=skills-r23';
-import {weapon, createCombatEffects} from './weapons.js?v=skills-r23';
-import {addRoomDetails} from './room-details.js?v=skills-r23';
-import {createMinimap} from './minimap.js?v=skills-r23';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=skills-r23';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=skills-r23';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=skills-r23';
-import {createPuzzleArt} from './puzzle-art.js?v=skills-r23';
-import {createWeaponPreview} from './weapon-preview.js?v=skills-r23';
-import {createProgression} from './progression.js?v=skills-r23';
-import {createProgressionArt} from './progression-art.js?v=skills-r23';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=skills-r23';
-import {buildWorld} from './world-render.js?v=skills-r23';
-import {createNavigator} from './navigation.js?v=skills-r23';
-import {createGameMenu} from './game-menu.js?v=skills-r23';
-import {createSaveSlots} from './save-slots.js?v=skills-r23';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=skills-r23';
-import {createEconomy} from './economy.js?v=skills-r23';
-import {createExplosions} from './explosion.js?v=skills-r23';
-import {createGameAudio} from './audio.js?v=skills-r23';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=skills-r23';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=skills-r23';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=skills-r23';
-import {observeHudLayout} from './interface-layout.js?v=skills-r23';
-import {createMapFocus} from './map-accessibility.js?v=skills-r23';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=skills-r23';
-import {placeLootDrops} from './loot-placement.js?v=skills-r23';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=skills-r23';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=skills-r23';
-import {createFireZones} from './fire-grenades.js?v=skills-r23';
-import {itemIconPath} from './item-icons.js?v=skills-r23';
-import {createLootView} from './loot-view.js?v=skills-r23';
-import {meleeTargets} from './melee.js?v=skills-r23';
-import {createPuzzleHints} from './puzzle-hints.js?v=skills-r23';
-import {createOnboarding} from './onboarding.js?v=skills-r23';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=skills-r23';
-import {validateSnapshot} from './snapshot-validation.js?v=skills-r23';
-import {DIFFICULTY_RULES} from './difficulty.js?v=skills-r23';
-import {createCampaignProfile} from './campaign-profile.js?v=skills-r23';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=skills-r23';
-import {createCampaignProgress} from './campaign-progress.js?v=skills-r23';
-import {buildOperationEnvironment} from './operation-environments.js?v=skills-r23';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=skills-r23';
+import {buildArt} from './environment.js?v=ledger-r24';
+import {soldier, animateSoldier} from './character.js?v=ledger-r24';
+import {weapon, createCombatEffects} from './weapons.js?v=ledger-r24';
+import {addRoomDetails} from './room-details.js?v=ledger-r24';
+import {createMinimap} from './minimap.js?v=ledger-r24';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=ledger-r24';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=ledger-r24';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=ledger-r24';
+import {createPuzzleArt} from './puzzle-art.js?v=ledger-r24';
+import {createWeaponPreview} from './weapon-preview.js?v=ledger-r24';
+import {createProgression} from './progression.js?v=ledger-r24';
+import {createProgressionArt} from './progression-art.js?v=ledger-r24';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=ledger-r24';
+import {buildWorld} from './world-render.js?v=ledger-r24';
+import {createNavigator} from './navigation.js?v=ledger-r24';
+import {createGameMenu} from './game-menu.js?v=ledger-r24';
+import {createSaveSlots} from './save-slots.js?v=ledger-r24';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=ledger-r24';
+import {createEconomy} from './economy.js?v=ledger-r24';
+import {createExplosions} from './explosion.js?v=ledger-r24';
+import {createGameAudio} from './audio.js?v=ledger-r24';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved} from './controls.js?v=ledger-r24';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=ledger-r24';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=ledger-r24';
+import {observeHudLayout} from './interface-layout.js?v=ledger-r24';
+import {createMapFocus} from './map-accessibility.js?v=ledger-r24';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=ledger-r24';
+import {placeLootDrops} from './loot-placement.js?v=ledger-r24';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=ledger-r24';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=ledger-r24';
+import {createFireZones} from './fire-grenades.js?v=ledger-r24';
+import {itemIconPath} from './item-icons.js?v=ledger-r24';
+import {createLootView} from './loot-view.js?v=ledger-r24';
+import {meleeTargets} from './melee.js?v=ledger-r24';
+import {createPuzzleHints} from './puzzle-hints.js?v=ledger-r24';
+import {createOnboarding} from './onboarding.js?v=ledger-r24';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=ledger-r24';
+import {validateSnapshot} from './snapshot-validation.js?v=ledger-r24';
+import {DIFFICULTY_RULES} from './difficulty.js?v=ledger-r24';
+import {createCampaignProfile} from './campaign-profile.js?v=ledger-r24';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=ledger-r24';
+import {createCampaignProgress} from './campaign-progress.js?v=ledger-r24';
+import {buildOperationEnvironment} from './operation-environments.js?v=ledger-r24';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=ledger-r24';
 const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
@@ -135,17 +135,21 @@ function refreshPlayerWeapon(){const old=playerMesh.getObjectByName('weapon');if
 function applyPrimaryLoadout(){const config=primaryWeapon(campaignProfile.state.primary);Object.assign(weapons.rifle,config,{name:config.name.toUpperCase(),baseCapacity:config.id==='carbine'?rules.magazine:config.capacity,baseReload:config.reload});applyUpgrades();if(!active||ended)weapons.rifle.reserve=primaryReserve(config.id,runConfig.difficulty);weapons.rifle.ammo=weapons.rifle.capacity;if(selected==='rifle')player.ammo=weapons.rifle.ammo;refreshPlayerWeapon();}
 refreshPlayerWeapon();
 let nextEnemyId=1;const enemies=[];
-function spawnEnemy(x,z,variant='normal',{encounter}={}){
+function spawnEnemy(x,z,variant='normal',{encounter,rewardIdentity}={}){
  const baseStats=ROACH_VARIANTS[variant]||ROACH_VARIANTS.normal;const stats={...baseStats,hp:Math.ceil(baseStats.hp*rules.hp),speed:baseStats.speed*rules.speed,biteDamage:Math.round(baseStats.biteDamage*rules.damage),behavior:rules.behavior,windupDuration:rules.windupDuration};
  const room=roomDefs.find(r=>x>=r.x&&x<r.x+r.w&&z>=r.z&&z<r.z+r.h);
  const safe=(cx,cz)=>!solid(cx,cz,stats.radius)&&Math.hypot(cx-player.x,cz-player.z)>3&&!enemies.some(e=>e.hp>0&&Math.hypot(cx-e.x,cz-e.z)<stats.radius+(e.radius??.32)+.2)&&(!room||(cx>=room.x+.5&&cx<room.x+room.w-1&&cz>=room.z+.5&&cz<room.z+room.h-1));
  let spawnFound=safe(x,z);if(!spawnFound){let found=false;for(let radius=.75;radius<8&&!found;radius+=.75)for(let i=0;i<16;i++){const a=i*Math.PI/8,cx=x+Math.cos(a)*radius,cz=z+Math.sin(a)*radius;if(safe(cx,cz)){x=cx;z=cz;found=true;spawnFound=true;break;}}}
  if(!spawnFound)return null;
- const enemy={encounter,bossMechanic:encounter==='nest'&&variant==='boss'?'pulse':undefined,id:'e'+nextEnemyId++,alerted:true,x,z,...stats,variant,mesh:createRoach(scene,variant),cooldown:1,spawnDelay:.7,attackWindup:0,staggerTime:0};enemy.mesh.position.set(x,0,z);enemy.mesh.visible=visible(x,z);attachEnemyHealthBar(scene,enemy);enemy.mesh.visible=false;enemy.spawnCue=new THREE.Mesh(new THREE.RingGeometry(.38,.52,24),new THREE.MeshBasicMaterial({color:variant==='boss'?0xed7968:0xc9a568,transparent:true,opacity:.7,depthWrite:false,side:THREE.DoubleSide}));enemy.spawnCue.rotation.x=-Math.PI/2;enemy.spawnCue.position.set(x,.045,z);enemy.spawnCue.visible=visible(x,z);scene.add(enemy.spawnCue);enemies.push(enemy);return enemy;
+ const enemy={encounter,rewardIdentity:rewardIdentity??`kill.static.${nextEnemyId-1}`,bossMechanic:encounter==='nest'&&variant==='boss'?'pulse':undefined,id:'e'+nextEnemyId++,alerted:true,x,z,...stats,variant,mesh:createRoach(scene,variant),cooldown:1,spawnDelay:.7,attackWindup:0,staggerTime:0};enemy.mesh.position.set(x,0,z);enemy.mesh.visible=visible(x,z);attachEnemyHealthBar(scene,enemy);enemy.mesh.visible=false;enemy.spawnCue=new THREE.Mesh(new THREE.RingGeometry(.38,.52,24),new THREE.MeshBasicMaterial({color:variant==='boss'?0xed7968:0xc9a568,transparent:true,opacity:.7,depthWrite:false,side:THREE.DoubleSide}));enemy.spawnCue.rotation.x=-Math.PI/2;enemy.spawnCue.position.set(x,.045,z);enemy.spawnCue.visible=visible(x,z);scene.add(enemy.spawnCue);enemies.push(enemy);return enemy;
 }
 [[8,6,'normal'],[25,6,'runner'],[20,13,'normal'],[25,24,'brute'],[36,7,'runner'],[42,13,'normal'],[42,29,'normal']].forEach(([x,z,type])=>{const e=spawnEnemy(x,z,type);if(e){e.alerted=false;e.spawnDelay=0;removeSpawnCue(e);}});
 
 const progression=createProgression({doors,enemies,spawnEnemy,getDifficulty:()=>runConfig.difficulty,remix:runConfig.remix,onToast:toast});
+// Pre-ledger completed operations already paid into the existing wallet; never pay them again.
+const completedRewardZones={breach:['security','storage'],command:['command','generator'],research:['lab','reactor','transit'],containment:['containment','evacuation'],nest:['nest'],hospital:['hospital-triage','hospital-ward','hospital-isolation'],freight:['freight-pumps','freight-yard','freight-cold']};
+const paidZones=new Set(campaignProgress.completed().flatMap(id=>completedRewardZones[id]??[]));
+campaignProfile.migrateEnemyRewards(progression.state.zones.filter(zone=>paidZones.has(zone.id)).flatMap(zone=>Array.from({length:Math.ceil(Math.max(zone.total,120)*1.5)},(_,i)=>`kill.${zone.id}.${i}`)));
 const updateProgressionArt=createProgressionArt(scene,box,progression.state);
 const missionPoints={intel:{x:93,z:7},exit:{x:92,z:60}};
 const intelMesh=box(93,.35,7,.7,.65,.7,0x51dfe5);const intelGlow=new THREE.Mesh(new THREE.RingGeometry(.65,.73,32),new THREE.MeshBasicMaterial({color:0x51dfe5,side:THREE.DoubleSide}));intelGlow.rotation.x=-Math.PI/2;intelGlow.position.set(93,.04,7);scene.add(intelGlow);
@@ -333,7 +337,7 @@ function applySettings(settings){
 function captureSnapshot(){return {
  version:3,fieldSkill:{...fieldSkills.serialize(campaignProgress.completed()),selected:activeFieldSkill},barrels:barrelSystem.serialize(),doorHints:doorHint?.serializeSeen()??[],fireZones:fireZones.serialize(),profileRevision:campaignProfile.state.revision,loadout:{primary:active&&!ended?(weapons.rifle.id??campaignProfile.state.primary):campaignProfile.state.primary,unlocked:[...campaignProfile.state.unlocked]},stats:{...operationStats},loot:JSON.parse(JSON.stringify(loot)),reserves:{rifle:weapons.rifle.reserve,pistol:weapons.pistol.reserve},economy:economy.serialize(),world:[W,H],config:{...runConfig},player:{x:player.x,z:player.z,hp:player.hp,maxHp:player.maxHp,ammo:player.ammo,intel:player.intel,angle:player.angle,hurtGrace:player.hurtGrace},selected,
  magazines:{rifle:selected==='rifle'?player.ammo:weapons.rifle.ammo,pistol:selected==='pistol'?player.ammo:weapons.pistol.ammo},reload,
- enemies:enemies.map(e=>({id:e.id,x:e.x,z:e.z,hp:e.hp,maxHp:e.maxHp,variant:e.variant,cooldown:e.cooldown,alerted:e.alerted,spawnDelay:e.spawnDelay,attackWindup:e.attackWindup,staggerTime:e.staggerTime,lootDropped:!!e.lootDropped,encounter:e.encounter,bossMechanic:e.bossMechanic,pulseCooldown:e.pulseCooldown,chargeCooldown:e.chargeCooldown,shriekCooldown:e.shriekCooldown,leapCooldown:e.leapCooldown,staggerImmunity:e.staggerImmunity})),
+ enemies:enemies.map(e=>({id:e.id,rewardIdentity:e.rewardIdentity,x:e.x,z:e.z,hp:e.hp,maxHp:e.maxHp,variant:e.variant,cooldown:e.cooldown,alerted:e.alerted,spawnDelay:e.spawnDelay,attackWindup:e.attackWindup,staggerTime:e.staggerTime,lootDropped:!!e.lootDropped,encounter:e.encounter,bossMechanic:e.bossMechanic,pulseCooldown:e.pulseCooldown,chargeCooldown:e.chargeCooldown,shriekCooldown:e.shriekCooldown,leapCooldown:e.leapCooldown,staggerImmunity:e.staggerImmunity})),
  doors:doors.map(d=>({open:d.open,slide:d.slide,unlocked:!!d.unlocked})),
  puzzle:{solved:puzzle.solved,crates:puzzle.crates.map(c=>({x:c.x,z:c.z,seated:c.seated})),plates:puzzle.plates.map(p=>({active:p.active}))},
  progression:progression.serializeState(),explored:[...explored],seenRooms:[...seenRooms],rewardedZones:[...rewardedZones]
@@ -344,11 +348,11 @@ function restoreSnapshot(data){
  if(typeof grenadeActions!=='undefined')grenadeActions?.clear();doorHint?.skip();barrelSystem.restore(data.barrels);doorHint?.restoreSeen(data.doorHints??[]);guidanceDoorIndex=data.doorHints?.length?Number(data.doorHints[data.doorHints.length-1].split('|')[0]):null;
  Object.assign(operationStats,createOperationStats(data.stats));
  activeFieldSkill=normalizeFieldSkill(data.fieldSkill,campaignProgress.completed()).selected;
- Object.assign(runConfig,{operation:null,remix:false},data.config);updateOperationEnvironment();rules=difficultyRules[runConfig.difficulty]||difficultyRules.normal;campaignProfile.reload();const retainPurchases=campaignProfile.state.revision>(Number(data.profileRevision)||0);if(!retainPurchases){campaignProfile.restoreLoadout(data.loadout??{});economy.restore(data.economy);campaignProfile.state.revision=Math.max(campaignProfile.state.revision,Number(data.profileRevision)||0);}applyPrimaryLoadout();
+ Object.assign(runConfig,{operation:null,remix:false},data.config);updateOperationEnvironment();rules=difficultyRules[runConfig.difficulty]||difficultyRules.normal;campaignProfile.reload();const retainPurchases=campaignProfile.state.revision>(Number(data.profileRevision)||0);if(!retainPurchases){campaignProfile.restoreLoadout(data.loadout??{});campaignProfile.restoreCheckpointEconomy(data.economy);campaignProfile.state.revision=Math.max(campaignProfile.state.revision,Number(data.profileRevision)||0);}applyPrimaryLoadout();
  Object.assign(player,data.player);if(player.maxHp!==100){player.hp=Math.min(100,Math.max(0,player.hp/player.maxHp*100));player.maxHp=100;}player.hurtGrace=Math.max(0,Math.min(.4,Number(player.hurtGrace)||0));if(!Number.isFinite(player.x)||!Number.isFinite(player.z)||player.x<1||player.z<1||player.x>=W-1||player.z>=H-1)return false;
  for(const e of enemies){removeSpawnCue(e);scene.remove(e.mesh);if(e.healthBar)scene.remove(e.healthBar.group);}enemies.length=0;const byId=new Map();nextEnemyId=1;lootView.clear();Object.assign(loot,createLootState(data.loot));weapons.rifle.reserve=Math.max(0,Math.min(300,Number(data.reserves?.rifle??120)||0));weapons.pistol.reserve=Math.max(0,Math.min(150,Number(data.reserves?.pistol??60)||0));
- for(const saved of data.enemies){const base=ROACH_VARIANTS[saved.variant]||ROACH_VARIANTS.normal;const enemy={...base,...saved,maxHp:saved.maxHp??Math.ceil(base.hp*rules.hp),speed:base.speed*rules.speed,biteDamage:Math.round(base.biteDamage*rules.damage),behavior:rules.behavior,windupDuration:rules.windupDuration,mesh:saved.hp>0?createRoach(scene,saved.variant):new THREE.Group()};if(saved.variant==='screecher')enemy.shriekCooldown=Math.max(0,Math.min(6,Number.isFinite(saved.shriekCooldown)?saved.shriekCooldown:1));if(saved.variant==='leaper')enemy.leapCooldown=Math.max(0,Math.min(4.8,Number.isFinite(saved.leapCooldown)?saved.leapCooldown:1));if(saved.variant==='charger')enemy.chargeCooldown=Math.max(0,Math.min(4.5,Number.isFinite(saved.chargeCooldown)?saved.chargeCooldown:1));enemy.chargeWindup=0;enemy.chargeRemaining=0;enemy.shriekWindup=0;enemy.leapWindup=0;enemy.leapRemaining=0;enemy.pulseWindup=0;enemy.attackWindup=Math.max(0,Number(enemy.attackWindup)||0);enemy.staggerTime=Math.max(0,Number(enemy.staggerTime)||0);enemy.mesh.position.set(enemy.x,0,enemy.z);enemy.mesh.visible=false;attachEnemyHealthBar(scene,enemy);enemies.push(enemy);byId.set(enemy.id,enemy);nextEnemyId=Math.max(nextEnemyId,(Number(enemy.id?.slice(1))||0)+1);}
- if(!progression.restoreState(data.progression,byId))return false;progression.state.mission=runConfig.mission;runConfig.remix=!!progression.state.remix;for(const zone of progression.state.zones)for(const enemy of zone.wave){enemy.encounter=zone.id;if(zone.id==='nest'&&enemy.variant==='boss'){enemy.bossMechanic='pulse';enemy.pulseCooldown=Math.max(2,Number(enemy.pulseCooldown)||0);}enemy.pulseWindup=0;}fireZones.clear();if(data.fireZones)fireZones.restore(data.fireZones);for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);
+ for(const saved of data.enemies){if(!saved.rewardIdentity){const zone=data.progression.zones.find(z=>z.waveIds?.includes(saved.id));const index=zone?.waveIds.indexOf(saved.id);saved.rewardIdentity=zone?`kill.${zone.id}.${Math.max(0,zone.spawned-zone.waveIds.length+index)}`:`kill.static.${Math.max(0,(Number(saved.id?.slice(1))||1)-1)}`;}const base=ROACH_VARIANTS[saved.variant]||ROACH_VARIANTS.normal;const enemy={...base,...saved,maxHp:saved.maxHp??Math.ceil(base.hp*rules.hp),speed:base.speed*rules.speed,biteDamage:Math.round(base.biteDamage*rules.damage),behavior:rules.behavior,windupDuration:rules.windupDuration,mesh:saved.hp>0?createRoach(scene,saved.variant):new THREE.Group()};if(saved.variant==='screecher')enemy.shriekCooldown=Math.max(0,Math.min(6,Number.isFinite(saved.shriekCooldown)?saved.shriekCooldown:1));if(saved.variant==='leaper')enemy.leapCooldown=Math.max(0,Math.min(4.8,Number.isFinite(saved.leapCooldown)?saved.leapCooldown:1));if(saved.variant==='charger')enemy.chargeCooldown=Math.max(0,Math.min(4.5,Number.isFinite(saved.chargeCooldown)?saved.chargeCooldown:1));enemy.chargeWindup=0;enemy.chargeRemaining=0;enemy.shriekWindup=0;enemy.leapWindup=0;enemy.leapRemaining=0;enemy.pulseWindup=0;enemy.attackWindup=Math.max(0,Number(enemy.attackWindup)||0);enemy.staggerTime=Math.max(0,Number(enemy.staggerTime)||0);enemy.mesh.position.set(enemy.x,0,enemy.z);enemy.mesh.visible=false;attachEnemyHealthBar(scene,enemy);enemies.push(enemy);byId.set(enemy.id,enemy);nextEnemyId=Math.max(nextEnemyId,(Number(enemy.id?.slice(1))||0)+1);}
+ if(!progression.restoreState(data.progression,byId))return false;progression.state.mission=runConfig.mission;runConfig.remix=!!progression.state.remix;for(const zone of progression.state.zones)for(const enemy of zone.wave){enemy.encounter=zone.id;if(zone.id==='nest'&&enemy.variant==='boss'){enemy.bossMechanic='pulse';enemy.pulseCooldown=Math.max(2,Number(enemy.pulseCooldown)||0);}enemy.pulseWindup=0;}for(const zone of data.progression.zones)if(zone.status==='cleared'&&!zone.waveRewardIds)for(let i=0;i<(zone.total??zone.spawned);i++)campaignProfile.queueEnemyReward(`kill.${zone.id}.${i}`,'paid').catch(()=>{});for(const enemy of enemies)if(enemy.hp<=0&&!enemy.rewardIdentity){enemy.rewardIdentity=`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`;}for(const enemy of enemies)if(enemy.hp<=0)campaignProfile.queueEnemyReward(enemy.rewardIdentity,'paid').catch(()=>{});fireZones.clear();if(data.fireZones)fireZones.restore(data.fireZones);for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);
  data.doors?.forEach((d,i)=>{if(doors[i])Object.assign(doors[i],d);});
  progression.state.artifacts=[...new Set([...progression.state.artifacts,...campaignProgress.artifacts()])];progression.state.logs=[...new Set([...progression.state.logs,...campaignProgress.researchLogs()])];for(const device of progression.state.devices){if(device.kind==='artifact'||device.kind==='log'){device.active=(device.kind==='artifact'?progression.state.artifacts:progression.state.logs).includes(device.id);device.progress=device.active?1:0;}}progression.refreshLocks();
  puzzle.grabbed=null;puzzle.solved=!!data.puzzle.solved;puzzle.crates.forEach((c,i)=>Object.assign(c,data.puzzle.crates[i]));puzzle.plates.forEach((p,i)=>Object.assign(p,data.puzzle.plates[i]));doors[0].unlocked=puzzle.solved;updatePuzzleArt();
@@ -356,6 +360,7 @@ function restoreSnapshot(data){
  for(let i=0;i<W*H;i++)fogPixels[i*4+3]=255;for(const id of explored){const x=id%W,z=Math.floor(id/W);fogPixels[((H-1-z)*W+x)*4+3]=209;}previousVisible=[];
  weapons.rifle.ammo=data.magazines?.rifle??rules.magazine;weapons.pistol.ammo=data.magazines?.pistol??12;reload=0;if(data.selected!==selected)equip(data.selected==='pistol'?'pistol':'rifle');weapons.rifle.ammo=data.magazines?.rifle??rules.magazine;weapons.pistol.ammo=data.magazines?.pistol??12;weapons.rifle.ammo=Math.min(weapons.rifle.ammo,weapons.rifle.capacity);weapons.pistol.ammo=Math.min(weapons.pistol.ammo,weapons.pistol.capacity);player.ammo=Math.min(data.player.ammo,weapons[selected].capacity);reload=Math.max(0,Number(data.reload)||0);
  focus.x=player.x;focus.z=player.z;keyboardAim={x:-Math.sin(player.angle),z:-Math.cos(player.angle)};aimMode=menu?.settings.aimMode==='mouse'?'mouse':'keyboard';lastPointer=null;
+
  reload=Math.max(0,reload);refreshPlayerWeapon();persistCampaignProfile();refreshGuidance(true);updateFog();hud();return true;
 }
 function startOperation(saveInitial=true){active=true;ended=false;resumeRun();menu?.hide();renderer.domElement.focus();if(saveInitial&&runConfig.mission==='campaign'&&(!runConfig.operation||runConfig.operation==='breach'))tutorial?.start(player,{touch:!!touchControls?.enabled});toast(operationTitle().toUpperCase());if(saveInitial){queueCheckpoint('Operation deployment');commitCheckpoint();}}
@@ -430,7 +435,7 @@ function refreshHelp(){
 }
 refreshGuidance(true);
 
-function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;economy.rewardKill(enemy.variant);const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
+function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(()=>hud()).catch(()=>{});const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
 
 function knifeStrike(){
  if(meleeCooldown>0)return;meleeCooldown=.55;
@@ -447,3 +452,6 @@ function finishBackupImport(){active=false;paused=true;ended=false;checkpointPen
 function updateDeploymentTransfer(){if(campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()||fieldSkills.isSessionOnly())history.replaceState(null,'',location.pathname+location.search+encodeDeploymentState({profile:campaignProfile.serialize(),progress:campaignProgress.serialize(),fieldSkill:fieldSkills.serialize(campaignProgress.completed())}));}
 function persistCampaignProfile(){const ok=campaignProfile.persist();updateDeploymentTransfer();return ok;}
 function deploymentUrl(config){persistCampaignProfile();campaignProgress.persist();return restartOperationUrl(location.pathname,config)+encodeDeploymentState({profile:campaignProfile.serialize(),progress:campaignProgress.serialize(),fieldSkill:fieldSkills.serialize(campaignProgress.completed())});}
+
+// Recover durable reward journal entries interrupted by closing/reloading the page.
+campaignProfile.recoverEnemyRewards().then(()=>hud()).catch(()=>{});
