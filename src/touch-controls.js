@@ -3,10 +3,10 @@ export function stickVector(x,z,deadzone=.15){
  const magnitude=(Math.min(1,length)-deadzone)/(1-deadzone);return {x:x/length*magnitude,z:z/length*magnitude};
 }
 export function createTwinStickInput(){
- const sticks={move:{pointer:null,x:0,z:0},aim:{pointer:null,x:0,z:0}};
- function update(name,id,x,z){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,stickVector(x,z));return true;}
- function end(name,id){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,{pointer:null,x:0,z:0});return true;}
- return {begin(name,id,x=0,z=0){const stick=sticks[name];if(!stick||stick.pointer!==null||Object.values(sticks).some(s=>s.pointer===id))return false;stick.pointer=id;return update(name,id,x,z);},update,end,reset(){for(const stick of Object.values(sticks))Object.assign(stick,{pointer:null,x:0,z:0});},getState(){const move={x:sticks.move.x,z:sticks.move.z},aim={x:sticks.aim.x,z:sticks.aim.z,active:sticks.aim.pointer!==null&&Math.hypot(sticks.aim.x,sticks.aim.z)>0};return {move,aim,sprint:sticks.move.pointer!==null&&Math.hypot(move.x,move.z)>=.85,firing:aim.active&&Math.hypot(aim.x,aim.z)>.2};}};
+ const sticks={move:{pointer:null,x:0,z:0},aim:{pointer:null,x:0,z:0}};let firing=false;
+ function update(name,id,x,z){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,stickVector(x,z));if(name==='aim'){const magnitude=Math.hypot(stick.x,stick.z);firing=magnitude>=(firing ? .68 : .9);}return true;}
+ function end(name,id){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,{pointer:null,x:0,z:0});if(name==='aim')firing=false;return true;}
+ return {begin(name,id,x=0,z=0){const stick=sticks[name];if(!stick||stick.pointer!==null||Object.values(sticks).some(s=>s.pointer===id))return false;stick.pointer=id;return update(name,id,x,z);},update,end,reset(){firing=false;for(const stick of Object.values(sticks))Object.assign(stick,{pointer:null,x:0,z:0});},getState(){const move={x:sticks.move.x,z:sticks.move.z},aim={x:sticks.aim.x,z:sticks.aim.z,active:sticks.aim.pointer!==null&&Math.hypot(sticks.aim.x,sticks.aim.z)>0};return {move,aim,sprint:sticks.move.pointer!==null&&Math.hypot(move.x,move.z)>=.85,firing:aim.active&&firing};}};
 }
 export function shouldShowTouchControls(mode,{coarse=false,touchPoints=0}={}){return mode==='on'||mode!=='off'&&(coarse||touchPoints>0);}
 /** Small action labels retain the full nearby-device context for assistive input. */
@@ -37,17 +37,17 @@ export function createTouchControls({host,isRunning,onAction,device=()=>({coarse
  const heldInteract=createHeldInteraction(()=>onAction('interact'),()=>onAction('interactEnd'));
  const input=createTwinStickInput(),knobs={},cleanups=[];let enabled=false,mode='auto',lastInteractPrompt=null;
  const doc=host.ownerDocument??document,make=(tag,cls,text)=>{const node=doc.createElement(tag);node.className=cls;if(text)node.textContent=text;return node;};
- function paint(name){const state=input.getState()[name],knob=knobs[name];const travel=(knob.parentElement.getBoundingClientRect?.().width||96)*.24;knob.style.transform=`translate(${state.x*travel}px,${state.z*travel}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);}
+ function paint(name){const state=input.getState()[name],knob=knobs[name];const travel=(knob.parentElement.getBoundingClientRect?.().width||96)*.24;knob.style.transform=`translate(${state.x*travel}px,${state.z*travel}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);if(name==='aim')knob.parentElement.classList.toggle('firing',input.getState().firing);}
  function reset(){heldInteract.reset();input.reset();for(const name of ['move','aim'])paint(name);}
  function listen(node,name,callback,options){node.addEventListener(name,callback,options);cleanups.push(()=>node.removeEventListener(name,callback,options));}
  host.replaceChildren();
- for(const [name,label] of [['move','Move / run'],['aim','Aim + fire']]){
-  const stick=make('div','touch-stick touch-stick-'+name);stick.setAttribute('role','group');stick.setAttribute('aria-label',name==='move'?'Movement thumbstick; push to the outer edge to sprint':'Aim and fire thumbstick');stick.dataset.stick=name;
+ for(const [name,label] of [['move','Move / run'],['aim','Aim · edge to fire']]){
+  const stick=make('div','touch-stick touch-stick-'+name);stick.setAttribute('role','group');stick.setAttribute('aria-label',name==='move'?'Movement thumbstick; push to the outer edge to sprint':'Aim thumbstick; push to the outer edge to fire');stick.dataset.stick=name;let origin=null;
   const track=make('span','touch-stick-track'),knob=make('span','touch-stick-knob'),caption=make('span','touch-stick-label',label);track.setAttribute('aria-hidden','true');knob.setAttribute('aria-hidden','true');stick.append(track,knob,caption);knobs[name]=knob;host.append(stick);
-  const position=e=>{const rect=stick.getBoundingClientRect(),radius=Math.min(rect.width,rect.height)*.38;return {x:(e.clientX-rect.left-rect.width/2)/radius,z:(e.clientY-rect.top-rect.height/2)/radius};};
-  listen(stick,'pointerdown',e=>{if(!enabled||!isRunning()||e.button>0)return;e.preventDefault();const p=position(e);if(!input.begin(name,e.pointerId,p.x,p.z))return;try{stick.setPointerCapture(e.pointerId);}catch{}paint(name);});
+  const position=e=>{const rect=stick.getBoundingClientRect(),radius=Math.min(rect.width,rect.height)*.38;return {x:(e.clientX-(origin?.x??rect.left+rect.width/2))/radius,z:(e.clientY-(origin?.z??rect.top+rect.height/2))/radius};};
+  listen(stick,'pointerdown',e=>{if(!enabled||!isRunning()||e.button>0)return;e.preventDefault();const p=position(e);if(!input.begin(name,e.pointerId,name==='aim'?0:p.x,name==='aim'?0:p.z))return;if(name==='aim')origin={x:e.clientX,z:e.clientY};try{stick.setPointerCapture(e.pointerId);}catch{}paint(name);});
   listen(stick,'pointermove',e=>{const p=position(e);if(input.update(name,e.pointerId,p.x,p.z)){e.preventDefault();paint(name);}});
-  const end=e=>{if(input.end(name,e.pointerId)){e.preventDefault();paint(name);}};listen(stick,'pointerup',end);listen(stick,'pointercancel',end);listen(stick,'lostpointercapture',end);
+  const end=e=>{if(input.end(name,e.pointerId)){e.preventDefault();origin=null;paint(name);}};listen(stick,'pointerup',end);listen(stick,'pointercancel',end);listen(stick,'lostpointercapture',end);
  }
  const actions=make('div','touch-actions');for(const [action,label] of [['interact','Interact'],['reload','Reload'],['weapon','Swap'],['knife','Melee']]){const button=make('button','touch-action');button.type='button';button.dataset.action=action;button.setAttribute('aria-label',label);const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg'),path=doc.createElementNS('http://www.w3.org/2000/svg','path');svg.setAttribute('viewBox','0 0 32 32');svg.setAttribute('aria-hidden','true');path.setAttribute('d',ICONS[action]);svg.append(path);button.append(svg,make('span','',label));if(action==='interact'){
  listen(button,'pointerdown',event=>{if(!enabled||!isRunning()||event.button>0)return;event.preventDefault();if(heldInteract.begin(event.pointerId)){try{button.setPointerCapture(event.pointerId);}catch{}}});

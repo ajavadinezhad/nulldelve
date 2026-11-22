@@ -29,7 +29,9 @@ test('rotating the viewport releases actual captured sticks and held Interact',(
  try{
   const events=[],controls=createTouchControls({host,isRunning:()=>true,onAction:a=>events.push(a),device:()=>({coarse:true})});
   host.children[0].emit('pointerdown',{pointerId:1,clientX:90,clientY:48});
-  host.children[1].emit('pointerdown',{pointerId:2,clientX:48,clientY:4});
+  host.children[1].emit('pointerdown',{pointerId:2,clientX:48,clientY:48});
+  assert.equal(controls.getState().firing,false);
+  host.children[1].emit('pointermove',{pointerId:2,clientX:48,clientY:4});
   host.children[2].children[0].emit('pointerdown',{pointerId:3});
   assert.equal(controls.getState().firing,true);assert.equal(controls.getState().interactHeld,true);
   win.emit('resize');
@@ -38,4 +40,14 @@ test('rotating the viewport releases actual captured sticks and held Interact',(
   host.children[2].children[0].emit('pointerup',{pointerId:3});assert.equal(events.length,2);
   controls.dispose();assert.equal(win.listeners.resize.length,0);
  }finally{globalThis.addEventListener=previousAdd;globalThis.removeEventListener=previousRemove;}
+});
+
+test('aiming uses an ammunition-safe inner zone and hysteresis at the fire ring',()=>{
+ const input=createTwinStickInput();input.begin('aim',1,.55,0);assert.equal(input.getState().aim.active,true);assert.equal(input.getState().firing,false);
+ input.update('aim',1,.9,0);assert.equal(input.getState().firing,false);
+ input.update('aim',1,1,0);assert.equal(input.getState().firing,true);
+ input.update('aim',1,.88,0);assert.equal(input.getState().firing,true);
+ input.update('aim',1,.6,0);assert.equal(input.getState().firing,false);
+ input.update('aim',1,.8,0);assert.equal(input.getState().firing,false);
+ input.end('aim',1);assert.equal(input.getState().firing,false);
 });

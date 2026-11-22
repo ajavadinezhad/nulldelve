@@ -41,7 +41,6 @@
 @media(max-height:500px) and (max-width:1000px){
  .game-menu:has(.skill-tree){padding:12px 22px}
  .game-menu:has(.skill-tree)>.menu-brand,.game-menu:has(.skill-tree)>.preview-footer{display:none}
- .game-menu:has(.skill-tree)>.menu-status:empty{display:none}
  .game-menu:has(.skill-tree) .menu-content>h2{font-size:22px;margin:0 0 8px}
  .game-menu:has(.skill-tree) .shop-toolbar{margin-bottom:10px}
  .game-menu:has(.skill-tree) .skill-branch-filters{margin-bottom:10px}
@@ -100,4 +99,24 @@
  .game-menu .armory-detail .inline-upgrade .shop-buy{min-width:68px;padding:6px}
  .game-menu .attachment-choice{grid-template-columns:minmax(0,1fr)}
  .game-menu .attachment-choice select{width:100%}
+}
+
+/* Selection highlights must not change the geometry of the browsing rail. */
+.game-menu .roster-weapon{border-width:1px;box-sizing:border-box}
+.game-menu .roster-weapon.selected{border-left-width:1px;box-shadow:inset 2px 0 #e9b96c}
+.game-menu .armory-roster{scrollbar-gutter:stable;overscroll-behavior:contain}
+.game-menu .armory-detail-heading{min-height:56px}
+.game-menu .weapon-ownership{flex:none;min-width:64px;margin-top:5px;font-size:10px;line-height:1.4;text-align:right;text-transform:uppercase;letter-spacing:1px;color:#8e9aab;white-space:nowrap}
+.game-menu .weapon-ownership.equipped-label{color:#d2b47f}
+.game-menu .shop-balance strong,.game-menu .upgrade-effect,.game-menu .upgrade-level,.game-menu .supply-row-copy>small{font-variant-numeric:tabular-nums}
+.game-menu .supply-row .shop-buy{min-width:82px}
+.game-menu .shop-tabs .menu-button,.game-menu .roster-weapon,.game-menu .workbench-tabs button,.game-menu .skill-branch-filter{touch-action:manipulation}
+@media(max-width:900px){
+ .game-menu .armory-roster{scrollbar-gutter:auto}
+ .game-menu .roster-weapon.selected{border-bottom-width:1px;box-shadow:inset 0 -2px #e9b96c}
+}
+@media(max-width:379px){
+ .game-menu .armory-detail-heading{min-height:68px;align-content:start}
+ .game-menu .weapon-ownership{margin-top:0;text-align:left}
+ .game-menu .supply-row .shop-buy{min-width:68px}
 }

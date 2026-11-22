@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=ui-audit-r35';
+import {compatibleStorage} from './storage-compat.js?v=ui-stability-r37';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';

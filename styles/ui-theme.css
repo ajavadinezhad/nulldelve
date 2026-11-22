@@ -73,3 +73,9 @@ body:has(>#overlay.menu-overlay)>.hud{visibility:hidden}
 
 /* Outcome copy belongs after extraction, separate from optional run statistics. */
 .result-story{border-left:2px solid var(--ui-accent);padding:1px 0 1px 12px;margin:0 0 20px}.result-story[hidden]{display:none}.result-story h2{font-size:14px;line-height:1.4;margin:0 0 7px;color:#efc887}.result-story p{font-size:13px;line-height:1.65;margin:0;color:#c0cbd8}#horde-status[data-phase="regroup"]{color:#c1d9ec;border-color:#617b91;background:#172631ed}
+/* Short phone landscapes prioritize interactive content over repeated branding. */
+@media(max-height:500px){
+ #overlay .game-menu{padding:10px 14px}
+ #overlay .game-menu>header.menu-brand,#overlay .game-menu>.preview-footer{display:none}
+ #overlay .game-menu .menu-content{padding-bottom:12px}
+}

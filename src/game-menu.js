@@ -1,14 +1,14 @@
-import {renderFieldJournal,journalIcon} from './field-journal.js?v=ui-audit-r35';
-import {createPuzzleDiscovery} from './puzzle-discovery.js?v=ui-audit-r35';
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=ui-audit-r35';
-import {compatibleStorage} from './storage-compat.js?v=ui-audit-r35';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=ui-audit-r35';
-import {createCampaignMap} from './campaign-map.js?v=ui-audit-r35';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=ui-audit-r35';
-import {createItemIcon} from './item-icons.js?v=ui-audit-r35';
-import {buildMissionPreview} from './mission-previews.js?v=ui-audit-r35';
-import {renderShop} from './shop-ui.js?v=ui-audit-r35';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=ui-audit-r35';
+import {renderFieldJournal,journalIcon} from './field-journal.js?v=ui-stability-r37';
+import {createPuzzleDiscovery} from './puzzle-discovery.js?v=ui-stability-r37';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=ui-stability-r37';
+import {compatibleStorage} from './storage-compat.js?v=ui-stability-r37';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=ui-stability-r37';
+import {createCampaignMap} from './campaign-map.js?v=ui-stability-r37';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=ui-stability-r37';
+import {createItemIcon} from './item-icons.js?v=ui-stability-r37';
+import {buildMissionPreview} from './mission-previews.js?v=ui-stability-r37';
+import {renderShop} from './shop-ui.js?v=ui-stability-r37';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=ui-stability-r37';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -106,10 +106,10 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const deployment=element('div','campaign-deployment'),mapPane=element('div','campaign-map-pane'),briefing=element('div','campaign-briefing');deployment.append(mapPane,briefing);content.append(deployment);
   mapPane.append(createCampaignMap({selected:operation,onSelect:id=>{if(!CAMPAIGN_OPERATIONS.some(item=>item.id===id))return;if(!isCampaignOperationUnlocked(id,status().completedOperations??[])){notice('Complete the previous operation to unlock this location.');return;}operation=id;render(false);},completed}));
   const selected=CAMPAIGN_OPERATIONS.find(item=>item.id===operation)??CAMPAIGN_OPERATIONS[0];
-  const detail=element('section','campaign-operation-detail');if(['hospital','freight','signal'].includes(selected.id)){const preview=element('div','mission-preview hospital-preview');preview.append(buildMissionPreview(selected.id));detail.append(preview);}detail.setAttribute('aria-live','polite');detail.append(element('h3','',selected.name),element('p','',selected.description.replace(/^Enter the ruins\. /,'')));briefing.append(detail);
+  const detail=element('section','campaign-operation-detail');{const preview=element('div','mission-preview hospital-preview');preview.append(buildMissionPreview(selected.id));detail.append(preview);}detail.setAttribute('aria-live','polite');detail.append(element('h3','',selected.name),element('p','',selected.description.replace(/^Enter the ruins\. /,'')));briefing.append(detail);
   const fieldset=element('fieldset','menu-fieldset');fieldset.append(element('legend','','Difficulty'));
   const choices=element('div','difficulty-options'),personalBest=element('p','operation-best');personalBest.setAttribute('role','status');personalBest.setAttribute('aria-label','Personal best for selected operation and difficulty');
-  function updatePersonalBest(){const record=status().personalBests?.[operationRecordKey({mission:'campaign',operation:selected.id,difficulty,remix:false})];personalBest.replaceChildren();personalBest.hidden=!Number.isFinite(record?.elapsed);if(!personalBest.hidden){personalBest.append(element('span','','Personal best'),element('strong','',formatDuration(record.elapsed)));if(Number.isFinite(record.kills))personalBest.append(element('small','',`${Math.max(0,Math.floor(record.kills))} kills`));if(Number.isFinite(record.exploration))personalBest.append(element('small','',`${Math.round(Math.max(0,Math.min(100,record.exploration)))}% mapped`));}}
+  function updatePersonalBest(){const record=status().personalBests?.[operationRecordKey({mission:'campaign',operation:selected.id,difficulty,remix:false})];personalBest.replaceChildren();personalBest.hidden=false;if(!Number.isFinite(record?.elapsed)){personalBest.append(element('span','','Personal best'),element('strong','','—'));}else{personalBest.append(element('span','','Personal best'),element('strong','',formatDuration(record.elapsed)));if(Number.isFinite(record.kills))personalBest.append(element('small','',`${Math.max(0,Math.floor(record.kills))} kills`));if(Number.isFinite(record.exploration))personalBest.append(element('small','',`${Math.round(Math.max(0,Math.min(100,record.exploration)))}% mapped`));}}
   for(const option of DIFFICULTIES){const label=element('label',`difficulty-option${difficulty===option.id?' selected':''}`),input=element('input');label.dataset.difficulty=option.id;input.type='radio';input.name='operation-difficulty';input.value=option.id;input.checked=difficulty===option.id;input.addEventListener('change',()=>{if(!input.checked)return;difficulty=option.id;for(const row of choices.children)row.className=`difficulty-option${row.dataset.difficulty===difficulty?' selected':''}`;updatePersonalBest();});input.setAttribute('aria-label',option.name);const check=element('span','difficulty-check','✓');check.setAttribute('aria-hidden','true');label.append(input,element('strong','',option.name),check);choices.append(label);}
   updatePersonalBest();fieldset.append(choices,personalBest);briefing.append(fieldset);
   const deployActions=element('div','menu-actions');briefing.append(deployActions);deployActions.append(button('Deploy',()=>{if(!isCampaignOperationUnlocked(operation,status().completedOperations??[])){notice('Complete the previous operation before deploying here.');return;}action(onNewGame,[{mission:'campaign',difficulty,operation,remix:false}]);},'menu-button primary'),button('Armory',()=>prepareView('armory','campaign-map'),'menu-button secondary'),button('Back',()=>changeView('missions'),'menu-button secondary'));
@@ -215,9 +215,9 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r35'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r37'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
-  const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
+  const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){
    const detail=revealSkillDetails,revealTarget=detail?[...content.querySelectorAll('section')].find(node=>node.id==='skill-detail'):[...content.querySelectorAll('button')].find(node=>node.dataset.focusKey==='skill-node-'+selectedSkill);
    revealSkillDetails=revealSkillTree=false;revealTarget?.focus?.({preventScroll:true});revealTarget?.scrollIntoView?.({block:detail?'nearest':'center'});

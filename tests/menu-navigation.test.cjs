@@ -84,3 +84,10 @@ test('touch ergonomics settings are editable and defaults reset them',async()=>{
 test('training reset asks for confirmation before changing learned skills',async()=>{let options,resets=0;const h=harness(false,()=>{},false,current=>{options=current.options;},()=>({ok:true}),()=>{resets++;h.state.skillState={learned:[],selected:'none'};return {ok:true,message:'Training reset.'};});h.state.fieldSkill='medic';h.state.skillState={learned:['medic'],selected:'medic'};await h.click('Armory');options.onGroupChange('skills');await h.click('Reset training');assert.equal(resets,0);assert.match(h.text(),/return all training points/);await h.click('Cancel');assert.equal(resets,0);await h.click('Reset training');await h.click('Reset training');assert.equal(resets,1);assert.match(h.text(),/Training reset/);});
 
 test('successive native Back actions keep submenu navigation ahead of resume or exit',async()=>{const h=harness(true);h.menu.show('pause');await h.click('Settings');await h.click('Progress');assert.equal(h.menu.back(),true);assert.equal(h.resumed(),0);assert.ok(h.find('Resume'));assert.equal(h.menu.back(),true);await Promise.resolve();assert.equal(h.resumed(),1);assert.equal(h.menu.isOpen(),false);});
+
+test('refresh preserves the menu scroll instead of scrolling its focused control into view',()=>{
+ const h=harness();const button=h.find('Settings');button.focus();h.menu.refresh();assert.equal(h.doc.activeElement,h.find('Settings'));assert.equal(h.doc.activeElement.lastScroll,undefined);
+});
+test('unplayed difficulty keeps the personal best row present',async()=>{
+ const h=harness();h.click('New operation');await h.click('Facility descent');const best=h.overlay.querySelectorAll('p').find(n=>n.className==='operation-best');assert.equal(best.hidden,false);assert.ok(best.children.some(n=>n.textContent==='—'));
+});

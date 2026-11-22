@@ -1,5 +1,5 @@
-import {PUZZLE_PRESETS,createPuzzlePreset} from './puzzle-presets.js?v=ui-audit-r35';
-import {renderPuzzleBoard} from './puzzle-lab.js?v=ui-audit-r35';
+import {PUZZLE_PRESETS,createPuzzlePreset} from './puzzle-presets.js?v=ui-stability-r37';
+import {renderPuzzleBoard} from './puzzle-lab.js?v=ui-stability-r37';
 const NS='http://www.w3.org/2000/svg';
 const paths={systems:'M5 5h7v7H5zM20 5h7v7h-7zM5 20h7v7H5zM20 20h7v7h-7zM12 8h8M8 12v8M24 12v8M12 24h8',mutations:'M11 12q5-8 10 0v10q-5 7-10 0zM12 8 9 4m11 4 3-4M7 13l-4-3m4 9H2m6 5-4 4m21-15 4-3m-4 9h5m-6 5 4 4',circuit:'M5 8h8v16h14M5 24h8M20 8h7M5 5v6m0 10v6m22-6v6m0-22v6M20 5v6',glyph:'m16 4 12 23H4z',pressure:'M5 9h22v18H5zM9 5h14M10 18h12m-6-6v12',notes:'M7 4h19v24H7zM3 9h7M3 16h7M3 23h7M13 10h7m-7 6h7m-7 6h5'};
 export function journalIcon(kind='notes'){const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 32 32');svg.setAttribute('aria-hidden','true');const p=document.createElementNS(NS,'path');p.setAttribute('d',paths[kind]??paths.notes);svg.append(p);return svg;}
