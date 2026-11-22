@@ -123,9 +123,6 @@
 /* Reserve explicit room for the ammunition line on 320–359px phones. */
 @media(max-width:359px){.touch-controls-enabled .player-status{grid-template-columns:46px minmax(0,1fr) 92px;gap:4px}.touch-controls-enabled .player-status #ammo{font-size:14px}.touch-controls-enabled .ammo-icon{width:11px;height:17px}.touch-controls-enabled .player-status #weapon-preview{width:26px}.touch-controls-enabled .player-status .weapon-status{grid-template-columns:26px minmax(0,1fr);padding-left:4px}}
 
-/* Aim stays quiet until the deliberate outer fire ring is engaged. */
-.touch-stick-aim.firing .touch-stick-track{border-color:#efba62;box-shadow:0 0 0 2px #efba6240}
-.touch-stick-aim.firing .touch-stick-label{color:#efba62}
 
 /* Keep the phone supplies at two fixed columns when a second grenade type
    becomes available. The desktop :has selector otherwise adds a phantom third
@@ -156,3 +153,27 @@
 .touch-controls-enabled aside.mission-note .mission-guidance>summary{min-height:44px}
 .touch-controls-enabled aside.mission-note .mission-guidance h2{font-size:11px;gap:6px}
 .touch-controls-enabled aside.mission-note .mission-guidance[open]>#hint{display:block;font-size:12px;line-height:1.5}
+/* Keep the disclosure and camera-lead control reachable while only the
+   optional hint scrolls. A short landscape must not scroll its close target
+   out of the panel just to reveal the last line of supporting text. */
+.touch-controls-enabled aside.mission-note:has(.mission-guidance){overflow:hidden}
+.touch-controls-enabled aside.mission-note:has(.mission-guidance[open]){
+ --guidance-height:clamp(92px,calc(100dvh - var(--combat-panel-height,64px) - 130px),200px);
+ max-height:none;
+}
+.touch-controls-enabled aside.mission-note .mission-guidance>summary{position:relative;padding-right:17px;gap:6px}
+.touch-controls-enabled aside.mission-note .mission-guidance>summary::after{position:absolute;right:3px;top:50%;margin:-5px 0 0}
+.touch-controls-enabled aside.mission-note .mission-guidance[open]>summary::after{margin-top:-1px}
+.touch-controls-enabled aside.mission-note .mission-guidance h2{max-height:4.05em;overflow:hidden}
+.touch-controls-enabled aside.mission-note .mission-guidance[open]>#hint{
+ max-height:calc(var(--guidance-height) - 65px);overflow:auto;
+ overscroll-behavior:contain;scrollbar-width:thin;scroll-padding:3px;
+ overflow-wrap:anywhere;-webkit-overflow-scrolling:touch;
+}
+
+/* Fire is a separate held action above the aiming thumbstick. */
+.touch-fire{position:absolute;right:max(10px,env(safe-area-inset-right));bottom:calc(max(8px,env(safe-area-inset-bottom)) + 92px);width:52px;height:48px;pointer-events:auto;touch-action:none;border-color:#b7c9dc;background:#182635ed}
+.touch-fire.held{background:#684b25;border-color:#efba62;color:#ffe0ad}
+.touch-left-handed .touch-fire{right:auto;left:max(10px,env(safe-area-inset-left))}
+.touch-large-controls .touch-fire{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 120px)}
+@media(max-width:359px){.touch-large-controls .touch-fire{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 104px)}}

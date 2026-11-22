@@ -114,3 +114,7 @@ aside.mission-note .mission-guidance h2{display:flex;align-items:center;gap:8px;
 .mission-guidance h2[data-cue="exit"]::before{background-image:url('../assets/menu-play.svg')}
 aside.mission-note .mission-guidance[open]>#hint{display:block;margin:5px 0 8px;font-size:12px;line-height:1.5}
 .mission-guidance>summary:focus-visible{outline:2px solid #b5c9df;outline-offset:2px;border-radius:3px}
+/* Optional prose scrolls independently on desktop too: collapsing the hint
+   must remain possible after reading a long instruction. */
+aside.mission-note:has(.mission-guidance){max-height:none;overflow:hidden}
+aside.mission-note .mission-guidance[open]>#hint{max-height:clamp(36px,calc(100dvh - 280px),160px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;overflow-wrap:anywhere}

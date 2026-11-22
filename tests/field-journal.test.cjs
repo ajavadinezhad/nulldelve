@@ -8,3 +8,10 @@ test('system diagrams are read-only, without solve or state-changing controls',(
 test('empty journal and mutations avoid undiscovered placeholders and puzzle hints',()=>{assert.ok(all(render({systems:[]})).some(n=>n.textContent==='Nothing recorded yet'));const notes=[{id:'runner',name:'Runner',warning:'Fast approach',counter:'Keep space.'}],nodes=all(render({tab:'mutations',mutations:notes}));assert.ok(nodes.some(n=>n.textContent==='Keep space.'));assert.equal(nodes.filter(n=>n.tag==='button').length,1);});
 
 test('every recorded mutation has a real journal illustration',()=>{const fs=require('node:fs'),{MUTATION_NOTES}=require('../src/mutation-notes.js');for(const note of MUTATION_NOTES)assert.ok(fs.existsSync('assets/mutation-'+note.id+'.svg'),note.id);});
+
+test('reference hint escalation names the full hint before revealing it',()=>{
+ for(const [hintLevel,label] of [[0,'Need a hint?'],[1,'Another clue'],[2,'Full reference hint'],[3,'Repeat reference hint'],[100,'Repeat reference hint'],[NaN,'Need a hint?']]){
+  const nodes=all(render({systems:['glyph-cipher'],hintLevel}));assert.equal(nodes.filter(n=>n.tag==='button').at(-1).textContent,label);
+  if(Number.isFinite(hintLevel)&&hintLevel>0)assert.ok(nodes.some(n=>n.attrs['aria-label']==='Reference hint; not the live puzzle solution'));
+ }
+});

@@ -140,3 +140,8 @@ test('checkpoint roundtrip preserves replay attempt identity instead of minting 
  const restored=session({expanded:true});assert.equal(restored.restore(saved),true);assert.equal(restored.ctx.replayRewardId,saved.replayRewardId);assert.equal(restored.capture().replayRewardId,saved.replayRewardId);
  const legacy=plain(saved);delete legacy.replayRewardId;assert.equal(restored.restore(legacy),true);assert.equal(restored.ctx.replayRewardId,null);
 });
+
+test('a new objective closes old optional guidance while same-objective refresh preserves it',()=>{
+ const s=session();s.ctx.refreshGuidance(true);const objective=s.elements.get('#objective'),detail={open:true};objective.closest=()=>detail;
+ s.ctx.refreshGuidance(true);assert.equal(detail.open,true);objective.textContent='Previous objective';s.ctx.refreshGuidance(true);assert.equal(detail.open,false);
+});

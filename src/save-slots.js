@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=visual-cues-r38';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=visual-cues-r38';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=visual-cues-r38';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=visual-cues-r38';
-import {validateSnapshot} from './snapshot-validation.js?v=visual-cues-r38';
-import {normalizeSettings} from './controls.js?v=visual-cues-r38';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=move-facing-r41';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=move-facing-r41';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=move-facing-r41';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=move-facing-r41';
+import {validateSnapshot} from './snapshot-validation.js?v=move-facing-r41';
+import {normalizeSettings} from './controls.js?v=move-facing-r41';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

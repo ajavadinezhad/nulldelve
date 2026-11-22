@@ -1,8 +1,8 @@
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=visual-cues-r38';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=visual-cues-r38';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=visual-cues-r38';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=visual-cues-r38';
-import {createProgression} from './progression.js?v=visual-cues-r38';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=move-facing-r41';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=move-facing-r41';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=move-facing-r41';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=move-facing-r41';
+import {createProgression} from './progression.js?v=move-facing-r41';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','spitter','mender','boss']);

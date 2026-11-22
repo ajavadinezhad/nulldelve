@@ -3,10 +3,16 @@ export function stickVector(x,z,deadzone=.15){
  const magnitude=(Math.min(1,length)-deadzone)/(1-deadzone);return {x:x/length*magnitude,z:z/length*magnitude};
 }
 export function createTwinStickInput(){
- const sticks={move:{pointer:null,x:0,z:0},aim:{pointer:null,x:0,z:0}};let firing=false;
- function update(name,id,x,z){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,stickVector(x,z));if(name==='aim'){const magnitude=Math.hypot(stick.x,stick.z);firing=magnitude>=(firing ? .68 : .9);}return true;}
- function end(name,id){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,{pointer:null,x:0,z:0});if(name==='aim')firing=false;return true;}
- return {begin(name,id,x=0,z=0){const stick=sticks[name];if(!stick||stick.pointer!==null||Object.values(sticks).some(s=>s.pointer===id))return false;stick.pointer=id;return update(name,id,x,z);},update,end,reset(){firing=false;for(const stick of Object.values(sticks))Object.assign(stick,{pointer:null,x:0,z:0});},getState(){const move={x:sticks.move.x,z:sticks.move.z},aim={x:sticks.aim.x,z:sticks.aim.z,active:sticks.aim.pointer!==null&&Math.hypot(sticks.aim.x,sticks.aim.z)>0};return {move,aim,sprint:sticks.move.pointer!==null&&Math.hypot(move.x,move.z)>=.85,firing:aim.active&&firing};}};
+ const sticks={move:{pointer:null,x:0,z:0},aim:{pointer:null,x:0,z:0}};
+ function update(name,id,x,z){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,stickVector(x,z));return true;}
+ function end(name,id){const stick=sticks[name];if(!stick||stick.pointer!==id)return false;Object.assign(stick,{pointer:null,x:0,z:0});return true;}
+ return {begin(name,id,x=0,z=0){const stick=sticks[name];if(!stick||stick.pointer!==null||Object.values(sticks).some(s=>s.pointer===id))return false;stick.pointer=id;return update(name,id,x,z);},update,end,reset(){for(const stick of Object.values(sticks))Object.assign(stick,{pointer:null,x:0,z:0});},getState(){const move={x:sticks.move.x,z:sticks.move.z},aim={x:sticks.aim.x,z:sticks.aim.z,active:sticks.aim.pointer!==null&&Math.hypot(sticks.aim.x,sticks.aim.z)>0};return {move,aim,sprint:sticks.move.pointer!==null&&Math.hypot(move.x,move.z)>=.85,firing:false};}};
+}
+/** Independent aiming overrides movement; releasing both retains the game's last facing. */
+export function touchAimDirection(state){
+ const source=state?.aim?.active?state.aim:state?.move;
+ const x=source?.x??0,z=source?.z??0,length=Math.hypot(x,z);
+ return Number.isFinite(length)&&length>0?{x:x/length,z:z/length}:null;
 }
 export function shouldShowTouchControls(mode,{coarse=false,touchPoints=0}={}){return mode==='on'||mode!=='off'&&(coarse||touchPoints>0);}
 /** Small action labels retain the full nearby-device context for assistive input. */
@@ -35,14 +41,15 @@ const ICONS={grab:'M10 10h12v13H10zM10 14h12M16 10v13M3 17h4v9h7m15-9h-4v9h-7',i
 export function createTouchControls({host,isRunning,onAction,device=()=>({coarse:globalThis.matchMedia?.('(pointer: coarse)')?.matches??false,touchPoints:globalThis.navigator?.maxTouchPoints??0})}){
  if(!host)return {enabled:false,getState:()=>({move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false}),reset(){},configure(){}};
  const heldInteract=createHeldInteraction(()=>onAction('interact'),()=>onAction('interactEnd'));
+ let fireButton=null;const heldFire=createHeldInteraction(()=>fireButton?.classList.toggle('held',true),()=>fireButton?.classList.toggle('held',false));
  const input=createTwinStickInput(),knobs={},cleanups=[];let enabled=false,mode='auto',lastInteractPrompt=null;
  const doc=host.ownerDocument??document,make=(tag,cls,text)=>{const node=doc.createElement(tag);node.className=cls;if(text)node.textContent=text;return node;};
- function paint(name){const state=input.getState()[name],knob=knobs[name];const travel=(knob.parentElement.getBoundingClientRect?.().width||96)*.24;knob.style.transform=`translate(${state.x*travel}px,${state.z*travel}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);if(name==='aim')knob.parentElement.classList.toggle('firing',input.getState().firing);}
- function reset(){heldInteract.reset();input.reset();for(const name of ['move','aim'])paint(name);}
+ function paint(name){const state=input.getState()[name],knob=knobs[name];const travel=(knob.parentElement.getBoundingClientRect?.().width||96)*.24;knob.style.transform=`translate(${state.x*travel}px,${state.z*travel}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);}
+ function reset(){heldFire.reset();heldInteract.reset();input.reset();for(const name of ['move','aim'])paint(name);}
  function listen(node,name,callback,options){node.addEventListener(name,callback,options);cleanups.push(()=>node.removeEventListener(name,callback,options));}
  host.replaceChildren();
- for(const [name,label] of [['move','Move / run'],['aim','Aim · edge to fire']]){
-  const stick=make('div','touch-stick touch-stick-'+name);stick.setAttribute('role','group');stick.setAttribute('aria-label',name==='move'?'Movement thumbstick; push to the outer edge to sprint':'Aim thumbstick; push to the outer edge to fire');stick.dataset.stick=name;let origin=null;
+ for(const [name,label] of [['move','Move + turn'],['aim','Aim']]){
+  const stick=make('div','touch-stick touch-stick-'+name);stick.setAttribute('role','group');stick.setAttribute('aria-label',name==='move'?'Movement and facing thumbstick; push to the outer edge to sprint':'Aim thumbstick; rotate only, does not fire');stick.dataset.stick=name;let origin=null;
   const track=make('span','touch-stick-track'),knob=make('span','touch-stick-knob'),caption=make('span','touch-stick-label',label);track.setAttribute('aria-hidden','true');knob.setAttribute('aria-hidden','true');stick.append(track,knob,caption);knobs[name]=knob;host.append(stick);
   const position=e=>{const rect=stick.getBoundingClientRect(),radius=Math.min(rect.width,rect.height)*.38;return {x:(e.clientX-(origin?.x??rect.left+rect.width/2))/radius,z:(e.clientY-(origin?.z??rect.top+rect.height/2))/radius};};
   listen(stick,'pointerdown',e=>{if(!enabled||!isRunning()||e.button>0)return;e.preventDefault();const p=position(e);if(!input.begin(name,e.pointerId,name==='aim'?0:p.x,name==='aim'?0:p.z))return;if(name==='aim')origin={x:e.clientX,z:e.clientY};try{stick.setPointerCapture(e.pointerId);}catch{}paint(name);});
@@ -54,7 +61,12 @@ export function createTouchControls({host,isRunning,onAction,device=()=>({coarse
  const end=event=>{if(heldInteract.end(event.pointerId))event.preventDefault();};for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(button,type,end);
  listen(button,'click',event=>{if(event.detail===0&&enabled&&isRunning()){onAction(action);onAction('interactEnd');}});
  }else listen(button,'click',()=>{if(enabled&&isRunning())onAction(action);});actions.append(button);}host.append(actions);
+ fireButton=make('button','touch-action touch-fire');fireButton.type='button';fireButton.dataset.action='fire';fireButton.setAttribute('aria-label','Fire; hold to shoot');
+ const fireSvg=doc.createElementNS('http://www.w3.org/2000/svg','svg'),firePath=doc.createElementNS('http://www.w3.org/2000/svg','path');fireSvg.setAttribute('viewBox','0 0 32 32');fireSvg.setAttribute('aria-hidden','true');firePath.setAttribute('d','M12 27V12l4-7 4 7v15zM12 20h8');fireSvg.append(firePath);fireButton.append(fireSvg,make('span','','Fire'));host.append(fireButton);
+ listen(fireButton,'pointerdown',event=>{if(!enabled||!isRunning()||event.button>0)return;event.preventDefault();if(heldFire.begin(event.pointerId)){try{fireButton.setPointerCapture(event.pointerId);}catch{}}});
+ const endFire=event=>{if(heldFire.end(event.pointerId))event.preventDefault();};for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(fireButton,type,endFire);
+ listen(fireButton,'click',event=>{if(event.detail===0&&enabled&&isRunning())onAction('fire');});
  function configure(next=mode,{handedness='right',size='normal'}={}){reset();doc.body.classList.toggle('touch-left-handed',handedness==='left');doc.body.classList.toggle('touch-large-controls',size==='large');mode=next;const nextEnabled=shouldShowTouchControls(mode,device());if(nextEnabled!==enabled)reset();enabled=nextEnabled;host.hidden=!enabled;doc.body.classList.toggle('touch-controls-enabled',enabled);}
  configure();listen(globalThis,'blur',reset);listen(globalThis,'resize',reset);listen(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
- return {get enabled(){return enabled;},getState:()=>enabled?{...input.getState(),interactHeld:heldInteract.held}:{move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false},reset,configure,setInteractAvailable(prompt){if(prompt===lastInteractPrompt)return;lastInteractPrompt=prompt;const button=actions.querySelector('[data-action="interact"]');if(!button)return;const context=touchInteractionContext(prompt);button.classList.toggle('available',context.available);button.setAttribute('aria-label',context.description);button.title=context.description;button.querySelector('span').textContent=context.label;button.querySelector('path').setAttribute('d',['Grab','Release'].includes(context.label)?ICONS.grab:ICONS.interact);},dispose(){reset();cleanups.forEach(fn=>fn());doc.body.classList.remove('touch-controls-enabled');host.replaceChildren();}};
+ return {get enabled(){return enabled;},getState:()=>enabled?{...input.getState(),firing:heldFire.held,interactHeld:heldInteract.held}:{move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false},reset,configure,setInteractAvailable(prompt){if(prompt===lastInteractPrompt)return;lastInteractPrompt=prompt;const button=actions.querySelector('[data-action="interact"]');if(!button)return;const context=touchInteractionContext(prompt);button.classList.toggle('available',context.available);button.setAttribute('aria-label',context.description);button.title=context.description;button.querySelector('span').textContent=context.label;button.querySelector('path').setAttribute('d',['Grab','Release'].includes(context.label)?ICONS.grab:ICONS.interact);},dispose(){reset();cleanups.forEach(fn=>fn());doc.body.classList.remove('touch-controls-enabled');host.replaceChildren();}};
 }
