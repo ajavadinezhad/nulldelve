@@ -702,3 +702,50 @@
 .game-menu .persistence-warning{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;padding:9px 12px;margin:0 0 10px;background:#30281b;border:1px solid #86734d;color:#e1d0a8;flex:0 0 auto;font-size:12px;line-height:1.4}.game-menu .persistence-warning strong{color:#f0d594}.game-menu .persistence-warning span{flex:1;min-width:160px}.game-menu .persistence-warning .menu-button{font-size:12px;min-height:34px;padding:7px 10px}
 .field-notes-frame{display:block;width:100%;height:min(62dvh,660px);min-height:280px;border:1px solid #485057;border-radius:6px;background:#101216}.menu-content:has(.field-notes-frame){max-width:none;width:100%}
 .mutation-journal{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}.mutation-note{display:flex;align-items:center;gap:14px;background:#202630;border:1px solid #424c5a;border-radius:10px;padding:14px}.mutation-note img{width:78px;height:72px;flex:none}.mutation-note h3{margin:0 0 6px;font-size:1.05rem}.mutation-warning{font-size:.8rem;color:#edbd76}.mutation-note p{font-size:.9rem;line-height:1.5;margin:6px 0 0;color:#b9c3ce}.field-skill-options{display:flex;gap:8px;flex-wrap:wrap}.field-skill-options button{flex:1 1 140px;text-align:left;padding:12px}.field-skill-options strong,.field-skill-options small{display:block}.field-skill-options small{font-size:.8rem;font-weight:400;margin-top:6px;line-height:1.45}.field-skill-options button[aria-pressed=true]{border-color:#ecba66;background:#3b3429}
+
+/* Campaign and settings controls must fit their panel, including long selections
+   and native backup filenames. The menu's existing content scroller owns overflow. */
+.game-menu .campaign-deployment>* ,
+.game-menu .campaign-briefing>* ,
+.game-menu .settings-grid>*{min-width:0}
+.game-menu .setting-row select{min-width:0;max-width:100%}
+.game-menu .setting-row>span,.game-menu .setting-row output{min-width:0;overflow-wrap:anywhere}
+.game-menu .keyboard-controls{min-width:0;max-width:100%}
+.game-menu .binding-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(72px,max-content);gap:8px}
+.game-menu .binding-row>span{min-width:0;overflow-wrap:anywhere}
+.game-menu .binding-button{max-width:140px;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+.game-menu .backup-panel,.game-menu .backup-preview{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.game-menu .backup-file-label{display:grid;gap:6px;flex:1 1 200px;min-width:0;max-width:100%;font-size:13px}
+.game-menu .backup-panel input[type=file]{display:block;width:100%;min-width:0;max-width:100%;min-height:44px;font-size:12px}
+.game-menu .backup-panel input[type=file]::file-selector-button{min-height:44px;max-width:100%;margin-right:8px;padding:7px 10px;border:1px solid #536176;border-radius:7px;background:#242e3b;color:#dae3ef;font:inherit}
+.game-menu .backup-preview{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.game-menu .backup-preview>strong,.game-menu .backup-preview>p{flex-basis:100%;min-width:0;margin:0}
+.game-menu .backup-preview>.menu-button{flex:1 1 160px;min-width:0;max-width:100%;min-height:44px}
+.game-menu .campaign-briefing .menu-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.game-menu .campaign-briefing .menu-actions>.menu-button{min-width:0;width:100%;min-height:44px;padding:10px 12px}
+.game-menu .campaign-briefing .menu-actions>.primary{grid-column:1/-1}
+.game-menu .campaign-briefing .difficulty-option{min-height:44px}
+.game-menu .campaign-operation-detail>h3,.game-menu .campaign-operation-detail>p{max-width:100%;overflow-wrap:anywhere}
+.game-menu .campaign-atlas{container-type:inline-size}
+/* At small map widths, keep only the numbered/locked targets. The selected
+   operation's full name remains in the briefing and every target has an aria label. */
+@container (max-width:600px){
+ .game-menu .campaign-node-label{display:none}
+ .game-menu .campaign-node{width:48px;height:48px;min-width:48px;max-width:48px;padding:6px;gap:0;justify-content:center}
+}
+@media(max-width:850px){
+ .game-menu .campaign-node-label{display:none}
+ .game-menu .campaign-node{width:48px;height:48px;min-width:48px;max-width:48px;padding:6px;gap:0;justify-content:center}
+}
+@media(max-width:520px){
+ .game-menu .setting-row:has(select){grid-template-columns:minmax(0,1fr);gap:7px}
+ .game-menu .setting-row select{width:100%;max-width:none;min-height:44px}
+ .game-menu[data-view="settings"] .menu-content>.menu-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .game-menu[data-view="settings"] .menu-content>.menu-tabs>.menu-button{width:100%;min-width:0;min-height:44px;padding:8px;font-size:12px}
+ .game-menu[data-view="settings"] .menu-content>.menu-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .game-menu[data-view="settings"] .menu-content>.menu-actions>.menu-button{width:100%;min-width:0;min-height:44px;padding:9px 10px;font-size:12px}
+ .game-menu .campaign-briefing .difficulty-options{grid-template-columns:1fr}
+}
+@media(max-width:360px){
+ .game-menu[data-view="settings"] .menu-content>.menu-actions{grid-template-columns:minmax(0,1fr)}
+}

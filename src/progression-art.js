@@ -1,5 +1,5 @@
-import {hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=skill-layout-r34';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=skill-layout-r34';
+import {hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=ui-audit-r35';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=ui-audit-r35';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */

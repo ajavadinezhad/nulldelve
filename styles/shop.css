@@ -62,3 +62,42 @@
 .game-menu .skill-fork:after{left:calc(50% / var(--fork-count,2));right:calc(50% / var(--fork-count,2))}
 .game-menu .skill-tier .skill-node-name{width:100%;max-width:96px;min-height:32px;overflow-wrap:normal;line-height:1.45}
 @media(max-width:1100px){.game-menu .skill-tree{grid-template-columns:minmax(0,1fr);gap:18px}.game-menu .skill-map{grid-column:1;grid-row:2}.game-menu .skill-detail{grid-column:1;grid-row:3;position:static;margin:0}.game-menu .skill-branches{gap:0;max-width:360px}.game-menu .skill-tier .skill-node-name{max-width:110px}.game-menu .skill-toolbar{gap:8px}.game-menu .skill-branch-filters{margin-bottom:14px}}
+
+/* Content-sized stat cells and bounded columns keep specialist values legible. */
+.game-menu .armory-workbench>*{min-width:0}
+.game-menu .roster-copy strong,.game-menu .armory-detail-heading h3{overflow-wrap:anywhere}
+.game-menu .armory-detail-heading{align-items:flex-start}
+.game-menu .armory-detail-heading h3{flex:1;min-width:0}
+.game-menu .armory-detail-heading .equipped-label{flex:none;margin-top:5px;white-space:nowrap}
+.game-menu .armory-detail>.weapon-row-stats{grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:12px 10px}
+.game-menu .armory-detail>.weapon-row-stats>div{min-width:0}
+.game-menu .armory-detail>.weapon-row-stats .weapon-stat-wide{grid-column:span 2}
+.game-menu .armory-detail>.weapon-row-stats dd{max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+.game-menu .armory-detail .inline-upgrade-copy{min-width:0;align-items:start}
+.game-menu .armory-detail .inline-upgrade-copy>strong{min-width:0;overflow-wrap:anywhere}
+.game-menu .armory-detail .upgrade-effect{grid-column:1/-1;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.game-menu .armory-detail .upgrade-level{grid-row:1;align-self:start;line-height:1.5}
+.game-menu .attachment-choice{min-width:0;gap:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.game-menu .attachment-choice>span,.game-menu .attachment-choice select{min-width:0;max-width:100%}
+.game-menu .supply-row-copy>span{overflow-wrap:anywhere}
+@media(max-width:900px){
+ .game-menu .armory-workbench{grid-template-columns:minmax(0,1fr);gap:14px}
+ .game-menu .armory-roster{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;max-height:none;padding:2px 2px 8px;gap:6px;scroll-snap-type:x proximity}
+ .game-menu .roster-weapon{flex:0 0 156px;min-height:64px;padding:8px;scroll-snap-align:start}
+ .game-menu .roster-weapon.selected{border-left-width:1px;border-bottom:2px solid #e9b96c}
+ .game-menu .roster-weapon>.shop-icon{width:30px;flex-basis:30px}
+ .game-menu .roster-copy strong{font-size:12px}
+ .game-menu .armory-weapon-preview{height:120px;margin:8px 0}
+ .game-menu .armory-detail>.weapon-row-stats{padding-bottom:14px}
+ .game-menu .shop-buy.menu-button,.game-menu .shop-tabs .menu-button,.game-menu .workbench-tabs button{min-height:44px}
+}
+@media(max-width:379px){
+ .game-menu .armory-detail>.weapon-row-stats{grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:10px 7px}
+ .game-menu .armory-detail-heading{flex-wrap:wrap;gap:5px 12px}
+ .game-menu .armory-detail-heading h3{flex-basis:100%}
+ .game-menu .armory-detail .inline-upgrade{grid-template-columns:20px minmax(0,1fr) auto;gap:7px}
+ .game-menu .armory-detail .inline-upgrade>.shop-icon{width:20px;height:22px}
+ .game-menu .armory-detail .inline-upgrade .shop-buy{min-width:68px;padding:6px}
+ .game-menu .attachment-choice{grid-template-columns:minmax(0,1fr)}
+ .game-menu .attachment-choice select{width:100%}
+}

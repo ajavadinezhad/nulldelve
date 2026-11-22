@@ -3,3 +3,11 @@
 .journal-tabs{position:sticky;top:0;z-index:3;padding:4px;background:#1b222dee;border-radius:10px;backdrop-filter:blur(12px)}.journal-tabs .journal-back{margin-left:auto;white-space:nowrap}
 .journal-tabs{display:grid;grid-template-columns:auto auto 1fr;align-items:center}.journal-tabs .menu-button{min-width:0;width:auto;margin:0}.journal-tabs .journal-back{justify-self:end}
 @media(max-width:700px){.journal-tabs{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 72px;gap:5px}.journal-tabs .menu-button{padding:8px 6px;font-size:12px;gap:5px}.journal-tabs svg{width:21px;height:21px}.journal-tabs .journal-back{justify-self:stretch}}
+
+/* Long discovered names and diagrams stay inside their own panels. */
+.journal-detail-heading>div{min-width:0}.journal-detail h3,.journal-entry strong,.journal-kicker,.journal-counter,.journal-hint{overflow-wrap:anywhere}
+.journal-detail-heading>svg,.journal-detail-heading>img{flex-shrink:0}
+.journal-diagram{min-width:0;overflow:auto;overscroll-behavior:contain}.journal-diagram .board-grid,.journal-diagram .board-cell{min-width:0}
+.journal-roster{scroll-padding:8px}.journal-entry{flex-shrink:0}
+@media(max-width:359px){.journal-tabs{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 64px}.journal-tabs .menu-button{font-size:11px;padding:8px 4px;gap:4px}.journal-tabs svg{width:18px;height:18px}.journal-detail{padding:14px}.journal-detail-heading{gap:10px}.journal-detail-heading>svg,.journal-detail-heading>img{width:42px;height:42px;padding:7px}.journal-detail h3{font-size:18px}}
+@media(max-height:500px){.game-menu:has(.field-journal){padding:12px 16px}.game-menu:has(.field-journal)>.menu-brand,.game-menu:has(.field-journal)>.preview-footer{display:none}.game-menu:has(.field-journal) .menu-content>h2{font-size:22px;margin:0 0 8px}.journal-tabs{margin-bottom:12px}.journal-detail{padding:16px}.journal-detail-heading{margin-bottom:12px}.journal-specimen{height:110px}.journal-specimen img{width:88px;height:88px}.journal-diagram{min-height:130px}.journal-diagram .board-svg{max-height:180px}.journal-empty{min-height:180px}}
