@@ -70,3 +70,6 @@ body:has(>#overlay.menu-overlay)>.hud{visibility:hidden}
 .inventory-item.charging-grenade{background:linear-gradient(90deg,#9e742d99 calc(var(--throw-power,0)*100%),#222b38 calc(var(--throw-power,0)*100%));border-color:#efba62;box-shadow:0 0 12px #efba6240}.inventory-item.charging-grenade img{filter:drop-shadow(0 0 4px #efba62)}
 
 .result-actions:has(>:nth-child(2):last-child) .result-action:last-child{grid-column:1/-1}
+
+/* Outcome copy belongs after extraction, separate from optional run statistics. */
+.result-story{border-left:2px solid var(--ui-accent);padding:1px 0 1px 12px;margin:0 0 20px}.result-story[hidden]{display:none}.result-story h2{font-size:14px;line-height:1.4;margin:0 0 7px;color:#efc887}.result-story p{font-size:13px;line-height:1.65;margin:0;color:#c0cbd8}#horde-status[data-phase="regroup"]{color:#c1d9ec;border-color:#617b91;background:#172631ed}

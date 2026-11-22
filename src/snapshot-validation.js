@@ -1,8 +1,8 @@
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=hands-on-r28b';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=hands-on-r28b';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=hands-on-r28b';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=hands-on-r28b';
-import {createProgression} from './progression.js?v=hands-on-r28b';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=completion-r30';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=completion-r30';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=completion-r30';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=completion-r30';
+import {createProgression} from './progression.js?v=completion-r30';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','boss']);

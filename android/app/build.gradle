@@ -1,0 +1,52 @@
+plugins { id 'com.android.application' }
+
+def privateSigning = new Properties()
+def signingFile = rootProject.file('signing.properties')
+if (signingFile.exists()) signingFile.withInputStream { privateSigning.load(it) }
+def signingValue = { name -> System.getenv(name) ?: privateSigning.getProperty(name) }
+
+android {
+    namespace 'com.ajavadinezhad.nulldelve'
+    compileSdk 36
+    buildFeatures { buildConfig true }
+    defaultConfig {
+        applicationId 'com.ajavadinezhad.nulldelve'
+        minSdk 26
+        targetSdk 36
+        versionCode 2
+        versionName '0.1.1'
+    }
+    signingConfigs {
+        if (signingValue('NULLDELVE_KEYSTORE')) {
+            release {
+                storeFile file(signingValue('NULLDELVE_KEYSTORE'))
+                storePassword signingValue('NULLDELVE_STORE_PASSWORD')
+                keyAlias signingValue('NULLDELVE_KEY_ALIAS')
+                keyPassword signingValue('NULLDELVE_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (signingValue('NULLDELVE_KEYSTORE')) signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/gameAssets')
+}
+
+// Package only runtime files. Never copy the repository, attachments or credentials.
+tasks.register('syncGameAssets', Sync) {
+    from('../..') {
+        include 'index.html', 'puzzle-lab.html'
+        include 'src/**', 'styles/**', 'assets/**', 'vendor/**'
+        exclude 'assets/screenshots/**', 'assets/preview/**'
+    }
+    into layout.buildDirectory.dir('generated/gameAssets/game')
+}
+tasks.named('preBuild').configure { dependsOn 'syncGameAssets' }
+dependencies { implementation 'androidx.webkit:webkit:1.14.0' }

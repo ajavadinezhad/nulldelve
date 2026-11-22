@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=hands-on-r28b';
+import {compatibleStorage} from './storage-compat.js?v=completion-r30';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';

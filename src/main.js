@@ -1,66 +1,68 @@
-import {SALVAGE_CACHES} from './mission-salvage.js?v=hands-on-r28b';
-import {createSalvageArt} from './salvage-art.js?v=hands-on-r28b';
-import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=hands-on-r28b';
-import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=hands-on-r28b';
-import {applyWeaponAttachment} from './weapon-attachments.js?v=hands-on-r28b';
-import {createMutationNotes} from './mutation-notes.js?v=hands-on-r28b';
-import {grantHospitalAmmo} from './mission-supplies.js?v=hands-on-r28b';
-import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=hands-on-r28b';
-import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=hands-on-r28b';
-import {createGrenadeActions} from './grenade-actions.js?v=hands-on-r28b';
-import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=hands-on-r28b';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=hands-on-r28b';
-import {compatibleStorage} from './storage-compat.js?v=hands-on-r28b';
-import {createTouchControls} from './touch-controls.js?v=hands-on-r28b';
-import {createHudFeedback} from './hud-feedback.js?v=hands-on-r28b';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=hands-on-r28b';
+import {campaignDebrief} from './campaign-story.js?v=completion-r30';
+import {encounterStatus} from './encounter-status.js?v=completion-r30';
+import {SALVAGE_CACHES} from './mission-salvage.js?v=completion-r30';
+import {createSalvageArt} from './salvage-art.js?v=completion-r30';
+import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=completion-r30';
+import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=completion-r30';
+import {applyWeaponAttachment} from './weapon-attachments.js?v=completion-r30';
+import {createMutationNotes} from './mutation-notes.js?v=completion-r30';
+import {grantHospitalAmmo} from './mission-supplies.js?v=completion-r30';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=completion-r30';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=completion-r30';
+import {createGrenadeActions} from './grenade-actions.js?v=completion-r30';
+import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=completion-r30';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=completion-r30';
+import {compatibleStorage} from './storage-compat.js?v=completion-r30';
+import {createTouchControls} from './touch-controls.js?v=completion-r30';
+import {createHudFeedback} from './hud-feedback.js?v=completion-r30';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=completion-r30';
 const puzzleDiscovery=createPuzzleDiscovery();
 const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=hands-on-r28b';
-import {soldier, animateSoldier} from './character.js?v=hands-on-r28b';
-import {weapon, createCombatEffects} from './weapons.js?v=hands-on-r28b';
-import {addRoomDetails} from './room-details.js?v=hands-on-r28b';
-import {createMinimap} from './minimap.js?v=hands-on-r28b';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=hands-on-r28b';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=hands-on-r28b';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=hands-on-r28b';
-import {createPuzzleArt} from './puzzle-art.js?v=hands-on-r28b';
-import {createWeaponPreview} from './weapon-preview.js?v=hands-on-r28b';
-import {createProgression} from './progression.js?v=hands-on-r28b';
-import {createProgressionArt} from './progression-art.js?v=hands-on-r28b';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=hands-on-r28b';
-import {buildWorld} from './world-render.js?v=hands-on-r28b';
-import {createNavigator} from './navigation.js?v=hands-on-r28b';
-import {createGameMenu} from './game-menu.js?v=briefing-r29';
-import {createSaveSlots} from './save-slots.js?v=hands-on-r28b';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=hands-on-r28b';
-import {createEconomy} from './economy.js?v=hands-on-r28b';
-import {createExplosions} from './explosion.js?v=hands-on-r28b';
-import {createGameAudio} from './audio.js?v=hands-on-r28b';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved,keyboardAimDirection} from './controls.js?v=hands-on-r28b';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=hands-on-r28b';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=hands-on-r28b';
-import {observeHudLayout} from './interface-layout.js?v=hands-on-r28b';
-import {createMapFocus} from './map-accessibility.js?v=hands-on-r28b';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=hands-on-r28b';
-import {placeLootDrops} from './loot-placement.js?v=hands-on-r28b';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=hands-on-r28b';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=hands-on-r28b';
-import {createFireZones} from './fire-grenades.js?v=hands-on-r28b';
-import {itemIconPath} from './item-icons.js?v=hands-on-r28b';
-import {createLootView} from './loot-view.js?v=hands-on-r28b';
-import {meleeTargets} from './melee.js?v=hands-on-r28b';
-import {createPuzzleHints} from './puzzle-hints.js?v=hands-on-r28b';
-import {createOnboarding} from './onboarding.js?v=hands-on-r28b';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=hands-on-r28b';
-import {validateSnapshot} from './snapshot-validation.js?v=hands-on-r28b';
-import {DIFFICULTY_RULES} from './difficulty.js?v=hands-on-r28b';
-import {createCampaignProfile} from './campaign-profile.js?v=hands-on-r28b';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=hands-on-r28b';
-import {createCampaignProgress} from './campaign-progress.js?v=hands-on-r28b';
-import {buildOperationEnvironment} from './operation-environments.js?v=hands-on-r28b';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=hands-on-r28b';
+import {buildArt} from './environment.js?v=completion-r30';
+import {soldier, animateSoldier} from './character.js?v=completion-r30';
+import {weapon, createCombatEffects} from './weapons.js?v=completion-r30';
+import {addRoomDetails} from './room-details.js?v=completion-r30';
+import {createMinimap} from './minimap.js?v=completion-r30';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=completion-r30';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=completion-r30';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=completion-r30';
+import {createPuzzleArt} from './puzzle-art.js?v=completion-r30';
+import {createWeaponPreview} from './weapon-preview.js?v=completion-r30';
+import {createProgression} from './progression.js?v=completion-r30';
+import {createProgressionArt} from './progression-art.js?v=completion-r30';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=completion-r30';
+import {buildWorld} from './world-render.js?v=completion-r30';
+import {createNavigator} from './navigation.js?v=completion-r30';
+import {createGameMenu} from './game-menu.js?v=completion-r30';
+import {createSaveSlots} from './save-slots.js?v=completion-r30';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=completion-r30';
+import {createEconomy} from './economy.js?v=completion-r30';
+import {createExplosions} from './explosion.js?v=completion-r30';
+import {createGameAudio} from './audio.js?v=completion-r30';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved,keyboardAimDirection} from './controls.js?v=completion-r30';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=completion-r30';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=completion-r30';
+import {observeHudLayout} from './interface-layout.js?v=completion-r30';
+import {createMapFocus} from './map-accessibility.js?v=completion-r30';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=completion-r30';
+import {placeLootDrops} from './loot-placement.js?v=completion-r30';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=completion-r30';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=completion-r30';
+import {createFireZones} from './fire-grenades.js?v=completion-r30';
+import {itemIconPath} from './item-icons.js?v=completion-r30';
+import {createLootView} from './loot-view.js?v=completion-r30';
+import {meleeTargets} from './melee.js?v=completion-r30';
+import {createPuzzleHints} from './puzzle-hints.js?v=completion-r30';
+import {createOnboarding} from './onboarding.js?v=completion-r30';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=completion-r30';
+import {validateSnapshot} from './snapshot-validation.js?v=completion-r30';
+import {DIFFICULTY_RULES} from './difficulty.js?v=completion-r30';
+import {createCampaignProfile} from './campaign-profile.js?v=completion-r30';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=completion-r30';
+import {createCampaignProgress} from './campaign-progress.js?v=completion-r30';
+import {buildOperationEnvironment} from './operation-environments.js?v=completion-r30';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=completion-r30';
 const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
@@ -187,19 +189,20 @@ function end(win){
  ended=true;active=false;audio.setPaused(true);tutorial?.hide();shooting=false;keys.clear();touchControls?.reset();menu?.hide();document.body.classList.remove('playing');
  persistCampaignProfile();if(win&&runConfig.mission==='campaign'&&runConfig.operation){campaignProgress.complete(runConfig.operation);void campaignProfile.claimCashReward('contract.'+runConfig.operation).then(result=>{if(result.ok&&result.amount>0){hud();const notes=$('#result-notes');if(notes){const payout=document.createElement('p');payout.textContent=`First-clear payout · +$${result.amount}`;notes.append(payout);}}}).catch(()=>{});}
  const result=recordResult(browserStorage(),runConfig,operationStats,win,explorationPercent());
+ const story=win?campaignDebrief(runConfig,campaignProgress.completed(),[...new Set([...progression.state.logs,...campaignProgress.researchLogs()])]):null;
  const sectorComplete=win&&runConfig.mission==='campaign'&&runConfig.operation&&runConfig.operation!==CAMPAIGN_OPERATIONS[CAMPAIGN_OPERATIONS.length-1].id;
  const overlay=$('#overlay');overlay.classList.remove('menu-overlay');overlay.style.display='flex';
- overlay.innerHTML=`<section class="result-panel${win?' result-success':''}" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="result-heading"><svg class="result-symbol" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="16" cy="16" r="13"/><path d="${win?'m9 16 5 5 9-10':'m11 11 10 10m0-10L11 21'}"/></svg><h1 id="result-title">${sectorComplete?'Sector secured':win?'Mission complete':'Operation failed'}</h1></div><p id="result-context" class="result-context"></p><div class="result-actions" id="result-actions"><button id="again" class="result-action">Retry operation</button><button id="back-menu" class="result-action">Main menu</button></div><details class="result-details"><summary>Run details</summary><dl class="debrief" id="result-stats"></dl><div id="result-notes"></div></details></section>`;
+ overlay.innerHTML=`<section class="result-panel${win?' result-success':''}" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="result-heading"><svg class="result-symbol" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="16" cy="16" r="13"/><path d="${win?'m9 16 5 5 9-10':'m11 11 10 10m0-10L11 21'}"/></svg><h1 id="result-title">${story?.finale?'Campaign complete':sectorComplete?'Sector secured':win?'Mission complete':'Operation failed'}</h1></div><p id="result-context" class="result-context"></p><section id="result-story" class="result-story" hidden></section><div class="result-actions" id="result-actions"><button id="again" class="result-action">Retry operation</button><button id="back-menu" class="result-action">Main menu</button></div><details class="result-details"><summary>Run details</summary><dl class="debrief" id="result-stats"></dl><div id="result-notes"></div></details></section>`;
  const difficulty={easy:'Recruit',normal:'Operator',hard:'Veteran'}[runConfig.difficulty]??runConfig.difficulty;
  $('#result-context').textContent=operationTitle()+' · '+difficulty+(result.personalBest?' · Personal best':'');
+ if(story){const panel=$('#result-story');panel.hidden=false;const heading=document.createElement('h2'),body=document.createElement('p');heading.textContent=story.heading;body.textContent=story.body;panel.append(heading,body);}
  const debrief=$('#result-stats');for(const [label,value] of [['Time',formatDuration(result.elapsed)],['Creatures defeated',result.kills],['Facility mapped',result.exploration+'%'],['Shots fired',result.shots],['Supplies used',`${result.medkits} medkits · ${result.grenades} grenades`]]){const term=document.createElement('dt'),detail=document.createElement('dd');term.textContent=label;detail.textContent=value;debrief.append(term,detail);}
  let primary=$('#again');
  if(win&&runConfig.mission==='campaign'){const mapButton=document.createElement('button');mapButton.textContent=sectorComplete?'Next operation':'Facility map';mapButton.className='result-action result-primary';mapButton.onclick=()=>{prepareOperation();menu.show('campaign-map');};$('#again').before(mapButton);primary=mapButton;}
  else if(!win&&checkpointMatchesOperation(latestSnapshot(),runConfig)){const button=document.createElement('button');button.id='restart-checkpoint';button.textContent='Restart checkpoint';button.className='result-action result-primary';button.onclick=queueCheckpointLoad;$('#again').before(button);primary=button;}
  else $('#again').className='result-action result-primary';
  if(win&&result.delta!==null){const difference=document.createElement('p');difference.className='debrief-delta';difference.textContent=(result.delta<0?'−':'+')+formatDuration(Math.abs(result.delta))+' vs previous best';$('#result-notes').append(difference);}
- if(win&&runConfig.operation==='hospital'){const transmission=document.createElement('p');transmission.className='debrief-transmission';transmission.textContent='The patient ledger links the specimens to refrigerated freight. The terminal manifest may identify who authorized the transfers.';$('#result-notes').append(transmission);}
- if(win&&(!runConfig.operation||runConfig.operation==='nest')&&new Set([...progression.state.logs,...campaignProgress.researchLogs()]).size===3){const transmission=document.createElement('p');transmission.className='debrief-transmission';transmission.textContent='The nest was a relay. The recovered research traces the colony’s orders to a sealed hospital annex. Its quarantine ledger may reveal who brought the specimens inside.';$('#result-notes').append(transmission);}
+ if(story?.evidence){const transmission=document.createElement('p');transmission.className='debrief-transmission';transmission.textContent=story.evidence;$('#result-notes').append(transmission);}
  $('#again').onclick=()=>{location.href=deploymentUrl(runConfig);};$('#back-menu').onclick=()=>menu.show('main');primary.focus?.();
 }
 
@@ -310,7 +313,7 @@ function simulate(dt){
  const collected=collectNearbyLoot(loot,player,weapons,los);if(collected.health||collected.rifle||collected.pistol){tutorial?.event('loot');audio.pickup();hud();if(collected.health)toast(`+${collected.health} HEALTH`);}
  refreshGuidance();
  const horde=progression.state.zones.find(z=>z.status==='active');
- $('#horde-status').hidden=!horde;if(horde)$('#horde-status').textContent=`${horde.label} · ${horde.remaining} / ${horde.total} REMAINING`;
+ const encounter=encounterStatus(horde),hordeDisplay=$('#horde-status');hordeDisplay.hidden=!encounter;if(encounter){hordeDisplay.textContent=encounter.text;hordeDisplay.dataset.phase=encounter.phase;hordeDisplay.setAttribute('aria-label',encounter.label);}
  for(const zone of progression.state.zones)if(zone.status==='cleared'&&!rewardedZones.has(zone.id)){rewardedZones.add(zone.id);player.hp=Math.min(player.maxHp,player.hp+8);hud();queueCheckpoint(zone.label+' cleared');}
  if(runConfig.mission!=='campaign'&&progression.isMissionComplete()){queueCheckpoint('Operation completed');commitCheckpoint();end(true);return;}
  if(checkpointPending)commitCheckpoint();

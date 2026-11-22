@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=hands-on-r28b';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=hands-on-r28b';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=hands-on-r28b';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=hands-on-r28b';
-import {validateSnapshot} from './snapshot-validation.js?v=hands-on-r28b';
-import {normalizeSettings} from './controls.js?v=hands-on-r28b';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=completion-r30';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=completion-r30';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=completion-r30';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=completion-r30';
+import {validateSnapshot} from './snapshot-validation.js?v=completion-r30';
+import {normalizeSettings} from './controls.js?v=completion-r30';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

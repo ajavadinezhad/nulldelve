@@ -1,8 +1,8 @@
-import {cashReward} from './mission-salvage.js?v=hands-on-r28b';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=hands-on-r28b';
-import {compatibleStorage} from './storage-compat.js?v=hands-on-r28b';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=hands-on-r28b';
-import {createEconomy} from './economy.js?v=hands-on-r28b';
+import {cashReward} from './mission-salvage.js?v=completion-r30';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=completion-r30';
+import {compatibleStorage} from './storage-compat.js?v=completion-r30';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=completion-r30';
+import {createEconomy} from './economy.js?v=completion-r30';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';
