@@ -165,15 +165,21 @@ public final class MainActivity extends Activity {
         handleBack();
     }
     private void handleBack() {
-        long now = SystemClock.elapsedRealtime();
-        if (now - lastBack < 1400) {
-            new AlertDialog.Builder(this).setTitle("Exit Nulldelve?")
-                    .setMessage("You can continue from your latest checkpoint.")
-                    .setNegativeButton("Cancel", null).setPositiveButton("Exit", (d, w) -> finish()).show();
-        } else {
-            game.evaluateJavascript("window.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true}))", null);
-        }
-        lastBack = now;
+        // Let the game navigate submenus before considering an app-level exit.
+        game.evaluateJavascript("window.dispatchEvent(new Event('nulldelve-back',{cancelable:true}))", unhandled -> {
+            if (isFinishing() || isDestroyed()) return;
+            if ("false".equals(unhandled)) { lastBack = 0; return; }
+            long now = SystemClock.elapsedRealtime();
+            if (now - lastBack < 1400) {
+                lastBack = 0;
+                new AlertDialog.Builder(this).setTitle("Exit Nulldelve?")
+                        .setMessage("You can continue from your latest checkpoint.")
+                        .setNegativeButton("Cancel", null).setPositiveButton("Exit", (d, w) -> finish()).show();
+            } else {
+                lastBack = now;
+                Toast.makeText(this, "Press Back again to exit", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     private void immersive() {
         if (Build.VERSION.SDK_INT >= 30) {

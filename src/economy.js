@@ -1,5 +1,5 @@
-import {cashReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=completion-r30';
-import {normalizeAttachments} from './weapon-attachments.js?v=completion-r30';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=preview-polish-r31';
+import {normalizeAttachments} from './weapon-attachments.js?v=preview-polish-r31';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','pistol'],UPGRADES=['damage','magazine','reload'];
@@ -12,7 +12,7 @@ const clamp=(value,min,max,fallback=0)=>typeof value==='number'&&Number.isFinite
 const integer=(value,min,max,fallback=0)=>Math.floor(clamp(value,min,max,fallback));
 
 export function createEconomy(snapshot){
-  const state={enemyRewardsVersion:1,claimedRewards:{},attachments:normalizeAttachments(),credits:150,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{damage:0,magazine:0,reload:0}])),magazineBonuses:Object.fromEntries(GUNS.map(gun=>[gun,0])),items:{medkit:0,grenade:0,fireGrenade:0},grenadeType:'frag',shield:0};
+  const state={enemyRewardsVersion:1,claimedRewards:{},replayAttempts:{},attachments:normalizeAttachments(),credits:150,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{damage:0,magazine:0,reload:0}])),magazineBonuses:Object.fromEntries(GUNS.map(gun=>[gun,0])),items:{medkit:0,grenade:0,fireGrenade:0},grenadeType:'frag',shield:0};
   function restore(saved){
     // An older save with no economy starts at the normal allowance. An explicit
     // economy object with malformed/zero credits never silently grants more money.
@@ -20,6 +20,7 @@ export function createEconomy(snapshot){
     const data=!legacy&&typeof saved==='object'&&!Array.isArray(saved)?saved:{};
     state.credits=legacy?150:integer(data.credits,0,CREDIT_LIMIT);
     state.attachments=normalizeAttachments(data.attachments);
+    state.replayAttempts=Object.fromEntries(Object.entries(data.replayAttempts??{}).filter(([operation,id])=>replayReward(id)?.operation===operation));
     state.enemyRewardsVersion=legacy||data.enemyRewardsVersion===1?1:0;state.claimedRewards=normalizeRewardLedger(data.claimedRewards);
     for(const gun of GUNS)for(const upgrade of UPGRADES)state.upgrades[gun][upgrade]=integer((gun==='rifle'?(data.upgrades?.rifle??data.upgrades?.carbine):data.upgrades?.[gun])?.[upgrade],0,3);
     // Existing purchases used six rounds per tier. Preserve that paid capacity
@@ -30,7 +31,7 @@ export function createEconomy(snapshot){
     state.shield=clamp(data.shield,0,60);
     return state;
   }
-  function serialize(){return {enemyRewardsVersion:state.enemyRewardsVersion,claimedRewards:{...state.claimedRewards},attachments:{...state.attachments},credits:state.credits,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{...state.upgrades[gun]}])),magazineBonuses:{...state.magazineBonuses},items:{...state.items},grenadeType:state.grenadeType,shield:state.shield};}
+  function serialize(){return {enemyRewardsVersion:state.enemyRewardsVersion,claimedRewards:{...state.claimedRewards},replayAttempts:{...state.replayAttempts},attachments:{...state.attachments},credits:state.credits,upgrades:Object.fromEntries(GUNS.map(gun=>[gun,{...state.upgrades[gun]}])),magazineBonuses:{...state.magazineBonuses},items:{...state.items},grenadeType:state.grenadeType,shield:state.shield};}
   function getOffers(){
     const offers=[];
     for(const gun of GUNS)for(const upgrade of UPGRADES){
@@ -69,7 +70,8 @@ export function createEconomy(snapshot){
     if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,amount:0,message:'Enemy reward already paid.'};
     state.claimedRewards[id]=true;const amount=variant==='paid'?0:rewardKill(variant);return {ok:true,amount,message:`+$${amount}`};
   }
-  function claimReward(id){const reward=cashReward(id);if(!reward)return {ok:false,message:'Unknown cash reward.'};if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,message:'Already collected.'};state.claimedRewards[id]=true;state.credits=Math.min(CREDIT_LIMIT,state.credits+reward.amount);return {ok:true,amount:reward.amount,message:`+$${reward.amount} · ${reward.label}`};}
+  function beginReplayAttempt(operation,token){const id=`replay.${operation}.${token}`;if(!replayReward(id))return {ok:false,message:'Unknown replay operation.'};state.replayAttempts[operation]=id;return {ok:true,rewardId:id,message:'Replay started.'};}
+  function claimReward(id){const reward=cashReward(id);if(reward?.token&&state.replayAttempts[reward.operation]!==id)return {ok:false,expired:true,message:'This replay attempt is no longer active.'};if(!reward)return {ok:false,message:'Unknown cash reward.'};if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,message:'Already collected.'};state.claimedRewards[id]=true;state.credits=Math.min(CREDIT_LIMIT,state.credits+reward.amount);return {ok:true,amount:reward.amount,message:`+$${reward.amount} · ${reward.label}`};}
   function consume(item){
     if(!['medkit','grenade','fireGrenade'].includes(item)||state.items[item]<=0)return false;
     state.items[item]--;return true;
@@ -80,5 +82,5 @@ export function createEconomy(snapshot){
     return {damage:clamp(base.damage,1,10000,1)+upgrades.damage,capacity:capacity+(state.magazineBonuses[key]??0),reload:Math.max(.5,reload-.18*upgrades.reload),interval};
   }
   restore(snapshot);
-  return {state,getOffers,purchase,rewardKill,claimReward,claimEnemyReward,migrateEnemyRewards,consume,stats,serialize,restore};
+  return {state,getOffers,purchase,rewardKill,beginReplayAttempt,claimReward,claimEnemyReward,migrateEnemyRewards,consume,stats,serialize,restore};
 }

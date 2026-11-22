@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const {SKILL_NODES,fieldSkillEffects}=require('../src/field-skills.js');
+const {SKILL_NODES,fieldSkillEffects,effectiveFieldStats}=require('../src/field-skills.js');
 const {PRIMARY_WEAPONS}=require('../src/arsenal.js');
 const {createEconomy}=require('../src/economy.js');
 const {applyWeaponAttachment,attachmentOptions}=require('../src/weapon-attachments.js');
@@ -17,6 +17,6 @@ test('every skill reload uses real upgraded and attached guns without compoundin
  const reloadSource=fragment('function reloadDuration()','function advanceWeaponTimers');
  for(const gun of [...PRIMARY_WEAPONS,{id:'pistol',capacity:12,reload:1.1,interval:.29,baseDamage:2}])for(const rank of [0,3])for(const attachment of gun.id==='pistol'?[{id:'standard'}]:attachmentOptions(gun.id)){
   const economy=createEconomy({credits:1000,upgrades:{[gun.id==='carbine'?'rifle':gun.id]:{reload:rank}}}),stats=economy.stats(gun.id,{capacity:gun.capacity,reload:gun.reload,interval:gun.interval,damage:gun.baseDamage}),profile=gun.id==='pistol'?{...gun,...stats}:applyWeaponAttachment({...gun,...stats},attachment.id),original=JSON.stringify(profile),base=profile.capacity/(profile.capacity*profile.interval+profile.reload);
-  for(const id of ids){const ctx={Math,Number,selected:'rifle',weapons:{rifle:profile},skillEffects:()=>fieldSkillEffects(id)};vm.createContext(ctx);vm.runInContext(reloadSource,ctx);const first=vm.runInContext('reloadDuration()',ctx),again=vm.runInContext('reloadDuration()',ctx);assert.equal(first,again);assert.ok(first>=.5&&first<=profile.reload);const throughput=profile.capacity/(profile.capacity*profile.interval+first);assert.ok(throughput/base<=1/.88+1e-10,'12% reload reduction cannot exceed its theoretical full-cycle upper bound');assert.equal(JSON.stringify(profile),original,'skill must never mutate the weapon or compound');}
+  for(const id of ids){const ctx={effectiveFieldStats,activeFieldSkill:id,Math,Number,selected:'rifle',weapons:{rifle:profile},skillEffects:()=>fieldSkillEffects(id)};vm.createContext(ctx);vm.runInContext(reloadSource,ctx);const first=vm.runInContext('reloadDuration()',ctx),again=vm.runInContext('reloadDuration()',ctx);assert.equal(first,again);assert.ok(first>=.5&&first<=profile.reload);const throughput=profile.capacity/(profile.capacity*profile.interval+first);assert.ok(throughput/base<=1/.88+1e-10,'12% reload reduction cannot exceed its theoretical full-cycle upper bound');assert.equal(JSON.stringify(profile),original,'skill must never mutate the weapon or compound');}
  }
 });

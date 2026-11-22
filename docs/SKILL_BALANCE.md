@@ -22,3 +22,7 @@ Close Quarters and Blast Control now unlock after Hospital, allowing first-clear
 Runtime coverage now includes 252 double-checkpoint combinations (12 skills × seven deployed operations × three difficulties). Restored run development is retained separately from newer base development, so a fresh/imported checkpoint does not lose its skill on the next save. Backups include base development and selection, with rollback on failed import; old backups without skill data remain accepted. Phone node inspection brings its detail/action into view and provides a return-to-tree control. Short landscape screens use a compact skill-menu frame.
 
 These are deterministic runtime, availability, resource-bound and persistence checks. They do not establish human mission survival, optimal play or equal player preference among skills.
+
+## r31 specialization continuity
+
+Training can be reset at base after confirmation, refunding all earned points. Reset revisions prevent stale deployment links from restoring old development. Specializations replace rather than stack their leaf bonuses, retaining only these bounded parent benefits: Reactive Plating heals65; Tactical Reload and Close Quarters retain10% sprint; Quick Cast retains15% explosive radius. Other leaf values remain unchanged. Armory/combat share effective reload calculations and upgrade previews preserve the0.5s floor.

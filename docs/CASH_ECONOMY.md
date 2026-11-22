@@ -51,3 +51,7 @@ Existing balances are never reduced. Profiles created before the ledger mark com
 Enemy, exploration and first-clear contract rewards now share a durable pending-payout queue. Claiming a reward records the pending identity before any asynchronous profile lock; startup recovers every reward type. This closes the first-clear/departure gap where progress could be saved before the contract payment finished. Backup export can flush the queue before capturing the wallet.
 
 A duplicate claim after a storage quota failure no longer deletes its recovery journal simply because the reward exists in memory. Journal cleanup now requires the stored profile to confirm the claim. Enemy retries also retain the original pending mutation payout rather than replacing it with a different amount after replay. Regression cases cover quota failure → duplicate → reopen, real pending contract interruption, exploration recovery, and a delayed backup flush. Existing prices and bonus strengths are unchanged.
+
+## r31 replay allowance
+
+A fresh replay of an already completed operation pays only at its actual successful exit: Breach$30, Command$40, Research$45, Containment$55, Nest$65, Hospital$75, Freight$90. This is a modest consumable allowance, not renewed kill income. The durable deployment token survives checkpoints and pays once. A newly started replay invalidates older tokens; an earned payout still being saved prevents replacement. First clears continue using their one-time contract.

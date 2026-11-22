@@ -1,11 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const {fieldSkillEffects}=require('../src/field-skills.js');
+const {fieldSkillEffects,effectiveFieldStats}=require('../src/field-skills.js');
 const {createGrenadeActions}=require('../src/grenade-actions.js');
 const {createFireZones}=require('../src/fire-grenades.js');
 const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8');
 const noop=()=>{};
 function fragment(start,end){const at=source.indexOf(start),stop=source.indexOf(end,at);assert.ok(at>=0&&stop>at);return source.slice(at,stop);}
-function context(skill,extra={}){const ctx={skillEffects:()=>fieldSkillEffects(skill),Math,Number,...extra};vm.createContext(ctx);return ctx;}
+function context(skill,extra={}){const ctx={activeFieldSkill:skill,effectiveFieldStats,skillEffects:()=>fieldSkillEffects(skill),Math,Number,...extra};vm.createContext(ctx);return ctx;}
 test('plating spends less existing armor, preserves overflow damage and never protects an unarmored player',()=>{
  for(const [skill,shield,expectedHp,expectedShield]of [['none',10,100,0],['plating',10,100,2],['plating',4,95,0],['plating',0,90,0]]){
   const ctx=context(skill,{player:{hp:100,hurtGrace:0},economy:{state:{shield}},audio:{bite:noop}});vm.runInContext(fragment('function applyPlayerDamage','function beginReload'),ctx);assert.equal(vm.runInContext('applyPlayerDamage(10)',ctx),true);assert.ok(Math.abs(ctx.player.hp-expectedHp)<1e-8);assert.ok(Math.abs(ctx.economy.state.shield-expectedShield)<1e-8);assert.equal(vm.runInContext('applyPlayerDamage(10)',ctx),false);

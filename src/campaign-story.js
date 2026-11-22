@@ -1,4 +1,4 @@
-import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=completion-r30';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=preview-polish-r31';
 
 const reports=Object.freeze({
  breach:{heading:'A way inside',body:'The access manifest points toward Command. The doors were locked from inside; this was more than an equipment failure.'},
@@ -7,7 +7,7 @@ const reports=Object.freeze({
  containment:{heading:'An opened cage',body:'The containment locks failed from within. With an evacuation route secured, you can reach the Nest and recover the source records.'},
  nest:{heading:'The relay falls silent',body:'The Nest was a relay, not the origin of the outbreak. Its black box points to the hospital annex. The quarantine records may reveal how the specimens arrived.'},
  hospital:{heading:'Patients became cargo',body:'The patient ledger links the quarantined specimens to refrigerated freight. The shipping manifest is the missing link between the hospital and the facility.'},
- freight:{heading:'Origin confirmed',body:'The cold-chain manifest completes the trail: specimens reached the facility through the hospital freight route. You escaped with the records that expose it. The operation is over; the evidence is out.'},
+ freight:{heading:'The evidence is out',body:'The shipping records trace Specimen 07 from the hospital cold chain into the facility’s buried power conduits. Cutting the Nest relay stopped its commands reaching the colony. You escaped with the patient ledger and shipping manifest: the evidence needed to expose the experiment.'},
 });
 
 /** Story follows actual exits; optional logs enrich it without hiding the next chapter. */

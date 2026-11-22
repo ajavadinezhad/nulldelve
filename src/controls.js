@@ -1,4 +1,4 @@
-import {initialQuality} from './device-presentation.js?v=completion-r30';
+import {initialQuality} from './device-presentation.js?v=preview-polish-r31';
 export const DEFAULT_BINDINGS=Object.freeze({moveUp:'KeyW',moveDown:'KeyS',moveLeft:'KeyA',moveRight:'KeyD',interact:'KeyE',reload:'KeyR',medkit:'KeyQ',grenade:'KeyG',cycleGrenade:'KeyC',sprint:'ShiftLeft',fire:'Space',knife:'KeyF',rifle:'Digit1',pistol:'Digit2',map:'KeyM',help:'KeyH',resetPuzzle:'KeyT',aimUp:'ArrowUp',aimDown:'ArrowDown',aimLeft:'ArrowLeft',aimRight:'ArrowRight'});
 export const ACTION_LABELS=Object.freeze({moveUp:'Move up',moveDown:'Move down',moveLeft:'Move left',moveRight:'Move right',interact:'Interact',reload:'Reload',medkit:'Use medkit',grenade:'Throw grenade',cycleGrenade:'Switch grenade type',sprint:'Sprint',fire:'Fire',knife:'Knife strike',rifle:'Equip rifle',pistol:'Equip pistol',map:'Full map',help:'Controls help',resetPuzzle:'Reset crates',aimUp:'Aim up',aimDown:'Aim down',aimLeft:'Aim left',aimRight:'Aim right'});
 export const BINDING_ACTIONS=Object.freeze(Object.keys(DEFAULT_BINDINGS));
@@ -31,7 +31,7 @@ export function normalizeSettings(value={}){
  const clamp=(n,min,max,fallback)=>Number.isFinite(Number(n))?Math.max(min,Math.min(max,Number(n))):fallback;
  return {
   brightness:clamp(value?.brightness,.7,1.5,1),quality:initialQuality(value?.quality,{coarse:globalThis.matchMedia?.('(pointer: coarse)')?.matches??false,touchPoints:globalThis.navigator?.maxTouchPoints??0,touch:value?.touchControls==='on'}),zoom:clamp(value?.zoom,14,32,22),showMinimap:typeof value?.showMinimap==='boolean'?value.showMinimap:true,
-  bindings:normalizeBindings(value?.bindings),touchControls:['on','off','auto'].includes(value?.touchControls)?value.touchControls:'auto',aimMode:['mouse','keyboard','auto'].includes(value?.aimMode)?value.aimMode:'auto',hudScale:clamp(value?.hudScale,.85,1.5,1),
+  bindings:normalizeBindings(value?.bindings),touchHandedness:value?.touchHandedness==='left'?'left':'right',touchSize:value?.touchSize==='large'?'large':'normal',touchControls:['on','off','auto'].includes(value?.touchControls)?value.touchControls:'auto',aimMode:['mouse','keyboard','auto'].includes(value?.aimMode)?value.aimMode:'auto',hudScale:clamp(value?.hudScale,.85,1.5,1),
   masterVolume:clamp(value?.masterVolume,0,1,.65),sfxVolume:clamp(value?.sfxVolume,0,1,.8),musicVolume:clamp(value?.musicVolume,0,1,.35),muted:typeof value?.muted==='boolean'?value.muted:false,reducedEffects:typeof value?.reducedEffects==='boolean'?value.reducedEffects:false
  };
 }

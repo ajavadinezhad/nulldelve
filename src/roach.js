@@ -118,12 +118,12 @@ export function createRoach(scene,variant='normal'){
   root.userData.pulseTelegraph=telegraph;root.userData.pulseMaterial=dangerMaterial;
  }
  // Conservative 1.7 × 7.9m warning covers the 6.2m rush plus its .85m hit radius at both ends.
- if(variant==='charger'){const warning=new THREE.Mesh(new THREE.PlaneGeometry(1.7,7.9),new THREE.MeshBasicMaterial({color:0xffaa46,transparent:true,opacity:.25,depthWrite:false,side:THREE.DoubleSide}));warning.name='charge-warning';warning.rotation.x=-Math.PI/2;warning.position.set(0,.025,-3.1/stats.scale);warning.scale.set(1/(.94*stats.scale),1/stats.scale,1);warning.visible=false;root.add(warning);root.userData.chargeTelegraph=warning;}
- if(variant==='screecher'||variant==='leaper'){
-  const radius=variant==='screecher'?3.2:1.15,warning=new THREE.Group();warning.name=variant+'-danger-zone';warning.scale.set(1/root.scale.x,1/root.scale.y,1/root.scale.z);warning.position.y=.025/stats.scale;warning.visible=false;root.add(warning);
-  const fill=new THREE.Mesh(new THREE.CircleGeometry(radius,40),new THREE.MeshBasicMaterial({color:variant==='screecher'?0xebaa7a:0xf0c887,transparent:true,opacity:.15,depthWrite:false,side:THREE.DoubleSide}));fill.rotation.x=-Math.PI/2;warning.add(fill);
-  const edge=new THREE.Mesh(new THREE.RingGeometry(radius-.07,radius,40),new THREE.MeshBasicMaterial({color:variant==='screecher'?0xffbd8c:0xffdfa2,transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));edge.rotation.x=-Math.PI/2;edge.position.y=.007;warning.add(edge);
-  root.userData[variant==='screecher'?'shriekTelegraph':'leapTelegraph']=warning;root.userData.specialFill=fill.material;
+ if(variant==='charger'||variant==='boss'){const warning=new THREE.Mesh(new THREE.PlaneGeometry(1.7,7.9),new THREE.MeshBasicMaterial({color:0xffaa46,transparent:true,opacity:.25,depthWrite:false,side:THREE.DoubleSide}));warning.name='charge-warning';warning.rotation.x=-Math.PI/2;warning.position.set(0,.025,-3.1/stats.scale);warning.scale.set(1/root.scale.x,1/root.scale.z,1);warning.visible=false;root.add(warning);root.userData.chargeTelegraph=warning;}
+ if(variant==='screecher'||variant==='leaper'||variant==='boss'){
+  const radial=variant!=='leaper',radius=radial?3.2:1.15,warning=new THREE.Group();warning.name=variant+'-danger-zone';warning.scale.set(1/root.scale.x,1/root.scale.y,1/root.scale.z);warning.position.y=.025/stats.scale;warning.visible=false;root.add(warning);
+  const fill=new THREE.Mesh(new THREE.CircleGeometry(radius,40),new THREE.MeshBasicMaterial({color:radial?0xebaa7a:0xf0c887,transparent:true,opacity:.15,depthWrite:false,side:THREE.DoubleSide}));fill.rotation.x=-Math.PI/2;warning.add(fill);
+  const edge=new THREE.Mesh(new THREE.RingGeometry(radius-.07,radius,40),new THREE.MeshBasicMaterial({color:radial?0xffbd8c:0xffdfa2,transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));edge.rotation.x=-Math.PI/2;edge.position.y=.007;warning.add(edge);
+  root.userData[radial?'shriekTelegraph':'leapTelegraph']=warning;root.userData.specialFill=fill.material;
  }
  Object.assign(root.userData,{variant,body,legs,antennae,phase:0,time:0,lastPosition:null,speed:0,animationRate:variant==='runner'?1.3:variant==='boss'?.65:variant==='brute'?.8:1});
  scene.add(root);return root;

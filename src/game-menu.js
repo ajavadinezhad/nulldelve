@@ -1,12 +1,12 @@
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=completion-r30';
-import {compatibleStorage} from './storage-compat.js?v=completion-r30';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=completion-r30';
-import {createCampaignMap} from './campaign-map.js?v=completion-r30';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=completion-r30';
-import {createItemIcon} from './item-icons.js?v=completion-r30';
-import {buildMissionPreview} from './mission-previews.js?v=completion-r30';
-import {renderShop} from './shop-ui.js?v=completion-r30';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=completion-r30';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=preview-polish-r31';
+import {compatibleStorage} from './storage-compat.js?v=preview-polish-r31';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=preview-polish-r31';
+import {createCampaignMap} from './campaign-map.js?v=preview-polish-r31';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=preview-polish-r31';
+import {createItemIcon} from './item-icons.js?v=preview-polish-r31';
+import {buildMissionPreview} from './mission-previews.js?v=preview-polish-r31';
+import {renderShop} from './shop-ui.js?v=preview-polish-r31';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=preview-polish-r31';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -26,11 +26,11 @@ function skillIcon(node){const paths={armory:'menu-armory',move:'skill-mobility'
 function formatTime(value){if(!value)return 'Time unavailable';try{const date=new Date(value);return Number.isNaN(date.getTime())?'Time unavailable':date.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch{return 'Time unavailable';}}
 
 /** DOM-only game menu. The owning game controls gameplay, save storage and settings effects. */
-export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>{},onExportBackup=null,onPreviewBackup=null,onImportBackup=null,onContinue=()=>{},onLoad=()=>{},onLoadCheckpoint=()=>{},onSave=()=>{},onPurchase=()=>{},onFieldSkill=()=>{},onResume=()=>{},onClose=()=>{},onSettings=()=>{},getStatus=()=>({active:false,slots:[],canContinue:false})}){
+export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>{},onExportBackup=null,onPreviewBackup=null,onImportBackup=null,onContinue=()=>{},onLoad=()=>{},onLoadCheckpoint=()=>{},onSave=()=>{},onPurchase=()=>{},onFieldSkill=()=>{},onRespecFieldSkills=null,onResume=()=>{},onClose=()=>{},onSettings=()=>{},getStatus=()=>({active:false,slots:[],canContinue:false})}){
  const settings=readSettings();
  const previousDifficulty=status().config?.difficulty;
  let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty=['easy','normal','hard'].includes(previousDifficulty)?previousDifficulty:'normal',statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,selectedSkillBranch=null,backupPreview=null,keyboardOpen=null;
- let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems',revealSkillDetails=false,revealSkillTree=false;
+ let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems',revealSkillDetails=false,revealSkillTree=false,confirmTrainingReset=false;
  const compactSkills=()=>typeof matchMedia==='function'&&matchMedia('(max-width:900px)').matches;
  const nestedScrollPositions=new Map();
  function status(){try{return getStatus()??{active:false,slots:[],canContinue:false};}catch{return {active:false,slots:[],canContinue:false};}}
@@ -138,11 +138,11 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function drawPersistenceWarning(current){if(!current.persistenceWarning)return;const panel=element('section','persistence-warning');panel.setAttribute('role','status');panel.append(element('strong','','Session only'),element('span','',typeof current.persistenceWarning==='string'?current.persistenceWarning:'Download a backup before closing this page.'));if(onExportBackup){const download=button('Download backup',()=>action(downloadBackup,[],{close:false}),'menu-button secondary');download.dataset.focusKey='warning-backup';panel.append(download);}shell.append(panel);}
  function drawBackup(){
   if(!onExportBackup&&!onPreviewBackup)return;
-  const panel=element('section','backup-panel');panel.append(element('h3','','Backup'));
+  const panel=element('section','backup-panel');panel.append(element('h3','','Progress backup'),element('p','menu-description','Move your checkpoint, purchases and skills between devices.'));
   const row=element('div','menu-actions');
   if(onExportBackup){const download=button('Download',()=>action(downloadBackup,[],{close:false}),'menu-button secondary');download.dataset.focusKey='backup-download';row.append(download);}
   if(onPreviewBackup){const label=element('label','backup-file-label','Restore '),input=element('input');input.type='file';input.accept='.json,application/json';input.setAttribute('aria-label','Choose a backup file to preview');input.addEventListener('change',async()=>{const file=input.files?.[0];if(!file)return;backupPreview=null;if(file.size>10*1024*1024){notice('Choose a backup smaller than 10 MB.');return;}await action(async()=>{backupPreview=await onPreviewBackup(await file.text());return {message:'Ready to restore.'};},[],{close:false});});label.append(input);row.append(label);}panel.append(row);
-  if(backupPreview){const preview=element('div','backup-preview'),saves=(backupPreview.slots??[]).filter(Boolean);preview.append(element('strong','','Backup ready to restore'),element('p','',`${saves.length} manual save${saves.length===1?'':'s'}${backupPreview.checkpoint?' and an automatic checkpoint':''}${backupPreview.hasSettings?' · Includes settings':''}${backupPreview.hasCampaign?' · Campaign progress':''}${backupPreview.hasProfile?' · Weapons and supplies':''}.`));for(const save of saves)preview.append(element('p','slot-meta',`${save.name} · ${formatTime(save.time)}`));preview.append(element('p','menu-description','Restoring replaces current progress.'));const confirm=button('Restore this backup',()=>action(async()=>{const result=await onImportBackup?.(backupPreview.id);if(result?.ok!==false)backupPreview=null;return result;},[],{close:false}),'menu-button danger');confirm.dataset.focusKey='backup-confirm';preview.append(confirm,button('Cancel',()=>{backupPreview=null;render(false);},'menu-button secondary'));panel.append(preview);}content.append(panel);
+  if(backupPreview){const preview=element('div','backup-preview');preview.append(element('strong','','Backup ready to restore'),element('p','',`${backupPreview.checkpoint?'Checkpoint · ':''}${backupPreview.hasCampaign?'Campaign · ':''}${backupPreview.hasProfile?'Purchases · ':''}${backupPreview.hasSettings?'Settings':''}`.replace(/ · $/,'' )));preview.append(element('p','menu-description','Restoring replaces current progress.'));const confirm=button('Restore this backup',()=>action(async()=>{const result=await onImportBackup?.(backupPreview.id);if(result?.ok!==false)backupPreview=null;return result;},[],{close:false}),'menu-button danger');confirm.dataset.focusKey='backup-confirm';preview.append(confirm,button('Cancel',()=>{backupPreview=null;render(false);},'menu-button secondary'));panel.append(preview);}content.append(panel);
  }
  function drawArmory(current){
   heading('','Armory');
@@ -152,7 +152,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
    const completed=current.completedOperations??[],state=current.skillState??{learned:[],selected:current.fieldSkill??'none'};
    selectedSkill=[...SKILL_NODES,{id:'none'}].some(node=>node.id===selectedSkill)?selectedSkill:(current.fieldSkill??'none');
    const skills=element('div','skill-tree'),map=element('div','skill-map'),details=element('section','skill-detail');
-   skills.append(element('p','training-balance',`${trainingPoints(state,completed)} training points`));
+   const points=trainingPoints(state,completed),allPointsEarned=CAMPAIGN_OPERATIONS.every(operation=>completed.includes(operation.id));skills.append(element('p','training-balance',`${points} training points`));if(allPointsEarned&&points===0)skills.append(element('p','skill-requirement','All operation points earned · Reset training to try another branch'));if(onRespecFieldSkills&&state.learned.length){const reset=element('div','training-reset');if(confirmTrainingReset){reset.append(element('p','','Reset learned skills and return all training points? Your weapons and purchases stay.'),button('Reset training',()=>action(async()=>{const result=await onRespecFieldSkills();if(result?.ok!==false)confirmTrainingReset=false;return result;},[],{close:false}),'menu-button secondary'),button('Cancel',()=>{confirmTrainingReset=false;render(false);},'menu-button secondary'));}else reset.append(button('Reset training',()=>{confirmTrainingReset=true;render(false);},'menu-button secondary'));skills.append(reset);}
    const nodeButton=(node,tier)=>{
     const learned=node.id==='none'||state.learned.includes(node.id),available=node.id==='none'||skillLearnable(node.id,state,completed),equipped=current.fieldSkill===node.id;
     const control=button('',()=>{selectedSkill=node.id;selectedSkillBranch=SKILL_BRANCHES.find(branch=>branch.nodes.includes(node.id))?.id??selectedSkillBranch;revealSkillDetails=compactSkills();render(false);},'skill-circle'+(learned?' developed':'')+(available&&!learned?' available':'')+(equipped?' equipped':'')+(!learned&&!available?' locked':''));
@@ -175,7 +175,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
    details.id='skill-detail';details.dataset.focusKey='skill-detail';details.tabIndex=-1;details.setAttribute('aria-label','Selected skill');details.append(skillIcon(node),element('h3','',node.name),element('p','',node.description));
    const treeReturn=button('← Tree',()=>{revealSkillTree=true;render(false);},'skill-tree-return');treeReturn.dataset.focusKey='skill-tree-return';treeReturn.setAttribute('aria-label','Return to selected skill in tree');details.append(treeReturn);
    details.append(element('span','skill-equipped-summary',`Equipped: ${[...FIELD_SKILLS,...SKILL_NODES].find(skill=>skill.id===current.fieldSkill)?.name??'Standard kit'}`));
-   const requirement=!fieldSkillUnlocked(node.id,completed)?`Complete ${node.unlockAfter}`:node.requires&&!state.learned.includes(node.requires)?`Develop ${SKILL_NODES.find(n=>n.id===node.requires).name} first`:trainingPoints(state,completed)<1?'Earn a training point from your next first clear':'1 training point';
+   const requirement=!fieldSkillUnlocked(node.id,completed)?`Complete ${node.unlockAfter}`:node.requires&&!state.learned.includes(node.requires)?`Develop ${SKILL_NODES.find(n=>n.id===node.requires).name} first`:points<1?(allPointsEarned?'Reset training to try another branch':'Earn a training point from your next first clear'):'1 training point';
    if(!learned)details.append(element('p','skill-requirement',requirement));
    const activate=button(current.fieldSkill===node.id?'Equipped':learned?'Equip':'Develop · 1 point',()=>{revealSkillDetails=compactSkills();return action(onFieldSkill,[learned?node.id:'learn:'+node.id],{close:false});},'menu-button skill-activate');activate.disabled=current.fieldSkill===node.id||!learned&&!canLearn;activate.dataset.focusKey='skill-activate';details.append(activate,element('small','','One skill equipped. First clears earn training points.'));
    skills.append(map,details);content.append(skills);
@@ -186,7 +186,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function persist(){try{compatibleStorage(localStorage).setItem(SETTINGS_KEY,JSON.stringify(settings));}catch{}try{onSettings({...settings});}catch{notice('The display settings could not be applied.');}}
  function drawSettings(){
   heading('','Settings');
-  const tabs=element('div','menu-tabs');tabs.setAttribute('aria-label','Settings categories');for(const [id,label] of [['controls','Controls'],['audio','Audio'],['display','Display']]){const tab=button(label,()=>{settingsTab=id;render(false);},`menu-button secondary${settingsTab===id?' selected':''}`);tab.dataset.focusKey='settings-'+id;tab.setAttribute('aria-pressed',String(settingsTab===id));tabs.append(tab);}content.append(tabs);
+  const tabs=element('div','menu-tabs');tabs.setAttribute('aria-label','Settings categories');for(const [id,label] of [['controls','Controls'],['audio','Audio'],['display','Display'],['progress','Progress']]){const tab=button(label,()=>{settingsTab=id;render(false);},`menu-button secondary${settingsTab===id?' selected':''}`);tab.dataset.focusKey='settings-'+id;tab.setAttribute('aria-pressed',String(settingsTab===id));tabs.append(tab);}content.append(tabs);
   const grid=element('div','settings-grid');
   function range(key,title,min,max,step,format){const label=element('label','setting-row'),id=`game-setting-${key}`;label.htmlFor=id;const input=element('input');input.id=id;input.type='range';input.min=min;input.max=max;input.step=step;input.value=settings[key];const output=element('output','',format(settings[key]));output.htmlFor=id;input.addEventListener('input',()=>{settings[key]=Number(input.value);output.textContent=format(settings[key]);persist();});label.append(element('span','',title),input,output);grid.append(label);}
   function choice(key,title,options){const row=element('label','setting-row'),id=`game-setting-${key}`;row.htmlFor=id;const select=element('select');select.id=id;for(const [value,text] of options){const option=element('option','',text);option.value=value;select.append(option);}select.value=settings[key];select.addEventListener('change',()=>{settings[key]=select.value;persist();});row.append(element('span','',title),select);grid.append(row);}
@@ -198,13 +198,14 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   range('hudScale','Desktop HUD size',.85,1.5,.05,value=>`${Math.round(value*100)}%`);toggle('showMinimap','Show minimap');toggle('reducedEffects','Reduce flashes and effects');}
   if(settingsTab==='audio'){toggle('muted','Mute all sound');
   for(const [key,title] of [['masterVolume','Master volume'],['sfxVolume','Effects volume'],['musicVolume','Music volume']])range(key,title,0,1,.05,value=>`${Math.round(value*100)}%`);}
-  if(settingsTab==='controls'){choice('touchControls','Touch controls',[['auto','Automatic'],['on','On'],['off','Off']]);choice('aimMode','Aiming preference',[['auto','Mouse + keyboard'],['mouse','Mouse only'],['keyboard','Keyboard only']]);
+  if(settingsTab==='progress')drawBackup();
+  if(settingsTab==='controls'){choice('touchHandedness','Movement stick',[['right','Left side'],['left','Right side']]);choice('touchSize','Touch control size',[['normal','Normal'],['large','Large']]);choice('touchControls','Touch controls',[['auto','Automatic'],['on','On'],['off','Off']]);choice('aimMode','Aiming preference',[['auto','Mouse + keyboard'],['mouse','Mouse only'],['keyboard','Keyboard only']]);
   const keyboard=element('details','keyboard-controls');if(keyboardOpen===null)keyboardOpen=!(settings.touchControls==='on'||settings.touchControls!=='off'&&(globalThis.matchMedia?.('(pointer: coarse)')?.matches||globalThis.navigator?.maxTouchPoints>0));keyboard.open=keyboardOpen;keyboard.addEventListener('toggle',()=>{keyboardOpen=keyboard.open;});keyboard.append(element('summary','','Keyboard controls'));
   const note=element('p','settings-controls-note','Select a control, then press a key. Esc cancels.');keyboard.append(note);
   const bindings=element('div','binding-grid');
   for(const key of BINDING_ACTIONS){const row=element('div','binding-row');row.append(element('span','',ACTION_LABELS[key]));const control=button(formatKey(settings.bindings[key]),()=>{captureAction=key;for(const other of bindings.querySelectorAll('button'))other.classList.remove('capturing');control.classList.add('capturing');control.textContent='Press a key…';notice(`Choose a key for ${ACTION_LABELS[key].toLowerCase()}. Escape cancels.`);},'menu-button secondary binding-button');control.dataset.action=key;control.dataset.focusKey='binding-'+key;control.setAttribute('aria-label',`Change ${ACTION_LABELS[key].toLowerCase()} key, currently ${formatKey(settings.bindings[key])}`);row.append(control);bindings.append(row);}
   keyboard.append(bindings);grid.append(keyboard);}content.append(grid);
-  actions().append(button('Restore defaults',()=>{captureAction=null;const defaults=normalizeSettings();const keys=settingsTab==='controls'?['bindings','aimMode','touchControls']:settingsTab==='audio'?['muted','masterVolume','sfxVolume','musicVolume']:['brightness','quality','zoom','hudScale','showMinimap','reducedEffects'];for(const key of keys)if(key in defaults)settings[key]=defaults[key];persist();render(false);},'menu-button secondary'),button('Back',()=>changeView(returnView),'menu-button primary'));
+  const settingsActions=actions();if(settingsTab!=='progress')settingsActions.append(button('Restore defaults',()=>{captureAction=null;const defaults=normalizeSettings();const keys=settingsTab==='controls'?['bindings','aimMode','touchControls','touchHandedness','touchSize']:settingsTab==='audio'?['muted','masterVolume','sfxVolume','musicVolume']:['brightness','quality','zoom','hudScale','showMinimap','reducedEffects'];for(const key of keys)if(key in defaults)settings[key]=defaults[key];persist();render(false);},'menu-button secondary'));settingsActions.append(button('Back',()=>changeView(returnView),'menu-button primary'));
  }
 
  function render(focus=true){
@@ -214,7 +215,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r30'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r31'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){
@@ -227,10 +228,11 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   if(next==='campaign-map'){const current=status(),done=current.completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;if(['easy','normal','hard'].includes(current.config?.difficulty))difficulty=current.config.difficulty;}
   open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
  }
+ function back(){if(!open)return false;if(busy)return true;if(captureAction){captureAction=null;render(false);notice('Key change cancelled.');return true;}if(view==='pause')action(onResume);else if(view==='campaign-map')changeView('missions');else if(view!=='main')changeView(returnView);else if(status().active)changeView('pause');else return false;return true;}
  function hide(){captureAction=null;open=false;overlay.style.display='none';overlay.classList.remove('menu-overlay');if(previousFocus?.isConnected)previousFocus.focus?.({preventScroll:true});onClose();}
  overlay.addEventListener('keydown',event=>{
   if(!open)return;
-  if(!captureAction&&event.code==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(view==='pause')action(onResume);else if(view==='campaign-map')changeView('missions');else if(view!=='main')changeView(returnView);else if(status().active)changeView('pause');return;}
+  if(event.code==='Escape'){event.preventDefault();event.stopImmediatePropagation();back();return;}
   if(!captureAction)return;
   event.preventDefault();event.stopImmediatePropagation();
   if(event.code==='Escape'){captureAction=null;render(false);notice('Key change cancelled.');return;}
@@ -249,5 +251,5 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   else if(!event.shiftKey&&(document.activeElement===last||!panel.contains(document.activeElement))){event.preventDefault();first.focus();}
  });
  show('main');
- return {show,hide,refresh:()=>render(false),isOpen:()=>open,settings};
+ return {show,hide,back,refresh:()=>render(false),isOpen:()=>open,settings};
 }

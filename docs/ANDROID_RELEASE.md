@@ -103,3 +103,12 @@ the source. Artifacts are in `dist/android/nulldelve-0.1.1-release.apk` and
 works on their Samsung phone. Version 0.1.1 still needs an on-device check.
 Full manual playthroughs of every mission have not been completed; see
 `HANDS_ON_PLAYTEST.md` for actual coverage.
+
+## r31 preview (0.1.2 / code 3)
+
+Includes the gap-review fixes and closer stable phone framing. Signed APK/AAB
+verification passes; all113 packaged game assets match source. See
+PREVIEW_GAPS_R31.md for implementation and test evidence. Output:
+`dist/android/nulldelve-0.1.2-release.apk` and
+`dist/android/nulldelve-0.1.2-play.aab`. This version is not yet verified on a
+physical phone. Google Play publication remains on hold.

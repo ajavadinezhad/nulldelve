@@ -42,10 +42,10 @@ test('twelve distinct skills form three prerequisite spines with specialization 
  for(const branch of SKILL_BRANCHES){assert.equal(branch.nodes.length,4);const [base,advanced,...leaves]=branch.nodes;assert.equal(SKILL_NODES.find(node=>node.id===advanced).requires,base);for(const id of leaves)assert.equal(SKILL_NODES.find(node=>node.id===id).requires,advanced);}
  for(const leaf of ['plating','triage','quickloader','closequarters','steadythrow','widearea'])assert.equal(skillLearnable(leaf,{learned:[]},allOperations),false);
 });
-test('specializations provide bounded mutually exclusive abilities without stacking ancestors',()=>{
- const changed={plating:['armorDamageMultiplier',.8],triage:['medkitHealing',85],quickloader:['reloadMultiplier',.88],closequarters:['meleeDamage',2],steadythrow:['grenadeChargeMultiplier',.8],widearea:['grenadeRadiusMultiplier',1.25]};
- for(const [id,[key,value]]of Object.entries(changed)){assert.equal(fieldSkillEffects(id)[key],value);assert.ok(Object.isFrozen(fieldSkillEffects(id)));for(const other of Object.keys(fieldSkillEffects('none')))if(other!==key)assert.equal(fieldSkillEffects(id)[other],fieldSkillEffects('none')[other],id+' does not stack '+other);}
- const skills=createFieldSkills(store());for(const id of ['runner','pathfinder','quickloader'])assert.ok(skills.learn(id,allOperations).ok);assert.equal(skills.selected(allOperations),'quickloader');assert.equal(fieldSkillEffects(skills.selected(allOperations)).sprintMultiplier,1);assert.equal(trainingPoints(skills.serialize(allOperations),allOperations),4);
+test('specializations retain modest same-branch inheritance without combining every developed skill',()=>{
+ const changed={plating:{armorDamageMultiplier:.8,medkitHealing:65},triage:{medkitHealing:85},quickloader:{reloadMultiplier:.88,sprintMultiplier:1.1},closequarters:{meleeDamage:2,sprintMultiplier:1.1},steadythrow:{grenadeChargeMultiplier:.8,grenadeRadiusMultiplier:1.15},widearea:{grenadeRadiusMultiplier:1.25}};
+ for(const [id,overrides]of Object.entries(changed)){assert.deepEqual(fieldSkillEffects(id),{...fieldSkillEffects('none'),...overrides});assert.ok(Object.isFrozen(fieldSkillEffects(id)));}
+ const skills=createFieldSkills(store());for(const id of ['runner','pathfinder','quickloader'])assert.ok(skills.learn(id,allOperations).ok);assert.equal(skills.selected(allOperations),'quickloader');assert.equal(fieldSkillEffects(skills.selected(allOperations)).sprintMultiplier,1.1);assert.equal(trainingPoints(skills.serialize(allOperations),allOperations),4);
 });
 test('seven earned points force branch choices and stale imports cannot erase developed leaves',()=>{
  const storage=store(),skills=createFieldSkills(storage);for(const id of ['runner','pathfinder','quickloader','closequarters','demolition','ordnance','widearea'])assert.ok(skills.learn(id,allOperations).ok);

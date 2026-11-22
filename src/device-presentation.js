@@ -3,16 +3,27 @@ export function initialQuality(savedQuality,{coarse=false,touchPoints=0,touch=fa
  if(['low','medium','high'].includes(savedQuality))return savedQuality;
  return coarse||touch||touchPoints>0?'medium':'high';
 }
-/** Touch framing is symmetric across rotation: swap the visible world axes
- * instead of shrinking the operator when the viewport becomes shorter.
- * Keep the saved zoom independent of orientation; bound extreme aspect ratios.
+/** Phones use a fixed short-axis span. Browser bars can resize the long axis
+ * without changing actor scale, and rotation preserves the same close framing.
+ * The saved zoom remains effective; desktop framing is unchanged.
  */
 export function cameraViewSize(viewHeight=22,aspect=1,touch=false){
  const base=Number.isFinite(viewHeight)?Math.max(14,Math.min(32,viewHeight)):22;
  const ratio=Number.isFinite(aspect)&&aspect>0?aspect:1;
- const compensation=touch?Math.max(.5,Math.min(2,1/Math.sqrt(ratio))):1;
- const height=base*compensation;
+ const shortSpan=base*.6;
+ const height=touch?shortSpan/Math.min(1,Math.max(.2,ratio)):base;
  return {height,width:height*ratio};
+}
+/** Smooth zoom only, never the viewport aspect: rotation must not stretch actors. */
+export function createCameraFraming(){
+ let current=null;
+ return {update(zoom,aspect,touch,dt=0,{snap=false}={}){
+  const target=Number.isFinite(zoom)?Math.max(14,Math.min(32,zoom)):22;
+  if(current===null||snap)current=target;
+  else current+=(target-current)*(1-Math.exp(-10*Math.max(0,Math.min(.1,Number(dt)||0))));
+  if(Math.abs(target-current)<.001)current=target;
+  return cameraViewSize(current,aspect,touch);
+ }};
 }
 
 /** Respect high-density screens while bounding the render buffer's GPU cost. */

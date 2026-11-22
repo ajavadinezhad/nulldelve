@@ -1,68 +1,68 @@
-import {campaignDebrief} from './campaign-story.js?v=completion-r30';
-import {encounterStatus} from './encounter-status.js?v=completion-r30';
-import {SALVAGE_CACHES} from './mission-salvage.js?v=completion-r30';
-import {createSalvageArt} from './salvage-art.js?v=completion-r30';
-import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=completion-r30';
-import {createFieldSkills,fieldSkillEffects,normalizeFieldSkill} from './field-skills.js?v=completion-r30';
-import {applyWeaponAttachment} from './weapon-attachments.js?v=completion-r30';
-import {createMutationNotes} from './mutation-notes.js?v=completion-r30';
-import {grantHospitalAmmo} from './mission-supplies.js?v=completion-r30';
-import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=completion-r30';
-import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=completion-r30';
-import {createGrenadeActions} from './grenade-actions.js?v=completion-r30';
-import {cameraViewSize,renderPixelRatio} from './device-presentation.js?v=completion-r30';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=completion-r30';
-import {compatibleStorage} from './storage-compat.js?v=completion-r30';
-import {createTouchControls} from './touch-controls.js?v=completion-r30';
-import {createHudFeedback} from './hud-feedback.js?v=completion-r30';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=completion-r30';
+import {campaignDebrief} from './campaign-story.js?v=preview-polish-r31';
+import {encounterStatus} from './encounter-status.js?v=preview-polish-r31';
+import {SALVAGE_CACHES} from './mission-salvage.js?v=preview-polish-r31';
+import {createSalvageArt} from './salvage-art.js?v=preview-polish-r31';
+import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=preview-polish-r31';
+import {createFieldSkills,fieldSkillEffects,effectiveFieldStats,normalizeFieldSkill} from './field-skills.js?v=preview-polish-r31';
+import {applyWeaponAttachment} from './weapon-attachments.js?v=preview-polish-r31';
+import {createMutationNotes} from './mutation-notes.js?v=preview-polish-r31';
+import {grantHospitalAmmo} from './mission-supplies.js?v=preview-polish-r31';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=preview-polish-r31';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=preview-polish-r31';
+import {createGrenadeActions} from './grenade-actions.js?v=preview-polish-r31';
+import {createCameraFraming,renderPixelRatio} from './device-presentation.js?v=preview-polish-r31';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=preview-polish-r31';
+import {compatibleStorage} from './storage-compat.js?v=preview-polish-r31';
+import {createTouchControls} from './touch-controls.js?v=preview-polish-r31';
+import {createHudFeedback} from './hud-feedback.js?v=preview-polish-r31';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=preview-polish-r31';
 const puzzleDiscovery=createPuzzleDiscovery();
 const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=completion-r30';
-import {soldier, animateSoldier} from './character.js?v=completion-r30';
-import {weapon, createCombatEffects} from './weapons.js?v=completion-r30';
-import {addRoomDetails} from './room-details.js?v=completion-r30';
-import {createMinimap} from './minimap.js?v=completion-r30';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=completion-r30';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=completion-r30';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=completion-r30';
-import {createPuzzleArt} from './puzzle-art.js?v=completion-r30';
-import {createWeaponPreview} from './weapon-preview.js?v=completion-r30';
-import {createProgression} from './progression.js?v=completion-r30';
-import {createProgressionArt} from './progression-art.js?v=completion-r30';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=completion-r30';
-import {buildWorld} from './world-render.js?v=completion-r30';
-import {createNavigator} from './navigation.js?v=completion-r30';
-import {createGameMenu} from './game-menu.js?v=completion-r30';
-import {createSaveSlots} from './save-slots.js?v=completion-r30';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=completion-r30';
-import {createEconomy} from './economy.js?v=completion-r30';
-import {createExplosions} from './explosion.js?v=completion-r30';
-import {createGameAudio} from './audio.js?v=completion-r30';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved,keyboardAimDirection} from './controls.js?v=completion-r30';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=completion-r30';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=completion-r30';
-import {observeHudLayout} from './interface-layout.js?v=completion-r30';
-import {createMapFocus} from './map-accessibility.js?v=completion-r30';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=completion-r30';
-import {placeLootDrops} from './loot-placement.js?v=completion-r30';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=completion-r30';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=completion-r30';
-import {createFireZones} from './fire-grenades.js?v=completion-r30';
-import {itemIconPath} from './item-icons.js?v=completion-r30';
-import {createLootView} from './loot-view.js?v=completion-r30';
-import {meleeTargets} from './melee.js?v=completion-r30';
-import {createPuzzleHints} from './puzzle-hints.js?v=completion-r30';
-import {createOnboarding} from './onboarding.js?v=completion-r30';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=completion-r30';
-import {validateSnapshot} from './snapshot-validation.js?v=completion-r30';
-import {DIFFICULTY_RULES} from './difficulty.js?v=completion-r30';
-import {createCampaignProfile} from './campaign-profile.js?v=completion-r30';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=completion-r30';
-import {createCampaignProgress} from './campaign-progress.js?v=completion-r30';
-import {buildOperationEnvironment} from './operation-environments.js?v=completion-r30';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=completion-r30';
+import {buildArt} from './environment.js?v=preview-polish-r31';
+import {soldier, animateSoldier} from './character.js?v=preview-polish-r31';
+import {weapon, createCombatEffects} from './weapons.js?v=preview-polish-r31';
+import {addRoomDetails} from './room-details.js?v=preview-polish-r31';
+import {createMinimap} from './minimap.js?v=preview-polish-r31';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=preview-polish-r31';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=preview-polish-r31';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=preview-polish-r31';
+import {createPuzzleArt} from './puzzle-art.js?v=preview-polish-r31';
+import {createWeaponPreview} from './weapon-preview.js?v=preview-polish-r31';
+import {createProgression} from './progression.js?v=preview-polish-r31';
+import {createProgressionArt} from './progression-art.js?v=preview-polish-r31';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=preview-polish-r31';
+import {buildWorld} from './world-render.js?v=preview-polish-r31';
+import {createNavigator} from './navigation.js?v=preview-polish-r31';
+import {createGameMenu} from './game-menu.js?v=preview-polish-r31';
+import {createSaveSlots} from './save-slots.js?v=preview-polish-r31';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=preview-polish-r31';
+import {createEconomy} from './economy.js?v=preview-polish-r31';
+import {createExplosions} from './explosion.js?v=preview-polish-r31';
+import {createGameAudio} from './audio.js?v=preview-polish-r31';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved,keyboardAimDirection} from './controls.js?v=preview-polish-r31';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=preview-polish-r31';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=preview-polish-r31';
+import {observeHudLayout} from './interface-layout.js?v=preview-polish-r31';
+import {createMapFocus} from './map-accessibility.js?v=preview-polish-r31';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=preview-polish-r31';
+import {placeLootDrops} from './loot-placement.js?v=preview-polish-r31';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=preview-polish-r31';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=preview-polish-r31';
+import {createFireZones} from './fire-grenades.js?v=preview-polish-r31';
+import {itemIconPath} from './item-icons.js?v=preview-polish-r31';
+import {createLootView} from './loot-view.js?v=preview-polish-r31';
+import {meleeTargets} from './melee.js?v=preview-polish-r31';
+import {createPuzzleHints} from './puzzle-hints.js?v=preview-polish-r31';
+import {createOnboarding} from './onboarding.js?v=preview-polish-r31';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=preview-polish-r31';
+import {validateSnapshot} from './snapshot-validation.js?v=preview-polish-r31';
+import {DIFFICULTY_RULES} from './difficulty.js?v=preview-polish-r31';
+import {createCampaignProfile} from './campaign-profile.js?v=preview-polish-r31';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=preview-polish-r31';
+import {createCampaignProgress} from './campaign-progress.js?v=preview-polish-r31';
+import {buildOperationEnvironment} from './operation-environments.js?v=preview-polish-r31';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=preview-polish-r31';
 const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
@@ -72,7 +72,7 @@ const runConfig={mission:['campaign','siege','nest'].includes(params.get('missio
 const difficultyRules=DIFFICULTY_RULES;
 const puzzleHints=createPuzzleHints();const campaignProgress=createCampaignProgress(browserStorage());const fieldSkills=createFieldSkills(browserStorage());let activeFieldSkill=fieldSkills.selected(campaignProgress.completed()),activeFieldSkillState=null;
 function skillEffects(){return fieldSkillEffects(activeFieldSkill);}
-const operationStats=createOperationStats();let tutorial=null;
+const operationStats=createOperationStats();let tutorial=null,replayRewardId=null;
 const saveSlots=createSaveSlots();function latestSnapshot(){const data=saveSlots.loadCheckpoint();return validateSnapshot(data)?data:null;}const baseSnapshot=latestSnapshot();
 const loot=createLootState();const economy=createEconomy(baseSnapshot?.economy);const campaignProfile=createCampaignProfile({storage:browserStorage(),economy,getCompleted:()=>campaignProgress.completed()});if(!campaignProfile.reload())campaignProfile.restoreLoadout(baseSnapshot?.loadout??{});const incomingDeployment=decodeDeploymentState(location.hash);if(incomingDeployment){campaignProfile.restoreTransient(incomingDeployment.profile);campaignProgress.restoreTransient(incomingDeployment.progress);if(incomingDeployment.fieldSkill)fieldSkills.restoreDeployment(incomingDeployment.fieldSkill,campaignProgress.completed());activeFieldSkill=fieldSkills.selected(campaignProgress.completed());campaignProfile.persist();campaignProgress.persist();if(!campaignProfile.isSessionOnly()&&!campaignProgress.isSessionOnly()&&!fieldSkills.isSessionOnly())history.replaceState(null,'',location.pathname+location.search);}
 const audio=createGameAudio();audio.setPaused(true);const simulation=createFixedStepper();
@@ -188,6 +188,7 @@ function end(win){
  if(ended)return;
  ended=true;active=false;audio.setPaused(true);tutorial?.hide();shooting=false;keys.clear();touchControls?.reset();menu?.hide();document.body.classList.remove('playing');
  persistCampaignProfile();if(win&&runConfig.mission==='campaign'&&runConfig.operation){campaignProgress.complete(runConfig.operation);void campaignProfile.claimCashReward('contract.'+runConfig.operation).then(result=>{if(result.ok&&result.amount>0){hud();const notes=$('#result-notes');if(notes){const payout=document.createElement('p');payout.textContent=`First-clear payout · +$${result.amount}`;notes.append(payout);}}}).catch(()=>{});}
+ if(win&&runConfig.mission==='campaign'&&replayRewardId){void campaignProfile.claimCashReward(replayRewardId).then(result=>{if(result.ok&&result.amount>0){hud();const notes=$('#result-notes');if(notes){const payout=document.createElement('p');payout.textContent=`Replay completion · +$${result.amount}`;notes.append(payout);}}}).catch(()=>{});}
  const result=recordResult(browserStorage(),runConfig,operationStats,win,explorationPercent());
  const story=win?campaignDebrief(runConfig,campaignProgress.completed(),[...new Set([...progression.state.logs,...campaignProgress.researchLogs()])]):null;
  const sectorComplete=win&&runConfig.mission==='campaign'&&runConfig.operation&&runConfig.operation!==CAMPAIGN_OPERATIONS[CAMPAIGN_OPERATIONS.length-1].id;
@@ -223,7 +224,7 @@ function shoot(){
 }
 function applyPlayerDamage(damage){if(!Number.isFinite(damage)||damage<=0||(player.hurtGrace??0)>0)return false;player.hurtGrace=.4;audio.bite();const armorCost=Math.max(.8,Math.min(1,Number(skillEffects().armorDamageMultiplier)||1)),absorbed=Math.min(economy.state.shield/armorCost,damage);economy.state.shield=Math.max(0,economy.state.shield-absorbed*armorCost);player.hp=Math.max(0,player.hp-(damage-absorbed));return true;}
 function beginReload(){if(typeof grenadeActions!=='undefined'&&grenadeActions?.isAnimating())return;if(typeof grenadeActions!=='undefined'&&grenadeActions?.charging)grenadeActions.cancel();if(player.ammo>=weapons[selected].capacity||reload>0)return;if(weapons[selected].reserve<=0){toast('NO RESERVE AMMO · '+formatKey(bindings().knife)+' KNIFE · COLLECT GOLD SUPPLIES');return;}reload=reloadDuration();audio.reload();hud();}
-function reloadDuration(){return Math.max(.5,weapons[selected].reload*Math.max(.88,Math.min(1,Number(skillEffects().reloadMultiplier)||1)));}
+function reloadDuration(){return effectiveFieldStats(weapons[selected],activeFieldSkill).reload;}
 function advanceWeaponTimers(dt){meleeCooldown=Math.max(0,meleeCooldown-dt);fire=Math.max(0,fire-dt);if(reload>0){reload=Math.max(0,reload-dt);if(reload===0){player.ammo=refillMagazine(weapons[selected],player.ammo);hud();}}}
 function resumeRun(){if(typeof puzzle!=='undefined')puzzle.grabbed=null;touchControls?.reset();paused=false;simulation.reset();void audio.unlock();audio.setPaused(false);shooting=false;keys.clear();$('#pause').textContent='PAUSE  ESC';document.body.classList.add('playing');return true;}
 function pauseRun(){
@@ -241,6 +242,14 @@ function togglePause(){
  if(menu?.isOpen()){resumeRun();menu.hide();return;}
  pauseRun();
 }
+function navigateBack(){
+ if(doorHint?.isActive()){doorHint.skip();return true;}
+ if(helpOpen){toggleHelp();return true;}
+ if(menu?.back?.())return true;
+ if(!active||ended)return false;
+ togglePause();return true;
+}
+addEventListener('nulldelve-back',event=>{if(navigateBack())event.preventDefault();});
 $('#pause').onclick=togglePause;
 function toggleHelp(){if(!active||ended||menu?.isOpen())return;if(typeof puzzle!=='undefined')puzzle.grabbed=null;if(typeof grenadeActions!=='undefined')grenadeActions?.cancel();touchControls?.reset();helpOpen=!helpOpen;const help=$('#controls-help');help.hidden=!helpOpen;$('#help-button').setAttribute('aria-expanded',String(helpOpen));keys.clear();shooting=false;simulation.reset();if(helpOpen){refreshHelp();help.focus?.();}else renderer.domElement.focus();}
 $('#help-button').onclick=toggleHelp;
@@ -264,7 +273,7 @@ addEventListener('keydown',e=>{
  void audio.unlock();if(e.defaultPrevented)return;
  if(doorHint?.isActive()){e.preventDefault();if(e.code==='Escape'||actionForCode(e.code,bindings())==='interact')doorHint.skip();return;}
  if(helpOpen){if(e.code==='Escape'||actionForCode(e.code,bindings())==='help'){e.preventDefault();toggleHelp();}return;}
- if(e.code==='Escape'){e.preventDefault();togglePause();return;}
+ if(e.code==='Escape'){e.preventDefault();navigateBack();return;}
  if(menu?.isOpen()){keys.clear();return;}
  if(e.target?.closest?.('input,select,textarea,summary'))return;if(e.target?.closest?.('button')&&(e.code==='Space'||e.code==='Enter'))return;
  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)||Object.values(bindings()).includes(e.code))e.preventDefault();
@@ -283,10 +292,14 @@ addEventListener('keydown',e=>{
   if(action==='knife')knifeStrike();if(action==='rifle')equip('rifle');if(action==='pistol')equip('pistol');
  }
 });
-addEventListener('keyup',e=>{keys.delete(e.code);if(actionForCode(e.code,bindings())==='interact')releaseCrateGrab(puzzle);if(actionForCode(e.code,bindings())==='grenade'){if(isRunning())releaseGrenadeCharge();else cancelGrenadeCharge();}});addEventListener('blur',()=>{keys.clear();shooting=false;if(active&&!paused)pauseRun();});document.addEventListener('visibilitychange',()=>{if(document.hidden&&active)pauseRun();});
+addEventListener('keyup',e=>{keys.delete(e.code);if(actionForCode(e.code,bindings())==='interact')releaseCrateGrab(puzzle);if(actionForCode(e.code,bindings())==='grenade'){if(isRunning())releaseGrenadeCharge();else cancelGrenadeCharge();}});addEventListener('blur',()=>{keys.clear();shooting=false;if(active&&!paused)pauseRun();});document.addEventListener('visibilitychange',()=>{if(document.hidden&&active&&!paused)pauseRun();});
 addEventListener('pointermove',e=>{if(e.target!==renderer.domElement||e.pointerType==='touch')return;if(isRunning())tutorial?.event('aim');if(!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return;if(menu?.settings.aimMode!=='keyboard'&&pointerHasMoved(e,lastPointer))aimMode='mouse';lastPointer={x:e.clientX,y:e.clientY};mouse.set(e.clientX/innerWidth*2-1,1-e.clientY/innerHeight*2);if(aimMode==='mouse'){$('#crosshair').style.left=e.clientX+'px';$('#crosshair').style.top=e.clientY+'px';}});
 addEventListener('pointerdown',()=>{void audio.unlock();},{capture:true});renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'&&e.button===0&&isRunning()){renderer.domElement.focus();shooting=true;}});addEventListener('pointerup',()=>shooting=false);addEventListener('contextmenu',e=>e.preventDefault());
-let viewHeight=22;let focus={x:player.x,z:player.z};function resize(){if(menu)document.documentElement.style.setProperty('--hud-scale',String(menu.settings.hudScale??1));const aspect=innerWidth/innerHeight,{height:h,width:w}=cameraViewSize(viewHeight,aspect,!!touchControls?.enabled);camera.left=-w/2;camera.right=w/2;camera.top=h/2;camera.bottom=-h/2;camera.near=.1;camera.far=100;camera.updateProjectionMatrix();renderer.setPixelRatio(renderPixelRatio(menu?.settings.quality??'medium',{width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio}));renderer.setSize(innerWidth,innerHeight);}addEventListener('resize',resize);renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();viewHeight=THREE.MathUtils.clamp(viewHeight+Math.sign(e.deltaY)*1.5,14,32);resize();},{passive:false});resize();
+let viewHeight=22;let focus={x:player.x,z:player.z};
+const cameraFraming=createCameraFraming();
+function frameCamera(dt=0){const {height:h,width:w}=cameraFraming.update(viewHeight,innerWidth/innerHeight,!!touchControls?.enabled,dt);camera.left=-w/2;camera.right=w/2;camera.top=h/2;camera.bottom=-h/2;camera.near=.1;camera.far=100;camera.updateProjectionMatrix();}
+function resize(){if(menu)document.documentElement.style.setProperty('--hud-scale',String(menu.settings.hudScale??1));frameCamera();renderer.setPixelRatio(renderPixelRatio(menu?.settings.quality??'medium',{width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio}));renderer.setSize(innerWidth,innerHeight);}
+addEventListener('resize',resize);renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();if(touchControls?.enabled)return;viewHeight=THREE.MathUtils.clamp(viewHeight+Math.sign(e.deltaY)*1.5,14,32);if(menu)menu.settings.zoom=viewHeight;},{passive:false});resize();
 function simulate(dt){
  if(isRunning()){const lockedDoor=nearbyDoor();if(lockedDoor?.hintTarget)guidanceDoorIndex=doors.indexOf(lockedDoor);operationStats.elapsed+=dt;for(const d of doors)d.slide=THREE.MathUtils.clamp(d.slide+(d.open?1:-1)*dt*2.7,0,1);const touch=touchControls?.getState();if(!keys.has(bindings().interact)&&!touch?.interactHeld)releaseCrateGrab(puzzle);let dx=Number(keys.has(bindings().moveRight))-Number(keys.has(bindings().moveLeft))+(touch?.move.x??0),dz=Number(keys.has(bindings().moveDown))-Number(keys.has(bindings().moveUp))+(touch?.move.z??0);const l=Math.max(1,Math.hypot(dx,dz)),speed=puzzle.grabbed!=null?2.4:keys.has(bindings().sprint)||touch?.sprint?6*skillEffects().sprintMultiplier:4;move(player,dx/l*dt*speed,dz/l*dt*speed);if(updatePressurePuzzle(puzzle,player)){doors[0].unlocked=true;$('#hint').textContent='Door powered. Use '+formatKey(bindings().interact)+' at the green indicator.';toast('BOTH CIRCUITS ONLINE · DOOR READY · '+formatKey(bindings().interact));queueCheckpoint('Insertion door powered');audio.puzzle(true);}updatePuzzleArt();progression.update(player,dt);mutationNotes.record(enemies,visible);puzzleDiscovery.record(encounteredPuzzles({player,devices:progression.state.devices,plates:puzzle.plates,visible}));const ax=Number(keys.has(bindings().aimRight))-Number(keys.has(bindings().aimLeft)),az=Number(keys.has(bindings().aimDown))-Number(keys.has(bindings().aimUp));if((ax||az)&&menu?.settings.aimMode!=='mouse'){const length=Math.hypot(ax,az);keyboardAim={x:ax/length,z:az/length};aimMode='keyboard';}if(touch?.aim.active){const length=Math.hypot(touch.aim.x,touch.aim.z);keyboardAim={x:touch.aim.x/length,z:touch.aim.z/length};aimMode='keyboard';}if(ax||az||touch?.aim.active)tutorial?.event('aim');tutorial?.update(player,puzzle);if(aimMode==='keyboard')aim.set(player.x+keyboardAim.x*10,0,player.z+keyboardAim.z*10);else{ray.setFromCamera(mouse,camera);ray.ray.intersectPlane(plane,aim);}if(Math.hypot(aim.x-player.x,aim.z-player.z)>.05)player.angle=Math.atan2(-(aim.x-player.x),-(aim.z-player.z));grenadeActions?.update(dt,player,aim,solid);advanceWeaponTimers(dt);player.hurtGrace=Math.max(0,(player.hurtGrace??0)-dt);if(shooting||touch?.firing||keys.has(bindings().fire))shoot();if(ended)return;
  const livingEnemies=enemies.filter(enemy=>enemy.hp>0);
@@ -332,18 +345,18 @@ let last=performance.now(),lastPausedRender=0;renderer.setAnimationLoop(()=>{
  const nearest=isRunning()?nearbyDoor():null;const cashCache=isRunning()?nearbySalvage():null;const devicePrompt=cashCache?`E · SALVAGE · $${cashCache.amount}`:isRunning()?progression.getPrompt(player):null;const sectorExit=runConfig.operation?campaignOperationExit(runConfig.operation):null,exitReady=!!sectorExit&&campaignOperationObjectivesComplete(runConfig.operation,{player,progression});missionPoints.exit=runConfig.operation?(exitReady?sectorExit:null):{x:92,z:60};missionPoints.intel=runConfig.operation&&runConfig.operation!=='nest'?null:{x:93,z:7};sectorExitMarker.visible=exitReady&&visible(sectorExit.x,sectorExit.z);if(exitReady)sectorExitMarker.position.set(sectorExit.x,.06,sectorExit.z);const exitPrompt=isRunning()&&exitReady&&Math.hypot(player.x-sectorExit.x,player.z-sectorExit.z)<=1.4?(runConfig.operation==='nest'?'E · EVACUATE':'E · LEAVE SECTOR'):null;const cratePrompt=isRunning()?(puzzle.grabbed!=null?'E · RELEASE TO LET GO':nearestPullableCrate(puzzle,player,(x,z,r)=>solid(x,z,r,true))?'E · HOLD TO GRAB CRATE':null):null;$('#interact').textContent=(cratePrompt||exitPrompt||devicePrompt||(nearest?(nearest.progressLocked?'E · LOCKED · '+nearest.lockReason:nearest.needsPower&&!nearest.unlocked?'E · LOCKED · NO POWER':`E · ${nearest.open?'CLOSE':'OPEN'} DOOR`):'')).replace(/^E · /,formatKey(bindings().interact)+' · ');
  touchControls?.setInteractAvailable($('#interact').textContent);
  for(const mesh of [playerMesh]){if(!paused)mesh.userData.flashTime=Math.max(0,mesh.userData.flashTime-dt);mesh.userData.flash.visible=mesh.userData.flashTime>0;}
- playerMesh.position.set(player.x,0,player.z);playerMesh.rotation.y=player.angle;if(isRunning()){animateSoldier(playerMesh,active?dt:0,reload>0?{progress:1-reload/reloadDuration(),type:equippedModelType()}:false);for(const e of enemies)if(e.hp>0&&e.mesh.visible)animateRoach(e.mesh,active?dt:0);}combatEffects.update(running?dt:0);explosions.update(running?dt:0);updateProgressionArt(time);ring.material.color.set(player.hurtGrace>0?0xf2b26f:0xb7f8c6);ring.position.set(player.x,.05,player.z);if(hintFocus){focus.x=hintFocus.x;focus.z=hintFocus.z;}else{focus.x+=(player.x-focus.x)*(1-Math.exp(-7*dt));focus.z+=(player.z-focus.z)*(1-Math.exp(-7*dt));}camera.position.set(focus.x,40,focus.z);camera.lookAt(focus.x,0,focus.z);camera.updateMatrixWorld();if(aimMode==='keyboard'&&active){const screen=aim.clone().project(camera);$('#crosshair').style.left=THREE.MathUtils.clamp((screen.x+1)*innerWidth/2,16,innerWidth-16)+'px';$('#crosshair').style.top=THREE.MathUtils.clamp((1-screen.y)*innerHeight/2,16,innerHeight-16)+'px';}sun.position.set(player.x-18,35,player.z+3);sun.target.position.set(player.x,0,player.z);if(running)fogTick+=dt;if(running&&fogTick>.07){updateFog();fogTick=0;}intelMesh.rotation.y=time;for(let i=tracers.length-1;i>=0;i--){tracers[i].life-=dt;if(tracers[i].life<=0){scene.remove(tracers[i].line);tracers[i].line.geometry.dispose();tracers[i].line.material.dispose();tracers.splice(i,1);}}if(running){lootView.update(loot,visible,time);barrelSystem.update(visible);}renderer.render(scene,camera);
+ playerMesh.position.set(player.x,0,player.z);playerMesh.rotation.y=player.angle;if(isRunning()){animateSoldier(playerMesh,active?dt:0,reload>0?{progress:1-reload/reloadDuration(),type:equippedModelType()}:false);for(const e of enemies)if(e.hp>0&&e.mesh.visible)animateRoach(e.mesh,active?dt:0);}combatEffects.update(running?dt:0);explosions.update(running?dt:0);updateProgressionArt(time);ring.material.color.set(player.hurtGrace>0?0xf2b26f:0xb7f8c6);ring.position.set(player.x,.05,player.z);if(hintFocus){focus.x=hintFocus.x;focus.z=hintFocus.z;}else{focus.x+=(player.x-focus.x)*(1-Math.exp(-7*dt));focus.z+=(player.z-focus.z)*(1-Math.exp(-7*dt));}frameCamera(dt);camera.position.set(focus.x,40,focus.z);camera.lookAt(focus.x,0,focus.z);camera.updateMatrixWorld();if(aimMode==='keyboard'&&active){const screen=aim.clone().project(camera);$('#crosshair').style.left=THREE.MathUtils.clamp((screen.x+1)*innerWidth/2,16,innerWidth-16)+'px';$('#crosshair').style.top=THREE.MathUtils.clamp((1-screen.y)*innerHeight/2,16,innerHeight-16)+'px';}sun.position.set(player.x-18,35,player.z+3);sun.target.position.set(player.x,0,player.z);if(running)fogTick+=dt;if(running&&fogTick>.07){updateFog();fogTick=0;}intelMesh.rotation.y=time;for(let i=tracers.length-1;i>=0;i--){tracers[i].life-=dt;if(tracers[i].life<=0){scene.remove(tracers[i].line);tracers[i].line.geometry.dispose();tracers[i].line.material.dispose();tracers.splice(i,1);}}if(running){lootView.update(loot,visible,time);barrelSystem.update(visible);}renderer.render(scene,camera);
 });
 Object.assign(window,{renderer,scene,gameDebug:{player,enemies,map,explored,seenRooms,los,solid,move,updateFog,doors,cover,puzzle,progression}});enemies.forEach(e=>e.mesh.position.set(e.x,0,e.z));updateFog();hud();
 
 function applySettings(settings){
- touchControls?.configure(settings.touchControls);
+ touchControls?.configure(settings.touchControls,{handedness:settings.touchHandedness,size:settings.touchSize});
  renderer.domElement.style.filter=`brightness(${settings.brightness})`;
  renderer.shadowMap.enabled=settings.quality!=='low';const shadowSize=settings.quality==='high'?2048:1024;if(sun.shadow.mapSize.x!==shadowSize){sun.shadow.map?.dispose();sun.shadow.map=null;sun.shadow.mapSize.set(shadowSize,shadowSize);renderer.shadowMap.needsUpdate=true;}
  audio.applySettings(settings);fireZones.setReducedEffects(!!settings.reducedEffects);document.body.classList.toggle('reduced-effects',!!settings.reducedEffects);const fittingScale=settings.hudScale??1;document.documentElement.style.setProperty('--hud-scale',String(fittingScale));if(settings.aimMode==='mouse'||settings.aimMode==='keyboard')aimMode=settings.aimMode;viewHeight=settings.zoom;resize();refreshHelp();$('.map-panel').style.display=settings.showMinimap?'block':'none';
 }
 function captureSnapshot(){return {
- version:3,fieldSkill:{...(activeFieldSkillState??fieldSkills.serialize(campaignProgress.completed())),selected:activeFieldSkill},barrels:barrelSystem.serialize(),doorHints:doorHint?.serializeSeen()??[],fireZones:fireZones.serialize(),profileRevision:campaignProfile.state.revision,profilePurchaseRevision:campaignProfile.state.purchaseRevision,loadout:{primary:active&&!ended?(weapons.rifle.id??campaignProfile.state.primary):campaignProfile.state.primary,unlocked:[...campaignProfile.state.unlocked]},stats:{...operationStats},loot:JSON.parse(JSON.stringify(loot)),reserves:{rifle:weapons.rifle.reserve,pistol:weapons.pistol.reserve},economy:economy.serialize(),world:[W,H],config:{...runConfig},player:{x:player.x,z:player.z,hp:player.hp,maxHp:player.maxHp,ammo:player.ammo,intel:player.intel,angle:player.angle,hurtGrace:player.hurtGrace},selected,
+ version:3,replayRewardId,fieldSkill:{...(activeFieldSkillState??fieldSkills.serialize(campaignProgress.completed())),selected:activeFieldSkill},barrels:barrelSystem.serialize(),doorHints:doorHint?.serializeSeen()??[],fireZones:fireZones.serialize(),profileRevision:campaignProfile.state.revision,profilePurchaseRevision:campaignProfile.state.purchaseRevision,loadout:{primary:active&&!ended?(weapons.rifle.id??campaignProfile.state.primary):campaignProfile.state.primary,unlocked:[...campaignProfile.state.unlocked]},stats:{...operationStats},loot:JSON.parse(JSON.stringify(loot)),reserves:{rifle:weapons.rifle.reserve,pistol:weapons.pistol.reserve},economy:economy.serialize(),world:[W,H],config:{...runConfig},player:{x:player.x,z:player.z,hp:player.hp,maxHp:player.maxHp,ammo:player.ammo,intel:player.intel,angle:player.angle,hurtGrace:player.hurtGrace},selected,
  magazines:{rifle:selected==='rifle'?player.ammo:weapons.rifle.ammo,pistol:selected==='pistol'?player.ammo:weapons.pistol.ammo},reload,
  enemies:enemies.map(e=>({id:e.id,rewardIdentity:e.rewardIdentity,x:e.x,z:e.z,hp:e.hp,maxHp:e.maxHp,variant:e.variant,cooldown:e.cooldown,alerted:e.alerted,spawnDelay:e.spawnDelay,attackWindup:e.attackWindup,staggerTime:e.staggerTime,lootDropped:!!e.lootDropped,encounter:e.encounter,bossMechanic:e.bossMechanic,pulseCooldown:e.pulseCooldown,chargeCooldown:e.chargeCooldown,shriekCooldown:e.shriekCooldown,leapCooldown:e.leapCooldown,staggerImmunity:e.staggerImmunity})),
  doors:doors.map(d=>({open:d.open,slide:d.slide,unlocked:!!d.unlocked})),
@@ -355,6 +368,7 @@ function restoreSnapshot(data){
  if(!validateSnapshot(data,{width:W,height:H,doorCount:doors.length,crateCount:puzzle.crates.length,plateCount:puzzle.plates.length,barrelIds:barrelSystem.state.map(b=>b.id)}))return false;
  if(typeof grenadeActions!=='undefined')grenadeActions?.clear();doorHint?.skip();barrelSystem.restore(data.barrels);doorHint?.restoreSeen(data.doorHints??[]);guidanceDoorIndex=data.doorHints?.length?Number(data.doorHints[data.doorHints.length-1].split('|')[0]):null;
  Object.assign(operationStats,createOperationStats(data.stats));
+ replayRewardId=typeof data.replayRewardId==='string'&&data.replayRewardId.length<180?data.replayRewardId:null;
  activeFieldSkillState=normalizeFieldSkill(data.fieldSkill,campaignProgress.completed());activeFieldSkill=activeFieldSkillState.selected;
  Object.assign(runConfig,{operation:null,remix:false},data.config);updateOperationEnvironment();rules=difficultyRules[runConfig.difficulty]||difficultyRules.normal;campaignProfile.reload();const retainPurchases=campaignProfile.hasPurchasesSince(data);if(!retainPurchases){campaignProfile.restoreLoadout(data.loadout??{});campaignProfile.restoreCheckpointEconomy(data.economy);campaignProfile.state.revision=Math.max(campaignProfile.state.revision,Number(data.profileRevision)||0);}applyPrimaryLoadout();
  Object.assign(player,data.player);if(player.maxHp!==100){player.hp=Math.min(100,Math.max(0,player.hp/player.maxHp*100));player.maxHp=100;}player.hurtGrace=Math.max(0,Math.min(.4,Number(player.hurtGrace)||0));if(!Number.isFinite(player.x)||!Number.isFinite(player.z)||player.x<1||player.z<1||player.x>=W-1||player.z>=H-1)return false;
@@ -371,12 +385,13 @@ function restoreSnapshot(data){
 
  reload=Math.max(0,reload);refreshPlayerWeapon();persistCampaignProfile();refreshGuidance(true);updateFog();hud();if(retainPurchases)queueCheckpoint('Loadout updated');return true;
 }
-function startOperation(saveInitial=true){active=true;ended=false;resumeRun();menu?.hide();renderer.domElement.focus();if(saveInitial&&runConfig.mission==='campaign'&&(!runConfig.operation||runConfig.operation==='breach'))tutorial?.start(player,{touch:!!touchControls?.enabled});toast(operationTitle().toUpperCase());if(saveInitial)queueCheckpoint('Operation deployment');if(checkpointPending)commitCheckpoint();}
+function startOperation(saveInitial=true){let replayIssue=null;if(saveInitial&&runConfig.mission==='campaign'){const attempt=campaignProfile.beginReplayAttempt(runConfig.operation);replayRewardId=attempt.ok?attempt.rewardId:null;if(!attempt.ok&&campaignProgress.completed().includes(runConfig.operation))replayIssue=attempt.message??'Replay payout unavailable for this deployment.';}active=true;ended=false;resumeRun();menu?.hide();renderer.domElement.focus();if(saveInitial&&runConfig.mission==='campaign'&&(!runConfig.operation||runConfig.operation==='breach'))tutorial?.start(player,{touch:!!touchControls?.enabled});toast(replayIssue??operationTitle().toUpperCase());if(saveInitial)queueCheckpoint('Operation deployment');if(checkpointPending)commitCheckpoint();}
 function queueLoad(slot){const snapshot=saveSlots.load(slot);if(!snapshot)throw new Error('This save slot is empty or could not be read.');try{compatibleStorage(sessionStorage).setItem('nulldelve.pendingLoad',JSON.stringify(snapshot));}catch{throw new Error('Browser session storage is unavailable. Enable storage to load this save.');}location.href=location.pathname+'?play=load';return true;}
 menu=createGameMenu({overlay:$('#overlay'),
- getStatus:()=>({active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()||fieldSkills.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),skillState:fieldSkills.serialize(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:currentGuidance().steps,armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(),items:economy.state.items,sidearm:{stats:{damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload}},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
+ getStatus:()=>({active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()||fieldSkills.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),skillState:fieldSkills.serialize(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:currentGuidance().steps,armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(activeFieldSkill),items:economy.state.items,sidearm:{stats:effectiveFieldStats({damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload},activeFieldSkill)},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
  onPrepareOperation:prepareOperation,
  onFieldSkill:id=>{if(!isSafeToShop())return {ok:false,message:"Choose a field skill before deployment."};const result=id.startsWith('learn:')?fieldSkills.learn(id.slice(6),campaignProgress.completed()):fieldSkills.equip(id,campaignProgress.completed());if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());activeFieldSkillState=null;updateDeploymentTransfer();}return result;},
+ onRespecFieldSkills:()=>{if(!isSafeToShop())return {ok:false,message:'Reset training at base before deployment.'};const result=fieldSkills.respec(campaignProgress.completed(),{atBase:true});if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());activeFieldSkillState=null;updateDeploymentTransfer();}return result;},
  onNewGame:config=>{if(config.mission==='campaign'&&config.operation&&!campaignProgress.isUnlocked(config.operation))return {ok:false,message:'Finish the previous operation to unlock this location.'};persistCampaignProfile();location.href=deploymentUrl(config);},
  onContinue:()=>{if(active&&!ended){resumeRun();return true;}return queueCheckpointLoad();},
  onPurchase:async id=>{if(!isSafeToShop())return {ok:false,message:'Visit the armory before deployment.'};const result=await campaignProfile.purchaseOffer(id);if(result.ok){audio.purchase();applyPrimaryLoadout();hud();updateDeploymentTransfer();}return result;},
@@ -436,7 +451,7 @@ function refreshGuidance(force=false){const g=currentGuidance(),key=g.title+'|'+
 function refreshHelp(){
  const b=bindings(),help=$('#controls-help');$('#toggle-map').textContent=(mapOpen?'CLOSE MAP  ':'EXPAND  ')+formatKey(b.map);$('#help-button').setAttribute('aria-label','Controls help, '+formatKey(b.help));if(!help)return;help.setAttribute('tabindex','-1');help.setAttribute('role','region');help.setAttribute('aria-label','Controls help; play is paused');help.replaceChildren();const heading=document.createElement('strong');heading.textContent='CONTROLS · GAME PAUSED';help.append(heading);
  const rows=[[`${formatKey(b.moveUp)} ${formatKey(b.moveLeft)} ${formatKey(b.moveDown)} ${formatKey(b.moveRight)}`,'Move'],[['aimUp','aimLeft','aimDown','aimRight'].map(k=>formatKey(b[k])).join(' / '),'Aim (or mouse)'],['CLICK / '+formatKey(b.fire),'Fire'],[formatKey(b.knife),'Knife'],[formatKey(b.interact),'Interact / hold to drag crate'],[formatKey(b.reload),'Reload'],[formatKey(b.sprint),'Sprint'],[formatKey(b.rifle)+' / '+formatKey(b.pistol),'Weapons'],[formatKey(b.medkit),'Medkit'],[formatKey(b.grenade),'Hold / release grenade'],[formatKey(b.cycleGrenade),'Switch frag / fire'],[formatKey(b.map),'Full map'],[formatKey(b.resetPuzzle),'Reset crates'],[formatKey(b.help),'Close help']];
- if(touchControls?.enabled){const text=document.createElement('p');text.textContent='Left stick: move; push its edge to sprint. Right stick: aim and fire. Hold the grenade icon for range, release to throw. Hold Interact beside a crate and move to drag it. Release to let go. Tap other action icons to reload, swap, or strike.';help.append(text);if(!puzzle.solved){const reset=document.createElement('button');reset.type='button';reset.textContent='Reset crates';reset.onclick=()=>{resetPressurePuzzle(puzzle,player);updatePuzzleArt();updateFog();toggleHelp();};help.append(reset);}}else for(const [key,label] of rows){const span=document.createElement('span'),kbd=document.createElement('kbd');kbd.textContent=key;span.append(kbd,document.createTextNode(' '+label));help.append(span);}
+ if(touchControls?.enabled){const text=document.createElement('p');text.textContent='Movement stick: move; push its edge to sprint. Aim stick: aim and fire. Hold the grenade icon for range, release to throw. Hold Interact beside a crate and move to drag it. Release to let go. Tap other action icons to reload, swap, or strike.';help.append(text);if(!puzzle.solved){const reset=document.createElement('button');reset.type='button';reset.textContent='Reset crates';reset.onclick=()=>{resetPressurePuzzle(puzzle,player);updatePuzzleArt();updateFog();toggleHelp();};help.append(reset);}}else for(const [key,label] of rows){const span=document.createElement('span'),kbd=document.createElement('kbd');kbd.textContent=key;span.append(kbd,document.createTextNode(' '+label));help.append(span);}
  const hintContext={player,puzzle,progression};const hintInfo=puzzleHints.get(hintContext);if(hintInfo.available){const hintText=document.createElement('p');hintText.className='puzzle-hint-text';hintText.hidden=true;const request=document.createElement('button');request.type='button';request.className='puzzle-hint-button';request.textContent='Puzzle hint';request.onclick=()=>{const hint=puzzleHints.request(hintContext);hintText.textContent=hint.text;hintText.hidden=false;request.textContent=hint.stage===2?'Show hint again':'More help';};help.append(request,hintText);}
  {const replay=document.createElement('button');replay.type='button';replay.textContent='Replay training';replay.onclick=()=>{tutorial?.start(player,{force:true,touch:!!touchControls?.enabled});toggleHelp();};help.append(replay);}
  const close=document.createElement('button');close.type='button';close.textContent='Back to game';close.onclick=toggleHelp;help.append(close);

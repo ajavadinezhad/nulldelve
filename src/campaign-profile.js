@@ -1,8 +1,9 @@
-import {cashReward} from './mission-salvage.js?v=completion-r30';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=completion-r30';
-import {compatibleStorage} from './storage-compat.js?v=completion-r30';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=completion-r30';
-import {createEconomy} from './economy.js?v=completion-r30';
+import {effectiveFieldStats} from './field-skills.js?v=preview-polish-r31';
+import {cashReward} from './mission-salvage.js?v=preview-polish-r31';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=preview-polish-r31';
+import {compatibleStorage} from './storage-compat.js?v=preview-polish-r31';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=preview-polish-r31';
+import {createEconomy} from './economy.js?v=preview-polish-r31';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';
@@ -43,8 +44,16 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   }catch{sessionOnly=true;lastFailure='storage';return false;}
  }
  function markPurchase(){state.revision=Math.min(Number.MAX_SAFE_INTEGER,revision(state.revision)+1);state.purchaseRevision=state.revision;persist();return state.revision;}
+ function beginReplayAttempt(operation){
+  if(!(getCompleted()??[]).includes(operation))return {ok:false,message:'First-clear contract applies to this operation.'};
+  // Do not supersede a legitimate completed replay whose durable payout is
+  // still queued (for example while another tab briefly holds the lease).
+  if([...pendingRewards.values()].some(entry=>cashReward(entry.id)?.token&&cashReward(entry.id).operation===operation))return {ok:false,message:'Your previous replay reward is still saving. Try again shortly.'};
+  if(!beginMutation())return {ok:false,message:'Another tab is updating the armory. Try again.'};
+  const before=serialize();return finishMutation(economy.beginReplayAttempt(operation,token()),before,true);
+ }
  function weaponUnlocked(weapon){if(!weapon.unlockAfter)return true;const order=['breach','command','research','containment','nest','hospital','freight'],done=getCompleted()??[];return order.slice(0,order.indexOf(weapon.unlockAfter)+1).every(id=>done.includes(id));}
- function getWeaponOffers(){return PRIMARY_WEAPONS.map(weapon=>{const owned=state.unlocked.includes(weapon.id),unlocked=owned||weaponUnlocked(weapon),equipped=state.primary===weapon.id,attachment=economy.state.attachments[weapon.id]??'standard',stats=applyWeaponAttachment({...weapon,...economy.stats(weapon.id,{damage:weapon.baseDamage,capacity:weapon.capacity,interval:weapon.interval,reload:weapon.reload})},attachment);return {id:'weapon.'+weapon.id,weaponId:weapon.id,kind:'weapon',label:weapon.name??weapon.label??weapon.id,description:weapon.description??'Primary weapon for your next deployment.',unlockAfter:weapon.unlockAfter??null,locked:!unlocked,cost:weapon.cost,stats:{damage:stats.damage,capacity:stats.capacity,interval:stats.interval,reload:stats.reload,pellets:stats.pellets,range:stats.range},attachment,attachmentOptions:attachmentOptions(weapon.id),owned,equipped,available:unlocked&&!equipped&&(owned||economy.state.credits>=weapon.cost)};});}
+ function getWeaponOffers(skill='none'){return PRIMARY_WEAPONS.map(weapon=>{const owned=state.unlocked.includes(weapon.id),unlocked=owned||weaponUnlocked(weapon),equipped=state.primary===weapon.id,attachment=economy.state.attachments[weapon.id]??'standard',stats=effectiveFieldStats(applyWeaponAttachment({...weapon,...economy.stats(weapon.id,{damage:weapon.baseDamage,capacity:weapon.capacity,interval:weapon.interval,reload:weapon.reload})},attachment),skill);return {id:'weapon.'+weapon.id,weaponId:weapon.id,kind:'weapon',label:weapon.name??weapon.label??weapon.id,description:weapon.description??'Primary weapon for your next deployment.',unlockAfter:weapon.unlockAfter??null,locked:!unlocked,cost:weapon.cost,stats:{damage:stats.damage,capacity:stats.capacity,interval:stats.interval,reload:stats.reload,unskilledReload:stats.unskilledReload,reloadMultiplier:stats.reloadMultiplier,pellets:stats.pellets,range:stats.range},attachment,attachmentOptions:attachmentOptions(weapon.id),owned,equipped,available:unlocked&&!equipped&&(owned||economy.state.credits>=weapon.cost)};});}
  function setAttachment(value){const [,weaponId,attachmentId,...extra]=String(value).split('.');if(extra.length||!state.unlocked.includes(weaponId)||state.primary!==weaponId)return {ok:false,message:'Equip an owned weapon before modifying it.'};const option=attachmentOptions(weaponId).find(option=>option.id===attachmentId);if(!option)return {ok:false,message:'That attachment is not available for this weapon.'};economy.state.attachments[weaponId]=attachmentId;return {ok:true,message:`${option.name} fitted.`};}
  function mutate(value,equipOnly=false){
   const id=String(value).replace(/^(weapon|equip)\./,''),weapon=PRIMARY_WEAPONS.find(item=>item.id===id);
@@ -116,12 +125,12 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   rewardQueue=rewardQueue.catch(()=>{}).then(async()=>{
    let result;for(let attempt=0;attempt<12;attempt++){
     result=await purchaseOffer(offer);
-    if(result.ok||result.alreadyClaimed)break;
+    if(result.ok||result.alreadyClaimed||result.expired)break;
     await new Promise(resolve=>setTimeout(resolve,25*(attempt+1)));
    }
    // An in-memory duplicate after a quota failure is not a durable payout.
    // Keep its journal until storage itself confirms the wallet and claim.
-   if((result?.ok||result?.alreadyClaimed)&&read().saved?.economy.claimedRewards[entry.id]===true){
+   if(result?.expired||(result?.ok||result?.alreadyClaimed)&&read().saved?.economy.claimedRewards[entry.id]===true){
     pendingRewards.delete(key);try{journalStorage?.removeItem(key);}catch{}
    }
    return result;
@@ -157,11 +166,11 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
  function restoreCheckpointEconomy(saved){
   const latest=read(),preserve=!!latest.saved||sessionOnly||state.revision>0,current=economy.serialize();
   economy.restore(saved);
-  if(preserve){economy.state.credits=current.credits;economy.state.enemyRewardsVersion=current.enemyRewardsVersion;economy.state.claimedRewards={...economy.state.claimedRewards,...current.claimedRewards};}
+  if(preserve){economy.state.credits=current.credits;economy.state.enemyRewardsVersion=current.enemyRewardsVersion;economy.state.claimedRewards={...economy.state.claimedRewards,...current.claimedRewards};economy.state.replayAttempts={...current.replayAttempts};}
  }
  function restoreLoadout(saved={}){const primary=ids().includes(saved.primary)?saved.primary:'carbine';state.unlocked=['carbine',...ids().filter(id=>id!=='carbine'&&(state.unlocked.includes(id)||saved.unlocked?.includes(id)||id===primary))];state.primary=primary;return true;}
  function restoreTransient(value){const saved=normalizeCampaignProfile(value);if(!saved)return false;const latest=read();if(latest.saved&&latest.saved.revision>saved.revision){observedRaw=latest.raw;apply(latest.saved);return false;}apply(saved);observedRaw=latest.raw;sessionOnly=true;return true;}
  reload();
- return {state,persist,reload,markPurchase,hasPurchasesSince,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,queueEnemyReward,recoverEnemyRewards,recoverRewards,flushRewards,flushEnemyRewards,migrateEnemyRewards,restoreCheckpointEconomy,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
+ return {state,persist,reload,markPurchase,hasPurchasesSince,beginReplayAttempt,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,queueEnemyReward,recoverEnemyRewards,recoverRewards,flushRewards,flushEnemyRewards,migrateEnemyRewards,restoreCheckpointEconomy,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
 }
 export function defaultCampaignProfile(){return initial();}

@@ -1,5 +1,5 @@
 const {applyWeaponAttachment}=require('../src/weapon-attachments.js');
-const {SKILL_NODES,createFieldSkills,fieldSkillEffects,normalizeFieldSkill}=require('../src/field-skills.js');
+const {SKILL_NODES,createFieldSkills,fieldSkillEffects,effectiveFieldStats,normalizeFieldSkill}=require('../src/field-skills.js');
 const {upgradeWorldSnapshot,WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT}=require('../src/world-layout.js');
 const {compatibleStorage}=require('../src/storage-compat.js');
 const {test}=require('node:test');
@@ -28,7 +28,7 @@ function session({expanded=false}={}){
  const elements=new Map();const $=selector=>{if(!elements.has(selector))elements.set(selector,{textContent:''});return elements.get(selector);};
  const economy=createEconomy(),puzzle=createPressurePuzzle(),enemies=[],doors=Array.from({length:expanded?WORLD_DOOR_COUNT:18},()=>({open:false,slide:0,unlocked:false}));
  const difficultyRules={easy:{maxHp:150,speed:.85,damage:.65,hp:.8,magazine:40},normal:{maxHp:100,speed:1,damage:1,hp:1,magazine:30},hard:{maxHp:80,speed:1.12,damage:1.35,hp:1.15,magazine:24}};
- const ctx={fieldSkills:createFieldSkills(null),applyWeaponAttachment,normalizeFieldSkill,activeFieldSkill:'none',activeFieldSkillState:null,barrelSystem:{state:[],serialize:()=>[],restore:noop},doorHint:{serializeSeen:()=>[],restoreSeen:noop,skip:noop},fireZones:createFireZones(null),campaignProgress:createCampaignProgress(null),active:false,ended:false,menu:{settings:{aimMode:'auto'}},lastPointer:null,campaignProfile:createCampaignProfile({storage:null,economy}),primaryWeapon,primaryReserve,updateOperationEnvironment:noop,operationStats:createOperationStats(),createOperationStats,validateSnapshot,upgradeWorldSnapshot,W:expanded?WORLD_WIDTH:101,H:WORLD_HEIGHT,runConfig:{mission:'campaign',difficulty:'normal',operation:null,remix:false},difficultyRules,rules:difficultyRules.normal,economy,puzzle,enemies,doors,loot:createLootState(),lootView:{clear:noop},createLootState,
+ const ctx={replayRewardId:null,effectiveFieldStats,fieldSkills:createFieldSkills(null),applyWeaponAttachment,normalizeFieldSkill,activeFieldSkill:'none',activeFieldSkillState:null,barrelSystem:{state:[],serialize:()=>[],restore:noop},doorHint:{serializeSeen:()=>[],restoreSeen:noop,skip:noop},fireZones:createFireZones(null),campaignProgress:createCampaignProgress(null),active:false,ended:false,menu:{settings:{aimMode:'auto'}},lastPointer:null,campaignProfile:createCampaignProfile({storage:null,economy}),primaryWeapon,primaryReserve,updateOperationEnvironment:noop,operationStats:createOperationStats(),createOperationStats,validateSnapshot,upgradeWorldSnapshot,W:expanded?WORLD_WIDTH:101,H:WORLD_HEIGHT,runConfig:{mission:'campaign',difficulty:'normal',operation:null,remix:false},difficultyRules,rules:difficultyRules.normal,economy,puzzle,enemies,doors,loot:createLootState(),lootView:{clear:noop},createLootState,
   player:{x:7,z:29,hp:100,maxHp:100,ammo:30,intel:false,angle:0,hurtGrace:0},selected:'rifle',reload:0,nextEnemyId:1,
   weapons:{rifle:{baseCapacity:30,capacity:30,ammo:30,reserve:120,baseReload:1.7,reload:1.7,baseDamage:1,interval:.11},pistol:{baseCapacity:12,capacity:12,ammo:12,reserve:60,baseReload:1.1,reload:1.1,baseDamage:2,interval:.29}},
   explored:new Set(),seenRooms:new Set(),rewardedZones:new Set(),fogPixels:new Uint8Array((expanded?WORLD_WIDTH:101)*WORLD_HEIGHT*4),previousVisible:[1],focus:{x:0,z:0},keyboardAim:{x:0,z:-1},aimMode:'mouse',guidanceKey:'',
@@ -132,4 +132,10 @@ test('actual retry restores checkpoint supplies after cash earnings without refu
  const cash=economy.state.credits;
  assert.equal(target.restore(saved),true);assert.equal(economy.state.items.medkit,1);assert.equal(economy.state.credits,cash);
  assert.equal((await campaignProfile.queueEnemyReward('kill.command.0','normal')).amount,0);
+});
+
+test('checkpoint roundtrip preserves replay attempt identity instead of minting a new payout',()=>{
+ const first=session({expanded:true});first.ctx.replayRewardId='replay.breach.checkpoint-token';const saved=first.capture();assert.equal(saved.replayRewardId,first.ctx.replayRewardId);
+ const restored=session({expanded:true});assert.equal(restored.restore(saved),true);assert.equal(restored.ctx.replayRewardId,saved.replayRewardId);assert.equal(restored.capture().replayRewardId,saved.replayRewardId);
+ const legacy=plain(saved);delete legacy.replayRewardId;assert.equal(restored.restore(legacy),true);assert.equal(restored.ctx.replayRewardId,null);
 });
