@@ -144,3 +144,15 @@
  .touch-action.available:hover{background:#493b25e6;border-color:#efba62}
  .touch-action:active{background:#314258}
 }
+/* Keep warning silhouettes inside the compact icon; a ready reload or medkit
+   is indicated at the action itself instead of requiring mid-combat reading. */
+.touch-controls-enabled .ammo-readout{--ammo-cue-size:15px}
+.touch-controls-enabled:has(.ammo-status.empty-magazine:not(.out-of-ammo)) .touch-action[data-action="reload"]{
+ border-color:#a8cfee;box-shadow:inset 0 0 0 1px #a8cfee;color:#d9edfc;
+}
+@media(max-width:359px){.touch-controls-enabled .ammo-readout{--ammo-cue-size:11px}}
+.touch-controls-enabled aside.mission-note:has(.mission-guidance){width:min(296px,calc(100vw - 92px));max-height:58px}
+.touch-controls-enabled aside.mission-note:has(.mission-guidance[open]){max-height:min(200px,calc(100dvh - 240px));background:#101722ed}
+.touch-controls-enabled aside.mission-note .mission-guidance>summary{min-height:44px}
+.touch-controls-enabled aside.mission-note .mission-guidance h2{font-size:11px;gap:6px}
+.touch-controls-enabled aside.mission-note .mission-guidance[open]>#hint{display:block;font-size:12px;line-height:1.5}

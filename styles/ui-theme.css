@@ -79,3 +79,38 @@ body:has(>#overlay.menu-overlay)>.hud{visibility:hidden}
  #overlay .game-menu>header.menu-brand,#overlay .game-menu>.preview-footer{display:none}
  #overlay .game-menu .menu-content{padding-bottom:12px}
 }
+/* Combat states use distinct silhouettes as well as color. These overlays stay
+   inside the existing ammo icon slot, so a warning never reflows the HUD. */
+.ammo-readout{position:relative;--ammo-cue-size:calc(20px * var(--hud-scale,1))}
+.ammo-status.empty-magazine .ammo-readout::before{
+ content:'';position:absolute;left:0;top:50%;z-index:1;pointer-events:none;
+ width:var(--ammo-cue-size);height:2px;background:#f39c82;
+ transform:translateY(-50%) rotate(-45deg);border-radius:2px;
+}
+.ammo-status.reloading .ammo-readout::after{
+ content:'';position:absolute;left:-2px;top:50%;pointer-events:none;
+ width:var(--ammo-cue-size);height:var(--ammo-cue-size);box-sizing:border-box;
+ border:2px solid #8bc5f13d;border-top-color:#b5d8f4;border-right-color:#b5d8f4;
+ border-radius:50%;transform:translateY(-50%);animation:ammo-reload-ring 1.6s linear infinite;
+}
+.ammo-status.reloading .ammo-icon{opacity:.35;animation:none}
+.ammo-status.low-ammo:not(.reloading) #ammo{text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:2px}
+.player-status.low-health .vital>.track i{
+ background:repeating-linear-gradient(135deg,#f2a18c 0 5px,#a24f40 5px 8px);
+}
+.player-status.low-health #use-medkit:not(.empty){border-color:#edb1a0;box-shadow:inset 0 0 0 1px #edb1a0}
+@keyframes ammo-reload-ring{to{transform:translateY(-50%) rotate(360deg)}}
+.reduced-effects .ammo-status.reloading .ammo-readout::after{animation:none}
+@media(prefers-reduced-motion:reduce){.ammo-status.reloading .ammo-readout::after{animation:none}}
+/* The objective remains a compact, tappable cue; supporting prose is optional. */
+.mission-guidance>summary{display:flex;align-items:center;gap:9px;min-height:44px;cursor:pointer;list-style:none;touch-action:manipulation}
+.mission-guidance>summary::-webkit-details-marker{display:none}
+.mission-guidance>summary::after{content:'';width:7px;height:7px;border-right:2px solid #9eacbd;border-bottom:2px solid #9eacbd;transform:rotate(45deg);flex:none;margin:0 3px 4px auto}
+.mission-guidance[open]>summary::after{transform:rotate(225deg);margin-bottom:-4px}
+aside.mission-note .mission-guidance h2{display:flex;align-items:center;gap:8px;min-width:0;margin:0;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.mission-guidance h2[data-cue]::before{content:'';display:block;width:18px;height:18px;flex:none;background:center/contain no-repeat url('../assets/menu-notes.svg')}
+.mission-guidance h2[data-cue="power"]::before{background-image:url('../assets/skill-charge.svg')}
+.mission-guidance h2[data-cue="combat"]::before{background-image:url('../assets/menu-armory.svg')}
+.mission-guidance h2[data-cue="exit"]::before{background-image:url('../assets/menu-play.svg')}
+aside.mission-note .mission-guidance[open]>#hint{display:block;margin:5px 0 8px;font-size:12px;line-height:1.5}
+.mission-guidance>summary:focus-visible{outline:2px solid #b5c9df;outline-offset:2px;border-radius:3px}

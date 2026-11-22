@@ -26,7 +26,7 @@ const plain=value=>JSON.parse(JSON.stringify(value));
 function fragment(start,end){const at=source.indexOf(start);assert.ok(at>=0,`main contains ${start}`);const stop=source.indexOf(end,at);assert.ok(stop>at,`main contains ${end}`);return source.slice(at,stop);}
 function mesh(){return {position:{x:0,y:0,z:0,set(x,y,z){Object.assign(this,{x,y,z});},copy(value){Object.assign(this,value);}},visible:false};}
 function session({expanded=false}={}){
- const elements=new Map();const $=selector=>{if(!elements.has(selector))elements.set(selector,{textContent:''});return elements.get(selector);};
+ const elements=new Map();const $=selector=>{if(!elements.has(selector))elements.set(selector,{textContent:'',dataset:{},setAttribute(name,value){this[name]=value;}});return elements.get(selector);};
  const economy=createEconomy(),puzzle=createPressurePuzzle(),enemies=[],doors=Array.from({length:expanded?WORLD_DOOR_COUNT:18},()=>({open:false,slide:0,unlocked:false}));
  const difficultyRules={easy:{maxHp:150,speed:.85,damage:.65,hp:.8,magazine:40},normal:{maxHp:100,speed:1,damage:1,hp:1,magazine:30},hard:{maxHp:80,speed:1.12,damage:1.35,hp:1.15,magazine:24}};
  const ctx={replayRewardId:null,effectiveFieldStats,fieldSkills:createFieldSkills(null),applyWeaponAttachment,normalizeFieldSkill,activeFieldSkill:'none',activeFieldSkillState:null,barrelSystem:{state:[],serialize:()=>[],restore:noop},doorHint:{serializeSeen:()=>[],restoreSeen:noop,skip:noop},fireZones:createFireZones(null),campaignProgress:createCampaignProgress(null),active:false,ended:false,menu:{settings:{aimMode:'auto'}},lastPointer:null,campaignProfile:createCampaignProfile({storage:null,economy}),primaryWeapon,primaryReserve,updateOperationEnvironment:noop,operationStats:createOperationStats(),createOperationStats,validateSnapshot,upgradeWorldSnapshot,W:expanded?WORLD_WIDTH:101,H:WORLD_HEIGHT,runConfig:{mission:'campaign',difficulty:'normal',operation:null,remix:false},difficultyRules,rules:difficultyRules.normal,economy,puzzle,enemies,doors,loot:createLootState(),lootView:{clear:noop},createLootState,
@@ -46,7 +46,7 @@ function session({expanded=false}={}){
  vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
  vm.runInContext(fragment('function equippedModelType(','\nrefreshPlayerWeapon();'),ctx);
  vm.runInContext(fragment('function captureSnapshot()','\nfunction startOperation('),ctx);
- vm.runInContext(fragment('function currentGuidance()','\nfunction refreshHelp()'),ctx);
+ vm.runInContext(fragment('function missionCue(','\nfunction refreshHelp()'),ctx);
  vm.runInContext('applyUpgrades()',ctx);
  return {ctx,elements,capture:()=>plain(vm.runInContext('captureSnapshot()',ctx)),restore:data=>{ctx.saved=data;return vm.runInContext('restoreSnapshot(saved)',ctx);}};
 }

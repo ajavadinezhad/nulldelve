@@ -1,5 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=ui-stability-r37';
-import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=ui-stability-r37';
+import {compatibleStorage} from './storage-compat.js?v=visual-cues-r38';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=visual-cues-r38';
 export const CAMPAIGN_PROGRESS_KEY='nulldelve.campaign.v1';
 const ids=CAMPAIGN_OPERATIONS.map(operation=>operation.id);
 const logIds=['log-lab','log-containment','log-nest'];

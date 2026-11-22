@@ -1,6 +1,6 @@
-import {weaponThumbnail} from './weapon-preview.js?v=ui-stability-r37';
-import {createItemIcon} from './item-icons.js?v=ui-stability-r37';
-import {formatKey} from './controls.js?v=ui-stability-r37';
+import {weaponThumbnail} from './weapon-preview.js?v=visual-cues-r38';
+import {createItemIcon} from './item-icons.js?v=visual-cues-r38';
+import {formatKey} from './controls.js?v=visual-cues-r38';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
@@ -34,7 +34,7 @@ function icon(type){
  for(const d of paths[type]??paths.gear){const path=document.createElementNS(SVG_NS,'path');path.setAttribute('d',d);svg.append(path);}wrapper.append(svg);return wrapper;
 }
 const TITLES={damage:'Damage',magazine:'Magazine',reload:'Reload',medkit:'Medkit',grenade:'Frag grenade',fireGrenade:'Fire grenade',armor:'Armor'};
-const EFFECTS={damage:'+1 damage / shot',magazine:'+6 rounds',reload:'−0.18s · 0.5s minimum',medkit:'+50 health',grenade:'Blast area · hold for range',fireGrenade:'Burn area · hold for range',armor:'+40 armor · 60 maximum'};
+const EFFECTS={damage:'+1 damage / shot',magazine:'+6 rounds',reload:'−0.18s · 0.5s minimum',medkit:'+50 health',grenade:'Blast area',fireGrenade:'Burn area',armor:'+40 armor · 60 maximum'};
 const SUPPLIES=new Set(['medkit','grenade','fireGrenade','armor']);
 function purchaseButton(offer,onPurchase,{label,name,maxed=false,full=false}={}){
  const cost=integer(offer.cost),button=element('button','shop-buy menu-button primary',maxed?'Maxed':full?'Full':label??`$${cost.toLocaleString()}`);button.type='button';button.disabled=maxed||full||offer.available===false;if(!maxed&&!full&&(label===undefined||String(label).startsWith('$'))){const cash=element('img','cash-icon');cash.src='./assets/cash.svg';cash.alt='';cash.setAttribute('aria-hidden','true');button.append(cash);}
@@ -64,7 +64,7 @@ function renderUpgrades(target,{offers,prefix,name,stats,credits,onPurchase}){
  for(const kind of ['damage','magazine','reload']){const offer=offers.find(item=>item.id===prefix+'.'+kind);if(!offer)continue;const level=integer(offer.level),maxLevel=integer(offer.maxLevel)||3,maxed=level>=maxLevel,cost=integer(offer.cost),available=!maxed&&offer.available!==false&&credits>=cost,control=element('section','inline-upgrade'),copy=element('div','inline-upgrade-copy');copy.append(element('strong','',TITLES[kind]),element('span','upgrade-effect',upgradeEffect(kind,stats,maxed,offer.increment??6)));const tier=element('small','upgrade-level',`${level}/${maxLevel}`);tier.setAttribute('aria-label',`Upgrade level ${level} of ${maxLevel}`);copy.append(tier);control.append(icon(kind),copy,purchaseButton({...offer,available},onPurchase,{maxed,name:`Upgrade ${name} ${TITLES[kind].toLowerCase()}`}));panel.append(control);
  }if(panel.children.length)target.append(panel);
 }
-function renderSupplies(target,armory,offers,onPurchase){const list=element('div','supply-list'),credits=integer(armory.credits),medkitHealing=Number.isFinite(armory.medkitHealing)?Math.max(50,Math.min(85,armory.medkitHealing)):50;for(const offer of offers.filter(item=>SUPPLIES.has(item.id))){const kind=offer.id,owned=integer(offer.owned),full=kind==='armor'?owned>=60:owned>=5,cost=integer(offer.cost),available=!full&&offer.available!==false&&credits>=cost,row=element('article','supply-row'),copy=element('div','supply-row-copy');row.title=kind==='medkit'?`Use to restore up to ${medkitHealing} health. Carry up to five.`:offer.description??'';copy.append(element('h3','',TITLES[kind]),element('span','',kind==='medkit'?`+${medkitHealing} health`:EFFECTS[kind]),element('small','',`${owned}/${kind==='armor'?60:5}`));row.append(icon(kind),copy,purchaseButton({...offer,available},onPurchase,{full,name:`Buy ${offer.label??TITLES[kind]}`}));list.append(row);}target.append(list);if(!list.children.length)target.append(element('p','shop-status','No supplies available.'));}
+function renderSupplies(target,armory,offers,onPurchase){const list=element('div','supply-list'),credits=integer(armory.credits),medkitHealing=Number.isFinite(armory.medkitHealing)?Math.max(50,Math.min(85,armory.medkitHealing)):50;for(const offer of offers.filter(item=>SUPPLIES.has(item.id))){const kind=offer.id,owned=integer(offer.owned),full=kind==='armor'?owned>=60:owned>=5,cost=integer(offer.cost),available=!full&&offer.available!==false&&credits>=cost,row=element('article','supply-row'),copy=element('div','supply-row-copy');row.title=kind==='medkit'?`Use to restore up to ${medkitHealing} health. Carry up to five.`:kind==='grenade'?'Area blast. Hold to set throw range, release to throw.':kind==='fireGrenade'?'Burning area. Hold to set throw range, release to throw.':offer.description??'';copy.append(element('h3','',TITLES[kind]),element('span','',kind==='medkit'?`+${medkitHealing} health`:EFFECTS[kind]),element('small','',`${owned}/${kind==='armor'?60:5}`));row.append(icon(kind),copy,purchaseButton({...offer,available},onPurchase,{full,name:`Buy ${offer.label??TITLES[kind]}`}));list.append(row);}target.append(list);if(!list.children.length)target.append(element('p','shop-status','No supplies available.'));}
 
 function renderAttachments(target,gun,onPurchase){
  if(!Array.isArray(gun.attachmentOptions)||!gun.attachmentOptions.length)return;

@@ -1,9 +1,9 @@
-import {effectiveFieldStats} from './field-skills.js?v=ui-stability-r37';
-import {cashReward} from './mission-salvage.js?v=ui-stability-r37';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=ui-stability-r37';
-import {compatibleStorage} from './storage-compat.js?v=ui-stability-r37';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=ui-stability-r37';
-import {createEconomy} from './economy.js?v=ui-stability-r37';
+import {effectiveFieldStats} from './field-skills.js?v=visual-cues-r38';
+import {cashReward} from './mission-salvage.js?v=visual-cues-r38';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=visual-cues-r38';
+import {compatibleStorage} from './storage-compat.js?v=visual-cues-r38';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=visual-cues-r38';
+import {createEconomy} from './economy.js?v=visual-cues-r38';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';
