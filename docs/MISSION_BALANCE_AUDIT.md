@@ -56,3 +56,22 @@ Current coverage: seven campaign operations, 11 weapons, 42 campaign traversal c
 Flooded freight adds five rooms and 144 Normal creatures in escalating encounters of 32, 48 and 64. Its route includes drainage, independent rail switches, a timed dispatch interlock, a manifest and release controls. Estimated duration is 4.9–7.6 minutes on Easy, 6.0–9.0 on Normal and 8.7–12.8 on Hard. Finite ammunition is granted at the drainage and dispatch milestones; final armored composition was tuned without increasing these allocations.
 
 Two finite salvage caches per operation and one first-clear contract reward persist in the campaign profile. Weapon purchase tiers and smaller future kill payouts are documented in CASH_ECONOMY.md. Existing balances and owned weapons are preserved.
+
+## r32 Dead Signal
+
+Dead Signal unlocks after Flooded freight and appends a communications annex without
+moving any earlier coordinate. Its 24/44/68 baseline encounters introduce a single
+late Spitter in Breaker Gallery, ranged mixtures in Antenna Hall, and finite-use
+Menders later in the operation. Simultaneous limits remain10/16/20. A three-motor
+load distribution puzzle uses2/3/4kW ratings against5/4kW feeder capacities
+(6/3 on Remix), followed by isolating two antenna feeds during or after the defense,
+cutting the transmitter, and deliberately transmitting evidence after the core
+swarm. An opened service loop shortens extraction and contains optional salvage.
+Milestones are checkpointable; partial motor allocation and missing live enemy
+references restore in fresh sessions across all difficulty/variant configurations.
+
+The world expands from201×69/32doors to251×69/38doors;101-,151- and201-wide
+snapshots preserve coordinates, inventory and old door identities. Automated
+collision traversal covers48 campaign configurations, including the furnished
+annex and a deliberate exit. This is route-state coverage, not a human survival
+or phone performance claim.

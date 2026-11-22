@@ -1,6 +1,6 @@
-import {weaponThumbnail} from './weapon-preview.js?v=preview-polish-r31';
-import {createItemIcon} from './item-icons.js?v=preview-polish-r31';
-import {formatKey} from './controls.js?v=preview-polish-r31';
+import {weaponThumbnail} from './weapon-preview.js?v=dead-signal-r32';
+import {createItemIcon} from './item-icons.js?v=dead-signal-r32';
+import {formatKey} from './controls.js?v=dead-signal-r32';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
@@ -20,6 +20,8 @@ function icon(type){
   kestrel:['M8 20h42v9H29l-7 12H11l5-16H8z','M50 21h17v5H50M38 29v12h10V29M21 14h20v6M6 20V10h15v10'],
   jackal:['M8 20h44v10H29L20 41H9l6-15H8z','M52 18h14v13H52M28 11h20v9M28 30v9h11v-9'],
   vesper:['M5 22h50v7H28l-8 12H9l6-15H5z','M55 23h14M27 12h20v7H27M30 29v13h8V29M43 19v4'],
+  lancet:['M4 24h42v6H27l-8 11H8l5-14H4z','M46 23h23v6H46M27 11h19v7H27zM31 30v10h7V30M52 20v12M60 20v12'],
+  orison:['M7 21h43v9H29l-8 11H10l6-15H7z','M50 22h17v6H50M23 12h27v6H23M29 30v11h9V30M28 12v6M35 12v6M42 12v6'],
   mantis:['M4 24h41v6H26l-8 11H7l5-14H4z','M45 23h23v6H45M28 10h21v8H28zM25 9v11M50 8v12M53 30l-5 11M57 30l8 11M29 30v9h8v-9'],
   shotgun:['M5 20h48v7H29l-8 13H8l7-16H5z','M30 14h34v6M30 23h23M27 29h20'],
   pistol:['M14 12h43v12H34l-5 17H17l5-20h-8z','M34 24v9h10l4-9M21 17h31'],
@@ -55,7 +57,7 @@ export function renderShop(target,armory,onPurchase,{group:selectedGroup='weapon
  layout.append(list,detail);target.append(layout);
 }
 
-function weaponStats(stats){const list=element('dl','weapon-row-stats');for(const [label,value]of [['Damage',Number.isFinite(stats.damage)?`${stats.damage}${stats.pellets>1?' × '+stats.pellets:''}`:null],['Rounds',stats.capacity??stats.magazine],['Rate',stats.interval>0?`${(1/stats.interval).toFixed(1)}/s`:null],['Reload',Number.isFinite(stats.reload)?`${Number(stats.reload.toFixed(2))}s`:null],['Range',Number.isFinite(stats.range)?`${Number(stats.range.toFixed(2))}m`:null]]){if(value===null||value===undefined)continue;const stat=element('div');stat.append(element('dt','',label),element('dd','',String(value)));list.append(stat);}return list;}
+function weaponStats(stats){const list=element('dl','weapon-row-stats');for(const [label,value]of [['Damage',Number.isFinite(stats.damage)?`${stats.damage}${stats.pellets>1?' × '+stats.pellets:''}`:null],['Rounds',stats.capacity??stats.magazine],[stats.burstCount>1?'Burst':'Rate',stats.interval>0?(stats.burstCount>1?`${stats.burstCount}-round / ${Number(stats.interval.toFixed(2))}s`:`${(1/stats.interval).toFixed(1)}/s`):null],['Reload',Number.isFinite(stats.reload)?`${Number(stats.reload.toFixed(2))}s`:null],['Range',Number.isFinite(stats.range)?`${Number(stats.range.toFixed(2))}m`:null],['Pierce',stats.pierce>1?`${stats.pierce} targets · ${Math.round((stats.pierceMultiplier??.6)*100)}%`:null]]){if(value===null||value===undefined)continue;const stat=element('div');stat.append(element('dt','',label),element('dd','',String(value)));list.append(stat);}return list;}
 function upgradeEffect(kind,stats,maxed,increment=6){const current=kind==='damage'?stats.damage:kind==='magazine'?stats.capacity??stats.magazine:stats.reload;if(!Number.isFinite(current))return EFFECTS[kind]??'';if(maxed)return kind==='reload'?`${Number(current.toFixed(2))}s`:String(current);const baseReload=Number.isFinite(stats.unskilledReload)?stats.unskilledReload:current,reloadMultiplier=Number.isFinite(stats.reloadMultiplier)?Math.max(.88,Math.min(1,stats.reloadMultiplier)):1;const next=kind==='damage'?current+1:kind==='magazine'?current+increment:Math.max(.5,Math.max(.5,baseReload-.18)*reloadMultiplier);if(kind==='damage'&&stats.pellets>1)return `${current}×${stats.pellets} → ${next}×${stats.pellets}`;return `${Number(current.toFixed(2))}${kind==='reload'?'s':''} → ${Number(next.toFixed(2))}${kind==='reload'?'s':''}`;}
 function renderUpgrades(target,{offers,prefix,name,stats,credits,onPurchase}){
  const panel=element('div','inline-upgrades');panel.setAttribute('aria-label',`${name} upgrades`);panel.setAttribute('data-upgrade-weapon',prefix);

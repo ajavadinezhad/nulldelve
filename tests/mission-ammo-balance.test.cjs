@@ -5,9 +5,9 @@ const {deployCampaignOperation}=require('../src/campaign-operations.js');
 const {createPressurePuzzle}=require('../src/pressure-puzzle.js');
 const {ROACH_VARIANTS}=require('../src/roach.js');
 const {DIFFICULTY_RULES}=require('../src/difficulty.js');
-const {grantHospitalAmmo}=require('../src/mission-supplies.js');
+const {grantHospitalAmmo,grantSignalAmmo}=require('../src/mission-supplies.js');
 const {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine}=require('../src/loot.js');
-const OPERATIONS={breach:['security','storage'],command:['command','generator'],research:['lab','reactor','transit'],containment:['containment','evacuation'],nest:['nest'],hospital:['hospital-triage','hospital-ward','hospital-isolation'],freight:['freight-pumps','freight-yard','freight-cold']};
+const OPERATIONS={breach:['security','storage'],command:['command','generator'],research:['lab','reactor','transit'],containment:['containment','evacuation'],nest:['nest'],hospital:['hospital-triage','hospital-ward','hospital-isolation'],freight:['freight-pumps','freight-yard','freight-cold'],signal:['signal-yard','signal-relay','signal-uplink']};
 // Use actual generated queues, not a duplicate table of encounter compositions.
 function encounterQueues(difficulty){
  const enemies=[],progression=createProgression({doors:Array.from({length:18},()=>({})),enemies,getDifficulty:()=>difficulty,spawnEnemy:(x,z,variant)=>{const enemy={id:'e'+enemies.length,x,z,variant,hp:2};enemies.push(enemy);return enemy;}});
@@ -18,7 +18,7 @@ function encounterQueues(difficulty){
  progression.state.power.solved=true;progression.state.valves.solved=true;progression.state.operationTasks.commandFuse=true;
  for(const id of ['task-generator','task-coolant','task-evac'])progression.interact(progression.state.devices.find(device=>device.id===id));
  progression.state.artifacts=['artifact-archive','artifact-generator','artifact-containment'];progression.update({x:85,z:10},.01);
- return {...Object.fromEntries(progression.state.zones.map(zone=>[zone.id,[...zone.wave.map(enemy=>enemy.variant),...zone.queue]])),...hospitalQueues(difficulty),...freightQueues(difficulty)};
+ return {...Object.fromEntries(progression.state.zones.map(zone=>[zone.id,[...zone.wave.map(enemy=>enemy.variant),...zone.queue]])),...hospitalQueues(difficulty),...freightQueues(difficulty),...signalQueues(difficulty)};
 }
 // Deploy and progress actual hospital task actions to obtain each authored wave.
 function hospitalQueues(difficulty){
@@ -39,14 +39,21 @@ function freightQueues(difficulty){
  const capture=(id,x,z)=>{Object.assign(player,{x,z});progression.update(player,.01);const zone=progression.state.zones.find(z=>z.id===id);assert.equal(zone.status,'active',id);queues[id]=[...zone.wave.map(e=>e.variant),...zone.queue];for(let n=0;n<100&&zone.status==='active';n++){zone.wave.forEach(e=>e.hp=0);progression.update(player,4);}assert.equal(zone.status,'cleared',id);};
  capture('freight-pumps',162,30);use('freight-pump');capture('freight-yard',186,30);use('freight-switch-a');use('freight-dispatch');progression.update(player,8);capture('freight-cold',186,10);return queues;
 }
+function signalQueues(difficulty){
+ const enemies=[],doors=Array.from({length:38},()=>({})),player={},puzzle=createPressurePuzzle(),queues={};
+ const progression=createProgression({doors,enemies,getDifficulty:()=>difficulty,spawnEnemy:(x,z,variant)=>{const e={id:'signal'+enemies.length,x,z,variant,hp:2};enemies.push(e);return e;}});deployCampaignOperation('signal',{player,puzzle,progression,doors});
+ const use=id=>{Object.assign(player,progression.state.devices.find(d=>d.id===id));progression.interact(player);};
+ const capture=(id,x,z)=>{Object.assign(player,{x,z});progression.update(player,.01);const zone=progression.state.zones.find(z=>z.id===id);assert.equal(zone.status,'active',id);queues[id]=[...zone.wave.map(e=>e.variant),...zone.queue];for(let n=0;n<100&&zone.status==='active';n++){zone.wave.forEach(e=>e.hp=0);progression.update(player,4);}assert.equal(zone.status,'cleared',id);};
+ capture('signal-yard',212,30);use('signal-motor-a');use('signal-motor-b');use('signal-motor-c');use('signal-motor-c');use('signal-load');capture('signal-relay',236,30);use('signal-antenna-a');use('signal-antenna-b');use('signal-shutdown');capture('signal-uplink',236,10);return queues;
+}
 // Economy-only projection: no enemy damage, grenades, barrels or melee; all drops
 // recovered; Hospital uses its two actual finite route allotments. Pellet rays hit real body sizes at3m, and whole shots miss on cadence.
 function runSupply(weapon,difficulty,mobs,missEvery,upgrade=0,supplyStops=[],supplyBudget=64){
  const rules=DIFFICULTY_RULES[difficulty],weapons={rifle:{...weapon,damage:weapon.baseDamage+upgrade,reserve:primaryReserve(weapon.id),ammo:weapon.capacity},pistol:{capacity:12,damage:2,pellets:1,reserve:rules.pistolReserve,ammo:12}};
  const player={x:0,z:0,hp:100,maxHp:100,ammo:weapon.capacity},loot=createLootState();let selected='rifle',killed=0,shots=0;
  for(const variant of mobs){
-  if(supplyStops.includes(killed))grantHospitalAmmo(weapons,supplyBudget);
-  const maxHp=Math.ceil(ROACH_VARIANTS[variant].hp*rules.hp);let hp=maxHp;
+  if(supplyStops.includes(killed)){if(supplyBudget==='signal')grantSignalAmmo(weapons);else grantHospitalAmmo(weapons,supplyBudget);}
+  const maxHp=Math.ceil(ROACH_VARIANTS[variant].hp*rules.hp);let hp=maxHp+(variant==='mender'?6:0); // Conservative: all three repairs land before this supporter is killed.
   while(hp>0){
    let gun=weapons[selected];
    if(player.ammo===0){player.ammo=refillMagazine(gun,0);if(!player.ammo){gun.ammo=0;selected=selected==='rifle'?'pistol':'rifle';gun=weapons[selected];player.ammo=gun.ammo||refillMagazine(gun,0);if(!player.ammo)break;}}
@@ -59,7 +66,7 @@ function runSupply(weapon,difficulty,mobs,missEvery,upgrade=0,supplyStops=[],sup
  return {killed,rounds:weapons.rifle.reserve+weapons.rifle.ammo,pistol:weapons.pistol.reserve+weapons.pistol.ammo,shots};
 }
 for(const missEvery of [5,4])test(`whole-operation supply budgets support${Math.round((1-1/missEvery)*100)}% accuracy with either weapon and optional first damage upgrade`,()=>{
- for(const difficulty of ['easy','normal','hard']){const queues=encounterQueues(difficulty);for(const weapon of PRIMARY_WEAPONS)for(const upgrade of [0,1])for(const [operation,ids]of Object.entries(OPERATIONS)){const mobs=ids.flatMap(id=>queues[id]);assert.ok(mobs.length>0);const supplyStops=operation==='freight'?[queues['freight-pumps'].length,queues['freight-pumps'].length+queues['freight-yard'].length]:operation==='hospital'?[queues['hospital-triage'].length,queues['hospital-triage'].length+queues['hospital-ward'].length]:[];const result=runSupply(weapon,difficulty,mobs,missEvery,upgrade,supplyStops);assert.equal(result.killed,mobs.length,`${difficulty} ${operation} ${weapon.id} damage upgrade${upgrade}: ${result.killed}/${mobs.length}`);}}
+ for(const difficulty of ['easy','normal','hard']){const queues=encounterQueues(difficulty);for(const weapon of PRIMARY_WEAPONS)for(const upgrade of [0,1])for(const [operation,ids]of Object.entries(OPERATIONS)){const mobs=ids.flatMap(id=>queues[id]);assert.ok(mobs.length>0);const supplyStops=operation==='signal'?[queues['signal-yard'].length,queues['signal-yard'].length+queues['signal-relay'].length]:operation==='freight'?[queues['freight-pumps'].length,queues['freight-pumps'].length+queues['freight-yard'].length]:operation==='hospital'?[queues['hospital-triage'].length,queues['hospital-triage'].length+queues['hospital-ward'].length]:[];const result=runSupply(weapon,difficulty,mobs,missEvery,upgrade,supplyStops,operation==='signal'?'signal':64);assert.equal(result.killed,mobs.length,`${difficulty} ${operation} ${weapon.id} damage upgrade${upgrade}: ${result.killed}/${mobs.length}`);}}
 });
 module.exports={encounterQueues,runSupply,OPERATIONS};
 

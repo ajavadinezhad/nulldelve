@@ -1,4 +1,4 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=preview-polish-r31';
+import {DIFFICULTY_RULES} from './difficulty.js?v=dead-signal-r32';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;
@@ -27,7 +27,7 @@ export function createLootState(saved){
 }
 export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='normal',reachable=()=>true}={}){
  if(enemy.lootDropped)return [];enemy.lootDropped=true;state.kills++;
- const big=['brute','charger','sentinel','screecher','leaper'].includes(enemy.variant),boss=enemy.variant==='boss';
+ const big=['brute','charger','sentinel','screecher','leaper','spitter','mender'].includes(enemy.variant),boss=enemy.variant==='boss';
  // Count nearby uncollected supplies in the aid budget: ignoring drops must not
  // create an unlimited pile, while supplies behind closed geometry or left in
  // older rooms do not block aid the player can actually collect.
@@ -49,7 +49,7 @@ export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='n
   if(difficulty==='hard'&&lowAmmo&&(big||boss)){
    // Recover a bounded fighting chance after an expensive mutation, only when
    // both weapons (including nearby uncollected drops) are running dry.
-   const baseHp=({brute:6,charger:8,sentinel:14,screecher:10,leaper:7,boss:24})[enemy.variant]??2,hp=Math.max(1,Number(enemy.maxHp)||Math.ceil(baseHp*(DIFFICULTY_RULES[difficulty]?.hp??1))),gun=weapons?.rifle??{},pellets=Math.max(1,Number(gun.pellets)||1),damage=Math.max(1,Number(gun.damage??gun.baseDamage)||1);
+   const baseHp=({brute:6,charger:8,sentinel:14,screecher:10,leaper:7,spitter:6,mender:8,boss:24})[enemy.variant]??2,hp=Math.max(1,Number(enemy.maxHp)||Math.ceil(baseHp*(DIFFICULTY_RULES[difficulty]?.hp??1))),gun=weapons?.rifle??{},pellets=Math.max(1,Number(gun.pellets)||1),damage=Math.max(1,Number(gun.damage??gun.baseDamage)||1);
    rifle=Math.max(rifle,Math.min(pellets>1?6:16,primaryLowThreshold-supply('rifle'),Math.ceil(hp/(damage*pellets)*1.25)));
    pistol=Math.max(pistol,Math.min(4,Math.ceil(hp/8)));
   }

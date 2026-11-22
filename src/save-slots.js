@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=preview-polish-r31';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=preview-polish-r31';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=preview-polish-r31';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=preview-polish-r31';
-import {validateSnapshot} from './snapshot-validation.js?v=preview-polish-r31';
-import {normalizeSettings} from './controls.js?v=preview-polish-r31';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=dead-signal-r32';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=dead-signal-r32';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=dead-signal-r32';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=dead-signal-r32';
+import {validateSnapshot} from './snapshot-validation.js?v=dead-signal-r32';
+import {normalizeSettings} from './controls.js?v=dead-signal-r32';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=preview-polish-r31';
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=preview-polish-r31';
-import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=preview-polish-r31';
+import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=dead-signal-r32';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=dead-signal-r32';
+import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=dead-signal-r32';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},
@@ -10,8 +10,10 @@ export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'nest',name:'Nest & evacuation',description:'Break the Nest’s locks, destroy its core, recover the research intel, and evacuate.',x:84,y:20},
  {id:'hospital',name:'Silent hospital',description:'Restore emergency power, authenticate a quarantined sample, sterilize Surgery and recover the hospital patient ledger.',x:82,y:82},
  {id:'freight',name:'Flooded freight',description:'Drain the transfer route, reroute a quarantined cargo trolley and recover the cold-chain shipping manifest.',x:55,y:23},
+ {id:'signal',name:'Dead Signal',description:'Balance the communications feeders, isolate the colony antennas and transmit the experiment records beyond the facility.',x:31,y:19},
 ].map(Object.freeze));
 const definitions={
+ signal:{spawn:[212,57],prior:['security','storage','command','generator','lab','reactor','transit','containment','evacuation','nest','hospital-triage','hospital-ward','hospital-isolation','freight-pumps','freight-yard','freight-cold'],zones:['signal-yard','signal-relay','signal-uplink']},
  breach:{spawn:[7,29],prior:[],zones:['security','storage']},
  command:{spawn:[35,13],prior:['security','storage'],zones:['command','generator']},
  research:{spawn:[59,10],prior:['security','storage','command','generator'],zones:['lab','reactor','transit']},
@@ -31,7 +33,7 @@ export function deployCampaignOperation(value,{player,puzzle,progression,doors})
  if(definition.prior.includes('evacuation'))snapshot.operationTasks.evacPower=true;
  snapshot.circuit=definition.prior.includes('generator')?{rotations:[...WIRE_SOLUTION],powered:true,solved:true}:createWireCircuit();
  snapshot.elapsed=0;snapshot.operationTasks.generatorDefense={started:!!snapshot.operationTasks.genInserted,progress:snapshot.operationTasks.genInserted?22:0,jammed:false,completed:!!snapshot.operationTasks.genInserted,saboteurIds:[]};snapshot.logs=[];snapshot.evacuation={started:false,remaining:20,completed:false};
- const beyondBreach=id!=='breach',powerReady=['containment','nest','hospital','freight'].includes(id),valvesReady=['nest','hospital','freight'].includes(id);
+ const beyondBreach=id!=='breach',powerReady=['containment','nest','hospital','freight','signal'].includes(id),valvesReady=['nest','hospital','freight','signal'].includes(id);
  snapshot.archive={input:beyondBreach?[...sequences.archive]:[],solved:beyondBreach};
  snapshot.relay={started:false,remaining:0,completed:beyondBreach};
  snapshot.archiveEntered=beyondBreach;snapshot.securityEntered=beyondBreach;
@@ -50,6 +52,7 @@ export function campaignOperationObjectivesComplete(value,{player,progression}){
  const state=progression.state??progression,cleared=name=>state.zones.find(z=>z.id===name)?.status==='cleared';
  const tasks=state.operationTasks??createOperationTasks();
  if(!operationRouteComplete(id,tasks))return false;
+ if(id==='signal')return tasks.signalLoad&&tasks.signalAntennaA&&tasks.signalAntennaB&&tasks.signalShutdown&&tasks.signalSent&&cleared('signal-yard')&&cleared('signal-relay')&&cleared('signal-uplink');
  if(id==='breach')return cleared('security')&&cleared('storage');
  if(id==='command')return cleared('command')&&cleared('generator')&&tasks.commandFuse&&tasks.commandRepair;
  if(id==='research')return cleared('lab')&&cleared('reactor')&&!!state.power?.solved&&tasks.researchCoolant&&cleared('transit');
@@ -59,7 +62,7 @@ export function campaignOperationObjectivesComplete(value,{player,progression}){
  return state.artifacts?.length===3&&tasks.nestRelay.decoded&&cleared('nest')&&!!player.intel;
 }
 
-const EXITS={freight:{x:190,z:59,label:'Freight departure platform',direction:'Reach the departure platform in southeast Rail Control'},hospital:{x:110,z:60,label:'Hospital ambulance lift',direction:'Return west to Admission and reach the ambulance lift in its southern bay'},breach:{x:41,z:29,label:'Extraction sector exit',direction:'Leave Storage east through its door into Extraction'},command:{x:49,z:10,label:'Powered Bio Lab exit',direction:'Follow the yellow cable north through Extraction and Command, then east through the powered Bio Lab doorway'},research:{x:73,z:52,label:'Eastern Transit exit',direction:'Head east from Transit toward the Evacuation corridor'},containment:{x:86,z:42,label:'Containment return exit',direction:'Return north from Evacuation toward the Containment corridor'},nest:{x:92,z:60,label:'Evacuation pad',direction:'Leave Nest Core south through Containment, then continue southeast to Evacuation'}};
+const EXITS={signal:{x:242,z:59,label:'Communications service exit',direction:'Leave Transmission Core south through Antenna Hall, then use the open service shortcut to the southeast exit'},freight:{x:190,z:59,label:'Freight departure platform',direction:'Reach the departure platform in southeast Rail Control'},hospital:{x:110,z:60,label:'Hospital ambulance lift',direction:'Return west to Admission and reach the ambulance lift in its southern bay'},breach:{x:41,z:29,label:'Extraction sector exit',direction:'Leave Storage east through its door into Extraction'},command:{x:49,z:10,label:'Powered Bio Lab exit',direction:'Follow the yellow cable north through Extraction and Command, then east through the powered Bio Lab doorway'},research:{x:73,z:52,label:'Eastern Transit exit',direction:'Head east from Transit toward the Evacuation corridor'},containment:{x:86,z:42,label:'Containment return exit',direction:'Return north from Evacuation toward the Containment corridor'},nest:{x:92,z:60,label:'Evacuation pad',direction:'Leave Nest Core south through Containment, then continue southeast to Evacuation'}};
 export function campaignOperationExit(value){const id=normalizeCampaignOperation(value);return id?{...EXITS[id]}:null;}
 export function campaignOperationComplete(value,context){const exit=campaignOperationExit(value);return !!exit&&campaignOperationObjectivesComplete(value,context)&&Math.hypot(context.player.x-exit.x,context.player.z-exit.z)<=1.4;}
 
@@ -68,6 +71,7 @@ export function campaignOperationGuidance(value,{player,puzzle,progression}){
  const state=progression.state??progression,cleared=name=>state.zones.find(z=>z.id===name)?.status==='cleared';
  const tasks=state.operationTasks??createOperationTasks();
  const step=(label,done,hint)=>({label,done:!!done,hint});let steps;
+ if(id==='signal')steps=[step('Secure the Breaker Gallery',cleared('signal-yard'),'Go north from Arrival into the Breaker Gallery.'),step('Distribute the three motor loads',tasks.signalLoad,'Read the Gallery capacity plate. Connect all three motors to feeder A or B without overloading either, then test the distribution.'),step('Isolate both antenna feeds',tasks.signalAntennaA&&tasks.signalAntennaB,'Enter Antenna Hall to the east. Isolate its west and east antenna feeds; both can be cut during the defense.'),step('Secure Antenna Hall',cleared('signal-relay'),'Defeat all antenna defense reinforcements.'),step('Cut the colony transmitter',tasks.signalShutdown,'Use the Antenna Hall transmitter console after both feeds are isolated and the defense is cleared.'),step('Secure Transmission Core',cleared('signal-uplink'),'Head north into Transmission Core and secure the uplink.'),step('Transmit the experiment evidence',tasks.signalSent,'Use the northern uplink console to send the patient ledger and shipping records outside the facility.')];
  if(id==='breach')steps=[step('Power the insertion door',puzzle.solved,''),step('Decode the Archive',state.archive.solved,''),step('Link the Security relays',state.relay.completed,''),step('Clear the Security purge',cleared('security'),'Defeat every Security reinforcement.'),step('Survive the Storage ambush',cleared('storage'),'Head south from Security through its corridor into Storage and clear the ambush.')];
  if(id==='command')steps=[step('Defeat the Command mutation',cleared('command'),'Clear Command before entering its southern maintenance route.'),step('Recover the Maintenance fuse',tasks.commandFuse,'Go south through Extraction and Generator, then west to Maintenance. Find its service fuse.'),step('Insert the Generator fuse',tasks.genInserted,'Return east to Generator and fit the service fuse at its central repair console.'),step('Defend the Power House restart',cleared('generator')&&tasks.generatorDefense?.completed,'Keep the supply running inside Generator. Stop amber-marked saboteurs and repair any jam at the console.'),step('Connect the cross-room yellow cable',tasks.commandRepair,'')];
  if(id==='research')steps=[step('Clear Bio Lab',cleared('lab'),'Eliminate the Bio Lab outbreak.'),step('Clear the Reactor swarm',cleared('reactor'),'Go south from Bio Lab and clear Reactor.'),step('Restore Reactor power',state.power.solved,''),step('Start the Transit coolant purge',tasks.researchCoolant,'Go south from Reactor into Transit and activate the central coolant console.'),step('Defend the Transit purge',cleared('transit'),'Clear the coolant purge swarm to open the eastern Transit exit.')];

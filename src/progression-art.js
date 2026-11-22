@@ -1,5 +1,5 @@
-import {hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=preview-polish-r31';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=preview-polish-r31';
+import {hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=dead-signal-r32';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=dead-signal-r32';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */
@@ -29,12 +29,12 @@ export function createProgressionArt(scene, box, state) {
       const ring=new THREE.Mesh(new THREE.RingGeometry(.44,.49,32),status);ring.rotation.x=-Math.PI/2;ring.position.y=.025;g.add(ring);
       return {device,status,screenMaterial:artifactMaterial,artifact};
     }
-    part(g,0,.055,0,.67,.11,.67,materials.dark);
-    part(g,0,.34,.08,.34,.5,.28,materials.steel);
-    part(g,0,.63,0,.69,.12,.62,materials.trim);
+    const isGlyph=device.kind==='glyph';
+    if(isGlyph){part(g,0,.06,0,1.28,.12,1.2,materials.dark);part(g,0,.13,0,1.16,.025,1.08,materials.steel);}
+    else{part(g,0,.055,0,.67,.11,.67,materials.dark);part(g,0,.34,.08,.34,.5,.28,materials.steel);part(g,0,.63,0,.69,.12,.62,materials.trim);}
     const display=canvasTexture(128,128),ctx=display.ctx;
-    ctx.fillStyle=device.task?.startsWith('hospital')?'#162733':'#142923';ctx.fillRect(0,0,128,128);
-    if(device.kind==='glyph')glyph(ctx,device.glyph||device.id.replace('glyph-',''),64,55,61,'#b5d7c3');
+    ctx.fillStyle=isGlyph?'#101722':device.task?.startsWith('hospital')?'#162733':'#142923';ctx.fillRect(0,0,128,128);
+    if(isGlyph){ctx.strokeStyle='#657083';ctx.lineWidth=3;for(const [x,y,dx,dy]of [[7,7,1,1],[121,7,-1,1],[7,121,1,-1],[121,121,-1,-1]]){ctx.beginPath();ctx.moveTo(x+dx*15,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*15);ctx.stroke();}glyph(ctx,device.glyph||device.id.replace('glyph-',''),64,64,88,'#f2f4f8');}
     else if(device.kind==='log'){ctx.strokeStyle='#b5d7c3';ctx.lineWidth=4;ctx.strokeRect(33,22,62,70);for(let y=38;y<85;y+=13){ctx.beginPath();ctx.moveTo(43,y);ctx.lineTo(85,y);ctx.stroke();}}
     else if(device.kind==='power'){ctx.fillStyle='#e5c477';ctx.font='bold 65px monospace';ctx.textAlign='center';ctx.fillText(device.id.slice(-1).toUpperCase(),64,80);}
     else if(device.kind==='task'){
@@ -54,22 +54,23 @@ export function createProgressionArt(scene, box, state) {
     }
     else if(device.kind==='valve'){ctx.strokeStyle='#b5d7c3';ctx.lineWidth=5;ctx.beginPath();ctx.arc(64,57,29,0,Math.PI*2);ctx.moveTo(35,57);ctx.lineTo(93,57);ctx.moveTo(64,28);ctx.lineTo(64,86);ctx.stroke();}
     else{ctx.strokeStyle='#b5d7c3';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(64,66,14+i*13,-Math.PI*.8,-Math.PI*.2);ctx.stroke();}ctx.beginPath();ctx.arc(64,67,4,0,Math.PI*2);ctx.stroke();}
-    ctx.fillStyle='#819b8b';ctx.font=device.kind==='task'?'bold 11px monospace':'bold 13px monospace';ctx.textAlign='center';ctx.fillText(({glyph:'GLYPH INPUT',relay:'LINK RELAY',power:'POWER NODE',valve:'VALVE '+device.id.slice(-1).toUpperCase(),log:'RESEARCH LOG',task:device.label.split(' ').slice(-2).join(' ')})[device.kind],64,111);
+    ctx.fillStyle='#819b8b';ctx.font=device.kind==='task'?'bold 11px monospace':'bold 13px monospace';ctx.textAlign='center';if(!isGlyph)ctx.fillText(({glyph:'GLYPH INPUT',relay:'LINK RELAY',power:'POWER NODE',valve:'VALVE '+device.id.slice(-1).toUpperCase(),log:'RESEARCH LOG',task:device.label.split(' ').slice(-2).join(' ')})[device.kind],64,111);
     const screenMaterial=new THREE.MeshBasicMaterial({map:display.texture,color:0xffffff});
-    const screen=new THREE.Mesh(new THREE.PlaneGeometry(.59,.52),screenMaterial);screen.rotation.x=-Math.PI/2;screen.position.y=.696;g.add(screen);
+    const screen=new THREE.Mesh(new THREE.PlaneGeometry(isGlyph?1.08:.59,isGlyph?1.02:.52),screenMaterial);screen.rotation.x=-Math.PI/2;screen.position.y=isGlyph?.15:.696;g.add(screen);
     const status=new THREE.MeshBasicMaterial({color:0xdfab61});
-    part(g,.255,.716,-.235,.075,.025,.075,status);
-    const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.46,32),status);ring.rotation.x=-Math.PI/2;ring.position.y=.018;g.add(ring);
+    part(g,0,isGlyph?.17:.716,isGlyph?.57:-.235,isGlyph?.62:.32,.025,.065,status);
     return {device,status,screenMaterial};
   });
   // Plaques redraw after loading a saved normal/remixed operation.
   const clue=canvasTexture(512,160);plane(clue.texture,3.45,1.08,state.clue.x,.035,state.clue.z);
   const maintenance=[['power',59,33,'POWER ROUTE'],['valves',86,32,'VENT ORDER']].map(([id,x,z,title])=>{const plaque=canvasTexture(512,100);plane(plaque.texture,4.6,.9,x,.035,z);return {id,title,...plaque};});
   const hospitalPlaque=canvasTexture(512,160);plane(hospitalPlaque.texture,3.8,1.1,118,.035,31);
+  const signalPlaque=canvasTexture(512,160);plane(signalPlaque.texture,4.2,1.1,216,.035,25);
   const freightPlaque=canvasTexture(512,160);plane(freightPlaque.texture,4.2,1.1,164,.035,25);
   let clueVersion='';
   function updateClues(){
     const version=JSON.stringify([state.archive.sequence,state.power.sequence,state.valves.sequence,state.remix]);if(version===clueVersion)return;clueVersion=version;
+    const sc=signalPlaque.ctx;sc.fillStyle='#282536';sc.fillRect(0,0,512,160);sc.strokeStyle='#c5b0d8';sc.lineWidth=4;sc.strokeRect(4,4,504,152);sc.fillStyle='#eadfc8';sc.textAlign='center';sc.font='bold 25px monospace';sc.fillText('MOTORS 2 / 3 / 4 kW',256,53);sc.fillText('FEEDERS A / B: '+(state.remix?'6 / 3':'5 / 4')+' kW',256,110);signalPlaque.texture.needsUpdate=true;
     const fc=freightPlaque.ctx;fc.fillStyle='#23323e';fc.fillRect(0,0,512,160);fc.strokeStyle='#bca477';fc.lineWidth=4;fc.strokeRect(4,4,504,152);fc.fillStyle='#e5d3ae';fc.textAlign='center';fc.font='bold 26px monospace';fc.fillText('COLD CHAIN ROUTE',256,52);fc.fillText('A / B: '+freightTrackTarget(state.remix).join(' / '),256,111);freightPlaque.texture.needsUpdate=true;
     const hc=hospitalPlaque.ctx;hc.clearRect(0,0,512,160);hc.fillStyle='#243540';hc.fillRect(0,0,512,160);hc.strokeStyle='#a5bbc8';hc.lineWidth=4;hc.strokeRect(4,4,504,152);hc.textAlign='center';hc.fillStyle='#e0e9e9';hc.font='bold 24px monospace';hc.fillText('QUARANTINE PRESSURE',256,48);hc.font='bold 22px monospace';hc.fillText('O / F / E: '+hospitalAirlockTarget(state.remix).join(' / '),256,106);hospitalPlaque.texture.needsUpdate=true;
     const c=clue.ctx;c.clearRect(0,0,512,160);c.fillStyle='#222e29';c.fillRect(0,0,512,160);c.strokeStyle='#8e967b';c.lineWidth=4;c.strokeRect(4,4,504,152);
@@ -105,14 +106,14 @@ export function createProgressionArt(scene, box, state) {
   const cargoCar=new THREE.Group();part(cargoCar,0,.2,0,1.5,.4,.85,materials.trim);part(cargoCar,0,.45,0,1.2,.2,.7,materials.steel);railBoard.add(cargoCar);
   const railSignals=[0,1].map(index=>{const material=new THREE.MeshBasicMaterial({color:0xb67b50});part(railBoard,index?1.5:-1.5,.1,0,.2,.15,.2,material);return material;});
   function update(time=0){
-    updateClues();circuitArt.update();const route=state.operationTasks?.freightRoute;if(route){const progress=route.delivered?1:route.running?1-route.remaining/8:0;cargoCar.position.z=2-progress*4;const target=freightTrackTarget(state.remix);for(let i=0;i<2;i++)railSignals[i].color.set(route.switches[i]===target[i]?0x84b8c8:0xc18c51);}
+    updateClues();circuitArt.update();const route=state.operationTasks?.freightRoute;if(route){const progress=route.delivered?1:route.running?1-Math.min(1,route.remaining/3):0;cargoCar.position.z=2-progress*4;const target=freightTrackTarget(state.remix);for(let i=0;i<2;i++)railSignals[i].color.set(route.switches[i]===target[i]?0x84b8c8:0xc18c51);}
     const airlock=state.operationTasks?.hospitalAirlock,target=hospitalAirlockTarget(state.remix),defense=state.operationTasks?.generatorDefense;
     if(airlock){const label=state.operationTasks.hospitalSterile?'AIRLOCK STERILE':airlock.running?`SEALED CYCLE ${Math.ceil(airlock.remaining)}s`:`O ${airlock.settings[0]}/2  F ${airlock.settings[1]}/2  E ${airlock.settings[2]}/2`;if(label!==lastAirlock){const c=airlockScreen.ctx;c.clearRect(0,0,512,160);c.fillStyle='#1a2a38';c.fillRect(0,0,512,160);c.textAlign='center';c.font='bold 26px monospace';c.fillStyle='#b7cbd8';c.fillText(label,256,53);c.font='bold 22px monospace';c.fillStyle='#ecc17c';c.fillText('OXYGEN / FILTER / EXHAUST',256,98);c.font='18px monospace';c.fillText('MATCH GAUGES · THEN START CYCLE',256,133);airlockScreen.texture.needsUpdate=true;lastAirlock=label;}}
     if(defense){const label=defense.completed?'RESTART STABLE':defense.jammed?'JAMMED · INTERACT TO REPAIR':defense.started?`DEFEND RESTART ${Math.floor(defense.progress/22*100)}%`:'EMERGENCY RESTART';if(label!==lastRestart){const c=restartScreen.ctx;c.clearRect(0,0,512,128);c.fillStyle='#202a35';c.fillRect(0,0,512,128);c.fillStyle=defense.jammed?'#ef997c':'#edc17c';c.textAlign='center';c.font='bold 24px monospace';c.fillText(label,256,64);c.font='17px monospace';c.fillText('AMBER RINGS: CONSOLE SABOTEURS',256,102);restartScreen.texture.needsUpdate=true;lastRestart=label;}
      for(const marker of sabotageMarkers.values())marker.visible=false;const wave=state.zones.find(z=>z.id==='generator')?.wave??[];for(const e of wave){if(!defense.saboteurIds.includes(e.id))continue;let marker=sabotageMarkers.get(e.id);if(!marker){marker=new THREE.Mesh(new THREE.RingGeometry(.48,.57,20),new THREE.MeshBasicMaterial({color:0xf0bb64,side:THREE.DoubleSide,transparent:true,opacity:.8}));marker.rotation.x=-Math.PI/2;root.add(marker);sabotageMarkers.set(e.id,marker);}marker.visible=e.hp>0&&e.mesh?.visible!==false&&!defense.completed;marker.position.set(e.x,.07,e.z);}}
 
     for(const socket of sealMaterials)socket.material.color.set(state.artifacts?.includes(socket.id)?0x8be4b3:0x725c40);
-    for(const entry of devices){const {device,status,screenMaterial}=entry;if(device.kind==='artifact'){const collected=state.artifacts?.includes(device.id);entry.artifact.visible=!collected;device.active=!!collected;}status.color.set(device.active?0x86e5a3:device.kind==='relay'&&device.progress>0?0xa8cecc:0xdfab61);screenMaterial.color.set(device.active?0x8bedb2:0xffffff);}
+    for(const entry of devices){const {device,status,screenMaterial}=entry;if(device.kind==='artifact'){const collected=state.artifacts?.includes(device.id);entry.artifact.visible=!collected;device.active=!!collected;}status.color.set(device.active?0x82cde0:device.kind==='relay'&&device.progress>0?0xdfab61:0x8794a7);screenMaterial.color.set(device.active?0x94def0:0xffffff);}
     const relay=state.relay,completed=relay.completed||relay.solved;
     const label=completed?'LINK ESTABLISHED':relay.started?`LINK WINDOW  ${Math.ceil(Math.max(0,relay.remaining))}s`:'LINK RELAYS · 8 SECOND WINDOW';
     if(label!==lastTimer){const ctx=timer.ctx;ctx.clearRect(0,0,512,128);ctx.fillStyle='#152820';ctx.fillRect(0,0,512,128);ctx.strokeStyle=completed?'#88dba0':'#817c56';ctx.lineWidth=3;ctx.strokeRect(3,3,506,122);ctx.fillStyle=completed?'#b2efc3':'#c6bc8e';ctx.textAlign='center';ctx.font='bold 25px monospace';ctx.fillText(label,256,74);timer.texture.needsUpdate=true;lastTimer=label;}

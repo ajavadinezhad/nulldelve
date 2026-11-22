@@ -1,3 +1,4 @@
+const {SIGNAL_ROOMS,SIGNAL_DOORS,carveSignal,addSignalProps}=require('../src/signal-layout.js');
 const {WORLD_WIDTH,WORLD_HEIGHT}=require('../src/world-layout.js');
 const {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps}=require('../src/hospital-layout.js');
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');
@@ -5,7 +6,7 @@ const {createPressurePuzzle,moveWithCrates,updatePressurePuzzle}=require('../src
 const {EXPANSION_ROOMS,carveExpansion,addExpansionProps}=require('../src/facility-expansion.js');
 test('both pressure plates are reachable by pushing crates through the actual furnished room',async()=>{
  const THREE=await import('../vendor/three.module.js'),{buildArt}=await import('../src/environment.js');
- const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8'),ctx={...require('../src/freight-layout.js'),W:WORLD_WIDTH,H:WORLD_HEIGHT,HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,createPressurePuzzle,EXPANSION_ROOMS,carveExpansion};vm.createContext(ctx);
+ const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8'),ctx={...require('../src/freight-layout.js'),SIGNAL_ROOMS,SIGNAL_DOORS,carveSignal,W:WORLD_WIDTH,H:WORLD_HEIGHT,HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,createPressurePuzzle,EXPANSION_ROOMS,carveExpansion};vm.createContext(ctx);
  vm.runInContext(source.slice(source.indexOf('const map='),source.indexOf('const boxGeo='))+';globalThis.layout={map,cover,roomDefs,puzzle};',ctx);
  const {map,cover,roomDefs,puzzle}=ctx.layout,scene=new THREE.Scene();
  const previous=global.document;global.document={createElement:()=>({getContext:()=>new Proxy({},{get:(o,k)=>o[k]??(()=>{})})})};

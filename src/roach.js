@@ -14,6 +14,8 @@ const mats={
 
 // Collision radii describe the body; thin legs and antennae may extend beyond them.
 export const ROACH_VARIANTS={
+ spitter:{hp:6,speed:1.7,radius:.38,biteDamage:8,biteRange:1.05,attackCooldown:1.4,stopDistance:.85,scale:1.1},
+ mender:{hp:8,speed:1.55,radius:.43,biteDamage:9,biteRange:1.1,attackCooldown:1.4,stopDistance:.85,scale:1.25},
  normal:{hp:2,speed:2.7,radius:.32,biteDamage:12,biteRange:1.05,attackCooldown:.85,stopDistance:.78,scale:1},
  runner:{hp:1,speed:4.4,radius:.24,biteDamage:7,biteRange:.9,attackCooldown:.55,stopDistance:.65,scale:.72},
  brute:{hp:6,speed:1.9,radius:.46,biteDamage:19,biteRange:1.25,attackCooldown:1.15,stopDistance:1,scale:1.4},
@@ -24,6 +26,8 @@ export const ROACH_VARIANTS={
  boss:{hp:24,speed:1.45,radius:.75,biteDamage:28,biteRange:1.65,attackCooldown:1.4,stopDistance:1.3,scale:2.2}
 };
 const palettes={
+ spitter:{shell:0x5e4930,wing:0xa47a42,ridge:0xf0bf72,dark:0x30271f,leg:0x8c7152,eye:0xffc780},
+ mender:{shell:0x2e4652,wing:0x657f89,ridge:0x9bd8e6,dark:0x202f38,leg:0x738c94,eye:0xc4eff1},
  screecher:{shell:0x59335d,wing:0x95648e,ridge:0xedb26d,dark:0x2b202e,leg:0x9a729a,eye:0xffc881},
  leaper:{shell:0xb7b4a7,wing:0xd6d2c4,ridge:0x817969,dark:0x393b3b,leg:0xaaa694,eye:0xf0a254},
  charger:{shell:0x6e3917,wing:0xa56526,ridge:0xf3bb66,dark:0x30251d,leg:0x986741,eye:0xffc15b},
@@ -93,6 +97,8 @@ export function createRoach(scene,variant='normal'){
  }
  if(variant==='screecher'){for(const side of [-1,1]){ellipsoid(body,[side*.20,.43,.08],[.17,.16,.20],'ridge');ellipsoid(body,[side*.15,.43,.34],[.12,.13,.13],'ridge');}}
  if(variant==='leaper'){for(const side of [-1,1]){ellipsoid(body,[side*.30,.25,.37],[.13,.13,.30],'shell');segment(body,[side*.28,.22,.35],[side*.50,.30,.68],.045,'ridge');segment(body,[side*.50,.30,.68],[side*.65,.06,.90],.025,'leg');}}
+ if(variant==='spitter'){for(const side of [-1,1])ellipsoid(body,[side*.24,.36,-.22],[.19,.17,.24],'ridge');}
+ if(variant==='mender'){for(const side of [-1,1]){ellipsoid(body,[side*.24,.44,.15],[.13,.25,.22],'ridge');segment(body,[side*.24,.55,.15],[0,.72,.08],.035,'wing');}}
  if(variant==='charger'){for(const side of [-1,1])spike(body,[side*.12,.25,-.48],[side*.17,.35,-.85],.055,mats.ridge);}
  if(variant==='sentinel'){for(let i=0;i<3;i++)for(const side of [-1,1])ellipsoid(body,[side*.23,.31,-.06+i*.22],[.13,.12,.17],'ridge');}
  if(variant==='boss'){
@@ -125,6 +131,12 @@ export function createRoach(scene,variant='normal'){
   const edge=new THREE.Mesh(new THREE.RingGeometry(radius-.07,radius,40),new THREE.MeshBasicMaterial({color:radial?0xffbd8c:0xffdfa2,transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));edge.rotation.x=-Math.PI/2;edge.position.y=.007;warning.add(edge);
   root.userData[radial?'shriekTelegraph':'leapTelegraph']=warning;root.userData.specialFill=fill.material;
  }
+ if(variant==='spitter'||variant==='mender'){
+  const spit=variant==='spitter',radius=spit?1.05:3.2,warning=new THREE.Group();warning.name=spit?'spit-target-warning':'mend-radius-warning';warning.scale.set(1/root.scale.x,1/root.scale.y,1/root.scale.z);warning.position.y=.025/stats.scale;warning.visible=false;root.add(warning);
+  const fill=new THREE.Mesh(new THREE.CircleGeometry(radius,32),new THREE.MeshBasicMaterial({color:spit?0xf4a34e:0x9bd8e6,transparent:true,opacity:.2,depthWrite:false,side:THREE.DoubleSide}));fill.rotation.x=-Math.PI/2;warning.add(fill);
+  const edge=new THREE.Mesh(new THREE.RingGeometry(radius-.09,radius,32),new THREE.MeshBasicMaterial({color:spit?0xffc77e:0xb9eaf1,transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));edge.rotation.x=-Math.PI/2;edge.position.y=.01;warning.add(edge);
+  root.userData[spit?'spitTelegraph':'mendTelegraph']=warning;root.userData[spit?'spitFill':'mendFill']=fill.material;
+ }
  Object.assign(root.userData,{variant,body,legs,antennae,phase:0,time:0,lastPosition:null,speed:0,animationRate:variant==='runner'?1.3:variant==='boss'?.65:variant==='brute'?.8:1});
  scene.add(root);return root;
 }
@@ -134,6 +146,8 @@ export function animateRoach(mesh,dt){
  if(u.chargeTelegraph){u.chargeTelegraph.visible=(u.chargeWindup??0)>0;u.chargeTelegraph.material.opacity=.18+(u.chargeWindup??0)*.28;}
  if(u.shriekTelegraph){u.shriekTelegraph.visible=(u.shriekWindup??0)>0;u.specialFill.opacity=.12+(u.shriekWindup??0)*.24;}
  if(u.leapTelegraph){u.leapTelegraph.visible=!!u.leapTarget;if(u.leapTarget){const dx=u.leapTarget.x-mesh.position.x,dz=u.leapTarget.z-mesh.position.z,c=Math.cos(mesh.rotation.y),s=Math.sin(mesh.rotation.y);u.leapTelegraph.position.x=(dx*c-dz*s)/mesh.scale.x;u.leapTelegraph.position.z=(dx*s+dz*c)/mesh.scale.z;u.specialFill.opacity=.12+(u.leapWindup??0)*.2;}}
+ if(u.spitTelegraph){u.spitTelegraph.visible=!!u.spitTarget;if(u.spitTarget){const dx=u.spitTarget.x-mesh.position.x,dz=u.spitTarget.z-mesh.position.z,c=Math.cos(mesh.rotation.y),s=Math.sin(mesh.rotation.y);u.spitTelegraph.position.x=(dx*c-dz*s)/mesh.scale.x;u.spitTelegraph.position.z=(dx*s+dz*c)/mesh.scale.z;u.spitFill.opacity=.13+(u.spitWindup??0)*.25;}}
+ if(u.mendTelegraph){u.mendTelegraph.visible=(u.mendWindup??0)>0;u.mendFill.opacity=.12+(u.mendWindup??0)*.2;}
  const pulse=u.pulse;if(u.pulseTelegraph){u.pulseTelegraph.visible=!!pulse?.active;if(pulse?.active){u.pulseTelegraph.rotation.y=-pulse.angle-mesh.rotation.y;u.pulseMaterial.opacity=.15+(pulse.progress??0)*.2;}}
  const last=u.lastPosition;const moved=last?Math.hypot(mesh.position.x-last.x,mesh.position.z-last.z):0;
  u.lastPosition={x:mesh.position.x,z:mesh.position.z};u.speed+=(Math.min(1,moved/dt/1.1)-u.speed)*(1-Math.exp(-16*dt));

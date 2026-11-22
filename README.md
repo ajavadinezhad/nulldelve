@@ -12,7 +12,7 @@ Run `python3 -m http.server 8000 --bind 127.0.0.1` from this folder, then open h
 
 ## Phone controls
 
-Touch devices automatically get two thumbsticks: left moves (push to the outer edge to sprint), right aims and fires. Interact, Reload, Swap and Melee are large tap targets; medkit, grenade and map remain available in the HUD. Touch controls can be set to Automatic, On or Off in Settings → Controls. Pause and cancelled touches release held input. Crates can be reset from Help.
+Touch devices automatically get two thumbsticks: left moves (push to the outer edge to sprint), right aims and fires. Interact, Reload, Swap and Melee are large tap targets; medkit, grenade and map remain available in the HUD. Touch controls can be set to Automatic, On or Off in Settings → Controls, with mirrored stick placement and larger controls available. Pause and cancelled touches release held input. Crates can be reset from Help.
 
 ## Controls
 
@@ -112,7 +112,7 @@ The armory adds the KESTREL battle rifle ($820) and MANTIS anti-materiel rifle (
 
 ## Field kit and encounter update (r19)
 
-Armory has 12 developable field skills across three connected branches, each with two prerequisite stages and a specialization fork. Medicine offers armor efficiency or stronger finite medkits; Mobility offers faster reloads or stronger close-range knife strikes; Demolition offers quicker throw charging or wider blast/fire coverage. Earn one training point per unique operation clear (seven currently); one developed skill is equipped at a time. Effects replace rather than stack, checkpoints retain the equipped skill, and existing development survives stale deployment links. Explosives and ground fire also threaten the operator.
+Armory has 14 developable field skills across three connected branches, each with two prerequisite stages and a specialization fork. Medicine offers armor efficiency or stronger finite medkits; Mobility offers faster reloads or stronger close-range knife strikes; Demolition offers quicker throw charging or wider blast/fire coverage. Earn one training point per unique operation clear (eight currently); one developed skill is equipped at a time. Specializations retain bounded branch benefits; training can be reset at base. Checkpoints retain the equipped skill, and existing development survives stale deployment links. Explosives and ground fire also threaten the operator.
 
 Each equipped primary has one free attachment choice. Single-projectile guns trade reload speed for range or range for slower cadence. Pellet weapons trade spread against stagger. Attachments preserve paid damage, magazine upgrades and loaded ammo.
 
@@ -123,3 +123,9 @@ Field notes adds discovered mutations with their warning and one counter. Entrie
 Flooded freight unlocks after Hospital: five rooms, drainage controls, independent track routing and an eight-second cargo transfer, followed by Cold Chain and manifest extraction. Waves escalate32/48/64 on Normal. Its matched puzzle reference unlocks on encounter. Existing101-wide and151-wide checkpoints migrate without moving earlier content.
 
 JACKAL riot slug gun emphasizes close-range stagger; VESPER needle carbine emphasizes long-range control. Their specialist purchases unlock after Command and Containment respectively, while already owned weapons stay usable. Two finite cash caches per operation reward exploration. First-clear contracts pay once, and payout claims persist through older checkpoint restoration. New kill payouts are smaller; existing wallets stay intact. Cash pickup prompts appear only nearby, and collection highlights the existing wallet.
+
+## Dead Signal expansion
+
+The eighth sequential operation follows Flooded freight into a violet-lit communications annex. Allocate three motor loads across two feeder capacities, isolate both antenna feeds during the defense, cut the colony transmitter and send the experiment evidence from Transmission Core. Three escalating swarms introduce Spitters (move out of the marked strike circle) and limited-charge Menders (interrupt their repair windup). Two finite ammunition allotments support the required route; checkpoints preserve partial feeder assignments and live wave state.
+
+LANCET pierces up to two aligned creatures with60% damage on the second; cover and barrels stop its shot. ORISON fires three-round bursts with per-round ammunition and recovery between bursts. Emergency Seal repairs8armor with a finite medkit; Blast Insulation reduces self explosive/fire damage25%. Both require their existing branch prerequisites and Freight completion. The annex adds an eighth training point.

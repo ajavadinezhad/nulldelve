@@ -1,12 +1,12 @@
-import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=preview-polish-r31';
-import {normalizeAttachments} from './weapon-attachments.js?v=preview-polish-r31';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=dead-signal-r32';
+import {normalizeAttachments} from './weapon-attachments.js?v=dead-signal-r32';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
-const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','pistol'],UPGRADES=['damage','magazine','reload'];
-const MAGAZINE_STEPS={rifle:6,smg:6,shotgun:2,marksman:2,lmg:10,hush:3,scattergun:2,kestrel:4,mantis:1,jackal:1,vesper:4,pistol:2};
+const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','lancet','orison','pistol'],UPGRADES=['damage','magazine','reload'];
+const MAGAZINE_STEPS={rifle:6,smg:6,shotgun:2,marksman:2,lmg:10,hush:3,scattergun:2,kestrel:4,mantis:1,jackal:1,vesper:4,lancet:2,orison:3,pistol:2};
 const COSTS={damage:[100,200,350],magazine:[80,160,280],reload:[80,160,280]};
 const REWARDS={normal:2,runner:3,brute:8,charger:10,sentinel:14,screecher:12,leaper:9,boss:40};
-const GUN_NAMES={rifle:'MK4',smg:'VX9',shotgun:'BREACH-12',marksman:'SABLE',lmg:'M60',hush:'HUSH-9',scattergun:'TWIN',kestrel:'KESTREL',mantis:'MANTIS',jackal:'JACKAL',vesper:'VESPER',pistol:'P9'};
+const GUN_NAMES={rifle:'MK4',smg:'VX9',shotgun:'BREACH-12',marksman:'SABLE',lmg:'M60',hush:'HUSH-9',scattergun:'TWIN',kestrel:'KESTREL',mantis:'MANTIS',jackal:'JACKAL',vesper:'VESPER',lancet:'LANCET',orison:'ORISON',pistol:'P9'};
 const ITEM_LIMIT=5,CREDIT_LIMIT=999999999;
 const clamp=(value,min,max,fallback=0)=>typeof value==='number'&&Number.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
 const integer=(value,min,max,fallback=0)=>Math.floor(clamp(value,min,max,fallback));

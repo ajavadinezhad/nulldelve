@@ -1,0 +1,3 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const {createBurstFire}=require('../src/weapon-actions.js');
+test('burst emits two bounded follow-ups, spends no future ammo and respects cancellation',()=>{const burst=createBurstFire();let shots=0;burst.begin(3,.075);burst.update(.05,()=>shots++);assert.equal(shots,0);burst.update(.05,()=>shots++);assert.equal(shots,1);burst.update(.05,()=>shots++);assert.equal(shots,2);assert.equal(burst.active,false);burst.begin(3);burst.cancel();burst.update(.1,()=>shots++);assert.equal(shots,2);burst.begin(3);burst.update(.1,()=>false);assert.equal(burst.active,false);});

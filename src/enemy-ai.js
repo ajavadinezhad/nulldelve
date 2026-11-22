@@ -10,10 +10,12 @@ export function applyEnemyStagger(enemy,duration){
 export const CHARGER_RUSH={windup:.9,speed:10,duration:.62,cooldown:4.5,damage:18,hitRadius:.85};
 export const SCREECHER_PULSE={radius:3.2,windup:1.25,cooldown:6,damage:14};
 export const LEAPER_HOP={range:6,distance:5.5,windup:1,duration:.6,cooldown:4.8,radius:1.15,damage:12};
+export const SPITTER_SHOT={range:7,minRange:3,radius:1.05,windup:1.2,cooldown:5,damage:11};
+export const MENDER_PULSE={radius:3.2,windup:1.4,cooldown:6,healing:2,charges:3};
 export const NEST_PULSE={radius:5.5,windup:1.1,cooldown:6,safeHalfAngle:.6,damage:20};
 const angleDifference=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 /** Roaches announce a bite before striking. Stats may live directly on enemy or in stats. */
-export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,allowMovement=true}) {
+export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,onMend=()=>false,allowMovement=true}) {
   if(enemy.hp<=0||!Number.isFinite(dt)||dt<=0)return;
   const stat=(name,fallback)=>enemy[name]??enemy.stats?.[name]??fallback;
   const visual=enemy.mesh.userData;
@@ -25,13 +27,25 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,allowM
   enemy.chargeCooldown=Math.max(0,(enemy.chargeCooldown??0)-dt);
   enemy.shriekCooldown=Math.max(0,(enemy.shriekCooldown??0)-dt);
   enemy.leapCooldown=Math.max(0,(enemy.leapCooldown??0)-dt);
+  enemy.spitCooldown=Math.max(0,(enemy.spitCooldown??0)-dt);
+  enemy.mendCooldown=Math.max(0,(enemy.mendCooldown??0)-dt);
   enemy.cooldown=Math.max(0,(enemy.cooldown??0)-dt);
   if((enemy.pulseWindup??0)>0){
     enemy.pulseWindup=Math.max(0,enemy.pulseWindup-dt);visual.pulse={active:enemy.pulseWindup>0,angle:enemy.pulseGapAngle,radius:NEST_PULSE.radius,progress:1-enemy.pulseWindup/NEST_PULSE.windup};
     if(enemy.pulseWindup===0){const dx=player.x-enemy.x,dz=player.z-enemy.z;enemy.pulseCooldown=NEST_PULSE.cooldown;if(Math.hypot(dx,dz)<=NEST_PULSE.radius&&Math.abs(angleDifference(Math.atan2(dz,dx),enemy.pulseGapAngle))>NEST_PULSE.safeHalfAngle&&lineOfSight(enemy.x,enemy.z,player.x,player.z))onBite(NEST_PULSE.damage);}
     return;
   }
-  if((enemy.staggerTime??0)>0){if((enemy.shriekWindup??0)>0)enemy.shriekCooldown=SCREECHER_PULSE.cooldown;if((enemy.leapWindup??0)>0||(enemy.leapRemaining??0)>0)enemy.leapCooldown=LEAPER_HOP.cooldown;enemy.shriekWindup=0;enemy.leapWindup=0;enemy.leapRemaining=0;visual.shriekWindup=0;visual.leapTarget=null;visual.leapProgress=0;if((enemy.chargeWindup??0)>0||(enemy.chargeRemaining??0)>0)enemy.chargeCooldown=CHARGER_RUSH.cooldown;enemy.chargeWindup=0;enemy.chargeRemaining=0;visual.chargeWindup=0;enemy.staggerTime=Math.max(0,enemy.staggerTime-dt);cancelBite();return;}
+  if((enemy.staggerTime??0)>0){if((enemy.spitWindup??0)>0)enemy.spitCooldown=SPITTER_SHOT.cooldown;if((enemy.mendWindup??0)>0)enemy.mendCooldown=MENDER_PULSE.cooldown;enemy.spitWindup=0;enemy.mendWindup=0;visual.spitTarget=null;visual.mendWindup=0;if((enemy.shriekWindup??0)>0)enemy.shriekCooldown=SCREECHER_PULSE.cooldown;if((enemy.leapWindup??0)>0||(enemy.leapRemaining??0)>0)enemy.leapCooldown=LEAPER_HOP.cooldown;enemy.shriekWindup=0;enemy.leapWindup=0;enemy.leapRemaining=0;visual.shriekWindup=0;visual.leapTarget=null;visual.leapProgress=0;if((enemy.chargeWindup??0)>0||(enemy.chargeRemaining??0)>0)enemy.chargeCooldown=CHARGER_RUSH.cooldown;enemy.chargeWindup=0;enemy.chargeRemaining=0;visual.chargeWindup=0;enemy.staggerTime=Math.max(0,enemy.staggerTime-dt);cancelBite();return;}
+  if(enemy.variant==='spitter'&&(enemy.spitWindup??0)>0){
+    enemy.spitWindup=Math.max(0,enemy.spitWindup-dt);visual.spitWindup=1-enemy.spitWindup/SPITTER_SHOT.windup;
+    if(enemy.spitWindup===0){enemy.spitCooldown=SPITTER_SHOT.cooldown;visual.spitTarget=null;if(Math.hypot(player.x-enemy.spitX,player.z-enemy.spitZ)<=SPITTER_SHOT.radius&&lineOfSight(enemy.x,enemy.z,player.x,player.z))onBite(SPITTER_SHOT.damage);}
+    return;
+  }
+  if(enemy.variant==='mender'&&(enemy.mendWindup??0)>0){
+    enemy.mendWindup=Math.max(0,enemy.mendWindup-dt);visual.mendWindup=enemy.mendWindup>0?1-enemy.mendWindup/MENDER_PULSE.windup:0;
+    if(enemy.mendWindup===0){enemy.mendCooldown=MENDER_PULSE.cooldown;if(onMend(enemy,MENDER_PULSE))enemy.mendCharges=Math.max(0,(enemy.mendCharges??MENDER_PULSE.charges)-1);visual.mendCharges=enemy.mendCharges??MENDER_PULSE.charges;}
+    return;
+  }
   if(shrieks&&(enemy.shriekWindup??0)>0){
     enemy.shriekWindup=Math.max(0,enemy.shriekWindup-dt);visual.shriekWindup=enemy.shriekWindup>0?1-enemy.shriekWindup/SCREECHER_PULSE.windup:0;
     if(enemy.shriekWindup===0){enemy.shriekCooldown=SCREECHER_PULSE.cooldown;enemy.cooldown=Math.max(enemy.cooldown,stat('attackCooldown',1.3));if(Math.hypot(player.x-enemy.x,player.z-enemy.z)<=SCREECHER_PULSE.radius&&lineOfSight(enemy.x,enemy.z,player.x,player.z))onBite(SCREECHER_PULSE.damage);}
@@ -75,6 +89,8 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,allowM
   if(seesPlayer&&d<stat('detectRange',11))enemy.alerted=true;
   if(!seesPlayer||!enemy.alerted){cancelBite();return;}
   enemy.mesh.rotation.y=Math.atan2(-dx,-dz);
+  if(enemy.variant==='spitter'&&d>=SPITTER_SHOT.minRange&&d<=SPITTER_SHOT.range&&enemy.spitCooldown<=0){cancelBite();enemy.spitX=player.x;enemy.spitZ=player.z;enemy.spitWindup=SPITTER_SHOT.windup;visual.spitWindup=.001;visual.spitTarget={x:enemy.spitX,z:enemy.spitZ};return;}
+  if(enemy.variant==='mender'&&d<=8&&(enemy.mendCharges??MENDER_PULSE.charges)>0&&enemy.mendCooldown<=0){cancelBite();enemy.mendWindup=MENDER_PULSE.windup;visual.mendWindup=.001;return;}
   if(enemy.variant==='boss'&&(enemy.encounter==='nest'||enemy.bossMechanic==='pulse')&&d>2&&d<=NEST_PULSE.radius+1&&enemy.pulseCooldown<=0){
     // The telegraphed gap sits beside the starting position, so standing still is
     // dangerous while a short sidestep reaches safety. Alternate the side each pulse.

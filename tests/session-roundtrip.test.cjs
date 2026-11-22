@@ -1,3 +1,4 @@
+const {createBurstFire}=require('../src/weapon-actions.js');
 const {applyWeaponAttachment}=require('../src/weapon-attachments.js');
 const {SKILL_NODES,createFieldSkills,fieldSkillEffects,effectiveFieldStats,normalizeFieldSkill}=require('../src/field-skills.js');
 const {upgradeWorldSnapshot,WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT}=require('../src/world-layout.js');
@@ -40,7 +41,7 @@ function session({expanded=false}={}){
  ctx.progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant,{encounter}={})=>{const stats=ROACH_VARIANTS[variant],e={encounter,id:'e'+ctx.nextEnemyId++,x,z,...stats,maxHp:stats.hp,variant,cooldown:1,alerted:true,mesh:mesh(),attackWindup:0,staggerTime:0,spawnDelay:0};enemies.push(e);return e;}});
  ctx.persistCampaignProfile=()=>ctx.campaignProfile.persist();
  ctx.queueCheckpoint=reason=>{ctx.pendingCheckpoint=reason;};
- ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;vm.createContext(ctx);
+ ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();vm.createContext(ctx);
  vm.runInContext(fragment('function applyUpgrades()','\napplyUpgrades();'),ctx);
  vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
  vm.runInContext(fragment('function equippedModelType(','\nrefreshPlayerWeapon();'),ctx);
@@ -99,8 +100,8 @@ test('largest demolition fire survives actual snapshot validation and restoratio
 test('quickloader checkpoint keeps remaining reload time and matching animation duration',()=>{const first=session({expanded:true});for(const id of ['breach','command','research','containment','nest','hospital'])first.ctx.campaignProgress.complete(id);for(const id of ['runner','pathfinder','quickloader'])assert.ok(first.ctx.fieldSkills.learn(id,first.ctx.campaignProgress.completed()).ok);first.ctx.activeFieldSkill='quickloader';first.ctx.skillEffects=()=>fieldSkillEffects(first.ctx.activeFieldSkill);first.ctx.audio={reload:noop};first.ctx.player.ammo=0;vm.runInContext(fragment('function beginReload','function resumeRun'),first.ctx);vm.runInContext('beginReload()',first.ctx);const duration=first.ctx.weapons.rifle.reload*.88;assert.ok(Math.abs(first.ctx.reload-duration)<1e-8);first.ctx.reload-=.25;const saved=first.capture(),second=session({expanded:true});for(const id of ['breach','command','research','containment','nest','hospital'])second.ctx.campaignProgress.complete(id);second.ctx.skillEffects=()=>fieldSkillEffects(second.ctx.activeFieldSkill);vm.runInContext(fragment('function beginReload','function resumeRun'),second.ctx);assert.equal(second.restore(saved),true);assert.equal(second.ctx.activeFieldSkill,'quickloader');assert.ok(Math.abs(second.ctx.reload-(duration-.25))<1e-8);assert.ok(Math.abs(vm.runInContext('1-reload/reloadDuration()',second.ctx)-.25/duration)<1e-8);assert.ok(source.includes('progress:1-reload/reloadDuration()'));});
 
 
-test('all twelve skill paths survive two actual checkpoint captures across seven operations and all difficulties',()=>{
- const {deployCampaignOperation}=require('../src/campaign-operations.js'),operations=['breach','command','research','containment','nest','hospital','freight'];let combinations=0;
+test('all skill paths survive two actual checkpoint captures across every operation and all difficulties',()=>{
+ const {deployCampaignOperation}=require('../src/campaign-operations.js'),operations=require('../src/campaign-operations.js').CAMPAIGN_OPERATIONS.map(operation=>operation.id);let combinations=0;
  for(const node of SKILL_NODES)for(const operation of operations)for(const difficulty of ['easy','normal','hard']){
   const first=session({expanded:true});for(const id of operations)first.ctx.campaignProgress.complete(id);
   const path=[];for(let current=node;current;current=SKILL_NODES.find(n=>n.id===current.requires))path.unshift(current.id);
@@ -112,7 +113,7 @@ test('all twelve skill paths survive two actual checkpoint captures across seven
   const second=fresh.capture();assert.deepEqual(second.fieldSkill,saved.fieldSkill,'recapture retains learned prerequisites from the running checkpoint');
   assert.equal(fresh.restore(second),true);assert.equal(fresh.ctx.activeFieldSkill,node.id);assert.deepEqual(fieldSkillEffects(fresh.ctx.activeFieldSkill),fieldSkillEffects(node.id));combinations++;
  }
- assert.equal(combinations,252);
+ assert.equal(combinations,SKILL_NODES.length*operations.length*3);
 });
 
 test('resuming an older skill checkpoint preserves newer base development separately',()=>{

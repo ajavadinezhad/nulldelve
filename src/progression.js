@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=preview-polish-r31';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=preview-polish-r31';
-import {DIFFICULTY_RULES} from './difficulty.js?v=preview-polish-r31';
+import {OPERATION_ROUTES} from './operation-routes.js?v=dead-signal-r32';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=dead-signal-r32';
+import {DIFFICULTY_RULES} from './difficulty.js?v=dead-signal-r32';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -9,12 +9,14 @@ export const ARTIFACTS=Object.freeze([
  {id:'artifact-generator',kind:'artifact',x:29,z:54,label:'GENERATOR CORE RELIC'},
  {id:'artifact-containment',kind:'artifact',x:94,z:36,label:'CONTAINMENT SEAL RELIC'},
 ].map(Object.freeze));
+export const SIGNAL_TASKS=['signalMotorA','signalMotorB','signalMotorC','signalLoad','signalAntennaA','signalAntennaB','signalShutdown','signalSent'];
+export const signalFeederTargets=remix=>remix?[6,3]:[5,4];
 export const FREIGHT_TASKS=['freightDrain','freightSwitchA','freightSwitchB','freightDispatch','freightManifest','freightRelease'];
 export const freightTrackTarget=remix=>remix?[0,1]:[1,0];
 export const HOSPITAL_TASKS=['hospitalFuse','hospitalPower','hospitalSample','hospitalAuth','hospitalValveA','hospitalValveB','hospitalValveC','hospitalSterile'];
 export const hospitalAirlockTarget=remix=>remix?[1,2,1]:[2,1,0];
 export const hospitalFlowSequence=remix=>remix?['hospitalValveC','hospitalValveA','hospitalValveB']:['hospitalValveA','hospitalValveB','hospitalValveC'];
-export function createOperationTasks(){return {...Object.fromEntries([...HOSPITAL_TASKS,...FREIGHT_TASKS].map(task=>[task,false])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,false])),freightRoute:{switches:[0,0],running:false,remaining:0,delivered:false},hospitalAirlock:{settings:[0,0,0],running:false,remaining:0},generatorDefense:{started:false,progress:0,jammed:false,completed:false,saboteurIds:[]},commandFuse:false,genInserted:false,commandRepair:false,researchCoolant:false,evacPower:false,nestRelay:{started:false,remaining:0,linked:false,decoded:false}};}
+export function createOperationTasks(){return {...Object.fromEntries([...HOSPITAL_TASKS,...FREIGHT_TASKS,...SIGNAL_TASKS].map(task=>[task,false])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,false])),signalLoadout:{feeders:[-1,-1,-1]},freightRoute:{switches:[0,0],running:false,remaining:0,delivered:false},hospitalAirlock:{settings:[0,0,0],running:false,remaining:0},generatorDefense:{started:false,progress:0,jammed:false,completed:false,saboteurIds:[]},commandFuse:false,genInserted:false,commandRepair:false,researchCoolant:false,evacPower:false,nestRelay:{started:false,remaining:0,linked:false,decoded:false}};}
 export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHint=()=>{},getDifficulty=()=> 'normal',remix=false}){
   const initialSequences=progressionSequences(remix);
   const devices=[
@@ -33,6 +35,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   devices.push(...[{id:'hospital-fuse',task:'hospitalFuse',x:108,z:27,label:'PHARMACY POWER FUSE'},{id:'hospital-power',task:'hospitalPower',x:118,z:57,label:'EMERGENCY SUPPLY'},{id:'hospital-sample',task:'hospitalSample',x:114,z:7,label:'SEALED TRIAGE SAMPLE'},{id:'hospital-auth',task:'hospitalAuth',x:132,z:12,label:'WARD SAMPLE DIAGNOSTICS'},{id:'hospital-oxygen',task:'hospitalValveA',x:130,z:27,label:'THEATRE OXYGEN'},{id:'hospital-filter',task:'hospitalValveB',x:142,z:27,label:'THEATRE FILTER'},{id:'hospital-saline',task:'hospitalValveC',x:140,z:35,label:'THEATRE EXHAUST'}].map(d=>({...d,kind:'task',active:false,progress:0})));
   devices.push({id:'hospital-cycle',task:'hospitalSterile',kind:'task',x:136,z:36,label:'AIRLOCK CYCLE',active:false,progress:0});
   devices.push(...[{id:'freight-pump',task:'freightDrain',x:158,z:29,label:'FLOOD PUMP BREAKER'},{id:'freight-switch-a',task:'freightSwitchA',x:180,z:29,label:'TRACK SWITCH A'},{id:'freight-switch-b',task:'freightSwitchB',x:192,z:35,label:'TRACK SWITCH B'},{id:'freight-dispatch',task:'freightDispatch',x:189,z:29,label:'CARGO DISPATCH'},{id:'freight-manifest',task:'freightManifest',x:191,z:7,label:'QUARANTINE CARGO MANIFEST'},{id:'freight-release',task:'freightRelease',x:190,z:55,label:'RAIL EXTRACTION RELEASE'}].map(d=>({...d,kind:'task',active:false,progress:0})));
+  devices.push(...[{id:'signal-motor-a',task:'signalMotorA',x:207,z:29,label:'2 kW VENTILATION MOTOR'},{id:'signal-motor-b',task:'signalMotorB',x:213,z:34,label:'3 kW ANTENNA MOTOR'},{id:'signal-motor-c',task:'signalMotorC',x:218,z:28,label:'4 kW UPLINK MOTOR'},{id:'signal-load',task:'signalLoad',x:212,z:26,label:'FEEDER DISTRIBUTION TEST'},{id:'signal-antenna-a',task:'signalAntennaA',x:230,z:27,label:'ISOLATE WEST ANTENNA FEED'},{id:'signal-antenna-b',task:'signalAntennaB',x:243,z:34,label:'ISOLATE EAST ANTENNA FEED'},{id:'signal-shutdown',task:'signalShutdown',x:237,z:34,label:'CUT COLONY TRANSMITTER'},{id:'signal-send',task:'signalSent',x:237,z:8,label:'TRANSMIT EXPERIMENT EVIDENCE'}].map(d=>({...d,kind:'task',active:false,progress:0})));
   devices.push(...OPERATION_ROUTES.map(route=>({...route,kind:'task',active:false,progress:0})));
   const definitions=[
     {id:'security',label:'SECURITY PURGE',total:8,batch:3,liveCap:6,legacyTotal:24,corners:[[20,6],[27,6],[20,14],[27,14]]},
@@ -51,6 +54,9 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     {id:'hospital-triage',label:'TRIAGE OUTBREAK',total:26,batch:4,liveCap:10,legacyTotal:26,corners:[[105,5],[120,5],[105,16],[120,16]],bounds:[106,119,6,15],interactive:true},
     {id:'hospital-ward',label:'WARD INFESTATION',total:44,batch:6,liveCap:16,legacyTotal:44,corners:[[129,5],[144,5],[129,16],[144,16]],bounds:[130,143,6,15],interactive:true},
     {id:'hospital-isolation',label:'QUARANTINE SWARM',total:70,batch:8,liveCap:21,legacyTotal:70,corners:[[129,44],[144,44],[129,61],[144,61]],bounds:[130,143,46,60],interactive:true,boss:true},
+    {id:'signal-yard',label:'BREAKER GALLERY BREACH',total:24,batch:4,liveCap:10,legacyTotal:24,corners:[[205,24],[220,24],[205,36],[220,36]],bounds:[206,219,25,35],interactive:true},
+    {id:'signal-relay',label:'ANTENNA HALL DEFENSE',total:44,batch:6,liveCap:16,legacyTotal:44,corners:[[229,24],[244,24],[229,36],[244,36]],bounds:[230,243,25,35],interactive:true},
+    {id:'signal-uplink',label:'TRANSMISSION CORE SWARM',total:68,batch:8,liveCap:20,legacyTotal:68,corners:[[229,5],[244,5],[229,16],[244,16]],bounds:[230,243,6,15],interactive:true},
   ];
   definitions.sort((a,b)=>a.total-b.total);
   const difficulty=()=>DIFFICULTY_RULES[getDifficulty()]??DIFFICULTY_RULES.normal;
@@ -58,15 +64,16 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   const zones=definitions.map(d=>({id:d.id,label:d.label,status:'dormant',wave:[],liveCap:d.liveCap,total:scaledTotal(d),spawned:0,queued:0,remaining:0,queue:[],rewardQueue:[],spawnTimer:0,phaseRested:false}));
   const state={devices,zones,clue:{x:9,z:13,label:'△ → ○ → □'},remix:!!remix,archive:{sequence:initialSequences.archive,input:[],solved:false},relay:{started:false,remaining:0,duration:8,completed:false},elapsed:0,totalEnemies:zones.reduce((sum,zone)=>sum+zone.total,0),liveCap:36,mission:'campaign',operationId:null,operationTasks:createOperationTasks(),circuit:createWireCircuit(),milestone:0,operationZoneIds:null,power:{sequence:initialSequences.power,input:[],solved:false},valves:{sequence:initialSequences.valves,input:[],solved:false},logs:[],artifacts:[],evacuation:{started:false,remaining:20,completed:false}};
   state.clue.id='archive';state.clue.kind='clue';
-  state.clues=[state.clue,{id:'freight',kind:'clue',x:164,z:25,label:'CARGO ROUTING PLATE'},{id:'hospital',kind:'clue',x:118,z:31,label:'HOSPITAL FLOW PLAQUE'},{id:'power',kind:'clue',x:59,z:33,label:'REACTOR ROUTING PLAQUE'},{id:'valves',kind:'clue',x:86,z:32,label:'CONTAINMENT MAINTENANCE PLAQUE'}];
+  state.clues=[state.clue,{id:'signal',kind:'clue',x:216,z:25,label:'FEEDER CAPACITY PLATE'},{id:'freight',kind:'clue',x:164,z:25,label:'CARGO ROUTING PLATE'},{id:'hospital',kind:'clue',x:118,z:31,label:'HOSPITAL FLOW PLAQUE'},{id:'power',kind:'clue',x:59,z:33,label:'REACTOR ROUTING PLAQUE'},{id:'valves',kind:'clue',x:86,z:32,label:'CONTAINMENT MAINTENANCE PLAQUE'}];
   const symbols={triangle:'△',circle:'○',square:'□'};
-  function clueText(id){if(id==='freight')return 'COLD CHAIN ROUTE · TRACK A '+(freightTrackTarget(state.remix)[0]?'DIVERT':'STRAIGHT')+' / TRACK B '+(freightTrackTarget(state.remix)[1]?'DIVERT':'STRAIGHT');if(id==='hospital')return 'OXYGEN / FILTER / EXHAUST: '+hospitalAirlockTarget(state.remix).join(' / ')+' · MATCH GAUGES, THEN CYCLE';return id==='archive'?state.archive.sequence.map(g=>symbols[g]).join(' → '):state[id].sequence.map(value=>value.slice(-1).toUpperCase()).join(' → ');}
+  function clueText(id){if(id==='signal')return 'MOTORS 2 / 3 / 4 kW · FEEDER A / B CAPACITY '+signalFeederTargets(state.remix).join(' / ')+' kW · CONNECT EVERY MOTOR WITHOUT OVERLOAD';if(id==='freight')return 'COLD CHAIN ROUTE · TRACK A '+(freightTrackTarget(state.remix)[0]?'DIVERT':'STRAIGHT')+' / TRACK B '+(freightTrackTarget(state.remix)[1]?'DIVERT':'STRAIGHT');if(id==='hospital')return 'OXYGEN / FILTER / EXHAUST: '+hospitalAirlockTarget(state.remix).join(' / ')+' · MATCH GAUGES, THEN CYCLE';return id==='archive'?state.archive.sequence.map(g=>symbols[g]).join(' → '):state[id].sequence.map(value=>value.slice(-1).toUpperCase()).join(' → ');}
   function refreshClueLabels(){state.clue.label=clueText('archive');}
   refreshClueLabels();
   const [security,storage,command,lab,reactor,containment,nest]=['security','storage','command','lab','reactor','containment','nest'].map(id=>zones.find(z=>z.id===id));
   const generator=zones.find(z=>z.id==='generator'),transit=zones.find(z=>z.id==='transit'),evacuationZone=zones.find(z=>z.id==='evacuation');
   const hospitalTriage=zones.find(z=>z.id==='hospital-triage'),hospitalWard=zones.find(z=>z.id==='hospital-ward'),hospitalIsolation=zones.find(z=>z.id==='hospital-isolation');
   const freightPumps=zones.find(z=>z.id==='freight-pumps'),freightYard=zones.find(z=>z.id==='freight-yard'),freightCold=zones.find(z=>z.id==='freight-cold');
+  const [signalYard,signalRelay,signalUplink]=['signal-yard','signal-relay','signal-uplink'].map(id=>zones.find(z=>z.id===id));
   const living=enemy=>enemy&&enemy.hp>0;
   const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
   const inBounds=(p,minX,maxX,minZ,maxZ)=>p.x>=minX&&p.x<=maxX&&p.z>=minZ&&p.z<=maxZ;
@@ -98,6 +105,12 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       [15,active(generator),'GENERATOR SEALED · CLEAR THE RESTART SWARM'],
       [16,active(generator)||active(transit),'TRANSIT SEALED · CLEAR THE SWARM'],
       [17,active(transit)||active(evacuationZone)||researchExitLocked,active(transit)||active(evacuationZone)?'EVACUATION SEALED · CLEAR THE SWARM':'COOLANT LOCK · COMPLETE THE TRANSIT PURGE'],
+      [32,state.operationId!=='signal','COMMUNICATIONS TRANSFER SEALED'],
+      [33,state.operationId!=='signal'||active(signalYard),'BREAKER GALLERY SEALED · CLEAR THE BREACH'],
+      [34,state.operationId!=='signal'||!state.operationTasks.signalLoad||active(signalRelay),'FEEDER LOAD LOCK · BALANCE THE THREE MOTORS'],
+      [35,state.operationId!=='signal'||!state.operationTasks.signalShutdown||active(signalUplink),'TRANSMITTER LOCK · ISOLATE BOTH ANTENNA FEEDS'],
+      [36,state.operationId!=='signal'||!state.operationTasks.signalShutdown||active(signalRelay),'SERVICE ROUTE · CUT THE TRANSMITTER'],
+      [37,state.operationId!=='signal'||!state.operationTasks.signalLoad,'SERVICE SHORTCUT · BALANCE THE FEEDERS'],
       [26,state.operationId!=='freight','FREIGHT TRANSFER SEALED'],
       [27,state.operationId!=='freight'||active(freightPumps),'PUMP HALL SEALED · CLEAR THE BREACH'],
       [28,state.operationId!=='freight'||!state.operationTasks.freightDrain||active(freightPumps)||active(freightYard),'FLOODED TRACK · RESTORE THE PUMP BREAKER'],
@@ -135,19 +148,21 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       target(6,point,label);
     }
     if(researchExitLocked){const point=!state.power.solved?state.clues.find(c=>c.id==='power'):devices.find(d=>d.task==='researchCoolant');target(17,point,!state.power.solved?'A Reactor maintenance clue':'The Transit coolant console');}
+    if(state.operationId==='signal'){target(34,devices.find(d=>d.task==='signalLoad'),'The feeder capacity plate and motor distribution');target(35,devices.find(d=>d.task===(!state.operationTasks.signalAntennaA?'signalAntennaA':!state.operationTasks.signalAntennaB?'signalAntennaB':'signalShutdown')),'An active antenna feed');}
     if(state.operationId==='freight'){target(28,devices.find(d=>d.task==='freightDrain'),'The Pump Hall flood breaker');const route=state.operationTasks.freightRoute,ready=route.switches.every((v,i)=>v===freightTrackTarget(state.remix)[i]);target(31,route.running||ready?devices.find(d=>d.task==='freightDispatch'):state.clues.find(c=>c.id==='freight'),route.running?'The moving cargo transfer':ready?'The cargo dispatch console':'A cold-chain rail specification');target(29,devices.find(d=>d.task==='freightManifest'),'The quarantined shipping manifest');}
     if(state.operationId==='hospital'){target(20,devices.find(d=>d.task===(!state.operationTasks.hospitalFuse?'hospitalFuse':'hospitalPower')),'An emergency hospital power supply');target(22,devices.find(d=>d.task===(!state.operationTasks.hospitalSample?'hospitalSample':'hospitalAuth')),'The quarantine diagnostics route');const airlock=state.operationTasks.hospitalAirlock,cycleReady=airlock.settings.every((value,i)=>value===hospitalAirlockTarget(state.remix)[i]);target(23,airlock.running||cycleReady?devices.find(d=>d.id==='hospital-cycle'):state.clues.find(clue=>clue.id==='hospital'),airlock.running?'The sealed theatre cycle':cycleReady?'The theatre cycle console':'A theatre pressure specification');}
     for(const index of [8,11]){if(nestArtifactsLocked){const artifact=ARTIFACTS.find(a=>!state.artifacts.includes(a.id));target(index,artifact,'A trace of a missing relic');}else if(nestSignalLocked){const point=devices.find(d=>d.task===(state.operationTasks.nestRelay.linked?'nestDecode':state.operationTasks.nestRelay.started?'nestLink':'nestStart'));target(index,point,'A signal controlling the Nest shield');}}
   }
-  const taskOperation={...Object.fromEntries(FREIGHT_TASKS.map(task=>[task,'freight'])),...Object.fromEntries(HOSPITAL_TASKS.map(task=>[task,'hospital'])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,route.operation])),commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
+  const taskOperation={...Object.fromEntries(SIGNAL_TASKS.map(task=>[task,'signal'])),...Object.fromEntries(FREIGHT_TASKS.map(task=>[task,'freight'])),...Object.fromEntries(HOSPITAL_TASKS.map(task=>[task,'hospital'])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,route.operation])),commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
   function nearestDevice(player){return devices.filter(d=>(d.kind!=='task'||!state.operationId||taskOperation[d.task]===state.operationId)&&distance(d,player)<=1.7).sort((a,b)=>Number(a.kind==='wire'&&state.circuit.solved)-Number(b.kind==='wire'&&state.circuit.solved)||distance(a,player)-distance(b,player))[0];}
-  const nearestClue=player=>state.clues.filter(c=>(c.id!=='hospital'||state.operationId==='hospital')&&(c.id!=='freight'||state.operationId==='freight')&&distance(c,player)<=1.8).sort((a,b)=>distance(a,player)-distance(b,player))[0];
+  const nearestClue=player=>state.clues.filter(c=>(c.id!=='signal'||state.operationId==='signal')&&(c.id!=='hospital'||state.operationId==='hospital')&&(c.id!=='freight'||state.operationId==='freight')&&distance(c,player)<=1.8).sort((a,b)=>distance(a,player)-distance(b,player))[0];
   function getPrompt(player){
     const d=nearestDevice(player),clue=nearestClue(player);
     if(clue&&(!d||distance(clue,player)<distance(d,player)))return `E · READ ${clue.id==='archive'?'THE ARCHIVE CLUE':clue.label}`;
     if(d){
       if(d.kind==='task'){
         const signal=state.operationTasks.nestRelay;
+        if(['signalMotorA','signalMotorB','signalMotorC'].includes(d.task)){const index=['signalMotorA','signalMotorB','signalMotorC'].indexOf(d.task),choice=state.operationTasks.signalLoadout.feeders[index];return state.operationTasks.signalLoad?'FEEDER SETTINGS SEALED':`E · ${d.label} · ${choice<0?'DISCONNECTED':choice===0?'FEEDER A':'FEEDER B'}`;}
         if(d.task==='nestStart')return signal.linked?'SIGNAL LINK ESTABLISHED':`E · ${signal.started?'RESTART':'CHARGE'} SIGNAL RELAY A${signal.started?' · '+Math.ceil(signal.remaining)+'s':''}`;
         if(d.task==='nestLink')return signal.linked?'SIGNAL LINK ESTABLISHED':`E · LINK SIGNAL RELAY B${signal.started?' · '+Math.ceil(signal.remaining)+'s':' · CHARGE A FIRST'}`;
         if(['freightSwitchA','freightSwitchB'].includes(d.task)){const route=state.operationTasks.freightRoute;return route.delivered?'CARGO ROUTE SEALED':route.running?'CARGO TRANSFER · TRACKS INTERLOCKED':`E · ${d.label} · ${route.switches[d.task==='freightSwitchA'?0:1]?'DIVERT':'STRAIGHT'}`;}
@@ -227,6 +242,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if([reactor,containment,transit,evacuationZone,nest].includes(zone)&&i>zone.total*.6&&i%13===10)variant='sentinel';
       if([hospitalTriage,hospitalWard,hospitalIsolation].includes(zone)){variant=i%4===1?'runner':'normal';if(i>zone.total*.4&&i%7===4)variant='leaper';if(zone!==hospitalTriage&&i>zone.total*.5&&i%9===6)variant='screecher';if(zone===hospitalIsolation&&i%10===8)variant='sentinel';}
       if([freightPumps,freightYard,freightCold].includes(zone)){variant=i%4===(remix?2:1)?'runner':'normal';if(i>zone.total*.4&&i%8===5)variant='leaper';if(zone!==freightPumps&&i%10===7)variant='screecher';if(zone===freightCold&&i===zone.total-12)variant='sentinel';}
+      if([signalYard,signalRelay,signalUplink].includes(zone)){variant=i%4===1?'runner':'normal';if(i>zone.total*.35&&i%9===6)variant='brute';if(zone===signalYard&&i===Math.floor(zone.total*.7)||zone!==signalYard&&i>zone.total*.4&&i%10===7)variant='spitter';if(zone===signalRelay&&i===Math.floor(zone.total*.65)||zone===signalUplink&&[Math.floor(zone.total*.55),Math.floor(zone.total*.82)].includes(i))variant='mender';if(zone===signalUplink&&i>zone.total*.65&&i%17===12)variant='sentinel';}
       if(definition.boss&&i===0)variant='boss';
       zone.queue.push(variant);zone.rewardQueue.push(i);
     }
@@ -240,7 +256,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   }
   function interact(player){
     const d=nearestDevice(player),clue=nearestClue(player);
-    if(clue&&(!d||distance(clue,player)<distance(d,player))){const title=clue.id==='archive'?'ARCHIVE CLUE':clue.label;onToast(`${title} · ${clueText(clue.id)}`);hint(`${title}: ${clue.id==='archive'?state.archive.sequence.join(' → ').toUpperCase():clueText(clue.id)}. ${clue.id==='hospital'?'Set each gauge independently, then start the sealed cycle.':clue.id==='freight'?'Both switches must match simultaneously; their order does not matter.':'Use the consoles in this order.'}`);return true;}
+    if(clue&&(!d||distance(clue,player)<distance(d,player))){const title=clue.id==='archive'?'ARCHIVE CLUE':clue.label;onToast(`${title} · ${clueText(clue.id)}`);hint(`${title}: ${clue.id==='archive'?state.archive.sequence.join(' → ').toUpperCase():clueText(clue.id)}. ${clue.id==='hospital'?'Set each gauge independently, then start the sealed cycle.':clue.id==='signal'?'Connect each motor to A or B, respect both capacities, then test the distribution.':clue.id==='freight'?'Both switches must match simultaneously; their order does not matter.':'Use the consoles in this order.'}`);return true;}
     if(!d)return false;
     if(d.kind==='wire'){
       if(state.circuit.solved){onToast('GENERATOR CABLE ALREADY CONNECTED');return true;}
@@ -267,6 +283,21 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
         const next=OPERATION_ROUTES.find(item=>item.previous===route.task);
         if(route.optional)return finish('OPTIONAL BACKUP SECURED',next?.hint??'Backup complete. Continue the main operation when ready.');
         return finish('ROUTE OBJECTIVE SECURED',next?.hint??'Return to the sector exit after completing the remaining objectives.');
+      }
+      if(SIGNAL_TASKS.includes(d.task)){
+        if(tasks[d.task]&&!['signalMotorA','signalMotorB','signalMotorC'].includes(d.task)){onToast('SIGNAL SYSTEM ALREADY SECURED');return true;}
+        const motors=['signalMotorA','signalMotorB','signalMotorC'];
+        if(motors.includes(d.task)||d.task==='signalLoad'){
+          if(signalYard.status!=='cleared'){onToast('CLEAR THE BREAKER GALLERY FIRST');return true;}
+          if(tasks.signalLoad){onToast('FEEDER SETTINGS SEALED');return true;}
+          if(motors.includes(d.task)){const index=motors.indexOf(d.task);tasks.signalLoadout.feeders[index]=(tasks.signalLoadout.feeders[index]+1)%2;d.progress=(tasks.signalLoadout.feeders[index]+1)/2;onToast(`${d.label} · FEEDER ${tasks.signalLoadout.feeders[index]===0?'A':'B'}`);return true;}
+          const allocated=[0,0],feeders=tasks.signalLoadout.feeders;feeders.forEach((feeder,i)=>{if(feeder>=0)allocated[feeder]+=[2,3,4][i];});
+          if(feeders.includes(-1)||allocated.some((load,i)=>load>signalFeederTargets(state.remix)[i])){onToast('FEEDER OVERLOAD OR DISCONNECTED MOTOR · READ THE CAPACITY PLATE');return true;}
+          tasks.signalLoad=true;return finish('FEEDER LOADS BALANCED · ANTENNA HALL OPEN','Enter Antenna Hall to the east. Its two antenna feeds can be isolated during the defense.');
+        }
+        if(['signalAntennaA','signalAntennaB'].includes(d.task)){if(!tasks.signalLoad||signalRelay.status==='dormant'){onToast('ENTER THE ANTENNA HALL FIRST');return true;}tasks[d.task]=true;return finish('ANTENNA FEED ISOLATED','Isolate the other antenna feed and secure the hall, then cut the transmitter.');}
+        if(d.task==='signalShutdown'){if(signalRelay.status!=='cleared'||!tasks.signalAntennaA||!tasks.signalAntennaB){onToast('ISOLATE BOTH ANTENNA FEEDS AND CLEAR THE DEFENSE');return true;}tasks.signalShutdown=true;return finish('COLONY TRANSMITTER CUT · UPLINK ROUTE OPEN','Proceed north to Transmission Core. The south service passage is now an open shortcut.');}
+        if(d.task==='signalSent'){if(!tasks.signalShutdown||signalUplink.status!=='cleared'){onToast('SECURE TRANSMISSION CORE FIRST');return true;}tasks.signalSent=true;return finish('EVIDENCE TRANSMITTED · SERVICE EXIT RELEASED','Leave via the marked southern Service Exit. The colony signal is isolated and the records are outside the facility.');}
       }
       if(FREIGHT_TASKS.includes(d.task)){
         const cargo=tasks.freightRoute;if(tasks[d.task]&&!['freightSwitchA','freightSwitchB'].includes(d.task)){onToast('FREIGHT SYSTEM ALREADY SECURED');return true;}
@@ -357,6 +388,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       state.relay.remaining=Math.max(0,state.relay.remaining-step);devices[3].progress=state.relay.remaining/state.relay.duration;
       if(state.relay.remaining===0){state.relay.started=false;devices[3].active=false;devices[3].progress=0;onToast('RELAY CHARGE EXPIRED · TRY A AGAIN');hint('The relay charge faded. Plan a faster route and try the timed link again.');}
     }
+    if(state.operationId==='signal'){if(signalYard.status==='dormant'&&inBounds(player,206,219,25,35))launchWave(signalYard,player);if(state.operationTasks.signalLoad&&signalRelay.status==='dormant'&&inBounds(player,230,243,25,35))launchWave(signalRelay,player);if(state.operationTasks.signalShutdown&&signalUplink.status==='dormant'&&inBounds(player,230,243,6,15))launchWave(signalUplink,player);}
     const cargo=state.operationTasks.freightRoute;
     if(state.operationId==='freight'){
       if(freightPumps.status==='dormant'&&inBounds(player,156,169,25,35))launchWave(freightPumps,player);
@@ -423,7 +455,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     };
   }
   function restoreState(snapshot,enemyById){
-    const variants=new Set(['normal','runner','brute','boss','charger','sentinel','screecher','leaper']),statuses=new Set(['dormant','active','cleared']);
+    const variants=new Set(['normal','runner','brute','boss','charger','sentinel','screecher','leaper','spitter','mender']),statuses=new Set(['dormant','active','cleared']);
     if(!snapshot||snapshot.version!==1||!snapshot.archive||!snapshot.relay||!Array.isArray(snapshot.zones)||snapshot.zones.length<7||snapshot.zones.length>zones.length)return false;
     if(snapshot.remix!==undefined&&typeof snapshot.remix!=='boolean')return false;
     const restoredSequences=progressionSequences(snapshot.remix===true);
@@ -448,6 +480,10 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(rawTasks!==undefined&&(!rawTasks||typeof rawTasks!=='object'||Array.isArray(rawTasks)))return false;
     const savedTasks=rawTasks?{...taskDefaults,...rawTasks,genInserted:rawTasks.genInserted??!!rawTasks.commandRepair}:taskDefaults;
     for(const route of OPERATION_ROUTES){if(rawTasks?.[route.task]!==undefined&&typeof rawTasks[route.task]!=='boolean')return false;if(rawTasks?.[route.task]===undefined)savedTasks[route.task]=route.operation!=='hospital';}
+    const signal=savedTasks.signalLoadout;
+    if(!signal||!Array.isArray(signal.feeders)||signal.feeders.length!==3||!signal.feeders.every(v=>v===-1||v===0||v===1)||SIGNAL_TASKS.some(task=>typeof savedTasks[task]!=='boolean'))return false;
+    const loads=[0,0];signal.feeders.forEach((feeder,i)=>{if(feeder>=0)loads[feeder]+=[2,3,4][i];});
+    if(savedTasks.signalLoad&&(signal.feeders.includes(-1)||loads.some((load,i)=>load>signalFeederTargets(snapshot.remix===true)[i]))||savedTasks.signalShutdown&&(!savedTasks.signalLoad||!savedTasks.signalAntennaA||!savedTasks.signalAntennaB)||savedTasks.signalSent&&!savedTasks.signalShutdown)return false;
     const hospitalValves=['hospitalValveA','hospitalValveB','hospitalValveC'],hospitalCount=hospitalValves.filter(task=>savedTasks[task]).length,hospitalSequence=hospitalFlowSequence(snapshot.remix===true);
     if((!rawTasks?.hospitalAirlock&&hospitalValves.some(task=>savedTasks[task]!==hospitalSequence.slice(0,hospitalCount).includes(task)))||savedTasks.hospitalPower&&!savedTasks.hospitalFuse||savedTasks.hospitalAuth&&!savedTasks.hospitalSample||savedTasks.hospitalSterile&&(!savedTasks.hospitalAuth||hospitalCount!==3))return false;
     if(rawTasks?.hospitalAirlock===undefined)savedTasks.hospitalAirlock={settings:savedTasks.hospitalSterile?hospitalAirlockTarget(snapshot.remix===true):[0,0,0],running:false,remaining:0};
@@ -463,7 +499,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     const restoredCircuit=snapshot.circuit===undefined?(savedTasks.commandRepair?{rotations:[...WIRE_SOLUTION],powered:true,solved:true}:createWireCircuit()):createWireCircuit(snapshot.circuit);
     if(!restoredCircuit||restoredCircuit.solved!==savedTasks.commandRepair||restoredCircuit.powered&&!savedTasks.genInserted)return false;
     if(!savedTasks||typeof savedTasks!=='object'||[...HOSPITAL_TASKS,...FREIGHT_TASKS,'commandFuse','genInserted','commandRepair','researchCoolant','evacPower'].some(key=>typeof savedTasks[key]!=='boolean')||!savedTasks.nestRelay||['started','linked','decoded'].some(key=>typeof savedTasks.nestRelay[key]!=='boolean')||!Number.isFinite(savedTasks.nestRelay.remaining)||savedTasks.nestRelay.remaining<0||savedTasks.nestRelay.remaining>30)return false;
-    if(snapshot.operationId!=null&&!['breach','command','research','containment','nest','hospital','freight'].includes(snapshot.operationId))return false;
+    if(snapshot.operationId!=null&&!['breach','command','research','containment','nest','hospital','freight','signal'].includes(snapshot.operationId))return false;
     state.circuit=restoredCircuit;state.operationId=snapshot.operationId??null;state.operationTasks=JSON.parse(JSON.stringify(savedTasks));state.milestone=Number.isFinite(snapshot.milestone)?Math.max(0,Math.floor(snapshot.milestone)):0;
     state.remix=snapshot.remix===true;state.archive.sequence=restoredSequences.archive;state.power.sequence=restoredSequences.power;state.valves.sequence=restoredSequences.valves;refreshClueLabels();
     state.operationZoneIds=snapshot.operationZoneIds?[...snapshot.operationZoneIds]:null;

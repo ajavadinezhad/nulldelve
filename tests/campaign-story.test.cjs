@@ -6,8 +6,8 @@ test('every operation has an outcome, with no optional research required to cont
  const nest=campaignDebrief({mission:'campaign',operation:'nest'}),hospital=campaignDebrief({mission:'campaign',operation:'hospital'});
  assert.match(nest.body,/hospital/i);assert.match(hospital.body,/freight/i);assert.equal(nest.evidence,null);
 });
-test('the finale requires all seven completed operations, not just a direct last-sector deployment',()=>{
- const config={mission:'campaign',operation:'freight'},completed=CAMPAIGN_OPERATIONS.map(o=>o.id);
+test('the finale requires all eight completed operations, not just a direct last-sector deployment',()=>{
+ const config={mission:'campaign',operation:'signal'},completed=CAMPAIGN_OPERATIONS.map(o=>o.id);
  assert.equal(campaignDebrief(config,completed).finale,true);
  for(const omitted of completed)assert.equal(campaignDebrief(config,completed.filter(id=>id!==omitted)).finale,false);
  assert.equal(campaignDebrief({...config,operation:'hospital'},completed).finale,false);

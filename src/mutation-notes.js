@@ -8,6 +8,8 @@ export const MUTATION_NOTES=Object.freeze([
  {id:'sentinel',name:'Sentinel',color:'#9186b5',warning:'Resists stagger',counter:'Keep your distance during its longer bite windup; do not rely on shots to interrupt it.'},
  {id:'screecher',name:'Screecher',color:'#a47ac1',warning:'Radial warning',counter:'Solid cover blocks the shriek. Stagger interrupts its windup.'},
  {id:'leaper',name:'Leaper',color:'#d7d1bb',warning:'Landing marker',counter:'Move away from the locked landing point. Stagger interrupts takeoff.'},
+ {id:'spitter',name:'Spitter',color:'#d4a363',warning:'Locked ground circle',counter:'Leave the amber target circle before the spit lands. Cover blocks the attack.'},
+ {id:'mender',name:'Mender',color:'#9bd8e6',warning:'Pale repair pulse',counter:'Interrupt its pulse or separate it from injured creatures. It has only three repair charges.'},
  {id:'boss',name:'Matriarch',color:'#b35843',warning:'Large body, heavy bite',counter:'Keep an escape lane open and clear nearby smaller creatures.'},
 ].map(Object.freeze));
 const valid=new Set(MUTATION_NOTES.map(n=>n.id));

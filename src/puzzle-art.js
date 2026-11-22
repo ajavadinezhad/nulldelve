@@ -12,8 +12,8 @@ export function createPuzzleArt(scene, box, crates, plates, door) {
   }
   function stencil(text,w,h,color='#e3d5a1'){
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=128;
-    const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.textAlign='center';ctx.font='bold 42px monospace';ctx.fillText(text,128,60);
-    ctx.font='18px monospace';ctx.fillText(text==='A'||text==='B'?'PRESSURE SENSOR':'MOVABLE LOAD',128,90);
+    const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.textAlign='center';const sensor=text==='A'||text==='B';ctx.font=sensor?'bold 92px monospace':'bold 42px monospace';ctx.fillText(text,128,sensor?99:60);
+    if(!sensor){ctx.font='18px monospace';ctx.fillText('MOVABLE LOAD',128,90);}
     const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false}));mesh.rotation.x=-Math.PI/2;return mesh;
   }
@@ -33,7 +33,6 @@ export function createPuzzleArt(scene, box, crates, plates, door) {
     g.position.set(crate.x,0,crate.z);
   }
   const indicators=[];
-  const ringGeo=new THREE.RingGeometry(.53,.62,40);
   const lampGeo=new THREE.CylinderGeometry(.085,.085,.035,12);
   const green=new THREE.Color(0x83ed9d),red=new THREE.Color(0xf07953);
   const plateViews=plates.map((plate,index)=>{
@@ -41,11 +40,12 @@ export function createPuzzleArt(scene, box, crates, plates, door) {
     part(g,0,.04,0,1.5,.08,1.5,dark);
     const platform=part(g,0,.095,0,1.31,.055,1.31,bodyMaterial);
     const status=new THREE.MeshBasicMaterial({color:red});
-    const ring=new THREE.Mesh(ringGeo,status);ring.rotation.x=-Math.PI/2;ring.position.y=.13;g.add(ring);
+    const outline=new THREE.MeshBasicMaterial({color:0xd7e1ee});
+    for(const side of [-1,1])for(const end of [-1,1]){part(g,side*.57,.13,end*.47,.065,.025,.26,outline);part(g,side*.47,.13,end*.57,.26,.025,.065,outline);}
     for(const x of [-.63,.63])for(const z of [-.63,.63]){
       const lamp=new THREE.Mesh(lampGeo,status);lamp.position.set(x,.105,z);g.add(lamp);
     }
-    const label=stencil(index?'B':'A',.66,.38);label.position.set(0,.135,0);g.add(label);
+    const label=stencil(index?'B':'A',.95,.55,'#f2f4f8');label.position.set(0,.135,0);g.add(label);
     // Each sensor has a matching lamp on the fixed doorway frame, outside the sliding leaf.
     const lampMaterial=new THREE.MeshBasicMaterial({color:red});
     const frame=new THREE.Group();frame.position.set(door.x+(index?1.6:-1.6),1.66,door.z);root.add(frame);

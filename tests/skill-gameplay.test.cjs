@@ -1,3 +1,4 @@
+const {createBurstFire}=require('../src/weapon-actions.js');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {fieldSkillEffects,effectiveFieldStats}=require('../src/field-skills.js');
 const {createGrenadeActions}=require('../src/grenade-actions.js');
@@ -5,7 +6,7 @@ const {createFireZones}=require('../src/fire-grenades.js');
 const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8');
 const noop=()=>{};
 function fragment(start,end){const at=source.indexOf(start),stop=source.indexOf(end,at);assert.ok(at>=0&&stop>at);return source.slice(at,stop);}
-function context(skill,extra={}){const ctx={activeFieldSkill:skill,effectiveFieldStats,skillEffects:()=>fieldSkillEffects(skill),Math,Number,...extra};vm.createContext(ctx);return ctx;}
+function context(skill,extra={}){const ctx={activeFieldSkill:skill,effectiveFieldStats,skillEffects:()=>fieldSkillEffects(skill),Math,Number,...extra};ctx.burstFire??=createBurstFire();vm.createContext(ctx);return ctx;}
 test('plating spends less existing armor, preserves overflow damage and never protects an unarmored player',()=>{
  for(const [skill,shield,expectedHp,expectedShield]of [['none',10,100,0],['plating',10,100,2],['plating',4,95,0],['plating',0,90,0]]){
   const ctx=context(skill,{player:{hp:100,hurtGrace:0},economy:{state:{shield}},audio:{bite:noop}});vm.runInContext(fragment('function applyPlayerDamage','function beginReload'),ctx);assert.equal(vm.runInContext('applyPlayerDamage(10)',ctx),true);assert.ok(Math.abs(ctx.player.hp-expectedHp)<1e-8);assert.ok(Math.abs(ctx.economy.state.shield-expectedShield)<1e-8);assert.equal(vm.runInContext('applyPlayerDamage(10)',ctx),false);
@@ -19,7 +20,7 @@ test('close quarters changes actual melee damage while keeping cooldown, targeti
  for(const [skill,expected]of [['none',2],['closequarters',1]]){const enemy={hp:3,mesh:{visible:true}},ctx=context(skill,{player:{x:0,z:0,angle:0},aim:{x:0,z:-1},enemies:[enemy],los:()=>true,meleeTargets:()=>[enemy],meleeCooldown:0,trace:noop,applyEnemyStagger:noop,rewardEnemyKill:noop,updateEnemyHealthBar:noop,audio:{melee:noop},hud:noop});vm.runInContext(fragment('function knifeStrike()','\n\nattachGraphicsRecovery'),ctx);vm.runInContext('knifeStrike()',ctx);assert.equal(enemy.hp,expected);assert.equal(ctx.meleeCooldown,.55);vm.runInContext('knifeStrike()',ctx);assert.equal(enemy.hp,expected);}
 });
 test('advanced medicine consumes one kit and clamps its real healing to missing health',()=>{
- for(const [hp,expected]of [[10,95],[80,100]]){let consumed=0;const ctx=context('triage',{player:{hp,maxHp:100},economy:{consume:()=>{consumed++;return true;}},operationStats:{medkits:0},persistCampaignProfile:noop,audio:{pickup:noop},hud:noop,toast:noop});vm.runInContext(fragment('function useMedkit()','function throwGrenade'),ctx);vm.runInContext('useMedkit()',ctx);assert.equal(ctx.player.hp,expected);assert.equal(consumed,1);assert.equal(ctx.operationStats.medkits,1);}
+ for(const [hp,expected]of [[10,95],[80,100]]){let consumed=0;const ctx=context('triage',{player:{hp,maxHp:100},economy:{state:{shield:0},consume:()=>{consumed++;return true;}},operationStats:{medkits:0},persistCampaignProfile:noop,audio:{pickup:noop},hud:noop,toast:noop});vm.runInContext(fragment('function useMedkit()','function throwGrenade'),ctx);vm.runInContext('useMedkit()',ctx);assert.equal(ctx.player.hp,expected);assert.equal(consumed,1);assert.equal(ctx.operationStats.medkits,1);}
 });
 test('steady throw charges faster but leaves release animation and flight timing unchanged',()=>{
  const player={x:0,z:0,angle:0},aim={x:10,z:0};let impact=[0,0];const actions=['none','steadythrow'].map((id,i)=>createGrenadeActions({getChargeDuration:()=>fieldSkillEffects(id).grenadeChargeMultiplier,onImpact:()=>impact[i]++}));for(const a of actions){a.begin();a.update(.5,player,aim);}assert.ok(Math.abs(actions[0].power-.4)<1e-8);assert.ok(Math.abs(actions[1].power-.5)<1e-8);for(const a of actions){a.cancel();a.launch(player,aim,1);}for(let i=0;i<15;i++){for(const a of actions)a.update(.1,player,aim);assert.equal(impact[0],impact[1]);}assert.deepEqual(impact,[1,1]);

@@ -4,3 +4,6 @@ export function grantHospitalAmmo(weapons,budget=64){
  const rifleGain=Math.min(Math.ceil(Math.max(64,Math.min(80,Number.isFinite(budget)?budget:64))/value),Math.max(0,300-primary.reserve)),pistolGain=Math.min(18,Math.max(0,150-pistol.reserve));
  primary.reserve+=rifleGain;pistol.reserve+=pistolGain;return {rifle:rifleGain,pistol:pistolGain};
 }
+
+/** Communications allotments use the same conservative budget as Hospital. */
+export function grantSignalAmmo(weapons){return grantHospitalAmmo(weapons,64);}
