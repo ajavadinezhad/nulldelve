@@ -37,7 +37,7 @@ export function createTouchControls({host,isRunning,onAction,device=()=>({coarse
  const heldInteract=createHeldInteraction(()=>onAction('interact'),()=>onAction('interactEnd'));
  const input=createTwinStickInput(),knobs={},cleanups=[];let enabled=false,mode='auto',lastInteractPrompt=null;
  const doc=host.ownerDocument??document,make=(tag,cls,text)=>{const node=doc.createElement(tag);node.className=cls;if(text)node.textContent=text;return node;};
- function paint(name){const state=input.getState()[name],knob=knobs[name];knob.style.transform=`translate(${state.x*34}px,${state.z*34}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);}
+ function paint(name){const state=input.getState()[name],knob=knobs[name];const travel=(knob.parentElement.getBoundingClientRect?.().width||96)*.24;knob.style.transform=`translate(${state.x*travel}px,${state.z*travel}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);}
  function reset(){heldInteract.reset();input.reset();for(const name of ['move','aim'])paint(name);}
  function listen(node,name,callback,options){node.addEventListener(name,callback,options);cleanups.push(()=>node.removeEventListener(name,callback,options));}
  host.replaceChildren();

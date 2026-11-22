@@ -1,9 +1,9 @@
-import {effectiveFieldStats} from './field-skills.js?v=dead-signal-r32';
-import {cashReward} from './mission-salvage.js?v=dead-signal-r32';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=dead-signal-r32';
-import {compatibleStorage} from './storage-compat.js?v=dead-signal-r32';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=dead-signal-r32';
-import {createEconomy} from './economy.js?v=dead-signal-r32';
+import {effectiveFieldStats} from './field-skills.js?v=phone-journal-r33b';
+import {cashReward} from './mission-salvage.js?v=phone-journal-r33b';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=phone-journal-r33b';
+import {compatibleStorage} from './storage-compat.js?v=phone-journal-r33b';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=phone-journal-r33b';
+import {createEconomy} from './economy.js?v=phone-journal-r33b';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';

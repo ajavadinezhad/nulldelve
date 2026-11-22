@@ -10,7 +10,7 @@ export function initialQuality(savedQuality,{coarse=false,touchPoints=0,touch=fa
 export function cameraViewSize(viewHeight=22,aspect=1,touch=false){
  const base=Number.isFinite(viewHeight)?Math.max(14,Math.min(32,viewHeight)):22;
  const ratio=Number.isFinite(aspect)&&aspect>0?aspect:1;
- const shortSpan=base*.6;
+ const shortSpan=base*.5;
  const height=touch?shortSpan/Math.min(1,Math.max(.2,ratio)):base;
  return {height,width:height*ratio};
 }

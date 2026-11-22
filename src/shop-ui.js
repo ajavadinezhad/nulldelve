@@ -1,6 +1,6 @@
-import {weaponThumbnail} from './weapon-preview.js?v=dead-signal-r32';
-import {createItemIcon} from './item-icons.js?v=dead-signal-r32';
-import {formatKey} from './controls.js?v=dead-signal-r32';
+import {weaponThumbnail} from './weapon-preview.js?v=phone-journal-r33b';
+import {createItemIcon} from './item-icons.js?v=phone-journal-r33b';
+import {formatKey} from './controls.js?v=phone-journal-r33b';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;

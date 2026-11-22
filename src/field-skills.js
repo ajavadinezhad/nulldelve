@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=dead-signal-r32';
+import {compatibleStorage} from './storage-compat.js?v=phone-journal-r33b';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
