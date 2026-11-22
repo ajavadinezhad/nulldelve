@@ -1,5 +1,5 @@
-import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=phone-journal-r33b';
-import {normalizeAttachments} from './weapon-attachments.js?v=phone-journal-r33b';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=skill-layout-r34';
+import {normalizeAttachments} from './weapon-attachments.js?v=skill-layout-r34';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','lancet','orison','pistol'],UPGRADES=['damage','magazine','reload'];

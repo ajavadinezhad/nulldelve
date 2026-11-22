@@ -1,14 +1,14 @@
-import {renderFieldJournal,journalIcon} from './field-journal.js?v=phone-journal-r33b';
-import {createPuzzleDiscovery} from './puzzle-discovery.js?v=phone-journal-r33b';
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=phone-journal-r33b';
-import {compatibleStorage} from './storage-compat.js?v=phone-journal-r33b';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=phone-journal-r33b';
-import {createCampaignMap} from './campaign-map.js?v=phone-journal-r33b';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=phone-journal-r33b';
-import {createItemIcon} from './item-icons.js?v=phone-journal-r33b';
-import {buildMissionPreview} from './mission-previews.js?v=phone-journal-r33b';
-import {renderShop} from './shop-ui.js?v=phone-journal-r33b';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=phone-journal-r33b';
+import {renderFieldJournal,journalIcon} from './field-journal.js?v=skill-layout-r34';
+import {createPuzzleDiscovery} from './puzzle-discovery.js?v=skill-layout-r34';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=skill-layout-r34';
+import {compatibleStorage} from './storage-compat.js?v=skill-layout-r34';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=skill-layout-r34';
+import {createCampaignMap} from './campaign-map.js?v=skill-layout-r34';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=skill-layout-r34';
+import {createItemIcon} from './item-icons.js?v=skill-layout-r34';
+import {buildMissionPreview} from './mission-previews.js?v=skill-layout-r34';
+import {renderShop} from './shop-ui.js?v=skill-layout-r34';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=skill-layout-r34';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -33,7 +33,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  const previousDifficulty=status().config?.difficulty;
  let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty=['easy','normal','hard'].includes(previousDifficulty)?previousDifficulty:'normal',statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,selectedSkillBranch=null,backupPreview=null,keyboardOpen=null;
  let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems',noteSelection=null,noteHint=0,revealSkillDetails=false,revealSkillTree=false,confirmTrainingReset=false;
- const compactSkills=()=>typeof matchMedia==='function'&&matchMedia('(max-width:900px)').matches;
+ const compactSkills=()=>typeof matchMedia==='function'&&matchMedia('(max-width:1100px)').matches;
  const nestedScrollPositions=new Map();
  function status(){try{return getStatus()??{active:false,slots:[],canContinue:false};}catch{return {active:false,slots:[],canContinue:false};}}
  function notice(message){statusText=message;if(statusNode)statusNode.textContent=message;}
@@ -152,7 +152,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
    const completed=current.completedOperations??[],state=current.skillState??{learned:[],selected:current.fieldSkill??'none'};
    selectedSkill=[...SKILL_NODES,{id:'none'}].some(node=>node.id===selectedSkill)?selectedSkill:(current.fieldSkill??'none');
    const skills=element('div','skill-tree'),map=element('div','skill-map'),details=element('section','skill-detail');
-   const points=trainingPoints(state,completed),allPointsEarned=CAMPAIGN_OPERATIONS.every(operation=>completed.includes(operation.id));skills.append(element('p','training-balance',`${points} training points`));if(allPointsEarned&&points===0)skills.append(element('p','skill-requirement','All operation points earned · Reset training to try another branch'));if(onRespecFieldSkills&&state.learned.length){const reset=element('div','training-reset');if(confirmTrainingReset){reset.append(element('p','','Reset learned skills and return all training points? Your weapons and purchases stay.'),button('Reset training',()=>action(async()=>{const result=await onRespecFieldSkills();if(result?.ok!==false)confirmTrainingReset=false;return result;},[],{close:false}),'menu-button secondary'),button('Cancel',()=>{confirmTrainingReset=false;render(false);},'menu-button secondary'));}else reset.append(button('Reset training',()=>{confirmTrainingReset=true;render(false);},'menu-button secondary'));skills.append(reset);}
+   const toolbar=element('div','skill-toolbar');skills.append(toolbar);const points=trainingPoints(state,completed),allPointsEarned=CAMPAIGN_OPERATIONS.every(operation=>completed.includes(operation.id));toolbar.append(element('p','training-balance',`${points} training points`));if(allPointsEarned&&points===0)toolbar.append(element('p','skill-requirement','All operation points earned · Reset training to try another branch'));if(onRespecFieldSkills&&state.learned.length){const reset=element('div','training-reset');if(confirmTrainingReset){reset.append(element('p','','Reset learned skills and return all training points? Your weapons and purchases stay.'),button('Reset training',()=>action(async()=>{const result=await onRespecFieldSkills();if(result?.ok!==false)confirmTrainingReset=false;return result;},[],{close:false}),'menu-button secondary'),button('Cancel',()=>{confirmTrainingReset=false;render(false);},'menu-button secondary'));}else reset.append(button('Reset training',()=>{confirmTrainingReset=true;render(false);},'menu-button secondary'));toolbar.append(reset);}
    const nodeButton=(node,tier)=>{
     const learned=node.id==='none'||state.learned.includes(node.id),available=node.id==='none'||skillLearnable(node.id,state,completed),equipped=current.fieldSkill===node.id;
     const control=button('',()=>{selectedSkill=node.id;selectedSkillBranch=SKILL_BRANCHES.find(branch=>branch.nodes.includes(node.id))?.id??selectedSkillBranch;revealSkillDetails=compactSkills();render(false);},'skill-circle'+(learned?' developed':'')+(available&&!learned?' available':'')+(equipped?' equipped':'')+(!learned&&!available?' locked':''));
@@ -167,7 +167,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
     const lane=element('section','skill-branch'+(branch.id===selectedSkillBranch?' active-branch':''));lane.setAttribute('aria-label',branch.name+' branch');lane.append(element('h3','',branch.name));
     const nodes=branch.nodes.map(id=>SKILL_NODES.find(node=>node.id===id)).filter(Boolean),depth=node=>node.requires&&nodes.some(parent=>parent.id===node.requires)?1+depth(nodes.find(parent=>parent.id===node.requires)):1,maxDepth=Math.max(...nodes.map(depth));
     for(let tier=1;tier<=maxDepth;tier++){
-     const tierNodes=nodes.filter(node=>depth(node)===tier),row=element('div','skill-tier'+(tierNodes.length>1?' skill-fork':''));row.dataset.depth=String(tier);
+     const tierNodes=nodes.filter(node=>depth(node)===tier),row=element('div','skill-tier'+(tierNodes.length>1?' skill-fork':''));row.dataset.depth=String(tier);row.setAttribute('style','--fork-count:'+tierNodes.length);
      for(const node of tierNodes){const holder=element('div','skill-node-wrap'+(node.requires&&state.learned.includes(node.requires)?' parent-developed':''));if(node.requires)holder.dataset.requires=node.requires;holder.append(nodeButton(node,tier),element('span','skill-node-name',node.name));row.append(holder);}lane.append(row);
     }branches.append(lane);
    }map.append(branches);
@@ -215,7 +215,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r33'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r34'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){

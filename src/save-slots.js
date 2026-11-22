@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=phone-journal-r33b';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=phone-journal-r33b';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=phone-journal-r33b';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=phone-journal-r33b';
-import {validateSnapshot} from './snapshot-validation.js?v=phone-journal-r33b';
-import {normalizeSettings} from './controls.js?v=phone-journal-r33b';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=skill-layout-r34';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=skill-layout-r34';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=skill-layout-r34';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=skill-layout-r34';
+import {validateSnapshot} from './snapshot-validation.js?v=skill-layout-r34';
+import {normalizeSettings} from './controls.js?v=skill-layout-r34';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

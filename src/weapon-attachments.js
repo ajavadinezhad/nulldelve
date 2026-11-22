@@ -1,4 +1,4 @@
-import {PRIMARY_WEAPONS} from './arsenal.js?v=phone-journal-r33b';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=skill-layout-r34';
 const STANDARD=Object.freeze({id:'standard',name:'Standard',description:'Original weapon handling.'});
 const SINGLE=Object.freeze([STANDARD,Object.freeze({id:'handling',name:'Fast handling',description:'Reload −0.25s · range −15%'}),Object.freeze({id:'precision',name:'Long barrel',description:'Range +20% · firing interval +15%'})]);
 const PELLET=Object.freeze([STANDARD,Object.freeze({id:'choke',name:'Tight choke',description:'Spread −40% · stagger −35%'}),Object.freeze({id:'breacher',name:'Breaching kit',description:'Stagger +30% · spread +15%'})]);
