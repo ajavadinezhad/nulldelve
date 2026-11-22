@@ -1,4 +1,4 @@
-import {initialQuality} from './device-presentation.js?v=whole-audit-r27';
+import {initialQuality} from './device-presentation.js?v=hands-on-r28b';
 export const DEFAULT_BINDINGS=Object.freeze({moveUp:'KeyW',moveDown:'KeyS',moveLeft:'KeyA',moveRight:'KeyD',interact:'KeyE',reload:'KeyR',medkit:'KeyQ',grenade:'KeyG',cycleGrenade:'KeyC',sprint:'ShiftLeft',fire:'Space',knife:'KeyF',rifle:'Digit1',pistol:'Digit2',map:'KeyM',help:'KeyH',resetPuzzle:'KeyT',aimUp:'ArrowUp',aimDown:'ArrowDown',aimLeft:'ArrowLeft',aimRight:'ArrowRight'});
 export const ACTION_LABELS=Object.freeze({moveUp:'Move up',moveDown:'Move down',moveLeft:'Move left',moveRight:'Move right',interact:'Interact',reload:'Reload',medkit:'Use medkit',grenade:'Throw grenade',cycleGrenade:'Switch grenade type',sprint:'Sprint',fire:'Fire',knife:'Knife strike',rifle:'Equip rifle',pistol:'Equip pistol',map:'Full map',help:'Controls help',resetPuzzle:'Reset crates',aimUp:'Aim up',aimDown:'Aim down',aimLeft:'Aim left',aimRight:'Aim right'});
 export const BINDING_ACTIONS=Object.freeze(Object.keys(DEFAULT_BINDINGS));
@@ -20,6 +20,13 @@ export function normalizeBindings(input={}){
  return result;
 }
 export function actionForCode(code,bindings=DEFAULT_BINDINGS){return BINDING_ACTIONS.find(action=>bindings?.[action]===code)??null;}
+/** Latch aim on keydown, even if the key is released before the next frame. */
+export function keyboardAimDirection(keys,bindings=DEFAULT_BINDINGS){
+ const x=Number(keys.has(bindings.aimRight))-Number(keys.has(bindings.aimLeft));
+ const z=Number(keys.has(bindings.aimDown))-Number(keys.has(bindings.aimUp));
+ const length=Math.hypot(x,z);
+ return length?{x:x/length,z:z/length}:null;
+}
 export function normalizeSettings(value={}){
  const clamp=(n,min,max,fallback)=>Number.isFinite(Number(n))?Math.max(min,Math.min(max,Number(n))):fallback;
  return {

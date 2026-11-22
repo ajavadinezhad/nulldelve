@@ -39,6 +39,7 @@ function session({expanded=false}={}){
  };
  ctx.progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant,{encounter}={})=>{const stats=ROACH_VARIANTS[variant],e={encounter,id:'e'+ctx.nextEnemyId++,x,z,...stats,maxHp:stats.hp,variant,cooldown:1,alerted:true,mesh:mesh(),attackWindup:0,staggerTime:0,spawnDelay:0};enemies.push(e);return e;}});
  ctx.persistCampaignProfile=()=>ctx.campaignProfile.persist();
+ ctx.queueCheckpoint=reason=>{ctx.pendingCheckpoint=reason;};
  ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;vm.createContext(ctx);
  vm.runInContext(fragment('function applyUpgrades()','\napplyUpgrades();'),ctx);
  vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
@@ -121,4 +122,14 @@ test('resuming an older skill checkpoint preserves newer base development separa
  for(const id of ['runner','pathfinder','quickloader'])assert.ok(fresh.ctx.fieldSkills.learn(id,operations).ok);const base=fresh.ctx.fieldSkills.serialize(operations);
  assert.ok(fresh.restore(checkpoint));assert.equal(fresh.ctx.activeFieldSkill,'widearea');assert.deepEqual(fresh.ctx.fieldSkills.serialize(operations),base);
  const next=fresh.capture();assert.equal(next.fieldSkill.selected,'widearea');assert.ok(next.fieldSkill.learned.includes('widearea'));assert.ok(fresh.restore(next));assert.equal(fresh.ctx.activeFieldSkill,'widearea');assert.deepEqual(fresh.ctx.fieldSkills.serialize(operations),base);
+});
+
+test('actual retry restores checkpoint supplies after cash earnings without refunding or duplicating cash',async()=>{
+ const target=session(),{campaignProfile,economy}=target.ctx;
+ economy.restore({credits:500});await campaignProfile.purchaseOffer('medkit');
+ const saved=target.capture();economy.consume('medkit');campaignProfile.persist();
+ await campaignProfile.queueEnemyReward('kill.command.0','normal');
+ const cash=economy.state.credits;
+ assert.equal(target.restore(saved),true);assert.equal(economy.state.items.medkit,1);assert.equal(economy.state.credits,cash);
+ assert.equal((await campaignProfile.queueEnemyReward('kill.command.0','normal')).amount,0);
 });

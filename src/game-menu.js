@@ -1,13 +1,13 @@
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=whole-audit-r27';
-import {compatibleStorage} from './storage-compat.js?v=whole-audit-r27';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=whole-audit-r27';
-import {DIFFICULTY_RULES} from './difficulty.js?v=whole-audit-r27';
-import {createCampaignMap} from './campaign-map.js?v=whole-audit-r27';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=whole-audit-r27';
-import {createItemIcon} from './item-icons.js?v=whole-audit-r27';
-import {buildMissionPreview} from './mission-previews.js?v=whole-audit-r27';
-import {renderShop} from './shop-ui.js?v=whole-audit-r27';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=whole-audit-r27';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=hands-on-r28b';
+import {compatibleStorage} from './storage-compat.js?v=hands-on-r28b';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=hands-on-r28b';
+import {DIFFICULTY_RULES} from './difficulty.js?v=hands-on-r28b';
+import {createCampaignMap} from './campaign-map.js?v=hands-on-r28b';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=hands-on-r28b';
+import {createItemIcon} from './item-icons.js?v=hands-on-r28b';
+import {buildMissionPreview} from './mission-previews.js?v=hands-on-r28b';
+import {renderShop} from './shop-ui.js?v=hands-on-r28b';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=hands-on-r28b';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -29,7 +29,8 @@ function formatTime(value){if(!value)return 'Time unavailable';try{const date=ne
 /** DOM-only game menu. The owning game controls gameplay, save storage and settings effects. */
 export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>{},onExportBackup=null,onPreviewBackup=null,onImportBackup=null,onContinue=()=>{},onLoad=()=>{},onLoadCheckpoint=()=>{},onSave=()=>{},onPurchase=()=>{},onFieldSkill=()=>{},onResume=()=>{},onClose=()=>{},onSettings=()=>{},getStatus=()=>({active:false,slots:[],canContinue:false})}){
  const settings=readSettings();
- let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty='normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,selectedSkillBranch=null,backupPreview=null,keyboardOpen=null;
+ const previousDifficulty=status().config?.difficulty;
+ let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty=['easy','normal','hard'].includes(previousDifficulty)?previousDifficulty:'normal',remix=false,statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,selectedSkillBranch=null,backupPreview=null,keyboardOpen=null;
  let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems',revealSkillDetails=false,revealSkillTree=false;
  const compactSkills=()=>typeof matchMedia==='function'&&matchMedia('(max-width:900px)').matches;
  const nestedScrollPositions=new Map();
@@ -214,7 +215,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r27'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r28'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...content.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});if(!focus)target?.scrollIntoView?.({block:'nearest'});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){
@@ -224,7 +225,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  }
  function show(next='main'){
   if(!open)previousFocus=document.activeElement;
-  if(next==='campaign-map'){const done=status().completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;}
+  if(next==='campaign-map'){const current=status(),done=current.completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;if(['easy','normal','hard'].includes(current.config?.difficulty))difficulty=current.config.difficulty;}
   open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
  }
  function hide(){captureAction=null;open=false;overlay.style.display='none';overlay.classList.remove('menu-overlay');if(previousFocus?.isConnected)previousFocus.focus?.({preventScroll:true});onClose();}
