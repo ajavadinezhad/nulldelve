@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=puzzle-visuals-r51';
+import {compatibleStorage} from './storage-compat.js?v=campaign-pacing-r53';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';

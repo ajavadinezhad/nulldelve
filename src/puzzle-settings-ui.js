@@ -1,4 +1,4 @@
-import {createHardwareControl} from './puzzle-hardware.js?v=puzzle-visuals-r51';
+import {createHardwareControl} from './puzzle-hardware.js?v=campaign-pacing-r53';
 /** The lever travel maps to discrete positions; no target settings enter this view. */
 export function leverValueAt(clientY,rect,min,max){const compact=rect.height<=140,offset=compact?36:44,bottom=compact?50:79,top=rect.top+offset,travel=Math.max(1,rect.height-offset-bottom),t=Math.max(0,Math.min(1,(clientY-top)/travel));return Math.round(max-t*(max-min));}
 export function createPuzzleSettingsUI({getPanel,onAdjust,onTest,onPress=()=>({ok:false}),onOpen=()=>{},onClose=()=>{}}){

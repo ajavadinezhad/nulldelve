@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {weapon} from './weapons.js?v=puzzle-visuals-r51';
+import {weapon} from './weapons.js?v=campaign-pacing-r53';
 
 // All art is generated locally: no external models or texture downloads.
 export function buildArt(scene, box, cover, rooms) {

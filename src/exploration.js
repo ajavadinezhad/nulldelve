@@ -6,7 +6,20 @@ export const EXPLORATION_ALCOVES=Object.freeze([
 ].map(value=>Object.freeze({...value,room:Object.freeze(value.room),neck:Object.freeze(value.neck),cache:Object.freeze(value.cache),event:Object.freeze(value.event)})));
 export const EXPLORATION_ROOMS=Object.freeze(EXPLORATION_ALCOVES.map(site=>Object.freeze({...site.room,name:site.name,operation:site.operation})));
 export const EXPLORATION_CACHES=Object.freeze(EXPLORATION_ALCOVES.map((site,index)=>Object.freeze({id:['secret.hospital.linen','secret.freight.manifest','secret.signal.receiver'][index],operation:site.operation,...site.cache,amount:[18,22,24][index],label:'Recovered service cash'})));
-export const EXPLORATION_EVENTS=Object.freeze(EXPLORATION_ALCOVES.map(site=>Object.freeze({id:'exploration.'+site.id,operation:site.operation,...site.event})));
+// These beats activate on approach, never reveal fog, and stay spent after checkpoints.
+const ROUTE_EVENTS=[
+ {id:'breach-falling-dust',operation:'breach',x:23,z:18,kind:'dust',duration:3},
+ {id:'command-supply-fault',operation:'command',x:38,z:28,kind:'relay',duration:3.5},
+ {id:'command-pipe-vent',operation:'command',x:35,z:42,kind:'steam',duration:4},
+ {id:'research-transfer-dust',operation:'research',x:59,z:19,kind:'dust',duration:3.2},
+ {id:'research-coolant-vent',operation:'research',x:59,z:41,kind:'steam',duration:4.2},
+ {id:'containment-airlock-vent',operation:'containment',x:86,z:42,kind:'steam',duration:4},
+ {id:'nest-return-fault',operation:'nest',x:86,z:24,kind:'relay',duration:3.5},
+ {id:'hospital-gallery-dust',operation:'hospital',x:125,z:66,kind:'dust',duration:4},
+ {id:'freight-track-dust',operation:'freight',x:186,z:20,kind:'dust',duration:3.5},
+ {id:'signal-lift-fault',operation:'signal',x:236,z:18,kind:'relay',duration:3.8},
+];
+export const EXPLORATION_EVENTS=Object.freeze([...EXPLORATION_ALCOVES.map(site=>({id:'exploration.'+site.id,operation:site.operation,...site.event})),...ROUTE_EVENTS].map(Object.freeze));
 export function carveExploration(carve,operation){for(const site of EXPLORATION_ALCOVES){if(operation&&site.operation!==operation)continue;for(const r of [site.room,site.neck])carve(r.x,r.z,r.w,r.h);}}
 export function nearbyExplorationCache(player,{operation,claimed=()=>false,visible=()=>false}={}){
  if(!player)return null;

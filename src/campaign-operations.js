@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=puzzle-visuals-r51';
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=puzzle-visuals-r51';
-import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=puzzle-visuals-r51';
+import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=campaign-pacing-r53';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=campaign-pacing-r53';
+import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=campaign-pacing-r53';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},
@@ -15,12 +15,12 @@ export const CAMPAIGN_OPERATIONS=Object.freeze([
 const definitions={
  signal:{spawn:[212,57],prior:['security','storage','command','generator','lab','reactor','transit','containment','evacuation','nest','hospital-triage','hospital-ward','hospital-isolation','freight-pumps','freight-yard','freight-cold'],zones:['signal-yard','signal-relay','signal-uplink']},
  breach:{spawn:[7,29],prior:[],zones:['security','storage']},
- command:{spawn:[35,13],prior:['security','storage'],zones:['command','generator']},
- research:{spawn:[59,10],prior:['security','storage','command','generator'],zones:['lab','reactor','transit']},
- containment:{spawn:[86,30],prior:['security','storage','command','generator','lab','reactor','transit'],zones:['containment','evacuation']},
+ command:{spawn:[41,29],prior:['security','storage'],zones:['command','generator']},
+ research:{spawn:[49,10],prior:['security','storage','command','generator'],zones:['lab','reactor','transit']},
+ containment:{spawn:[73,52],prior:['security','storage','command','generator','lab','reactor','transit'],zones:['containment','evacuation']},
  freight:{spawn:[162,57],prior:['security','storage','command','generator','lab','reactor','transit','containment','evacuation','nest','hospital-triage','hospital-ward','hospital-isolation'],zones:['freight-pumps','freight-yard','freight-cold']},
  hospital:{spawn:[112,56],prior:['security','storage','command','generator','lab','reactor','transit','containment','evacuation','nest'],zones:['hospital-triage','hospital-ward','hospital-isolation']},
- nest:{spawn:[59,52],prior:['security','storage','command','generator','lab','reactor','transit','containment','evacuation'],zones:['nest']},
+ nest:{spawn:[86,42],prior:['security','storage','command','generator','lab','reactor','transit','containment','evacuation'],zones:['nest']},
 };
 export function normalizeCampaignOperation(value){return typeof value==='string'&&Object.hasOwn(definitions,value)?value:null;}
 /** Apply a direct deployment before play starts. Other operation hordes remain dormant. */

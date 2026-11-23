@@ -42,7 +42,7 @@ function session({expanded=false}={}){
  ctx.progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant,{encounter}={})=>{const stats=ROACH_VARIANTS[variant],e={encounter,id:'e'+ctx.nextEnemyId++,x,z,...stats,maxHp:stats.hp,variant,cooldown:1,alerted:true,mesh:mesh(),attackWindup:0,staggerTime:0,spawnDelay:0};enemies.push(e);return e;}});
  ctx.persistCampaignProfile=()=>ctx.campaignProfile.persist();
  ctx.queueCheckpoint=reason=>{ctx.pendingCheckpoint=reason;};
- ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();vm.createContext(ctx);
+ ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();ctx.encounterStats=require('../src/campaign-threat.js').encounterStats;vm.createContext(ctx);
  vm.runInContext(fragment('function applyUpgrades()','\napplyUpgrades();'),ctx);
  vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
  vm.runInContext(fragment('function equippedModelType(','\nrefreshPlayerWeapon();'),ctx);

@@ -1,4 +1,4 @@
-import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=puzzle-visuals-r51';
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=campaign-pacing-r53';
 import * as THREE from '../vendor/three.module.js';
 /** Flooded freight annex appends geometry without moving any older room. */
 export const FREIGHT_ROOMS=Object.freeze([

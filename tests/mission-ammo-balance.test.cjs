@@ -48,12 +48,12 @@ function signalQueues(difficulty){
 }
 // Economy-only projection: no enemy damage, grenades, barrels or melee; all drops
 // recovered; Hospital uses its two actual finite route allotments. Pellet rays hit real body sizes at3m, and whole shots miss on cadence.
-function runSupply(weapon,difficulty,mobs,missEvery,upgrade=0,supplyStops=[],supplyBudget=64){
+function runSupply(weapon,difficulty,mobs,missEvery,upgrade=0,supplyStops=[],supplyBudget=64,encounter){
  const rules=DIFFICULTY_RULES[difficulty],weapons={rifle:{...weapon,damage:weapon.baseDamage+upgrade,reserve:primaryReserve(weapon.id),ammo:weapon.capacity},pistol:{capacity:12,damage:2,pellets:1,reserve:rules.pistolReserve,ammo:12}};
  const player={x:0,z:0,hp:100,maxHp:100,ammo:weapon.capacity},loot=createLootState();let selected='rifle',killed=0,shots=0;
  for(const variant of mobs){
   if(supplyStops.includes(killed)){if(supplyBudget==='signal')grantSignalAmmo(weapons);else grantHospitalAmmo(weapons,supplyBudget);}
-  const maxHp=Math.ceil(ROACH_VARIANTS[variant].hp*rules.hp);let hp=maxHp+(variant==='mender'?6:0); // Conservative: all three repairs land before this supporter is killed.
+  const maxHp=require('../src/campaign-threat.js').encounterStats(ROACH_VARIANTS[variant],rules,encounter).hp;let hp=maxHp+(variant==='mender'?6:0); // Conservative: all three repairs land before this supporter is killed.
   while(hp>0){
    let gun=weapons[selected];
    if(player.ammo===0){player.ammo=refillMagazine(gun,0);if(!player.ammo){gun.ammo=0;selected=selected==='rifle'?'pistol':'rifle';gun=weapons[selected];player.ammo=gun.ammo||refillMagazine(gun,0);if(!player.ammo)break;}}
@@ -65,12 +65,12 @@ function runSupply(weapon,difficulty,mobs,missEvery,upgrade=0,supplyStops=[],sup
  }
  return {killed,rounds:weapons.rifle.reserve+weapons.rifle.ammo,pistol:weapons.pistol.reserve+weapons.pistol.ammo,shots};
 }
-for(const missEvery of [5,4])test(`whole-operation supply budgets support${Math.round((1-1/missEvery)*100)}% accuracy; late hard missions use the first damage upgrade`,()=>{
- for(const difficulty of ['easy','normal','hard']){const queues=encounterQueues(difficulty);for(const weapon of PRIMARY_WEAPONS)for(const upgrade of [0,1])for(const [operation,ids]of Object.entries(OPERATIONS)){if(difficulty==='hard'&&['nest','hospital','freight','signal'].includes(operation)&&upgrade===0)continue;const mobs=ids.flatMap(id=>queues[id]);assert.ok(mobs.length>0);const supplyStops=operation==='signal'?[queues['signal-yard'].length,queues['signal-yard'].length+queues['signal-relay'].length]:operation==='freight'?[queues['freight-pumps'].length,queues['freight-pumps'].length+queues['freight-yard'].length]:operation==='hospital'?[queues['hospital-triage'].length,queues['hospital-triage'].length+queues['hospital-ward'].length]:[];const result=runSupply(weapon,difficulty,mobs,missEvery,upgrade,supplyStops,operation==='signal'?'signal':64);assert.equal(result.killed,mobs.length,`${difficulty} ${operation} ${weapon.id} damage upgrade${upgrade}: ${result.killed}/${mobs.length}`);}}
+for(const missEvery of [5,4])test(`whole-operation supply budgets support${Math.round((1-1/missEvery)*100)}% accuracy; campaign builds invest before the research wing and annexes`,()=>{
+ for(const difficulty of ['easy','normal','hard']){const queues=encounterQueues(difficulty);for(const weapon of PRIMARY_WEAPONS)for(const upgrade of [0,1,2])for(const [operation,ids]of Object.entries(OPERATIONS)){if(['research','containment','nest','hospital','freight','signal'].includes(operation)&&upgrade===0)continue;if(['hospital','freight','signal'].includes(operation)&&upgrade<2)continue;const mobs=ids.flatMap(id=>queues[id]);assert.ok(mobs.length>0);const supplyStops=operation==='research'?[queues.lab.length]:operation==='containment'?[queues.containment.length]:operation==='nest'?[0]:operation==='signal'?[queues['signal-yard'].length,queues['signal-yard'].length+queues['signal-relay'].length]:operation==='freight'?[queues['freight-pumps'].length,queues['freight-pumps'].length+queues['freight-yard'].length]:operation==='hospital'?[queues['hospital-triage'].length,queues['hospital-triage'].length+queues['hospital-ward'].length]:[];const result=runSupply(weapon,difficulty,mobs,missEvery,upgrade,supplyStops,operation==='signal'?'signal':64,ids[0]);assert.equal(result.killed,mobs.length,`${difficulty} ${operation} ${weapon.id} damage upgrade${upgrade}: ${result.killed}/${mobs.length}`);}}
 });
 module.exports={encounterQueues,runSupply,OPERATIONS};
 
-test('Hospital remains completable with an upgraded pump shotgun at75% accuracy without a large leftover stockpile',()=>{const queues=encounterQueues('hard'),ids=OPERATIONS.hospital,mobs=ids.flatMap(id=>queues[id]),stops=[queues[ids[0]].length,queues[ids[0]].length+queues[ids[1]].length],weapon=PRIMARY_WEAPONS.find(weapon=>weapon.id==='shotgun'),result=runSupply(weapon,'hard',mobs,4,1,stops);assert.ok(mobs.includes('leaper')&&mobs.includes('screecher'),'projection must include the costly new mutations');assert.equal(result.killed,mobs.length);assert.ok(result.rounds+result.pistol>0);assert.ok(result.rounds+result.pistol<30,'survival budget should not become a large stockpile');});
+test('Hospital remains completable with an upgraded pump shotgun at75% accuracy without a large leftover stockpile',()=>{const queues=encounterQueues('hard'),ids=OPERATIONS.hospital,mobs=ids.flatMap(id=>queues[id]),stops=[queues[ids[0]].length,queues[ids[0]].length+queues[ids[1]].length],weapon=PRIMARY_WEAPONS.find(weapon=>weapon.id==='shotgun'),result=runSupply(weapon,'hard',mobs,4,2,stops,64,'hospital-triage');assert.ok(mobs.includes('leaper')&&mobs.includes('screecher'),'projection must include the costly new mutations');assert.equal(result.killed,mobs.length);assert.ok(result.rounds+result.pistol>0);assert.ok(result.rounds+result.pistol<=36,'survival budget should not become a large stockpile');});
 
 test('annexes retain forgiving entries while deeper encounters increase durable target density',()=>{
  for(const difficulty of ['easy','normal','hard']){
