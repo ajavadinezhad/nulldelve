@@ -1,4 +1,4 @@
-import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=exploration-ui-r45c';
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=progression-balance-r46';
 import * as THREE from '../vendor/three.module.js';
 /** Communications annex keeps every earlier coordinate and door index stable. */
 export const SIGNAL_ROOMS=Object.freeze([

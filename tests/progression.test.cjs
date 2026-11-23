@@ -27,3 +27,16 @@ test('entering puzzle rooms and running a signal timer do not repeat unsolicited
 
 test('later reinforcements wait for the current phase and persist the respite timer',()=>{const s=setup();s.p.update({x:38,z:10},.1);const zone=s.p.state.zones.find(z=>z.id==='command'),phase=Math.ceil(zone.total/3);for(let i=0;i<20;i++)s.p.update({x:38,z:10},4);assert.equal(zone.spawned,phase);assert.ok(zone.queue.length>0);zone.wave.forEach(e=>e.hp=0);s.p.update({x:38,z:10},1);assert.equal(zone.spawned,phase);assert.equal(zone.phaseRested,true);const saved=s.p.serializeState();saved.zones.find(z=>z.id==='command').spawnTimer=5.5;const other=setup();assert.equal(other.p.restoreState(saved,new Map(s.enemies.map(e=>[e.id,e]))),true);assert.equal(other.p.state.zones.find(z=>z.id==='command').spawnTimer,5.5);assert.equal(other.p.state.zones.find(z=>z.id==='command').phaseRested,true);other.p.update({x:38,z:10},5.4);assert.equal(other.p.state.zones.find(z=>z.id==='command').spawned,phase);other.p.update({x:38,z:10},.2);assert.ok(other.p.state.zones.find(z=>z.id==='command').spawned>phase);});
 test('new mutations arrive beyond opening sectors and later in an encounter',()=>{for(const [id,x,z] of [['storage',23,26],['command',38,10],['reactor',59,30]]){const s=setup();s.p.update({x,z},.1);const zone=s.p.state.zones.find(zone=>zone.id===id),variants=[...zone.wave.map(e=>e.variant),...zone.queue];if(id==='storage')assert.ok(!variants.some(v=>['charger','sentinel'].includes(v)));else{const first=variants.findIndex(v=>v==='charger');assert.ok(first>variants.length*.45);if(id==='reactor')assert.ok(variants.includes('sentinel'));}}});
+
+test('reinforcement pacing tightens within later phases without changing initial batches or phase rests',()=>{
+ for(const [difficulty,base]of [['easy',4],['normal',3],['hard',2.2]]){
+  const enemies=[],p=createProgression({doors:[],enemies,getDifficulty:()=>difficulty,spawnEnemy:(x,z,variant)=>{const enemy={id:'cadence'+enemies.length,x,z,variant,hp:2};enemies.push(enemy);return enemy;}}),player={x:38,z:10};
+  p.update(player,.01);const zone=p.state.zones.find(z=>z.id==='command'),phaseSize=Math.ceil(zone.total/3);
+  assert.ok(Math.abs(zone.spawnTimer-(base-.01))<1e-8);
+  for(let i=0;i<100&&zone.spawned<phaseSize;i++){zone.wave.forEach(e=>e.hp=0);p.update(player,base+1);}
+  zone.wave.forEach(e=>e.hp=0);p.update(player,.01);assert.equal(zone.phaseRested,true);assert.ok(zone.spawnTimer>5.9);
+  p.update(player,6);assert.ok(zone.spawned>phaseSize);assert.equal(zone.spawnTimer,base*.9);
+  for(let i=0;i<100&&zone.spawned<phaseSize*2;i++){zone.wave.forEach(e=>e.hp=0);p.update(player,base+1);}
+  zone.wave.forEach(e=>e.hp=0);p.update(player,.01);assert.equal(zone.phaseRested,true);p.update(player,6);assert.equal(zone.spawnTimer,base*.78);
+ }
+});

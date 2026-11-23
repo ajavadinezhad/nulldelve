@@ -101,3 +101,14 @@ test('backup preview rejects failure objects and accepts the real numeric previe
  const upload=async()=>{const input=h.overlay.querySelectorAll('input').find(n=>n.type==='file');input.files=[{size:2,text:async()=>'{}'}];await input.listeners.change[0]();};
  await upload();assert.ok(!h.find('Restore this backup'));assert.match(h.text(),/Backup rejected/);valid=true;await upload();assert.ok(h.find('Restore this backup'));await h.click('Restore this backup');assert.equal(imported,7);
 });
+
+test('Back cancels a backup restore before leaving Settings and reopening cannot restore stale data',async()=>{
+ const h=harness(false,()=>{},true,null,()=>({ok:true}),null,{onPreviewBackup:()=>({id:7}),onImportBackup:()=>{throw new Error('Must not restore');}});
+ await h.click('Settings');await h.click('Progress');const input=h.overlay.querySelectorAll('input').find(n=>n.type==='file');input.files=[{size:2,name:'progress.json',text:async()=>'{}'}];await input.listeners.change[0]();assert.ok(h.find('Restore this backup'));
+ h.menu.back();assert.ok(h.find('Progress'));assert.ok(!h.find('Restore this backup'));assert.ok(!h.text().includes('progress.json'));h.menu.back();assert.ok(h.find('New operation'));await h.click('Settings');assert.ok(!h.find('Restore this backup'));
+});
+
+test('Back cancels training reset before leaving Armory and hiding clears pending confirmation',async()=>{
+ let options,resets=0;const h=harness(false,()=>{},false,current=>options=current.options,()=>({ok:true}),()=>{resets++;return {ok:true};});h.state.skillState={learned:['medic'],selected:'medic'};await h.click('Armory');options.onGroupChange('skills');await h.click('Reset training');
+ h.menu.back();assert.equal(resets,0);assert.ok(!h.text().includes('Reset learned skills'));assert.ok(h.find('Reset training'));await h.click('Reset training');h.menu.hide();h.menu.show('armory');assert.ok(!h.text().includes('Reset learned skills'));assert.equal(resets,0);
+});

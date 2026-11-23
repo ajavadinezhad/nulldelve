@@ -1,9 +1,9 @@
-import {EXPLORATION_EVENTS} from './exploration.js?v=exploration-ui-r45c';
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=exploration-ui-r45c';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=exploration-ui-r45c';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=exploration-ui-r45c';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=exploration-ui-r45c';
-import {createProgression} from './progression.js?v=exploration-ui-r45c';
+import {EXPLORATION_EVENTS} from './exploration.js?v=progression-balance-r46';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=progression-balance-r46';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=progression-balance-r46';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=progression-balance-r46';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=progression-balance-r46';
+import {createProgression} from './progression.js?v=progression-balance-r46';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','spitter','mender','boss']);

@@ -65,9 +65,32 @@ function runSupply(weapon,difficulty,mobs,missEvery,upgrade=0,supplyStops=[],sup
  }
  return {killed,rounds:weapons.rifle.reserve+weapons.rifle.ammo,pistol:weapons.pistol.reserve+weapons.pistol.ammo,shots};
 }
-for(const missEvery of [5,4])test(`whole-operation supply budgets support${Math.round((1-1/missEvery)*100)}% accuracy with either weapon and optional first damage upgrade`,()=>{
- for(const difficulty of ['easy','normal','hard']){const queues=encounterQueues(difficulty);for(const weapon of PRIMARY_WEAPONS)for(const upgrade of [0,1])for(const [operation,ids]of Object.entries(OPERATIONS)){const mobs=ids.flatMap(id=>queues[id]);assert.ok(mobs.length>0);const supplyStops=operation==='signal'?[queues['signal-yard'].length,queues['signal-yard'].length+queues['signal-relay'].length]:operation==='freight'?[queues['freight-pumps'].length,queues['freight-pumps'].length+queues['freight-yard'].length]:operation==='hospital'?[queues['hospital-triage'].length,queues['hospital-triage'].length+queues['hospital-ward'].length]:[];const result=runSupply(weapon,difficulty,mobs,missEvery,upgrade,supplyStops,operation==='signal'?'signal':64);assert.equal(result.killed,mobs.length,`${difficulty} ${operation} ${weapon.id} damage upgrade${upgrade}: ${result.killed}/${mobs.length}`);}}
+for(const missEvery of [5,4])test(`whole-operation supply budgets support${Math.round((1-1/missEvery)*100)}% accuracy; late hard missions use the first damage upgrade`,()=>{
+ for(const difficulty of ['easy','normal','hard']){const queues=encounterQueues(difficulty);for(const weapon of PRIMARY_WEAPONS)for(const upgrade of [0,1])for(const [operation,ids]of Object.entries(OPERATIONS)){if(difficulty==='hard'&&['nest','hospital','freight','signal'].includes(operation)&&upgrade===0)continue;const mobs=ids.flatMap(id=>queues[id]);assert.ok(mobs.length>0);const supplyStops=operation==='signal'?[queues['signal-yard'].length,queues['signal-yard'].length+queues['signal-relay'].length]:operation==='freight'?[queues['freight-pumps'].length,queues['freight-pumps'].length+queues['freight-yard'].length]:operation==='hospital'?[queues['hospital-triage'].length,queues['hospital-triage'].length+queues['hospital-ward'].length]:[];const result=runSupply(weapon,difficulty,mobs,missEvery,upgrade,supplyStops,operation==='signal'?'signal':64);assert.equal(result.killed,mobs.length,`${difficulty} ${operation} ${weapon.id} damage upgrade${upgrade}: ${result.killed}/${mobs.length}`);}}
 });
 module.exports={encounterQueues,runSupply,OPERATIONS};
 
 test('Hospital remains completable with an upgraded pump shotgun at75% accuracy without a large leftover stockpile',()=>{const queues=encounterQueues('hard'),ids=OPERATIONS.hospital,mobs=ids.flatMap(id=>queues[id]),stops=[queues[ids[0]].length,queues[ids[0]].length+queues[ids[1]].length],weapon=PRIMARY_WEAPONS.find(weapon=>weapon.id==='shotgun'),result=runSupply(weapon,'hard',mobs,4,1,stops);assert.ok(mobs.includes('leaper')&&mobs.includes('screecher'),'projection must include the costly new mutations');assert.equal(result.killed,mobs.length);assert.ok(result.rounds+result.pistol>0);assert.ok(result.rounds+result.pistol<30,'survival budget should not become a large stockpile');});
+
+test('annexes retain forgiving entries while deeper encounters increase durable target density',()=>{
+ for(const difficulty of ['easy','normal','hard']){
+  const queues=encounterQueues(difficulty);
+  for(const operation of ['hospital','freight','signal']){
+   const ids=OPERATIONS[operation],average=id=>queues[id].reduce((sum,variant)=>sum+Math.ceil(ROACH_VARIANTS[variant].hp*DIFFICULTY_RULES[difficulty].hp),0)/queues[id].length;
+   assert.ok(average(ids[1])>average(ids[0]),difficulty+' '+operation+' middle room must require more target commitment');
+   assert.ok(average(ids[2])>average(ids[1]),difficulty+' '+operation+' final room must develop its opposition');
+   assert.ok(queues[ids[0]].filter(v=>['normal','runner'].includes(v)).length/queues[ids[0]].length>.8,'entry must keep its breather');
+  }
+  assert.ok(queues.nest.includes('screecher')&&queues.nest.includes('leaper'),'Nest needs priority and mobility threats rather than only more fodder');
+ }
+});
+
+test('deep final encounters reward a damage investment rather than remaining starter normal-roach fodder',()=>{
+ const queues=encounterQueues('normal'),minimumHp={nest:450,'hospital-isolation':330,'freight-cold':255,'signal-uplink':220};
+ for(const [id,floor]of Object.entries(minimumHp)){
+  const variants=queues[id],hp=variants.reduce((sum,v)=>sum+ROACH_VARIANTS[v].hp,0),starterShots=hp,upgradedShots=variants.reduce((sum,v)=>sum+Math.ceil(ROACH_VARIANTS[v].hp/2),0);
+  assert.ok(hp>=floor,id+' must retain meaningful late durability');
+  assert.ok(upgradedShots/starterShots<.6,id+' damage investment must reduce reload exposure substantially');
+  assert.ok(variants.filter(v=>!['normal','runner'].includes(v)).length/variants.length>.2,id+' needs priority threats');
+ }
+});

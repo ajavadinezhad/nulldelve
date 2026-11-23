@@ -1,14 +1,14 @@
-import {renderFieldJournal,journalIcon} from './field-journal.js?v=exploration-ui-r45c';
-import {createPuzzleDiscovery} from './puzzle-discovery.js?v=exploration-ui-r45c';
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=exploration-ui-r45c';
-import {compatibleStorage} from './storage-compat.js?v=exploration-ui-r45c';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=exploration-ui-r45c';
-import {createCampaignMap} from './campaign-map.js?v=exploration-ui-r45c';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=exploration-ui-r45c';
-import {createItemIcon} from './item-icons.js?v=exploration-ui-r45c';
-import {buildMissionPreview} from './mission-previews.js?v=exploration-ui-r45c';
-import {renderShop} from './shop-ui.js?v=exploration-ui-r45c';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=exploration-ui-r45c';
+import {renderFieldJournal,journalIcon} from './field-journal.js?v=progression-balance-r46';
+import {createPuzzleDiscovery} from './puzzle-discovery.js?v=progression-balance-r46';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=progression-balance-r46';
+import {compatibleStorage} from './storage-compat.js?v=progression-balance-r46';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=progression-balance-r46';
+import {createCampaignMap} from './campaign-map.js?v=progression-balance-r46';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=progression-balance-r46';
+import {createItemIcon} from './item-icons.js?v=progression-balance-r46';
+import {buildMissionPreview} from './mission-previews.js?v=progression-balance-r46';
+import {renderShop} from './shop-ui.js?v=progression-balance-r46';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=progression-balance-r46';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -43,7 +43,8 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   catch(error){if(!close)render(false);notice(typeof error?.message==='string'&&error.message.trim()?error.message:'That action could not be completed. Please try again.');}
   finally{busy=false;shell?.removeAttribute('aria-busy');}
  }
- function changeView(next){if(busy)return;captureAction=null;statusText='';view=next;if(next==='missions')returnView='main';render();}
+ function clearConfirmations(){backupPreview=null;backupFilename='';confirmTrainingReset=false;}
+ function changeView(next){if(busy)return;clearConfirmations();captureAction=null;statusText='';view=next;if(next==='missions')returnView='main';render();}
  function heading(eyebrow,title,description){if(view==='main'||view==='pause')content.append(element('h2','menu-title',title));if(description)content.append(element('p','menu-description',description));}
  function actions(){const row=element('div','menu-actions');content.append(row);return row;}
  function openPanel(next,home=view){returnView=home==='pause'?'pause':'main';changeView(next);}
@@ -219,7 +220,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r45'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r46'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...shell.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){
@@ -230,10 +231,10 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function show(next='main'){
   if(!open)previousFocus=document.activeElement;
   if(next==='campaign-map'){const current=status(),done=current.completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;if(['easy','normal','hard'].includes(current.config?.difficulty))difficulty=current.config.difficulty;}
-  open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
+  clearConfirmations();open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
  }
- function back(){if(!open)return false;if(busy)return true;if(captureAction){captureAction=null;render(false);notice('Key change cancelled.');return true;}if(view==='pause')action(onResume);else if(view==='campaign-map')changeView('missions');else if(view!=='main')changeView(returnView);else if(status().active)changeView('pause');else return false;return true;}
- function hide(){captureAction=null;open=false;overlay.style.display='none';overlay.classList.remove('menu-overlay');if(previousFocus?.isConnected)previousFocus.focus?.({preventScroll:true});onClose();}
+ function back(){if(!open)return false;if(busy)return true;if(captureAction){captureAction=null;render(false);notice('Key change cancelled.');return true;}if(backupPreview||confirmTrainingReset){clearConfirmations();render(false);notice('Cancelled.');return true;}if(view==='pause')action(onResume);else if(view==='campaign-map')changeView('missions');else if(view!=='main')changeView(returnView);else if(status().active)changeView('pause');else return false;return true;}
+ function hide(){clearConfirmations();captureAction=null;open=false;overlay.style.display='none';overlay.classList.remove('menu-overlay');if(previousFocus?.isConnected)previousFocus.focus?.({preventScroll:true});onClose();}
  overlay.addEventListener('keydown',event=>{
   if(!open)return;
   if(event.code==='Escape'){event.preventDefault();event.stopImmediatePropagation();back();return;}

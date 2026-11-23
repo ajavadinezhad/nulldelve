@@ -11,3 +11,30 @@ test('exploration art remains hidden until discovery and removes claimed cash wi
 test('event art does not expose atmosphere through fog or animate under reduced effects',()=>{const THREE=require('../vendor/three.module.js'),{createExplorationArt}=require('../src/exploration-art.js'),scene=new THREE.Scene(),event=EXPLORATION_EVENTS[0];let revealed=false;const art=createExplorationArt(scene,{operation:'hospital',visible:()=>revealed,reducedEffects:()=>true}),effect=art.root.getObjectByName(event.id);art.update([{...event,progress:.1}]);assert.equal(effect.visible,false);revealed=true;art.update([{...event,progress:.1}]);assert.equal(effect.visible,true);const first=effect.children.map(m=>m.position.clone());art.update([{...event,progress:.8}]);effect.children.forEach((m,i)=>assert.deepEqual(m.position,first[i]));art.update([]);assert.equal(effect.visible,false);art.dispose();});
 
 test('secret cash uses the persistent economy ledger and survives checkpoint replay without paying twice',()=>{const {createEconomy}=require('../src/economy.js'),{cashReward,normalizeRewardLedger}=require('../src/mission-salvage.js'),economy=createEconomy(),id=EXPLORATION_CACHES[0].id,before=economy.serialize();assert.equal(cashReward(id).amount,18);assert.equal(economy.claimReward(id).amount,18);assert.equal(economy.claimReward(id).alreadyClaimed,true);assert.equal(normalizeRewardLedger(economy.state.claimedRewards)[id],true);const saved=economy.serialize(),restored=createEconomy(saved);assert.equal(restored.claimReward(id).alreadyClaimed,true);assert.equal(restored.state.credits,before.credits+18);});
+
+test('all recess approaches remain traversable with the player radius and authored collision props',()=>{
+ const THREE=require('../vendor/three.module.js');
+ for(const [operation,carveName,propsName]of [['hospital','carveHospital','addHospitalProps'],['freight','carveFreight','addFreightProps'],['signal','carveSignal','addSignalProps']]){
+  const layout=require('../src/'+operation+'-layout.js'),map=Array.from({length:69},()=>Array(251).fill(1)),cover=[],scene=new THREE.Scene();
+  layout[carveName]((x,z,w,h)=>{for(let zz=z;zz<z+h;zz++)for(let xx=x;xx<x+w;xx++)map[zz][xx]=0;});
+  layout[propsName](scene,null,cover);
+  const site=EXPLORATION_ALCOVES.find(s=>s.operation===operation),radius=.32;
+  // Match the runtime's rounded tile corners and expanded prop rectangles.
+  const blocked=(x,z)=>[-radius,radius].some(dx=>[-radius,radius].some(dz=>map[Math.round(z+dz)]?.[Math.round(x+dx)]!==0))||cover.some(c=>Math.abs(x-c.x)<c.w/2+radius&&Math.abs(z-c.z)<c.h/2+radius);
+  for(let z=site.cache.z;z<=7;z+=.05)assert.equal(blocked(site.cache.x,z),false,operation+' approach at '+z);
+  assert.equal(nearbyExplorationCache(site.cache,{operation,visible:()=>true})?.operation,operation);
+  scene.traverse(object=>{object.geometry?.dispose();for(const material of Array.isArray(object.material)?object.material:[object.material])material?.dispose();});
+ }
+});
+
+test('switching operations hides old scenery and events while revealing only the current discovered recess',()=>{
+ const THREE=require('../vendor/three.module.js'),{createExplorationArt}=require('../src/exploration-art.js'),scene=new THREE.Scene();let operation='hospital';
+ const art=createExplorationArt(scene,{operation:()=>operation,visible:()=>true}),event=EXPLORATION_EVENTS[0];
+ art.update([{...event,progress:.2}]);assert.equal(art.root.getObjectByName(event.id).visible,true);
+ operation='freight';art.update([{...event,progress:.3}]);
+ assert.equal(art.root.getObjectByName(event.id).visible,false);
+ assert.equal(art.root.getObjectByName(EXPLORATION_ALCOVES[0].id).visible,false);
+ assert.equal(art.root.getObjectByName(EXPLORATION_CACHES[0].id).visible,false);
+ assert.equal(art.root.getObjectByName(EXPLORATION_ALCOVES[1].id).visible,true);
+ art.dispose();
+});

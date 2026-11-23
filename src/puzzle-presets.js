@@ -1,5 +1,5 @@
-import {registerPuzzleController,registerPuzzleMetadata} from './puzzle-runtime.js?v=exploration-ui-r45c';
-export {createPuzzlePreset} from './puzzle-runtime.js?v=exploration-ui-r45c';
+import {registerPuzzleController,registerPuzzleMetadata} from './puzzle-runtime.js?v=progression-balance-r46';
+export {createPuzzlePreset} from './puzzle-runtime.js?v=progression-balance-r46';
 const entries=[
  ['pressure-plates','Cargo counterweights','Distribute physical crate mass across two door circuits.','weights','Use the crate markings; each plate measures total mass.','A crate can occupy only one plate. Combine smaller masses when needed.','Match both plate totals to the posted circuit ratings.','Split three marked crates between the two rated plates.'],
  ['glyph-cipher','Archive maintenance cipher','Decode a facility service code from ordered industrial markings.','sequence','The maintenance record gives an ordered set of symbols.','A wrong key clears the partial code. Read left to right.','Press the symbols in the service record order.','Enter the displayed service-record symbol order without a mismatch.'],

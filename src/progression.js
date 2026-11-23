@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=exploration-ui-r45c';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=exploration-ui-r45c';
-import {DIFFICULTY_RULES} from './difficulty.js?v=exploration-ui-r45c';
+import {OPERATION_ROUTES} from './operation-routes.js?v=progression-balance-r46';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=progression-balance-r46';
+import {DIFFICULTY_RULES} from './difficulty.js?v=progression-balance-r46';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -218,7 +218,9 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if(enemy){enemy.rewardIdentity=`kill.${zone.id}.${zone.rewardQueue[0]??zone.spawned}`;if(zone.id==='generator'&&enemy.variant==='runner'&&!zone.wave.some(e=>e.hp>0&&state.operationTasks.generatorDefense.saboteurIds.includes(e.id))){state.operationTasks.generatorDefense.saboteurIds.push(enemy.id);onToast('SABOTEUR APPROACHING · DEFEND THE RESTART CONSOLE');}zone.queue.shift();zone.rewardQueue.shift();zone.wave.push(enemy);zone.spawned++;zone.phaseRested=false;spawnedNow++;}
     }
     refreshCounts(zone);
-    zone.spawnTimer=spawnedNow>0?(difficulty().reinforcementInterval??3):.65;
+    // Later phases close the gaps slightly; retain the opening pace and full inter-phase respite.
+    const phase=zone.id==='security'?0:Math.min(2,Math.floor((zone.spawned-1)/phaseSize));
+    zone.spawnTimer=spawnedNow>0?(difficulty().reinforcementInterval??3)*[1,.9,.78][phase]:.65;
   }
   function launchWave(zone,player){
     if(zone.status!=='dormant')return;
@@ -243,6 +245,16 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if([hospitalTriage,hospitalWard,hospitalIsolation].includes(zone)){variant=i%4===1?'runner':'normal';if(i>zone.total*.4&&i%7===4)variant='leaper';if(zone!==hospitalTriage&&i>zone.total*.5&&i%9===6)variant='screecher';if(zone===hospitalIsolation&&i%10===8)variant='sentinel';}
       if([freightPumps,freightYard,freightCold].includes(zone)){variant=i%4===(remix?2:1)?'runner':'normal';if(i>zone.total*.4&&i%8===5)variant='leaper';if(zone!==freightPumps&&i%10===7)variant='screecher';if(zone===freightCold&&i===zone.total-12)variant='sentinel';}
       if([signalYard,signalRelay,signalUplink].includes(zone)){variant=i%4===1?'runner':'normal';if(i>zone.total*.35&&i%9===6)variant='brute';if(zone===signalYard&&i===Math.floor(zone.total*.7)||zone!==signalYard&&i>zone.total*.4&&i%10===7)variant='spitter';if(zone===signalRelay&&i===Math.floor(zone.total*.65)||zone===signalUplink&&[Math.floor(zone.total*.55),Math.floor(zone.total*.82)].includes(i))variant='mender';if(zone===signalUplink&&i>zone.total*.65&&i%17===12)variant='sentinel';}
+      // Annex entry rooms remain a breather after the Nest. Deeper rooms need
+      // durable targets and target-priority threats, rather than more fodder.
+      // Only replace ordinary bodies, preserving each mission's authored specials.
+      if(variant==='normal'&&i>zone.total*.4){
+        if([hospitalWard,freightYard,signalRelay].includes(zone)&&i%11===9)variant='brute';
+        if(zone===hospitalIsolation&&(i%3===2||i===Math.floor(zone.total*.58))||zone===freightCold&&i%6===2)variant='charger';
+        if(zone===signalUplink&&i%10===2)variant='sentinel';
+        if(zone===nest&&i%8===2)variant='screecher';
+        else if(zone===nest&&i%11===4)variant='leaper';
+      }
       if(definition.boss&&i===0)variant='boss';
       zone.queue.push(variant);zone.rewardQueue.push(i);
     }

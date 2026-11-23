@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import {soldier} from './character.js?v=exploration-ui-r45c';
-import {createRoach} from './roach.js?v=exploration-ui-r45c';
+import {soldier} from './character.js?v=progression-balance-r46';
+import {createRoach} from './roach.js?v=progression-balance-r46';
 
 const cache=new Map();
 let renderAttempted=false;

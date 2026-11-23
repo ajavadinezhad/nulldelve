@@ -1,4 +1,4 @@
-import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=exploration-ui-r45c';
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=progression-balance-r46';
 import * as THREE from '../vendor/three.module.js';
 /** Flooded freight annex appends geometry without moving any older room. */
 export const FREIGHT_ROOMS=Object.freeze([

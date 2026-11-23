@@ -1,10 +1,13 @@
-import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=exploration-ui-r45c';
-import {normalizeAttachments} from './weapon-attachments.js?v=exploration-ui-r45c';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=progression-balance-r46';
+import {normalizeAttachments} from './weapon-attachments.js?v=progression-balance-r46';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','lancet','orison','pistol'],UPGRADES=['damage','magazine','reload'];
 const MAGAZINE_STEPS={rifle:6,smg:6,shotgun:2,marksman:2,lmg:10,hush:3,scattergun:2,kestrel:4,mantis:1,jackal:1,vesper:4,lancet:2,orison:3,pistol:2};
 const COSTS={damage:[100,200,350],magazine:[80,160,280],reload:[80,160,280]};
+// A flat +1 is a larger gain for automatics and pellet weapons. Price that
+// improvement as an earned purchase while keeping the starting supply choices.
+const DAMAGE_COSTS={rifle:[180,300,450],smg:[180,300,450],lmg:[180,300,450],vesper:[180,300,450],orison:[180,300,450],shotgun:[200,325,475],scattergun:[200,325,475]};
 const REWARDS={normal:2,runner:3,brute:8,charger:10,sentinel:14,screecher:12,leaper:9,spitter:10,mender:12,boss:40};
 export const isEnemyRewardVariant=variant=>variant==='paid'||Object.prototype.hasOwnProperty.call(REWARDS,variant);
 const GUN_NAMES={rifle:'MK4',smg:'VX9',shotgun:'BREACH-12',marksman:'SABLE',lmg:'M60',hush:'HUSH-9',scattergun:'TWIN',kestrel:'KESTREL',mantis:'MANTIS',jackal:'JACKAL',vesper:'VESPER',lancet:'LANCET',orison:'ORISON',pistol:'P9'};
@@ -36,7 +39,7 @@ export function createEconomy(snapshot){
   function getOffers(){
     const offers=[];
     for(const gun of GUNS)for(const upgrade of UPGRADES){
-      const level=state.upgrades[gun][upgrade],maxed=level>=3,cost=maxed?0:COSTS[upgrade][level];
+      const level=state.upgrades[gun][upgrade],maxed=level>=3,cost=maxed?0:(upgrade==='damage'?(DAMAGE_COSTS[gun]??COSTS.damage):COSTS[upgrade])[level];
       const labels={damage:'Damage tuning',magazine:'Extended magazine',reload:'Quick reload kit'};
       const descriptions={damage:'+1 damage per shot for this weapon.',magazine:`+${MAGAZINE_STEPS[gun]} round${MAGAZINE_STEPS[gun]===1?'':'s'} per magazine for this weapon.`,reload:'Reload this weapon 0.18 seconds faster (minimum 0.5s).'};
       offers.push({id:`${gun}.${upgrade}`,kind:'upgrade',label:`${GUN_NAMES[gun]} ${labels[upgrade]}`,description:maxed?'Fully upgraded.':descriptions[upgrade],cost,owned:level,level,maxLevel:3,increment:upgrade==='magazine'?MAGAZINE_STEPS[gun]:upgrade==='damage'?1:-.18,available:!maxed&&state.credits>=cost});
