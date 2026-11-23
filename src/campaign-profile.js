@@ -1,9 +1,9 @@
-import {effectiveFieldStats} from './field-skills.js?v=paid-camera-r47';
-import {cashReward} from './mission-salvage.js?v=paid-camera-r47';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=paid-camera-r47';
-import {compatibleStorage} from './storage-compat.js?v=paid-camera-r47';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=paid-camera-r47';
-import {createEconomy,isEnemyRewardVariant} from './economy.js?v=paid-camera-r47';
+import {effectiveFieldStats} from './field-skills.js?v=puzzle-visuals-r51';
+import {cashReward} from './mission-salvage.js?v=puzzle-visuals-r51';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=puzzle-visuals-r51';
+import {compatibleStorage} from './storage-compat.js?v=puzzle-visuals-r51';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=puzzle-visuals-r51';
+import {createEconomy,isEnemyRewardVariant} from './economy.js?v=puzzle-visuals-r51';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';

@@ -1,0 +1,13 @@
+# Puzzle controls and required lift transfers — r49
+
+Hospital pressure controls and Signal motor feeders now open one shared adjustment dialog on Interact. Three current values are visible with sliders and44px plus/minus controls. Test uses the original progression interaction pipeline, including resource allotments, milestones and system locks. Wrong configurations remain in the dialog with rejected feedback; accepted configurations close it and start the existing cycle. Running pressure cycles cannot reopen a modal that would pause their completion. No target values or solution orders are supplied to the UI.
+
+Dialog opening clears held movement, fire, crate grab and grenade charge. Simulation pauses behind it. Escape/native Back closes it first; Tab stays within its controls. The header and Test footer stay visible while content scrolls internally in short landscape viewports. Locked/completed systems are read-only. Remote actors, wrong operations, invalid indices and invalid setting values are rejected by the controller.
+
+The two authored service lifts now have visible safety rails and a player walking barrier across the full corridor. Interact starts the transfer only after its access door is open and its existing power/progression requirements are satisfied. The safety rails disappear during that ride. Approach range includes both sides of the gate; normal movement cannot bypass it. Cancellation/relocking still returns to the starting position. Old checkpoints inside the newly blocked shaft recover to the closest landing, preserving health, cash and other player fields.
+
+Automated coverage includes actual main movement against both lift barriers, forward/reverse Interact transfers, blocked/locked routes, old checkpoint recovery, setting authorization and interlocks, initial unassigned feeders, invalid/valid pressure tests, and the actual main interaction wrapper. The traversal harness now treats each shaft as a blocked walking edge and explicitly uses a lift transfer;48 campaign and12 arena difficulty/Remix routes pass. Full suite:90 test files passed.
+
+Chrome checks exercised the actual dialog component against the real progression controller in an isolated fixture. Slider keyboard input and plus/minus controls updated current values; rejected and accepted tests behaved correctly. Dialogs were checked at320×740,393×740,667×320 and1440×900. Landscape keeps its close/Test controls visible and scrolls only its content. Actual Breach runtime loaded without console errors. The hospital/signal full missions were not manually played through. Temporary fixture removed. Dialog screenshot: /tmp/nulldelve-puzzle-controls-r49.jpg.
+
+Local changes only; not published yet.

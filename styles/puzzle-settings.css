@@ -1,0 +1,66 @@
+.puzzle-settings-overlay{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#080d15cf;overscroll-behavior:contain;box-sizing:border-box}
+.puzzle-settings-overlay[hidden]{display:none}
+.puzzle-settings-dialog{display:flex;flex-direction:column;box-sizing:border-box;width:min(460px,100%);max-height:calc(100dvh - 24px);margin:0;background:linear-gradient(145deg,#2c333a,#171d25 55%);border:1px solid #59636e;border-radius:10px;color:#edf0f4;font:14px system-ui,sans-serif;box-shadow:inset 0 1px #ffffff19,0 18px 70px #000b;overflow:hidden;pointer-events:auto}
+.puzzle-settings-dialog header{display:flex;flex:none;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid #080d1580;background:#11182088}
+.puzzle-settings-dialog h2{font-size:16px;font-weight:600;margin:0;line-height:1.25}
+.puzzle-settings-dialog button{min-width:44px;min-height:44px;border:1px solid #526174;border-radius:6px;background:#232e3d;color:#e8edf4;font:18px system-ui;touch-action:manipulation;cursor:pointer;box-sizing:border-box}
+.puzzle-settings-dialog button:disabled{opacity:.45;cursor:default}
+.puzzle-settings-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:18px 14px 16px;overflow:auto;overscroll-behavior:contain;min-height:0;background:repeating-linear-gradient(0deg,#ffffff02 0 1px,transparent 1px 3px)}
+.puzzle-lever-card{display:flex;flex-direction:column;align-items:center;min-width:0;padding:10px 2px 8px;border:1px solid #111820;border-radius:5px;background:linear-gradient(90deg,#171d24,#242c35 50%,#171d24);box-shadow:inset 0 1px #a7b4c01a,0 1px #ffffff0b}
+.puzzle-lever-label{display:flex;align-items:center;justify-content:center;height:30px;padding:0 2px;text-align:center;font:600 10px/1.25 system-ui,sans-serif;letter-spacing:.06em;color:#c4ccd4;overflow-wrap:anywhere}
+.puzzle-settings-dialog .puzzle-lever{position:relative;isolation:isolate;flex:none;width:100%;height:184px;padding:0;margin:0;border:0;border-radius:0;background:none;box-shadow:none;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;perspective:260px}
+.puzzle-settings-dialog .puzzle-lever.grabbing{cursor:grabbing}
+.puzzle-lever-gate{position:absolute;top:16px;bottom:34px;width:15px;left:calc(50% - 7.5px);border:1px solid #060a0e;border-radius:12px;background:linear-gradient(90deg,#06090d,#10161b 60%,#020407);box-shadow:inset 2px 0 4px #000,1px 0 #85919d44,-1px 0 #000}
+.puzzle-lever-notches{position:absolute;top:44px;bottom:79px;left:4px;width:15px;pointer-events:none}
+.puzzle-lever-mark{position:absolute;top:var(--notch-top);left:0;transform:translateY(-50%);font:10px/1 ui-monospace,monospace;color:#6f7c89}
+.puzzle-lever-mark::after{content:'';position:absolute;left:14px;top:4px;width:5px;height:1px;background:#6f7c8955}
+.puzzle-lever-mark.selected{color:#edbd72}
+.puzzle-lever-arm{position:absolute;z-index:2;bottom:28px;left:calc(50% - 4px);width:8px;height:118px;transform-origin:50% 100%;transform:rotateX(var(--lever-angle,66deg));transform-style:preserve-3d;background:linear-gradient(90deg,#404b57,#c4cbd0 40%,#929ea8 60%,#303b47);border:1px solid #101820;border-radius:4px;box-shadow:3px 4px 4px #0008;transition:transform .16s cubic-bezier(.2,.7,.3,1);pointer-events:auto}
+.puzzle-lever.grabbing .puzzle-lever-arm{transition:none}
+.puzzle-lever-grip{position:absolute;left:50%;top:-8px;transform:translateX(-50%) rotateX(calc(0deg - var(--lever-angle,66deg)));width:clamp(30px,9vw,48px);height:27px;border:1px solid #0b1015;border-radius:5px;background:repeating-linear-gradient(0deg,transparent 0 4px,#0005 4px 5px),linear-gradient(#555e67 0,#313b46 22%,#161d25 70%,#080d13 100%);box-shadow:inset 0 2px #b9c5cf55,inset 0 -2px #000a,0 5px 6px #0009}
+.puzzle-lever-grip::after{content:'';position:absolute;left:4px;right:4px;top:9px;height:5px;border-radius:1px;background:#d1a864;box-shadow:0 1px #0008}
+.puzzle-lever-mount{position:absolute;z-index:3;bottom:13px;left:calc(50% - 18px);width:36px;height:25px;border:1px solid #0a1016;border-radius:50%;background:radial-gradient(ellipse,#4b5662 0 15%,#1a222b 20% 45%,#53606b 50% 56%,#202a34 60%);box-shadow:0 3px 4px #0008,inset 0 1px #b1bcc533;pointer-events:none}
+.puzzle-lever.unassigned .puzzle-lever-grip::after{background:#6e7a86}
+.puzzle-lever-value{display:block;min-width:34px;padding:4px 6px;border:1px solid #424d59;border-radius:3px;background:#0c131a;box-shadow:inset 0 1px 4px #000a;text-align:center;font:600 17px/20px ui-monospace,monospace;color:#edbd72}
+.puzzle-settings-dialog footer{display:flex;flex:none;align-items:center;gap:12px;justify-content:space-between;padding:10px 14px;border-top:1px solid #080d15aa;background:#11182088}
+.puzzle-settings-status{font-size:12px;margin:0;color:#b8c3d2}
+.puzzle-settings-status[data-state=accepted]{color:#90d0b4}.puzzle-settings-status[data-state=rejected]{color:#ef9b88}
+.puzzle-settings-dialog .puzzle-settings-test{font-size:14px;font-weight:650;padding:8px 24px;color:#191b20;background:#edbd72;border-color:#edbd72}
+.puzzle-settings-dialog button:focus-visible{outline:2px solid #dbe9fc;outline-offset:2px}
+@media(max-height:400px){.puzzle-settings-dialog header,.puzzle-settings-dialog footer{padding:5px 12px}.puzzle-settings-controls{padding:8px 12px;gap:8px}.puzzle-lever-card{padding:4px 2px}.puzzle-lever-label{height:24px}.puzzle-settings-dialog .puzzle-lever{height:128px}.puzzle-lever-arm{height:64px;bottom:28px}.puzzle-lever-notches{top:36px;bottom:50px}.puzzle-lever-value{font-size:14px;line-height:16px;padding:2px 6px}}
+@media(prefers-reduced-motion:reduce){.puzzle-lever-arm{transition:none}}
+/* One equipment language across every control bank: metal, inset grip, small lamp. */
+.puzzle-settings-controls{grid-template-columns:repeat(var(--control-count,3),minmax(0,1fr))}
+.puzzle-settings-dialog footer{min-height:64px;box-sizing:border-box}
+.puzzle-settings-dialog [hidden]{display:none!important}
+.puzzle-hardware-card{display:flex;flex-direction:column;align-items:center;min-width:0;gap:10px;padding:12px 4px;border:1px solid #111820;border-radius:5px;background:linear-gradient(110deg,#1a2129,#2c3540 50%,#181f27);box-shadow:inset 0 1px #a7b4c01a,0 1px #ffffff0b}
+.puzzle-settings-dialog .puzzle-hardware-button{position:relative;display:grid;place-items:center;width:100%;max-width:142px;height:128px;margin:0;padding:8px 4px;border:0;background:none;box-shadow:none;isolation:isolate}
+.hardware-face{position:relative;display:grid;place-items:center;width:66px;height:66px;max-width:100%;border-radius:10px;background:linear-gradient(#404b57,#1d252f 14%,#10161d 80%,#070c12);border:2px solid #111820;box-shadow:inset 0 2px #a1adb846,0 5px 0 #080e15,0 9px 10px #0006;transition:transform .1s}
+.puzzle-hardware-button:active .hardware-face{transform:translateY(3px);box-shadow:inset 0 2px #a1adb821,0 2px 0 #080e15,0 3px 5px #0007}
+.hardware-symbol{position:relative;box-sizing:border-box;width:29px;height:29px;border:3px solid #b6c4d2;filter:drop-shadow(0 2px 1px #000)}
+.hardware-symbol[data-symbol=circle]{border-radius:50%}
+.hardware-symbol[data-symbol=triangle]{width:34px;height:30px;border:0;background:#b6c4d2;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.hardware-symbol[data-symbol=triangle]::after{content:'';position:absolute;inset:6px 5px 3px;background:#1b232d;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.hardware-status-lamp{position:absolute;bottom:10px;left:calc(50% - 4px);width:8px;height:8px;border:2px solid #111922;border-radius:50%;background:#596775;box-shadow:0 1px #b2bec626}
+.hardware-status-lamp.lit,.puzzle-hardware-button[data-feedback=accepted] .hardware-status-lamp{background:#91c8bf;box-shadow:0 0 6px #80c3af66}
+.puzzle-hardware-button[data-feedback=rejected] .hardware-status-lamp{background:#e78e7a;box-shadow:0 0 6px #e78e7a66}
+.hardware-breaker-channel{position:relative;width:26px;height:45px;border:3px solid #465362;border-radius:4px;background:#080e15;box-shadow:inset 0 0 5px #000}
+.hardware-breaker-handle{position:absolute;left:-5px;top:20px;width:30px;height:13px;border:1px solid #0b1016;border-radius:3px;background:linear-gradient(#c1c6c6,#647181 35%,#24303d 70%,#0f1721);box-shadow:0 4px 5px #0009;transition:top .15s}
+.puzzle-hardware-button.engaged .hardware-breaker-handle{top:4px}
+.puzzle-hardware-button[data-hardware=wheel] .hardware-face,.puzzle-hardware-button[data-hardware=junction] .hardware-face{border:0;background:none;box-shadow:none;width:88px;height:88px}
+.hardware-wheel{position:relative;box-sizing:border-box;width:82px;height:82px;border:8px solid #8897a5;border-radius:50%;box-shadow:inset 0 2px #152030,inset 0 -2px #d3d9dc77,0 4px 0 #2e3946,0 9px 10px #0008;background:#101822;transition:transform .18s}
+.hardware-wheel-spoke{position:absolute;bottom:50%;left:calc(50% - 4px);width:8px;height:31px;transform-origin:50% 100%;background:linear-gradient(90deg,#465362,#b5bfc7,#536170)}
+.hardware-wheel-hub{position:absolute;left:calc(50% - 10px);top:calc(50% - 10px);width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#a99c83 0 26%,#202936 29% 43%,#8894a1 46% 60%,#2b3744 64%);box-shadow:0 3px 4px #0008}
+.hardware-coupling{position:relative;width:88px;height:88px;box-sizing:border-box;border:6px solid #657588;border-radius:50%;background:radial-gradient(circle,#283541,#101821 72%);box-shadow:inset 0 1px #b3c0ca55,0 5px #1b2632,0 9px 11px #0007}
+.hardware-coupling-port{position:absolute;bottom:50%;left:calc(50% - 4px);width:8px;height:33px;background:#354352;transform-origin:50% 100%;border-radius:2px;opacity:.25}
+.hardware-coupling-port.connected{background:linear-gradient(90deg,#8c744c,#d4b77c,#8c744c);opacity:1}
+.puzzle-settings-controls[data-mode=actions] .puzzle-hardware-card:only-child{justify-self:center;width:min(180px,100%)}
+@media(max-width:350px){.hardware-face{width:54px;height:58px}.puzzle-hardware-card{padding:10px 2px}.puzzle-settings-controls{gap:7px}.hardware-wheel,.hardware-coupling{width:78px;height:78px}.hardware-coupling-port{height:28px}}
+@media(max-height:400px){.puzzle-settings-dialog .puzzle-hardware-button{height:104px}.puzzle-hardware-card{padding:6px 2px;gap:2px}.puzzle-settings-dialog footer{min-height:55px}}
+@media(prefers-reduced-motion:reduce){.hardware-wheel,.hardware-breaker-handle,.hardware-face{transition:none}}
+.puzzle-settings-dialog[data-mode=actions] footer{min-height:44px;padding:8px 14px}
+.puzzle-settings-status{display:flex;align-items:center;gap:7px;min-height:14px}
+.puzzle-settings-status::before{content:'';display:block;flex:none;width:6px;height:6px;border:2px solid #101820;border-radius:50%;background:#677787;box-shadow:0 1px #ffffff15}
+.puzzle-settings-status[data-state=accepted]::before{background:#90d0b4}.puzzle-settings-status[data-state=rejected]::before{background:#ef9b88}
+.puzzle-hardware-card[data-hardware=key] .puzzle-lever-label{display:none}
+.puzzle-settings-dialog .puzzle-hardware-card[data-hardware=key] .puzzle-hardware-button{height:112px}

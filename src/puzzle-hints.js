@@ -1,4 +1,4 @@
-import {ARTIFACTS} from './progression.js?v=paid-camera-r47';
+import {ARTIFACTS} from './progression.js?v=puzzle-visuals-r51';
 /** Player-requested hints reveal one layer at a time, only for the nearby puzzle. */
 const PUZZLES=[
  {id:'freight-drain',title:'Freight flood control',bounds:[154,171,23,37],unsolved:c=>c.state.operationId==='freight'&&!c.state.operationTasks?.freightDrain},

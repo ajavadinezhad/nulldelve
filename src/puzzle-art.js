@@ -4,13 +4,13 @@ import * as THREE from '../vendor/three.module.js';
 export function createPuzzleArt(scene, box, crates, plates, door) {
   const root=new THREE.Group();root.name='pressure-plate-puzzle';scene.add(root);
   const dark=new THREE.MeshStandardMaterial({color:0x29313d,roughness:.8,metalness:.3});
-  const yellow=new THREE.MeshStandardMaterial({color:0xe1ba52,roughness:.65,metalness:.2});
+  const yellow=new THREE.MeshStandardMaterial({color:0xc5a573,roughness:.65,metalness:.2});
   const bodyMaterial=new THREE.MeshStandardMaterial({color:0x778493,roughness:.75,metalness:.3});
   const cube=new THREE.BoxGeometry(1,1,1);
   function part(parent,x,y,z,w,h,d,material){
     const mesh=new THREE.Mesh(cube,material);mesh.position.set(x,y,z);mesh.scale.set(w,h,d);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
   }
-  function stencil(text,w,h,color='#e3d5a1'){
+  function stencil(text,w,h,color='#d7c29e'){
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=128;
     const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.textAlign='center';ctx.font='bold 42px monospace';ctx.fillText(text,128,60);
 

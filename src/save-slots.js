@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=paid-camera-r47';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=paid-camera-r47';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=paid-camera-r47';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=paid-camera-r47';
-import {validateSnapshot} from './snapshot-validation.js?v=paid-camera-r47';
-import {normalizeSettings} from './controls.js?v=paid-camera-r47';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=puzzle-visuals-r51';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=puzzle-visuals-r51';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=puzzle-visuals-r51';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=puzzle-visuals-r51';
+import {validateSnapshot} from './snapshot-validation.js?v=puzzle-visuals-r51';
+import {normalizeSettings} from './controls.js?v=puzzle-visuals-r51';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

@@ -76,7 +76,7 @@ export function referencePuzzleHint(preset={},level=1){
 }
 async function startWorkshop(){
  if(new URLSearchParams(location.search).has('embedded'))document.body.classList.add('embedded-journal');
- const $=id=>document.getElementById(id),{PUZZLE_PRESETS:allPresets}=await import('./puzzle-presets.js?v=paid-camera-r47'),{createPuzzleDiscovery}=await import('./puzzle-discovery.js?v=paid-camera-r47');
+ const $=id=>document.getElementById(id),{PUZZLE_PRESETS:allPresets}=await import('./puzzle-presets.js?v=puzzle-visuals-r51'),{createPuzzleDiscovery}=await import('./puzzle-discovery.js?v=puzzle-visuals-r51');
  const discovered=new Set(createPuzzleDiscovery().list()),presets=allPresets.filter(p=>discovered.has(p.id));
  for(const id of ['setup-form','solution-details','puzzle-controls','puzzle-readouts','puzzle-state','puzzle-feedback','reset-puzzle','export-setup']){const element=$(id);if(element)element.hidden=true;}
  if(!presets.length){$('catalog-count').textContent='Field notes';$('filter-count').textContent='';$('puzzle-title').textContent='No systems recorded';$('puzzle-objective').textContent='Discover systems while exploring.';document.body.classList.add('empty-journal');return;}

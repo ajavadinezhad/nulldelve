@@ -1,4 +1,4 @@
-import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=paid-camera-r47';
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=puzzle-visuals-r51';
 import * as THREE from '../vendor/three.module.js';
 /** Communications annex keeps every earlier coordinate and door index stable. */
 export const SIGNAL_ROOMS=Object.freeze([

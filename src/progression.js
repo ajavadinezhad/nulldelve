@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=paid-camera-r47';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=paid-camera-r47';
-import {DIFFICULTY_RULES} from './difficulty.js?v=paid-camera-r47';
+import {OPERATION_ROUTES} from './operation-routes.js?v=puzzle-visuals-r51';
+import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=puzzle-visuals-r51';
+import {DIFFICULTY_RULES} from './difficulty.js?v=puzzle-visuals-r51';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -156,6 +156,34 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   const taskOperation={...Object.fromEntries(SIGNAL_TASKS.map(task=>[task,'signal'])),...Object.fromEntries(FREIGHT_TASKS.map(task=>[task,'freight'])),...Object.fromEntries(HOSPITAL_TASKS.map(task=>[task,'hospital'])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,route.operation])),commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
   const nearestClue=()=>null;
   function nearestDevice(player){return devices.filter(d=>!(d.kind==='log'&&d.active)&&(d.kind!=='task'||!state.operationId||taskOperation[d.task]===state.operationId)&&distance(d,player)<=1.7).sort((a,b)=>Number(a.kind==='wire'&&state.circuit.solved)-Number(b.kind==='wire'&&state.circuit.solved)||distance(a,player)-distance(b,player))[0];}
+  const settingGroups={pressure:{title:'Theatre pressure',tasks:['hospitalValveA','hospitalValveB','hospitalValveC'],test:'hospitalSterile',operation:'hospital',max:2},feeders:{title:'Motor distribution',tasks:['signalMotorA','signalMotorB','signalMotorC'],test:'signalLoad',operation:'signal',max:1},tracks:{title:'Rail control',tasks:['freightSwitchA','freightSwitchB'],test:'freightDispatch',operation:'freight',max:1}};
+  function settingsPanel(player){
+    const d=nearestDevice(player);if(!d)return null;
+    if(['glyph','power','valve','wire'].includes(d.kind)){
+      const key={glyph:'archive',power:'power',valve:'valves'}[d.kind],kind={glyph:'glyphs',power:'routing',valve:'valves',wire:'junction'}[d.kind],system=key?state[key]:state.circuit;
+      const group=d.kind==='wire'?[d]:devices.filter(v=>v.kind===d.kind),complete=!!system.solved;
+      const names={glyph:'Archive access',power:'Reactor switchgear',valve:'Containment manifold',wire:'Cable junction'};
+      return {kind,id:d.kind==='wire'?d.id:kind,title:names[d.kind],mode:'actions',complete,locked:complete,controls:group.map((v,i)=>({id:v.id,label:v.kind==='glyph'?v.label:v.kind==='wire'?'Rotate coupling':v.kind==='valve'?['West valve','East valve'][i]:['West breaker','North breaker','East breaker'][i],style:v.kind==='glyph'?'key':v.kind==='power'?'breaker':v.kind==='valve'?'wheel':'junction',symbol:v.glyph,active:v.active,ports:v.kind==='wire'?junctionPorts(state.circuit,v.index):null}))};
+    }
+    const entry=Object.entries(settingGroups).find(([,g])=>(g.tasks.includes(d.task)||g.test===d.task)&&(!state.operationId||state.operationId===g.operation));if(!entry)return null;
+    const [kind,g]=entry,t=state.operationTasks,complete=kind==='pressure'?t.hospitalSterile:kind==='tracks'?t.freightDispatch:t.signalLoad,running=kind==='pressure'?t.hospitalAirlock.running:kind==='tracks'&&t.freightRoute.running;
+    const locked=complete||running||(kind==='pressure'?!t.hospitalAuth:kind==='tracks'?(!t.freightDrain||freightYard.status!=='cleared'):signalYard.status!=='cleared');
+    const values=kind==='pressure'?t.hospitalAirlock.settings:kind==='tracks'?t.freightRoute.switches:t.signalLoadout.feeders;
+    return {kind,title:g.title,locked,complete:!!complete,running:!!running,controls:g.tasks.map((task,i)=>({id:task,label:devices.find(d=>d.task===task).label,value:values[i],min:0,max:g.max,options:kind==='feeders'?['A','B']:kind==='tracks'?['│','╱']:null,optionLabels:kind==='tracks'?['Straight','Divert']:null}))};
+  }
+  function adjustSetting(player,kind,index,value){
+    const panel=settingsPanel(player),g=settingGroups[kind];if(!g||!panel||panel.kind!==kind||panel.locked||!Number.isInteger(index)||index<0||index>=g.tasks.length||!Number.isInteger(value)||value<0||value>g.max)return {ok:false};
+    const current=panel.controls[index].value,steps=current<0?value+1:(value-current+g.max+1)%(g.max+1),device=devices.find(d=>d.task===g.tasks[index]);
+    for(let n=0;n<steps;n++)interact(device);
+    return {ok:settingsPanel(player).controls[index].value===value};
+  }
+  function settingsTestTarget(player){const panel=settingsPanel(player);return panel&&!panel.locked&&settingGroups[panel.kind]?devices.find(d=>d.task===settingGroups[panel.kind].test):null;}
+  function panelAction(player,kind,index,perform=interact){
+    const panel=settingsPanel(player);if(!panel||panel.kind!==kind||panel.mode!=='actions'||panel.locked||!Number.isInteger(index)||!panel.controls[index])return {ok:false};
+    const device=devices.find(d=>d.id===panel.controls[index].id),key={glyphs:'archive',routing:'power',valves:'valves'}[kind],before=key?state[key].input.length:0;
+    perform(device);const after=settingsPanel(player);if(!after)return {ok:false};
+    return {ok:true,accepted:kind==='junction'?null:(after.complete||state[key].input.length>before),complete:after.complete};
+  }
   function getPrompt(player){
     const d=nearestDevice(player);if(!d)return null;
     const t=state.operationTasks;
@@ -559,5 +587,5 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   function getSabotageTarget(enemy){const defense=state.operationTasks.generatorDefense;return living(enemy)&&(enemy.spawnDelay??0)<=0&&defense.started&&!defense.completed&&!defense.jammed&&defense.saboteurIds.includes(enemy.id)?{x:35,z:56,hp:100,angle:0}:null;}
   function sabotage(enemy){const defense=state.operationTasks.generatorDefense;if(!getSabotageTarget(enemy)||distance(enemy,{x:35,z:56})>1.8)return false;defense.jammed=true;onToast('RESTART JAMMED · REPAIR THE CONSOLE');return true;}
   recomputeLocks();
-  return {getSabotageTarget,sabotage,state,interact,getPrompt,refreshLocks:recomputeLocks,getDoorLead:index=>{recomputeLocks();return doors[index]?.hintTarget?{...doors[index].hintTarget}:null;},update,serializeState,restoreState,startMission,isMissionComplete:()=>state.mission==='siege'?state.evacuation.completed:state.mission==='nest'?nest.status==='cleared':false,canCollectIntel:()=>nest.status==='cleared'};
+  return {settingsPanel,adjustSetting,settingsTestTarget,panelAction,getSabotageTarget,sabotage,state,interact,getPrompt,refreshLocks:recomputeLocks,getDoorLead:index=>{recomputeLocks();return doors[index]?.hintTarget?{...doors[index].hintTarget}:null;},update,serializeState,restoreState,startMission,isMissionComplete:()=>state.mission==='siege'?state.evacuation.completed:state.mission==='nest'?nest.status==='cleared':false,canCollectIntel:()=>nest.status==='cleared'};
 }
