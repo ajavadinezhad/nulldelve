@@ -1,3 +1,4 @@
+import {puzzleAccessVisible} from './puzzle-access.js';
 import {createWireCircuitArt} from './wire-circuit-art.js?v=puzzle-visuals-r51';
 import * as THREE from '../vendor/three.module.js';
 
@@ -19,7 +20,7 @@ export function createProgressionArt(scene, box, state) {
   }
   function plane(texture,w,h,x,y,z,materialOptions={}){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false,...materialOptions}));m.rotation.x=-Math.PI/2;m.position.set(x,y,z);root.add(m);return m;}
   const circuitArt=createWireCircuitArt(scene,state);
-  const devices=state.devices.filter(device=>device.kind!=='wire').map((device,index)=>{
+  const devices=state.devices.filter(device=>device.kind!=='wire'&&puzzleAccessVisible(device)).map((device,index)=>{
     const g=new THREE.Group();g.name='interface-'+device.id;g.position.set(device.x,0,device.z);root.add(g);
     if(device.kind==='artifact'){
       part(g,0,.09,0,.75,.18,.75,materials.dark);part(g,0,.26,0,.48,.22,.48,materials.steel);
@@ -33,7 +34,7 @@ export function createProgressionArt(scene, box, state) {
     else{part(g,0,.055,0,.67,.11,.67,materials.dark);part(g,0,.34,.08,.34,.5,.28,materials.steel);part(g,0,.63,0,.69,.12,.62,materials.trim);}
     const display=canvasTexture(128,128),ctx=display.ctx;
     ctx.fillStyle=isGlyph?'#101722':device.task?.startsWith('hospital')?'#162733':'#182330';ctx.fillRect(0,0,128,128);
-    if(isGlyph){ctx.strokeStyle='#657083';ctx.lineWidth=3;for(const [x,y,dx,dy]of [[7,7,1,1],[121,7,-1,1],[7,121,1,-1],[121,121,-1,-1]]){ctx.beginPath();ctx.moveTo(x+dx*15,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*15);ctx.stroke();}glyph(ctx,device.glyph||device.id.replace('glyph-',''),64,64,88,'#f2f4f8');}
+    if(isGlyph){ctx.strokeStyle='#657083';ctx.lineWidth=3;for(const [x,y,dx,dy]of [[7,7,1,1],[121,7,-1,1],[7,121,1,-1],[121,121,-1,-1]]){ctx.beginPath();ctx.moveTo(x+dx*15,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*15);ctx.stroke();}ctx.strokeStyle='#f2f4f8';ctx.lineWidth=4;ctx.strokeRect(25,26,78,76);for(const x of [39,64,89])ctx.strokeRect(x-7,57,14,20);}
     else if(device.kind==='log'){ctx.strokeStyle='#bfd0df';ctx.lineWidth=4;ctx.strokeRect(33,22,62,70);for(let y=38;y<85;y+=13){ctx.beginPath();ctx.moveTo(43,y);ctx.lineTo(85,y);ctx.stroke();}}
     else if(device.kind==='power'){ctx.strokeStyle='#e5c477';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(73,20);ctx.lineTo(43,65);ctx.lineTo(65,65);ctx.lineTo(55,94);ctx.lineTo(88,48);ctx.lineTo(66,48);ctx.closePath();ctx.stroke();}
     else if(device.kind==='task'){

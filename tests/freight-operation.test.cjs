@@ -20,7 +20,7 @@ test('Freight resumes cargo and lockdown checkpoints in fresh sessions across al
   use(s,'freight-dispatch');s.p.update(s.player,2.5);
   const moving=s.p.serializeState();s=setup(remix,difficulty);
   assert.equal(s.p.restoreState(moving,new Map()),true);
-  Object.assign(s.player,{x:180,z:29});assert.equal(s.p.getPrompt(s.player),'CARGO TRANSFER · TRACKS INTERLOCKED');
+  Object.assign(s.player,{x:189,z:29});assert.equal(s.p.getPrompt(s.player),'CARGO TRANSFER · TRACKS INTERLOCKED');
   s.p.update(s.player,moving.operationTasks.freightRoute.remaining);
   assert.equal(s.doors[31].progressLocked,false);
   assert.equal(s.p.getPrompt(s.player),'CARGO ROUTE SEALED');

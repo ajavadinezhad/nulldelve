@@ -1,3 +1,4 @@
+import {puzzleAccessVisible,puzzleAccessPoint} from './puzzle-access.js';
 import {OPERATION_ROUTES} from './operation-routes.js?v=puzzle-visuals-r51';
 import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=puzzle-visuals-r51';
 import {DIFFICULTY_RULES} from './difficulty.js?v=puzzle-visuals-r51';
@@ -155,7 +156,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   }
   const taskOperation={...Object.fromEntries(SIGNAL_TASKS.map(task=>[task,'signal'])),...Object.fromEntries(FREIGHT_TASKS.map(task=>[task,'freight'])),...Object.fromEntries(HOSPITAL_TASKS.map(task=>[task,'hospital'])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,route.operation])),commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
   const nearestClue=()=>null;
-  function nearestDevice(player){return devices.filter(d=>!(d.kind==='log'&&d.active)&&(d.kind!=='task'||!state.operationId||taskOperation[d.task]===state.operationId)&&distance(d,player)<=1.7).sort((a,b)=>Number(a.kind==='wire'&&state.circuit.solved)-Number(b.kind==='wire'&&state.circuit.solved)||distance(a,player)-distance(b,player))[0];}
+  function nearestDevice(player,includeHidden=false){return devices.filter(d=>(includeHidden||devices.includes(player)||puzzleAccessVisible(d))&&!(d.kind==='log'&&d.active)&&(d.kind!=='task'||!state.operationId||taskOperation[d.task]===state.operationId)&&distance(d,player)<=1.7).sort((a,b)=>Number(a.kind==='wire'&&state.circuit.solved)-Number(b.kind==='wire'&&state.circuit.solved)||distance(a,player)-distance(b,player))[0];}
   const settingGroups={pressure:{title:'Theatre pressure',tasks:['hospitalValveA','hospitalValveB','hospitalValveC'],test:'hospitalSterile',operation:'hospital',max:2},feeders:{title:'Motor distribution',tasks:['signalMotorA','signalMotorB','signalMotorC'],test:'signalLoad',operation:'signal',max:1},tracks:{title:'Rail control',tasks:['freightSwitchA','freightSwitchB'],test:'freightDispatch',operation:'freight',max:1}};
   function settingsPanel(player){
     const d=nearestDevice(player);if(!d)return null;
@@ -187,6 +188,9 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   function getPrompt(player){
     const d=nearestDevice(player);if(!d)return null;
     const t=state.operationTasks;
+    if(d.task==='freightDispatch')return t.freightRoute.delivered?'CARGO ROUTE SEALED':t.freightRoute.running?'CARGO TRANSFER · TRACKS INTERLOCKED':'E · RAIL CONTROL';
+    if(d.task==='hospitalSterile')return t.hospitalSterile?'PRESSURE SETTINGS SEALED':t.hospitalAirlock.running?'PRESSURE CYCLE · CONTROLS INTERLOCKED':'E · THEATRE PRESSURE';
+    if(d.task==='signalLoad')return t.signalLoad?'FEEDER SETTINGS SEALED':'E · MOTOR DISTRIBUTION';
     if(['hospitalValveA','hospitalValveB','hospitalValveC'].includes(d.task)){
       if(t.hospitalSterile)return 'PRESSURE SETTINGS SEALED';
       if(t.hospitalAirlock.running)return 'PRESSURE CYCLE · CONTROLS INTERLOCKED';
@@ -201,7 +205,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       const choice=t.signalLoadout.feeders[['signalMotorA','signalMotorB','signalMotorC'].indexOf(d.task)];
       return t.signalLoad?'FEEDER SETTINGS SEALED':`E · ${d.label} · ${choice<0?'DISCONNECTED':choice===0?'FEEDER A':'FEEDER B'}`;
     }
-    return `E · ${d.label}${d.active?' · COMPLETE':''}`;
+    return `E · ${{glyph:'ARCHIVE CONSOLE',power:'REACTOR SWITCHGEAR',valve:'CONTAINMENT MANIFOLD'}[d.kind]??d.label}${d.active?' · COMPLETE':''}`;
   }
   function chooseSpawn(player,primary,alternatives){
     const candidates=[primary,...alternatives];
@@ -284,8 +288,8 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     const console=devices.find(d=>d.task==='commandRepair');console.active=true;console.progress=1;
     onToast('CROSS-ROOM CABLE CONNECTED · BIO LAB DOOR POWERED');hint('Follow the yellow cable through Extraction and Command to the east Bio Lab doorway.');return true;
   }
-  function interact(player){
-    const d=nearestDevice(player),clue=nearestClue(player);
+  function interact(player,worldOnly=false){
+    const d=nearestDevice(player,!worldOnly),clue=nearestClue(player);
     if(clue&&(!d||distance(clue,player)<distance(d,player))){onToast(clueText(clue.id));return true;}
     if(!d)return false;
     if(d.kind==='wire'){
@@ -587,5 +591,5 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   function getSabotageTarget(enemy){const defense=state.operationTasks.generatorDefense;return living(enemy)&&(enemy.spawnDelay??0)<=0&&defense.started&&!defense.completed&&!defense.jammed&&defense.saboteurIds.includes(enemy.id)?{x:35,z:56,hp:100,angle:0}:null;}
   function sabotage(enemy){const defense=state.operationTasks.generatorDefense;if(!getSabotageTarget(enemy)||distance(enemy,{x:35,z:56})>1.8)return false;defense.jammed=true;onToast('RESTART JAMMED · REPAIR THE CONSOLE');return true;}
   recomputeLocks();
-  return {settingsPanel,adjustSetting,settingsTestTarget,panelAction,getSabotageTarget,sabotage,state,interact,getPrompt,refreshLocks:recomputeLocks,getDoorLead:index=>{recomputeLocks();return doors[index]?.hintTarget?{...doors[index].hintTarget}:null;},update,serializeState,restoreState,startMission,isMissionComplete:()=>state.mission==='siege'?state.evacuation.completed:state.mission==='nest'?nest.status==='cleared':false,canCollectIntel:()=>nest.status==='cleared'};
+  return {panelLocation:step=>{const d=devices.find(d=>d.id===step.id||d.task===step.id),point=puzzleAccessPoint(d,devices);return point?{...step,x:point.x,z:point.z}:step;},settingsPanel,adjustSetting,settingsTestTarget,panelAction,getSabotageTarget,sabotage,state,interact,getPrompt,refreshLocks:recomputeLocks,getDoorLead:index=>{recomputeLocks();return doors[index]?.hintTarget?{...doors[index].hintTarget}:null;},update,serializeState,restoreState,startMission,isMissionComplete:()=>state.mission==='siege'?state.evacuation.completed:state.mission==='nest'?nest.status==='cleared':false,canCollectIntel:()=>nest.status==='cleared'};
 }
