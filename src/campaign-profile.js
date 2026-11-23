@@ -1,9 +1,9 @@
-import {effectiveFieldStats} from './field-skills.js?v=passages-r44';
-import {cashReward} from './mission-salvage.js?v=passages-r44';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=passages-r44';
-import {compatibleStorage} from './storage-compat.js?v=passages-r44';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=passages-r44';
-import {createEconomy} from './economy.js?v=passages-r44';
+import {effectiveFieldStats} from './field-skills.js?v=exploration-ui-r45c';
+import {cashReward} from './mission-salvage.js?v=exploration-ui-r45c';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=exploration-ui-r45c';
+import {compatibleStorage} from './storage-compat.js?v=exploration-ui-r45c';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=exploration-ui-r45c';
+import {createEconomy,isEnemyRewardVariant} from './economy.js?v=exploration-ui-r45c';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';
@@ -137,11 +137,11 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   });return rewardQueue;
  }
  function queueEnemyReward(id,variant){
-  if(typeof id!=='string'||!/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(id)||!['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(variant))return Promise.resolve({ok:false,message:'Unknown enemy reward.'});
+  if(typeof id!=='string'||!/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(id)||!isEnemyRewardVariant(variant))return Promise.resolve({ok:false,message:'Unknown enemy reward.'});
   const key=PENDING_PREFIX+id;
   // Preserve the original payout value through retries, changed mutation mixes
   // and legacy migration; a later duplicate must not replace the earned amount.
-  try{const queued=pendingRewards.get(key)??JSON.parse(journalStorage?.getItem(key)||'null');if(queued?.id===id&&['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(queued.variant))variant=queued.variant;}catch{}
+  try{const queued=pendingRewards.get(key)??JSON.parse(journalStorage?.getItem(key)||'null');if(queued?.id===id&&isEnemyRewardVariant(queued.variant))variant=queued.variant;}catch{}
   return queueReward(key,{id,variant},'enemy.'+id+'.'+variant);
  }
  function claimCashReward(id){
@@ -149,7 +149,7 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
   return queueReward(CASH_PENDING_PREFIX+id,{id},'reward.'+id);
  }
  function recoverRewards(){
-  try{for(let i=0;i<(journalStorage?.length??0);i++){const key=journalStorage.key(i);if(!key?.startsWith(PENDING_PREFIX)&&!key?.startsWith(CASH_PENDING_PREFIX))continue;try{const entry=JSON.parse(journalStorage.getItem(key));if(entry&&typeof entry.id==='string'&&(key===CASH_PENDING_PREFIX+entry.id&&cashReward(entry.id)||key===PENDING_PREFIX+entry.id&&/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(entry.id)&&['normal','runner','brute','charger','sentinel','screecher','leaper','boss','paid'].includes(entry.variant)))pendingRewards.set(key,entry);}catch{}}}catch{}
+  try{for(let i=0;i<(journalStorage?.length??0);i++){const key=journalStorage.key(i);if(!key?.startsWith(PENDING_PREFIX)&&!key?.startsWith(CASH_PENDING_PREFIX))continue;try{const entry=JSON.parse(journalStorage.getItem(key));if(entry&&typeof entry.id==='string'&&(key===CASH_PENDING_PREFIX+entry.id&&cashReward(entry.id)||key===PENDING_PREFIX+entry.id&&/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(entry.id)&&isEnemyRewardVariant(entry.variant)))pendingRewards.set(key,entry);}catch{}}}catch{}
   for(const [key,entry] of [...pendingRewards]){if(key.startsWith(CASH_PENDING_PREFIX))claimCashReward(entry.id);else queueEnemyReward(entry.id,entry.variant);}
   return rewardQueue;
  }

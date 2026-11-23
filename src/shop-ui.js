@@ -1,6 +1,6 @@
-import {weaponThumbnail} from './weapon-preview.js?v=passages-r44';
-import {createItemIcon} from './item-icons.js?v=passages-r44';
-import {formatKey} from './controls.js?v=passages-r44';
+import {weaponThumbnail} from './weapon-preview.js?v=exploration-ui-r45c';
+import {createItemIcon} from './item-icons.js?v=exploration-ui-r45c';
+import {formatKey} from './controls.js?v=exploration-ui-r45c';
 const SVG_NS='http://www.w3.org/2000/svg';
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 const integer=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;

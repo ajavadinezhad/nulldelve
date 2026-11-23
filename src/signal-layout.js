@@ -1,3 +1,4 @@
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=exploration-ui-r45c';
 import * as THREE from '../vendor/three.module.js';
 /** Communications annex keeps every earlier coordinate and door index stable. */
 export const SIGNAL_ROOMS=Object.freeze([
@@ -6,9 +7,10 @@ export const SIGNAL_ROOMS=Object.freeze([
  {x:228,z:23,w:18,h:15,name:'ANTENNA HALL'},
  {x:228,z:4,w:18,h:14,name:'TRANSMISSION CORE'},
  {x:228,z:43,w:18,h:20,name:'SERVICE EXIT'},
+ ...EXPLORATION_ROOMS.filter(room=>room.operation==='signal'),
 ].map(Object.freeze));
 export const SIGNAL_DOORS=Object.freeze([{x:200,z:52,axis:'z'},{x:212,z:40,axis:'x'},{x:224,z:30,axis:'z'},{x:236,z:20,axis:'x'},{x:236,z:40,axis:'x'},{x:224,z:52,axis:'z'}].map(Object.freeze));
-export function carveSignal(carve){SIGNAL_ROOMS.forEach(r=>carve(r.x,r.z,r.w,r.h));for(const c of [[195,51,10,3],[211,37,3,7],[221,29,8,3],[235,17,3,7],[235,37,3,7],[221,51,8,3]])carve(...c);}
+export function carveSignal(carve){SIGNAL_ROOMS.forEach(r=>carve(r.x,r.z,r.w,r.h));for(const c of [[195,51,10,3],[211,37,3,7],[221,29,8,3],[235,17,3,7],[235,37,3,7],[221,51,8,3]])carve(...c);carveExploration(carve,'signal');}
 export function addSignalProps(scene,box,cover){
  const root=new THREE.Group();root.name='signal-communications-equipment';scene.add(root);const batches=new Map(),steel=0x556579,amber=0xc99d58,ceramic=0xabb0bb;
  const part=(x,y,z,w,h,d,color)=>{if(!batches.has(color))batches.set(color,[]);batches.get(color).push({x,y,z,w,h,d});};

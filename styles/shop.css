@@ -120,3 +120,15 @@
  .game-menu .weapon-ownership{margin-top:0;text-align:left}
  .game-menu .supply-row .shop-buy{min-width:68px}
 }
+
+/* Context return is at the start of compact skill details, before the effect
+   text and action, rather than stranded below a long description. */
+@media(max-width:1100px){
+ .game-menu .skill-detail{display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:12px;row-gap:8px;align-items:center}
+ .game-menu .skill-detail>img,.game-menu .skill-detail>svg{grid-column:1;grid-row:2;float:none;width:28px;height:28px;margin:0}
+ .game-menu .skill-detail>h3{grid-column:2;grid-row:2;margin:0;font-size:17px;min-width:0;overflow-wrap:anywhere}
+ .game-menu .skill-detail>p,.game-menu .skill-detail>span,.game-menu .skill-detail>small,.game-menu .skill-detail>.skill-activate{grid-column:1/-1;min-width:0}
+ .game-menu .skill-detail>.skill-tree-return{grid-column:1/-1;grid-row:1;justify-self:start;display:flex;align-items:center;min-height:44px;padding:8px 12px;border:1px solid #4c5b70;border-radius:7px;background:#202a37;color:#dce5f0;line-height:1.2;touch-action:manipulation}
+ .game-menu .skill-detail>.skill-tree-return:focus-visible{outline:2px solid #d9e6f6;outline-offset:2px}
+ .game-menu .skill-detail>.skill-activate{margin:2px 0 6px}
+}

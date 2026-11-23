@@ -1,11 +1,12 @@
-import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=passages-r44';
-import {normalizeAttachments} from './weapon-attachments.js?v=passages-r44';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=exploration-ui-r45c';
+import {normalizeAttachments} from './weapon-attachments.js?v=exploration-ui-r45c';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','lancet','orison','pistol'],UPGRADES=['damage','magazine','reload'];
 const MAGAZINE_STEPS={rifle:6,smg:6,shotgun:2,marksman:2,lmg:10,hush:3,scattergun:2,kestrel:4,mantis:1,jackal:1,vesper:4,lancet:2,orison:3,pistol:2};
 const COSTS={damage:[100,200,350],magazine:[80,160,280],reload:[80,160,280]};
-const REWARDS={normal:2,runner:3,brute:8,charger:10,sentinel:14,screecher:12,leaper:9,boss:40};
+const REWARDS={normal:2,runner:3,brute:8,charger:10,sentinel:14,screecher:12,leaper:9,spitter:10,mender:12,boss:40};
+export const isEnemyRewardVariant=variant=>variant==='paid'||Object.prototype.hasOwnProperty.call(REWARDS,variant);
 const GUN_NAMES={rifle:'MK4',smg:'VX9',shotgun:'BREACH-12',marksman:'SABLE',lmg:'M60',hush:'HUSH-9',scattergun:'TWIN',kestrel:'KESTREL',mantis:'MANTIS',jackal:'JACKAL',vesper:'VESPER',lancet:'LANCET',orison:'ORISON',pistol:'P9'};
 const ITEM_LIMIT=5,CREDIT_LIMIT=999999999;
 const clamp=(value,min,max,fallback=0)=>typeof value==='number'&&Number.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
@@ -66,7 +67,7 @@ export function createEconomy(snapshot){
   }
   function migrateEnemyRewards(ids=[]){if(state.enemyRewardsVersion===1)return {ok:false,alreadyClaimed:true,message:'Enemy rewards already migrated.'};for(const id of ids)if(validEnemyRewardId(id))state.claimedRewards[id]=true;state.enemyRewardsVersion=1;return {ok:true,amount:0,message:'Existing cash preserved.'};}
   function claimEnemyReward(id,variant){
-    if(!validEnemyRewardId(id)||variant!=='paid'&&!Object.prototype.hasOwnProperty.call(REWARDS,variant))return {ok:false,message:'Unknown enemy reward.'};
+    if(!validEnemyRewardId(id)||!isEnemyRewardVariant(variant))return {ok:false,message:'Unknown enemy reward.'};
     if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,amount:0,message:'Enemy reward already paid.'};
     state.claimedRewards[id]=true;const amount=variant==='paid'?0:rewardKill(variant);return {ok:true,amount,message:`+$${amount}`};
   }

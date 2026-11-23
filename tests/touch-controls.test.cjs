@@ -40,8 +40,8 @@ test('rotating the viewport releases actual captured sticks and held Interact',(
   fireButton.emit('pointerdown',{pointerId:6});assert.equal(controls.getState().firing,true);
   win.emit('resize');
   assert.deepEqual(controls.getState().move,{x:0,z:0});assert.equal(controls.getState().firing,false);assert.equal(controls.getState().interactHeld,false);
-  assert.deepEqual(events,['interact','interactEnd']);
-  actions.children[0].emit('pointerup',{pointerId:3});assert.equal(events.length,2);
+  assert.deepEqual(events,['interact','fire','fire','interactEnd']);
+  actions.children[0].emit('pointerup',{pointerId:3});assert.equal(events.length,4);
   controls.dispose();assert.equal(win.listeners.resize.length,0);
  }finally{globalThis.addEventListener=previousAdd;globalThis.removeEventListener=previousRemove;}
 });
@@ -57,3 +57,36 @@ test('phone movement sets facing, independent aim overrides it, and idle keeps l
  assert.equal(touchAimDirection(input.getState()),null);input.begin('move',1,.6,.6);const moving=touchAimDirection(input.getState());assert.ok(Math.abs(moving.x-Math.SQRT1_2)<1e-8);assert.ok(Math.abs(moving.z-Math.SQRT1_2)<1e-8);
  input.begin('aim',2,-1,0);assert.deepEqual(touchAimDirection(input.getState()),{x:-1,z:0});input.end('aim',2);assert.deepEqual(touchAimDirection(input.getState()),moving);input.end('move',1);assert.equal(touchAimDirection(input.getState()),null);assert.equal(touchAimDirection(null),null);assert.equal(touchAimDirection({move:{x:NaN,z:0}}),null);assert.equal(input.getState().firing,false);
 });
+
+function withTouchHarness(run){
+ const {createTouchControls}=require('../src/touch-controls.js');
+ class Node{
+  constructor(){this.listeners={};this.children=[];this.style={};this.dataset={};this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name),remove:(...names)=>names.forEach(name=>this.classes.delete(name))};}
+  addEventListener(type,fn){(this.listeners[type]??=[]).push(fn);}removeEventListener(type,fn){this.listeners[type]=(this.listeners[type]??[]).filter(f=>f!==fn);}
+  emit(type,event={}){for(const fn of this.listeners[type]??[])fn({preventDefault(){},button:0,...event});}
+  setAttribute(){}setPointerCapture(){}replaceChildren(){this.children=[];}append(...nodes){for(const node of nodes){node.parentElement=this;this.children.push(node);}}
+  getBoundingClientRect(){return {left:0,top:0,width:96,height:96};}
+ }
+ const win=new Node(),doc=new Node();doc.body=new Node();doc.createElement=doc.createElementNS=()=>new Node();const host=new Node();host.ownerDocument=doc;
+ const previousAdd=globalThis.addEventListener,previousRemove=globalThis.removeEventListener,events=[];let running=true;
+ globalThis.addEventListener=win.addEventListener.bind(win);globalThis.removeEventListener=win.removeEventListener.bind(win);
+ const controls=createTouchControls({host,isRunning:()=>running,onAction:action=>events.push(action),device:()=>({coarse:true})});
+ try{run({controls,host,doc,win,events,setRunning:value=>{running=value;}});}finally{controls.dispose();globalThis.addEventListener=previousAdd;globalThis.removeEventListener=previousRemove;}
+}
+test('a brief Fire tap shoots once without needing a simulation sample or duplicating its click',()=>withTouchHarness(({controls,host,events})=>{
+ const fire=host.children.find(n=>n.dataset.action==='fire');fire.emit('pointerdown',{pointerId:7});assert.deepEqual(events,['fire']);assert.equal(controls.getState().firing,true);
+ fire.emit('pointerup',{pointerId:7});fire.emit('click',{detail:1});assert.equal(controls.getState().firing,false);assert.deepEqual(events,['fire']);
+ fire.emit('click',{detail:0});assert.deepEqual(events,['fire','fire'],'keyboard activation remains a single explicit shot');
+}));
+test('disabled or stopped phone controls cannot start firing and disposal clears side/size classes',()=>withTouchHarness(({controls,host,doc,events,setRunning})=>{
+ const fire=host.children.find(n=>n.dataset.action==='fire');controls.configure('on',{handedness:'left',size:'large'});assert.equal(doc.body.classes.has('touch-left-handed'),true);assert.equal(doc.body.classes.has('touch-large-controls'),true);
+ fire.emit('pointerdown',{pointerId:1});assert.equal(controls.getState().firing,true);controls.configure('off');assert.equal(controls.getState().firing,false);fire.emit('pointerdown',{pointerId:2});fire.emit('click',{detail:0});assert.deepEqual(events,['fire']);
+ controls.configure('on',{handedness:'left',size:'large'});setRunning(false);fire.emit('pointerdown',{pointerId:3});fire.emit('click',{detail:0});assert.equal(controls.getState().firing,false);assert.deepEqual(events,['fire']);
+ controls.dispose();assert.equal(doc.body.classes.has('touch-controls-enabled'),false);assert.equal(doc.body.classes.has('touch-left-handed'),false);assert.equal(doc.body.classes.has('touch-large-controls'),false);
+}));
+
+test('a pointer ending outside controls releases its owner without stopping another finger',()=>withTouchHarness(({controls,host,win})=>{
+ const move=host.children.find(n=>n.dataset.stick==='move'),fire=host.children.find(n=>n.dataset.action==='fire');
+ move.emit('pointerdown',{pointerId:1,clientX:90,clientY:48});fire.emit('pointerdown',{pointerId:2});assert.equal(controls.getState().firing,true);
+ win.emit('pointerup',{pointerId:2});assert.equal(controls.getState().firing,false);assert.ok(controls.getState().move.x>0);win.emit('pointercancel',{pointerId:1});assert.deepEqual(controls.getState().move,{x:0,z:0});
+}));

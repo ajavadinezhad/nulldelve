@@ -1,3 +1,4 @@
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=exploration-ui-r45c';
 import * as THREE from '../vendor/three.module.js';
 /** The clinical annex keeps old facility coordinates and door indices stable. */
 export const HOSPITAL_ROOMS=Object.freeze([
@@ -8,6 +9,7 @@ export const HOSPITAL_ROOMS=Object.freeze([
  {x:128,z:23,w:18,h:15,name:'HOSPITAL SURGERY'},
  {x:128,z:43,w:18,h:20,name:'HOSPITAL ISOLATION'},
  {x:109,z:65,w:36,h:3,name:'AMBULANCE SERVICE GALLERY'},
+ ...EXPLORATION_ROOMS.filter(room=>room.operation==='hospital'),
 ].map(Object.freeze));
 export const HOSPITAL_DOORS=Object.freeze([
  {x:100,z:52,axis:'z'}, {x:112,z:40,axis:'x'},
@@ -15,7 +17,7 @@ export const HOSPITAL_DOORS=Object.freeze([
  {x:136,z:20,axis:'x'}, {x:136,z:40,axis:'x'},
  {x:124,z:52,axis:'z'}, {x:124,z:30,axis:'z'},
 ].map(Object.freeze));
-export function carveHospital(carve){HOSPITAL_ROOMS.forEach(r=>carve(r.x,r.z,r.w,r.h));for(const corridor of [[109,62,3,5],[96,51,9,3],[111,17,3,7],[111,37,3,7],[121,9,8,3],[135,17,3,7],[135,37,3,7],[121,51,8,3],[121,29,8,3]])carve(...corridor);}
+export function carveHospital(carve){HOSPITAL_ROOMS.forEach(r=>carve(r.x,r.z,r.w,r.h));for(const corridor of [[109,62,3,5],[96,51,9,3],[111,17,3,7],[111,37,3,7],[121,9,8,3],[135,17,3,7],[135,37,3,7],[121,51,8,3],[121,29,8,3]])carve(...corridor);carveExploration(carve,'hospital');}
 /** Beds, carts, theatre lights and clinical counters are readable from above. */
 export function addHospitalProps(scene,box,cover){
  const root=new THREE.Group();root.name='hospital-clinical-equipment';scene.add(root);

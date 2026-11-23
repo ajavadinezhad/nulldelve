@@ -184,3 +184,6 @@
 .touch-controls-enabled.touch-left-handed .touch-stick-move{right:auto;left:max(10px,env(safe-area-inset-left))}
 .touch-controls-enabled.touch-left-handed .touch-fire{left:auto;right:max(10px,env(safe-area-inset-right))}
 .touch-controls-enabled.touch-large-controls .touch-fire{width:96px;height:96px;bottom:max(20px,env(safe-area-inset-bottom))}
+/* Large thumb targets need the compact two-row utility cluster in portrait. */
+.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(2,44px)}
+@media(min-width:600px){.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(4,44px)}}

@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {weapon} from './weapons.js?v=passages-r44';
+import {weapon} from './weapons.js?v=exploration-ui-r45c';
 
 // All art is generated locally: no external models or texture downloads.
 export function buildArt(scene, box, cover, rooms) {

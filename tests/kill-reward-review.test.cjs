@@ -68,3 +68,13 @@ test('malformed recovery records cannot block backup flushing or award cash',asy
  for(const [key,entry]of [['nulldelve.cash-reward.pending.contract.unknown',{id:'contract.unknown'}],['nulldelve.enemy-reward.pending.kill.security.1',{id:'kill.security.1',variant:'unknown'}],['nulldelve.enemy-reward.pending.kill.bad.-1',{id:'kill.bad.-1',variant:'boss'}]])store.setItem(key,JSON.stringify(entry));
  await profile.recoverRewards();const saved=await profile.flushRewards();assert.equal(saved.economy.credits,150);assert.deepEqual(saved.economy.claimedRewards,{});
 });
+
+test('every authored mutation earns one durable, modest payout and checkpoint replay cannot farm it',async()=>{
+ const {ROACH_VARIANTS}=require('../src/roach.js'),{isEnemyRewardVariant}=require('../src/economy.js');
+ const store=storage(),economy=createEconomy(),profile=createCampaignProfile({storage:store,economy,locks:null});profile.persist();const checkpoint=economy.serialize();let expected=150;
+ for(const [i,variant]of Object.keys(ROACH_VARIANTS).entries()){assert.equal(isEnemyRewardVariant(variant),true,variant);const id='kill.signal-yard.'+i,result=await profile.queueEnemyReward(id,variant);assert.equal(result.ok,true,variant);assert.ok(result.amount>=2&&result.amount<=40,variant);expected+=result.amount;assert.equal(JSON.parse(store.getItem(CAMPAIGN_PROFILE_KEY)).economy.claimedRewards[id],true);}
+ assert.equal(economy.state.credits,expected);profile.restoreCheckpointEconomy(checkpoint);assert.equal(economy.state.credits,expected);for(const [i,variant]of Object.keys(ROACH_VARIANTS).entries())assert.equal((await profile.queueEnemyReward('kill.signal-yard.'+i,variant)).alreadyClaimed,true);assert.equal(economy.state.credits,expected);
+});
+test('new mutation reward journals survive interruption and are recovered exactly once',async()=>{
+ for(const [variant,amount]of [['spitter',10],['mender',12]]){const store=storage(),profile=createCampaignProfile({storage:store,locks:null});profile.persist();const id='kill.signal-uplink.7';store.setItem(pending+id,JSON.stringify({id,variant}));const recovered=createCampaignProfile({storage:store,locks:null});await recovered.recoverRewards();assert.equal(recovered.serialize().economy.credits,150+amount);assert.equal(store.getItem(pending+id),null);await recovered.recoverRewards();assert.equal((await recovered.queueEnemyReward(id,'paid')).alreadyClaimed,true);assert.equal(recovered.serialize().economy.credits,150+amount);}
+});

@@ -1,8 +1,9 @@
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=passages-r44';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=passages-r44';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=passages-r44';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=passages-r44';
-import {createProgression} from './progression.js?v=passages-r44';
+import {EXPLORATION_EVENTS} from './exploration.js?v=exploration-ui-r45c';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=exploration-ui-r45c';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=exploration-ui-r45c';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=exploration-ui-r45c';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=exploration-ui-r45c';
+import {createProgression} from './progression.js?v=exploration-ui-r45c';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','spitter','mender','boss']);
@@ -19,6 +20,7 @@ export function validateSnapshot(data,{width,height,doorCount,crateCount=2,plate
   if(data.config.remix!==undefined&&typeof data.config.remix!=='boolean')return false;
   if(!validateBarrelSnapshot(data.barrels,barrelIds))return false;
   if(data.doorHints!==undefined&&(!Array.isArray(data.doorHints)||data.doorHints.length>200||!data.doorHints.every(id=>typeof id==='string'&&id.length<500)))return false;
+  if(data.exploration!==undefined){const e=data.exploration;if(!object(e)||e.version!==1||!Array.isArray(e.seen)||e.seen.length>EXPLORATION_EVENTS.length||new Set(e.seen).size!==e.seen.length||!e.seen.every(id=>EXPLORATION_EVENTS.some(event=>event.id===id)))return false;}
   if(data.fireZones!==undefined){const f=data.fireZones;if(!object(f)||f.version!==1||!finite(f.phase,0,.6)||!Number.isInteger(f.nextId)||f.nextId<1||!Array.isArray(f.zones)||f.zones.length>100||new Set(f.zones.map(z=>z?.id)).size!==f.zones.length||!f.zones.every(z=>object(z)&&Number.isInteger(z.id)&&z.id>0&&z.id<f.nextId&&finite(z.x,0,width)&&finite(z.z,0,height)&&finite(z.remaining,0,5.5)&&(z.radius===undefined||finite(z.radius,2.6,3.25))))return false;}
   if(data.config.operation!=null&&!normalizeCampaignOperation(data.config.operation))return false;
   if(data.profileRevision!==undefined&&(!Number.isSafeInteger(data.profileRevision)||data.profileRevision<0))return false;

@@ -1,3 +1,4 @@
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=exploration-ui-r45c';
 import * as THREE from '../vendor/three.module.js';
 /** Flooded freight annex appends geometry without moving any older room. */
 export const FREIGHT_ROOMS=Object.freeze([
@@ -6,12 +7,13 @@ export const FREIGHT_ROOMS=Object.freeze([
  {x:178,z:23,w:18,h:15,name:'LOADING YARD'},
  {x:178,z:4,w:18,h:14,name:'COLD CHAIN'},
  {x:178,z:43,w:18,h:20,name:'RAIL CONTROL'},
+ ...EXPLORATION_ROOMS.filter(room=>room.operation==='freight'),
 ].map(Object.freeze));
 export const FREIGHT_DOORS=Object.freeze([
  {x:148,z:52,axis:'z'},{x:162,z:40,axis:'x'},{x:174,z:30,axis:'z'},
  {x:186,z:40,axis:'x'},{x:174,z:52,axis:'z'},{x:186,z:20,axis:'x'},
 ].map(Object.freeze));
-export function carveFreight(carve){FREIGHT_ROOMS.forEach(r=>carve(r.x,r.z,r.w,r.h));for(const c of [[145,51,10,3],[161,37,3,7],[171,29,8,3],[185,37,3,7],[171,51,8,3],[185,17,3,7]])carve(...c);}
+export function carveFreight(carve){FREIGHT_ROOMS.forEach(r=>carve(r.x,r.z,r.w,r.h));for(const c of [[145,51,10,3],[161,37,3,7],[171,29,8,3],[185,37,3,7],[171,51,8,3],[185,17,3,7]])carve(...c);carveExploration(carve,'freight');}
 export function addFreightProps(scene,box,cover){
  const root=new THREE.Group();root.name='freight-annex-equipment';scene.add(root);const colors={steel:0x637480,rust:0x895b40,cargo:0x506779,yellow:0xc4a65d},batches=new Map();
  const part=(x,y,z,w,h,d,color)=>{if(!batches.has(color))batches.set(color,[]);batches.get(color).push({x,y,z,w,h,d});};

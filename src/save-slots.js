@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=passages-r44';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=passages-r44';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=passages-r44';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=passages-r44';
-import {validateSnapshot} from './snapshot-validation.js?v=passages-r44';
-import {normalizeSettings} from './controls.js?v=passages-r44';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=exploration-ui-r45c';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=exploration-ui-r45c';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=exploration-ui-r45c';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=exploration-ui-r45c';
+import {validateSnapshot} from './snapshot-validation.js?v=exploration-ui-r45c';
+import {normalizeSettings} from './controls.js?v=exploration-ui-r45c';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

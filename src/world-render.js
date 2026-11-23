@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {HOSPITAL_ROOMS} from './hospital-layout.js?v=passages-r44';
+import {HOSPITAL_ROOMS} from './hospital-layout.js?v=exploration-ui-r45c';
 /** Shared batches keep the facility and clinical wing cheap to draw. */
 export function buildWorld(scene,map,width,height){
  const floors=Array.from({length:9},()=>[]),walls=[[],[],[]],hospitalStart=Math.min(...HOSPITAL_ROOMS.map(room=>room.x))-1;

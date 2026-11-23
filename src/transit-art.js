@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {LIFT_LINKS,STAIR_PASSAGES} from './transit.js?v=passages-r44';
+import {LIFT_LINKS,STAIR_PASSAGES} from './transit.js?v=exploration-ui-r45c';
 /** Low geometry, clear walking lanes, and no collision changes. */
 export function buildTransitArt(scene){
  const root=new THREE.Group();root.name='facility-transit';scene.add(root);const geo=new THREE.BoxGeometry(1,1,1),materials=new Map(),batches=new Map();
