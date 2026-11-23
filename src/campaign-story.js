@@ -1,4 +1,4 @@
-import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=campaign-pacing-r53';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=critic-fixes-r54';
 
 const reports=Object.freeze({
  breach:{heading:'A way inside',body:'The access manifest points toward Command. The doors were locked from inside; this was more than an equipment failure.'},

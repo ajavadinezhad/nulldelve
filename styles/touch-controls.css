@@ -232,3 +232,5 @@
 .touch-controls-enabled #credits>img{flex:none}
 .touch-controls-enabled #cash-amount{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
+/* A small sight mark confirms facing stays fixed while the separate Fire is held. */
+.touch-fire.facing-locked::after{content:'⌖';position:absolute;right:7px;top:3px;font:15px/1 system-ui;color:#edf4ff;pointer-events:none}

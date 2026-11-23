@@ -5,6 +5,8 @@ export function applyEnemyStagger(enemy,duration){
   if((enemy.staggerImmunity??0)>0||(enemy.pulseWindup??0)>0)return false;
   enemy.staggerTime=Math.max(enemy.staggerTime??0,Math.min(.10,duration));enemy.staggerImmunity=1.1;return true;
  }
+ // An interrupted special gets its longest cooldown plus warning to act before another stun.
+ if(['charger','screecher','leaper','spitter','mender'].includes(enemy.variant)){if((enemy.staggerImmunity??0)>0)return false;enemy.staggerTime=Math.max(enemy.staggerTime??0,Math.min(.15,duration));enemy.staggerImmunity=8;return true;}
  enemy.staggerTime=Math.max(enemy.staggerTime??0,duration);return true;
 }
 export const CHARGER_RUSH={windup:.9,speed:10,duration:.62,cooldown:4.5,damage:18,hitRadius:.85};

@@ -1,9 +1,9 @@
-import {effectiveFieldStats} from './field-skills.js?v=campaign-pacing-r53';
-import {cashReward} from './mission-salvage.js?v=campaign-pacing-r53';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=campaign-pacing-r53';
-import {compatibleStorage} from './storage-compat.js?v=campaign-pacing-r53';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=campaign-pacing-r53';
-import {createEconomy,isEnemyRewardVariant} from './economy.js?v=campaign-pacing-r53';
+import {effectiveFieldStats} from './field-skills.js?v=critic-fixes-r54';
+import {cashReward} from './mission-salvage.js?v=critic-fixes-r54';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=critic-fixes-r54';
+import {compatibleStorage} from './storage-compat.js?v=critic-fixes-r54';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=critic-fixes-r54';
+import {createEconomy,isEnemyRewardVariant} from './economy.js?v=critic-fixes-r54';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';

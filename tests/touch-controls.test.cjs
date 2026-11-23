@@ -90,3 +90,14 @@ test('a pointer ending outside controls releases its owner without stopping anot
  move.emit('pointerdown',{pointerId:1,clientX:90,clientY:48});fire.emit('pointerdown',{pointerId:2});assert.equal(controls.getState().firing,true);
  win.emit('pointerup',{pointerId:2});assert.equal(controls.getState().firing,false);assert.ok(controls.getState().move.x>0);win.emit('pointercancel',{pointerId:1});assert.deepEqual(controls.getState().move,{x:0,z:0});
 }));
+
+
+test('holding Fire locks facing for retreat and strafe, releasing returns movement-facing immediately',()=>withTouchHarness(({controls,host,win})=>{
+ const move=host.children.find(n=>n.dataset.stick==='move'),fire=host.children.find(n=>n.dataset.action==='fire');
+ move.emit('pointerdown',{pointerId:1,clientX:90,clientY:48});fire.emit('pointerdown',{pointerId:2});
+ assert.equal(controls.getState().facingLocked,true);assert.deepEqual(controls.getState().aim,{x:1,z:0,active:true});
+ move.emit('pointermove',{pointerId:1,clientX:6,clientY:48});assert.ok(controls.getState().move.x<0);assert.deepEqual(controls.getState().aim,{x:1,z:0,active:true});
+ fire.emit('pointerup',{pointerId:999});assert.equal(controls.getState().facingLocked,true);
+ win.emit('pointerup',{pointerId:2});assert.equal(controls.getState().facingLocked,false);assert.equal(controls.getState().aim.active,false);assert.ok(controls.getState().move.x<0);
+ fire.emit('pointerdown',{pointerId:3});assert.deepEqual(controls.getState().aim,{x:-1,z:0,active:true});win.emit('blur');assert.equal(controls.getState().facingLocked,false);assert.equal(controls.getState().firing,false);
+}));

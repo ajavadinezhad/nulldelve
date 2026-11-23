@@ -64,3 +64,29 @@
 .puzzle-settings-status[data-state=accepted]::before{background:#90d0b4}.puzzle-settings-status[data-state=rejected]::before{background:#ef9b88}
 .puzzle-hardware-card[data-hardware=key] .puzzle-lever-label{display:none}
 .puzzle-settings-dialog .puzzle-hardware-card[data-hardware=key] .puzzle-hardware-button{height:112px}
+/* Keyed sockets and live instruments make the apparatus legible through its state. */
+.hardware-key-rotor{position:relative;display:grid;place-items:center;width:44px;height:44px;transition:transform .18s}
+.hardware-key-rotor::before{content:'';position:absolute;left:19px;top:-5px;width:6px;height:13px;background:#d1ac70;border:1px solid #101820;border-radius:2px}
+.hardware-key-socket{position:absolute;inset:-7px;border:2px solid #748492;border-radius:50%;pointer-events:none}
+.hardware-key-socket::before{content:'';position:absolute;left:calc(50% - 6px);top:-5px;width:12px;height:18px;background:#080e15;border:2px solid #748492;border-radius:3px}
+.hardware-live-reading{font:600 12px/18px ui-monospace,monospace;color:#c4d0dd;min-height:18px}
+.hardware-live-reading[data-direction=relief]::before{content:'↘ ';color:#a7cbd3}.hardware-live-reading[data-direction=feed]::before{content:'↗ ';color:#d5b984}
+.puzzle-instrument{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #42505e;border-radius:6px;background:#111922;min-width:0}
+.puzzle-instrument-gauge{position:relative;height:18px;flex:1;min-width:50px;border:1px solid #536271;border-radius:3px;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),#596572 10%);box-shadow:inset 0 2px 3px #0008}
+.puzzle-instrument-safe{position:absolute;top:0;bottom:0;background:#79b5ad77;border-inline:1px solid #9dcec4}
+.puzzle-instrument-needle{position:absolute;top:-4px;bottom:-4px;width:3px;background:#e4bf7d;transform:translateX(-50%);box-shadow:0 0 3px #000;transition:left .2s}
+.puzzle-instrument-reading{flex:none;min-width:52px;font:600 14px/20px ui-monospace,monospace;text-align:right;color:#e1e6ea}
+.puzzle-instrument-flow{flex:none;font:24px/24px system-ui;color:#677584}.puzzle-instrument-flow.flowing{color:#9dcec4}
+.puzzle-settings-controls:has(.puzzle-instrument:not([hidden])) .puzzle-hardware-card{gap:4px}
+@media(max-height:400px){.puzzle-instrument{padding:6px 8px;gap:8px}.hardware-live-reading{font-size:11px;line-height:14px;min-height:14px}}
+@media(prefers-reduced-motion:reduce){.hardware-key-rotor,.puzzle-instrument-needle{transition:none}}
+.puzzle-settings-controls[data-mode=actions]:has(>.puzzle-hardware-card:nth-child(2):last-child) .puzzle-hardware-card{justify-self:center;width:min(180px,100%)}
+@media(max-height:400px){
+ .puzzle-settings-dialog .puzzle-hardware-button,.puzzle-settings-dialog .puzzle-hardware-card[data-hardware=key] .puzzle-hardware-button{height:80px}
+ .puzzle-hardware-card .puzzle-lever-label{height:20px}
+ .puzzle-hardware-button[data-hardware=wheel] .hardware-face,.puzzle-hardware-button[data-hardware=junction] .hardware-face{width:66px;height:66px}
+ .hardware-wheel,.hardware-coupling{width:66px;height:66px;border-width:6px}
+ .hardware-wheel-spoke{height:24px}.hardware-coupling-port{height:23px}
+ .hardware-live-reading{line-height:14px;min-height:14px}
+}
+@media(max-height:400px){.puzzle-settings-controls[data-mode=actions]{padding-block:6px}}

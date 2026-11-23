@@ -1,4 +1,4 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=campaign-pacing-r53';
+import {DIFFICULTY_RULES} from './difficulty.js?v=critic-fixes-r54';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;
@@ -36,7 +36,7 @@ export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='n
  const supply=gun=>Math.max(0,Number(weapons?.[gun]?.reserve)||0)+Math.max(0,Number(held===gun?player?.ammo:weapons?.[gun]?.ammo)||0)+nearby.reduce((n,d)=>n+(d.kind==='ammo'?Math.max(0,Number(d[gun])||0):0),0);
  const primaryPellets=Math.max(1,Number(weapons?.rifle?.pellets)||1);
  const primaryLowThreshold=difficulty==='hard'?Math.max(primaryPellets>1?6:0,(weapons?.rifle?.baseDamage??1)>=8?6:0,Math.ceil(((weapons?.rifle?.baseDamage??1)>=2?60:primaryPellets>1?36:28)/(Math.max(1,Number(weapons?.rifle?.baseDamage)||1)*Math.min(3,primaryPellets)))):18;
- const lowAmmo=!!weapons&&supply('rifle')<primaryLowThreshold&&supply('pistol')<(difficulty==='hard'?14:8);
+ const lowAmmo=!!weapons&&supply('rifle')<primaryLowThreshold&&supply('pistol')<(difficulty==='hard'?24:8);
  const added=[];
  if(big||boss||state.kills%3===0||lowAmmo){
   const baseRifle=boss?12:big?6:lowAmmo?(difficulty==='hard'?3:2):3;
@@ -52,6 +52,12 @@ export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='n
    const baseHp=({brute:6,charger:8,sentinel:14,screecher:10,leaper:7,spitter:6,mender:8,boss:24})[enemy.variant]??2,hp=Math.max(1,Number(enemy.maxHp)||Math.ceil(baseHp*(DIFFICULTY_RULES[difficulty]?.hp??1))),gun=weapons?.rifle??{},pellets=Math.max(1,Number(gun.pellets)||1);
    rifle=Math.max(rifle,Math.min(pellets>1?6:16,primaryLowThreshold-supply('rifle'),Math.ceil(hp/(Math.max(1,Number(gun.baseDamage)||1)*Math.min(2,pellets))*1.25)));
    pistol=Math.max(pistol,Math.min(4,Math.ceil(hp/8)));
+  }
+  if(lowAmmo&&!big&&!boss&&Number.isFinite(enemy.maxHp)){
+   // A late worker can cost more than an early elite. Critical aid follows its
+   // real health budget, bounded by one small reserve and pending pickups.
+   const value=Math.max(1,Number(weapons?.rifle?.baseDamage)||1)*Math.min(3,primaryPellets);
+   rifle=Math.max(rifle,Math.min(12,primaryLowThreshold-supply('rifle'),Math.ceil(enemy.maxHp/value*1.25)));
   }
   added.push({id:allocatePickupId(state),kind:'ammo',x:enemy.x+.24,z:enemy.z+.12,rifle,pistol,amount:0});
  }

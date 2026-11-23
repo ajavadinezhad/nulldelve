@@ -6,18 +6,18 @@ test('campaign opposition escalates independently of equipment without changing 
  const zones=['security','command','lab','containment','nest','hospital-triage','freight-pumps','signal-yard'];
  for(const rules of Object.values(DIFFICULTY_RULES)){
   let last=0;
-  for(const id of zones){const stats=encounterStats(ROACH_VARIANTS.normal,rules,id);assert.ok(stats.hp>=last);last=stats.hp;assert.equal(stats.biteDamage,Math.round(ROACH_VARIANTS.normal.biteDamage*rules.damage));assert.equal(stats.windupDuration,rules.windupDuration);assert.ok(stats.speed<=ROACH_VARIANTS.normal.speed*1.12+.001);}
+  for(const id of zones){const stats=encounterStats(ROACH_VARIANTS.normal,rules,id,'normal');assert.ok(stats.hp>=last);last=stats.hp;assert.equal(stats.biteDamage,Math.round(ROACH_VARIANTS.normal.biteDamage*rules.damage));assert.equal(stats.windupDuration,rules.windupDuration);assert.ok(stats.speed<=ROACH_VARIANTS.normal.speed*1.12+.001);}
   assert.equal(rules.maxHp,100);
  }
  assert.equal(campaignThreat('unknown').hp,1);assert.equal(encounterStats(ROACH_VARIANTS.normal,DIFFICULTY_RULES.easy,'signal-yard').behavior,'direct');assert.equal(encounterStats(ROACH_VARIANTS.normal,DIFFICULTY_RULES.normal,'hospital-triage').behavior,'flank');
 });
 test('later baseline weapons need materially more shots; damage upgrades recover headroom',()=>{
- const base=ROACH_VARIANTS.normal,early=encounterStats(base,DIFFICULTY_RULES.normal,'security'),late=encounterStats(base,DIFFICULTY_RULES.normal,'hospital-ward');
- assert.equal(early.hp,2);assert.equal(late.hp,3);assert.equal(Math.ceil(late.hp/2),early.hp);
- const boss=encounterStats(ROACH_VARIANTS.boss,DIFFICULTY_RULES.normal,'hospital-isolation');assert.equal(boss.hp,36);assert.ok(Math.ceil(boss.hp/2)<boss.hp);
+ const base=ROACH_VARIANTS.normal,early=encounterStats(base,DIFFICULTY_RULES.normal,'security','normal'),late=encounterStats(base,DIFFICULTY_RULES.normal,'hospital-ward','normal');
+ assert.equal(early.hp,2);assert.equal(late.hp,4);assert.equal(Math.ceil(late.hp/2),early.hp);
+ const boss=encounterStats(ROACH_VARIANTS.boss,DIFFICULTY_RULES.normal,'hospital-isolation','boss');assert.equal(boss.hp,44);assert.ok(Math.ceil(boss.hp/2)<boss.hp);
 });
 test('main uses the same threat policy for spawning and restored movement without healing saves',()=>{
- const source=require('node:fs').readFileSync('src/main.js','utf8');assert.match(source,/stats=encounterStats\(baseStats,rules,encounter\)/);assert.match(source,/speed:encounterStats\(base,rules,saved.encounter\).speed/);assert.match(source,/\.\.\.base,\.\.\.saved,maxHp:saved.maxHp/);
+ const source=require('node:fs').readFileSync('src/main.js','utf8');assert.match(source,/stats=encounterStats\(baseStats,rules,encounter,variant\)/);assert.match(source,/speed:encounterStats\(base,rules,saved.encounter,saved.variant\).speed/);assert.match(source,/\.\.\.base,\.\.\.saved,maxHp:saved.maxHp/);
 });
 test('first facility deployments continue at the previous sector exit',()=>{
  const {deployCampaignOperation,campaignOperationExit}=require('../src/campaign-operations.js'),{createProgression}=require('../src/progression.js'),{createPressurePuzzle}=require('../src/pressure-puzzle.js');

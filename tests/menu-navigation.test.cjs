@@ -112,3 +112,9 @@ test('Back cancels training reset before leaving Armory and hiding clears pendin
  let options,resets=0;const h=harness(false,()=>{},false,current=>options=current.options,()=>({ok:true}),()=>{resets++;return {ok:true};});h.state.skillState={learned:['medic'],selected:'medic'};await h.click('Armory');options.onGroupChange('skills');await h.click('Reset training');
  h.menu.back();assert.equal(resets,0);assert.ok(!h.text().includes('Reset learned skills'));assert.ok(h.find('Reset training'));await h.click('Reset training');h.menu.hide();h.menu.show('armory');assert.ok(!h.text().includes('Reset learned skills'));assert.equal(resets,0);
 });
+
+
+test('deployment shows the actual equipped gun, upgrade pips, armor and specialization without requiring purchases',()=>{
+ const h=harness();h.state.fieldSkill='quickloader';h.state.armory={primary:'smg',shield:27,weapons:[{weaponId:'smg',label:'VX9 SMG'}],offers:[{id:'smg.damage',level:2},{id:'smg.magazine',level:1},{id:'smg.reload',level:0}]};h.menu.show('campaign-map');
+ const strip=h.overlay.querySelectorAll('section').find(node=>node.className==='deployment-loadout');assert.ok(strip);assert.match(h.text(),/VX9 SMG/);assert.match(h.text(),/Tactical Reload/);const upgrades=strip.querySelectorAll('span').filter(node=>node.className==='deployment-upgrade');assert.deepEqual(upgrades.map(node=>node.attrs['aria-label']),['Damage 2/3','Magazine 1/3','Reload 0/3']);assert.equal(strip.querySelectorAll('i').filter(node=>node.className==='filled').length,3);assert.equal(strip.querySelectorAll('button').length,0);assert.ok(h.find('Deploy'));assert.deepEqual(h.purchased(),[]);
+});

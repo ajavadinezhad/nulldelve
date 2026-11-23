@@ -1,4 +1,4 @@
-import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=campaign-pacing-r53';
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=critic-fixes-r54';
 import * as THREE from '../vendor/three.module.js';
 /** The clinical annex keeps old facility coordinates and door indices stable. */
 export const HOSPITAL_ROOMS=Object.freeze([

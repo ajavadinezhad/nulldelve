@@ -798,3 +798,19 @@
 .game-menu .backup-preview{display:grid;gap:8px;border-radius:9px}
 .game-menu .backup-confirm-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0}
 .game-menu .backup-confirm-actions>.menu-button{min-width:0;min-height:44px;padding:8px;font-size:12px;line-height:1.3;margin:0;white-space:normal}
+/* Deployment previews actual equipment without another navigation page. */
+.game-menu .deployment-loadout{display:grid;gap:8px;min-width:0;padding:10px 11px;border:1px solid var(--menu-border);border-radius:10px;background:#18212b;margin:10px 0}
+.game-menu .deployment-weapon{display:flex;align-items:center;gap:10px;min-width:0}
+.game-menu .deployment-weapon>.skill-icon{width:30px;height:30px;flex:none}
+.game-menu .deployment-weapon-copy{display:grid;gap:6px;min-width:0;flex:1}
+.game-menu .deployment-weapon-copy>strong{font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+.game-menu .deployment-upgrades{display:flex;flex-wrap:wrap;gap:8px 11px;min-width:0}
+.game-menu .deployment-upgrade{display:inline-flex;align-items:center;gap:3px;min-width:0}
+.game-menu .deployment-upgrade small{font:9px/1.2 monospace;color:#aab5c4;margin-right:2px}
+.game-menu .deployment-upgrade i{display:block;width:7px;height:4px;border-radius:1px;background:#485463}
+.game-menu .deployment-upgrade i.filled{background:#e6b66a}
+.game-menu .deployment-specialization{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;border-top:1px solid #354250;padding-top:7px;min-width:0}
+.game-menu .deployment-equipment{display:inline-flex;align-items:center;gap:6px;min-width:0;font-size:11px;color:#b9c6d6;overflow-wrap:anywhere}
+.game-menu .deployment-equipment>.skill-icon,.game-menu .deployment-equipment>img{width:20px;height:20px;flex:none}
+.game-menu .deployment-equipment>span{min-width:0;overflow-wrap:anywhere}
+@media(max-height:500px){.game-menu .deployment-loadout{padding:7px 9px;margin:7px 0;gap:5px}.game-menu .deployment-specialization{padding-top:5px}}

@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=campaign-pacing-r53';
+import {compatibleStorage} from './storage-compat.js?v=critic-fixes-r54';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
@@ -15,16 +15,16 @@ export const SKILL_BRANCHES=Object.freeze([
 ]);
 const milestones=['breach','command','research','containment','nest','hospital','freight','signal'];
 const advanced=[
- {id:'sealant',name:'Emergency Seal',description:'Medkits restore up to 65 health and repair 8 armor, capped at 60. Consumes a kit; no passive repair.',unlockAfter:'freight',requires:'surgeon',icon:'armor'},
- {id:'insulation',name:'Blast Insulation',description:'Take 25% less damage from your own explosions and ground fire. Retains 15% wider grenade effects; enemy attacks remain dangerous.',unlockAfter:'freight',requires:'ordnance',icon:'armor'},
+ {id:'sealant',name:'Emergency Seal',description:'Medkits restore up to 75 health and repair 8 armor, capped at 60. Consumes a kit; no passive repair.',unlockAfter:'freight',requires:'surgeon',icon:'armor'},
+ {id:'insulation',name:'Blast Insulation',description:'Take 25% less damage from your own explosions and ground fire. Retains 20% wider grenade effects; enemy attacks remain dangerous.',unlockAfter:'freight',requires:'ordnance',icon:'armor'},
  {id:'surgeon',name:'Trauma Specialist',description:'Medkits restore up to 75 health.',unlockAfter:'containment',requires:'medic',icon:'medkit'},
  {id:'pathfinder',name:'Pathfinder',description:'Sprint 15% faster. Crate movement stays unchanged.',unlockAfter:'nest',requires:'runner',icon:'move'},
  {id:'ordnance',name:'Ordnance Specialist',description:'Grenade effects and danger radius reach 20% farther.',unlockAfter:'hospital',requires:'demolition',icon:'grenade'},
- {id:'plating',name:'Reactive Plating',description:'Armor uses 20% less plating per hit. Retains Field Medic: medkits restore up to 65 health.',unlockAfter:'nest',requires:'surgeon',icon:'armor'},
+ {id:'plating',name:'Reactive Plating',description:'Armor uses 20% less plating per hit. Retains Trauma Specialist: medkits restore up to 75 health.',unlockAfter:'nest',requires:'surgeon',icon:'armor'},
  {id:'triage',name:'Emergency Triage',description:'Medkits restore up to 85 health. Still consumes one kit; no passive regeneration.',unlockAfter:'hospital',requires:'surgeon',icon:'healing'},
- {id:'quickloader',name:'Tactical Reload',description:'Reload 12% faster with either gun. Retains Rapid Response: sprint 10% faster.',unlockAfter:'hospital',requires:'pathfinder',icon:'reload'},
- {id:'closequarters',name:'Close Quarters',description:'Knife strikes deal 2 damage. Retains Rapid Response: sprint 10% faster.',unlockAfter:'hospital',requires:'pathfinder',icon:'melee'},
- {id:'steadythrow',name:'Quick Cast',description:'Reach full throwing range 20% sooner. Retains Demolition Harness: effects and danger radius reach 15% farther.',unlockAfter:'hospital',requires:'ordnance',icon:'charge'},
+ {id:'quickloader',name:'Tactical Reload',description:'Reload 12% faster with either gun. Retains Pathfinder: sprint 15% faster.',unlockAfter:'hospital',requires:'pathfinder',icon:'reload'},
+ {id:'closequarters',name:'Close Quarters',description:'Knife strikes deal 2 damage. Retains Pathfinder: sprint 15% faster.',unlockAfter:'hospital',requires:'pathfinder',icon:'melee'},
+ {id:'steadythrow',name:'Quick Cast',description:'Reach full throwing range 20% sooner. Retains Ordnance Specialist: effects and danger radius reach 20% farther.',unlockAfter:'hospital',requires:'ordnance',icon:'charge'},
  {id:'widearea',name:'Blast Control',description:'Grenade effects and danger radius reach 25% farther. Keep clear of your own blast.',unlockAfter:'hospital',requires:'ordnance',icon:'blast'},
 ];
 export const SKILL_NODES=Object.freeze([...FIELD_SKILLS.slice(1),...advanced.filter(node=>!['sealant','insulation'].includes(node.id)),...advanced.filter(node=>['sealant','insulation'].includes(node.id))].map(Object.freeze));
@@ -32,7 +32,7 @@ export function trainingPoints(state,completed=[]){return Math.max(0,milestones.
 export function skillLearnable(id,state,completed=[]){const node=SKILL_NODES.find(n=>n.id===id);return !!node&&fieldSkillUnlocked(id,completed)&&(!node.requires||state?.learned?.includes(node.requires))&&!state?.learned?.includes(id)&&trainingPoints(state,completed)>0;}
 
 const baseEffects=Object.freeze({medkitHealing:50,sprintMultiplier:1,grenadeRadiusMultiplier:1,reloadMultiplier:1,meleeDamage:1,armorDamageMultiplier:1,grenadeChargeMultiplier:1,medkitArmor:0,selfExplosionMultiplier:1});
-const effectOverrides={sealant:{medkitHealing:65,medkitArmor:8},insulation:{selfExplosionMultiplier:.75,grenadeRadiusMultiplier:1.15},none:{},medic:{medkitHealing:65},runner:{sprintMultiplier:1.1},demolition:{grenadeRadiusMultiplier:1.15},surgeon:{medkitHealing:75},pathfinder:{sprintMultiplier:1.15},ordnance:{grenadeRadiusMultiplier:1.2},plating:{armorDamageMultiplier:.8,medkitHealing:65},triage:{medkitHealing:85},quickloader:{reloadMultiplier:.88,sprintMultiplier:1.1},closequarters:{meleeDamage:2,sprintMultiplier:1.1},steadythrow:{grenadeChargeMultiplier:.8,grenadeRadiusMultiplier:1.15},widearea:{grenadeRadiusMultiplier:1.25}};
+const effectOverrides={sealant:{medkitHealing:75,medkitArmor:8},insulation:{selfExplosionMultiplier:.75,grenadeRadiusMultiplier:1.2},none:{},medic:{medkitHealing:65},runner:{sprintMultiplier:1.1},demolition:{grenadeRadiusMultiplier:1.15},surgeon:{medkitHealing:75},pathfinder:{sprintMultiplier:1.15},ordnance:{grenadeRadiusMultiplier:1.2},plating:{armorDamageMultiplier:.8,medkitHealing:75},triage:{medkitHealing:85},quickloader:{reloadMultiplier:.88,sprintMultiplier:1.15},closequarters:{meleeDamage:2,sprintMultiplier:1.15},steadythrow:{grenadeChargeMultiplier:.8,grenadeRadiusMultiplier:1.2},widearea:{grenadeRadiusMultiplier:1.25}};
 const effects=Object.freeze(Object.fromEntries(Object.entries(effectOverrides).map(([id,overrides])=>[id,Object.freeze({...baseEffects,...overrides})])));
 
 export function fieldSkillUnlocked(id,completed=[]){

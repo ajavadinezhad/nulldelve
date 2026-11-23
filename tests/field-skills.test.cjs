@@ -43,9 +43,9 @@ test('fourteen distinct skills form three prerequisite spines with specializatio
  for(const leaf of ['plating','triage','quickloader','closequarters','steadythrow','widearea'])assert.equal(skillLearnable(leaf,{learned:[]},allOperations),false);
 });
 test('specializations retain modest same-branch inheritance without combining every developed skill',()=>{
- const changed={plating:{armorDamageMultiplier:.8,medkitHealing:65},triage:{medkitHealing:85},quickloader:{reloadMultiplier:.88,sprintMultiplier:1.1},closequarters:{meleeDamage:2,sprintMultiplier:1.1},steadythrow:{grenadeChargeMultiplier:.8,grenadeRadiusMultiplier:1.15},widearea:{grenadeRadiusMultiplier:1.25}};
+ const changed={plating:{armorDamageMultiplier:.8,medkitHealing:75},triage:{medkitHealing:85},quickloader:{reloadMultiplier:.88,sprintMultiplier:1.15},closequarters:{meleeDamage:2,sprintMultiplier:1.15},steadythrow:{grenadeChargeMultiplier:.8,grenadeRadiusMultiplier:1.2},widearea:{grenadeRadiusMultiplier:1.25}};
  for(const [id,overrides]of Object.entries(changed)){assert.deepEqual(fieldSkillEffects(id),{...fieldSkillEffects('none'),...overrides});assert.ok(Object.isFrozen(fieldSkillEffects(id)));}
- const skills=createFieldSkills(store());for(const id of ['runner','pathfinder','quickloader'])assert.ok(skills.learn(id,allOperations).ok);assert.equal(skills.selected(allOperations),'quickloader');assert.equal(fieldSkillEffects(skills.selected(allOperations)).sprintMultiplier,1.1);assert.equal(trainingPoints(skills.serialize(allOperations),allOperations),4);
+ const skills=createFieldSkills(store());for(const id of ['runner','pathfinder','quickloader'])assert.ok(skills.learn(id,allOperations).ok);assert.equal(skills.selected(allOperations),'quickloader');assert.equal(fieldSkillEffects(skills.selected(allOperations)).sprintMultiplier,1.15);assert.equal(trainingPoints(skills.serialize(allOperations),allOperations),4);
 });
 test('seven earned points force branch choices and stale imports cannot erase developed leaves',()=>{
  const storage=store(),skills=createFieldSkills(storage);for(const id of ['runner','pathfinder','quickloader','closequarters','demolition','ordnance','widearea'])assert.ok(skills.learn(id,allOperations).ok);
@@ -70,5 +70,11 @@ test('new defensive specializations require their full branch, consume points an
  for(const [id,path]of [['sealant',['medic','surgeon','sealant']],['insulation',['demolition','ordnance','insulation']]]){
   const storage=store(),skills=createFieldSkills(storage);assert.equal(skills.learn(id,done).ok,false);for(const node of path)assert.equal(skills.learn(node,done).ok,true);const saved=skills.serialize(done),restored=createFieldSkills(storage);assert.equal(restored.selected(done),id);assert.deepEqual(normalizeFieldSkill(saved,done).learned,path);assert.equal(trainingPoints(saved,done),5);
  }
- const seal=fieldSkillEffects('sealant'),blast=fieldSkillEffects('insulation');assert.equal(seal.medkitHealing,65);assert.equal(seal.medkitArmor,8);assert.equal(seal.armorDamageMultiplier,1);assert.equal(blast.selfExplosionMultiplier,.75);assert.equal(blast.grenadeRadiusMultiplier,1.15);assert.equal(blast.medkitArmor,0);assert.ok(blast.selfExplosionMultiplier>0,'danger remains');
+ const seal=fieldSkillEffects('sealant'),blast=fieldSkillEffects('insulation');assert.equal(seal.medkitHealing,75);assert.equal(seal.medkitArmor,8);assert.equal(seal.armorDamageMultiplier,1);assert.equal(blast.selfExplosionMultiplier,.75);assert.equal(blast.grenadeRadiusMultiplier,1.2);assert.equal(blast.medkitArmor,0);assert.ok(blast.selfExplosionMultiplier>0,'danger remains');
+});
+
+
+test('every descendant retains the benefits earned along its prerequisite path',()=>{
+ const higherIsBetter=['medkitHealing','sprintMultiplier','grenadeRadiusMultiplier','meleeDamage','medkitArmor'],lowerIsBetter=['reloadMultiplier','armorDamageMultiplier','grenadeChargeMultiplier','selfExplosionMultiplier'];
+ for(const node of SKILL_NODES.filter(node=>node.requires)){const parent=fieldSkillEffects(node.requires),child=fieldSkillEffects(node.id);for(const key of higherIsBetter)assert.ok(child[key]>=parent[key],node.id+' must retain '+key);for(const key of lowerIsBetter)assert.ok(child[key]<=parent[key],node.id+' must retain '+key);}
 });

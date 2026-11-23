@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { weapon } from './weapons.js?v=campaign-pacing-r53';
+import { weapon } from './weapons.js?v=critic-fixes-r54';
 
 const sphere = new THREE.SphereGeometry(1, 14, 10);
 const cube = new THREE.BoxGeometry(1, 1, 1);

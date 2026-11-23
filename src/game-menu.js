@@ -1,14 +1,14 @@
-import {renderFieldJournal,journalIcon} from './field-journal.js?v=campaign-pacing-r53';
-import {createPuzzleDiscovery} from './puzzle-discovery.js?v=campaign-pacing-r53';
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=campaign-pacing-r53';
-import {compatibleStorage} from './storage-compat.js?v=campaign-pacing-r53';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=campaign-pacing-r53';
-import {createCampaignMap} from './campaign-map.js?v=campaign-pacing-r53';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=campaign-pacing-r53';
-import {createItemIcon} from './item-icons.js?v=campaign-pacing-r53';
-import {buildMissionPreview} from './mission-previews.js?v=campaign-pacing-r53';
-import {renderShop} from './shop-ui.js?v=campaign-pacing-r53';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=campaign-pacing-r53';
+import {renderFieldJournal,journalIcon} from './field-journal.js?v=critic-fixes-r54';
+import {createPuzzleDiscovery} from './puzzle-discovery.js?v=critic-fixes-r54';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=critic-fixes-r54';
+import {compatibleStorage} from './storage-compat.js?v=critic-fixes-r54';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=critic-fixes-r54';
+import {createCampaignMap} from './campaign-map.js?v=critic-fixes-r54';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=critic-fixes-r54';
+import {createItemIcon} from './item-icons.js?v=critic-fixes-r54';
+import {buildMissionPreview} from './mission-previews.js?v=critic-fixes-r54';
+import {renderShop} from './shop-ui.js?v=critic-fixes-r54';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=critic-fixes-r54';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -112,7 +112,21 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   function updatePersonalBest(){const record=status().personalBests?.[operationRecordKey({mission:'campaign',operation:selected.id,difficulty,remix:false})];personalBest.replaceChildren();personalBest.hidden=false;if(!Number.isFinite(record?.elapsed)){personalBest.append(element('span','','Personal best'),element('strong','','—'));}else{personalBest.append(element('span','','Personal best'),element('strong','',formatDuration(record.elapsed)));if(Number.isFinite(record.kills))personalBest.append(element('small','',`${Math.max(0,Math.floor(record.kills))} kills`));if(Number.isFinite(record.exploration))personalBest.append(element('small','',`${Math.round(Math.max(0,Math.min(100,record.exploration)))}% mapped`));}}
   for(const option of DIFFICULTIES){const label=element('label',`difficulty-option${difficulty===option.id?' selected':''}`),input=element('input');label.dataset.difficulty=option.id;input.type='radio';input.name='operation-difficulty';input.value=option.id;input.checked=difficulty===option.id;input.addEventListener('change',()=>{if(!input.checked)return;difficulty=option.id;for(const row of choices.children)row.className=`difficulty-option${row.dataset.difficulty===difficulty?' selected':''}`;updatePersonalBest();});input.setAttribute('aria-label',option.name);const check=element('span','difficulty-check','✓');check.setAttribute('aria-hidden','true');label.append(input,element('strong','',option.name),check);choices.append(label);}
   updatePersonalBest();fieldset.append(choices,personalBest);briefing.append(fieldset);
+  drawDeploymentLoadout(briefing,status());
   const deployActions=element('div','menu-actions');briefing.append(deployActions);deployActions.append(button('Deploy',()=>{if(!isCampaignOperationUnlocked(operation,status().completedOperations??[])){notice('Complete the previous operation before deploying here.');return;}action(onNewGame,[{mission:'campaign',difficulty,operation,remix:false}]);},'menu-button primary'),button('Armory',()=>prepareView('armory','campaign-map'),'menu-button secondary'));
+ }
+ function drawDeploymentLoadout(target,current){
+  const armory=current.armory??{},primary=armory.primary??'carbine',equipped=armory.weapons?.find(gun=>gun.weaponId===primary),skill=[...FIELD_SKILLS,...SKILL_NODES].find(node=>node.id===current.fieldSkill)??FIELD_SKILLS[0];
+  const strip=element('section','deployment-loadout');strip.setAttribute('aria-label','Deployment equipment');
+  const weapon=element('div','deployment-weapon');weapon.append(skillIcon({icon:'armory'}));const copy=element('div','deployment-weapon-copy');copy.append(element('strong','',equipped?.label??'MK4 Carbine'));
+  const upgrades=element('div','deployment-upgrades'),key=primary==='carbine'?'rifle':primary;
+  for(const [type,label]of [['damage','Damage'],['magazine','Magazine'],['reload','Reload']]){
+   const offer=armory.offers?.find(item=>item.id===key+'.'+type),level=Math.max(0,Math.min(3,Number(offer?.level??offer?.owned)||0)),item=element('span','deployment-upgrade');item.title=label+' '+level+'/3';item.setAttribute('aria-label',item.title);item.append(element('small','',label==='Magazine'?'MAG':label==='Damage'?'DMG':'RLD'));
+   for(let n=0;n<3;n++){const pip=element('i',n<level?'filled':'');pip.setAttribute('aria-hidden','true');item.append(pip);}upgrades.append(item);
+  }
+  copy.append(upgrades);weapon.append(copy);strip.append(weapon);
+  const choices=element('div','deployment-specialization'),armor=element('span','deployment-equipment');armor.append(skillIcon({icon:'armor'}),element('strong','',String(Math.max(0,Math.min(60,Number(armory.shield)||0)))));armor.setAttribute('aria-label','Armor '+Math.max(0,Math.min(60,Number(armory.shield)||0))+' of 60');
+  const specialty=element('span','deployment-equipment');specialty.append(skillIcon(skill),element('span','',skill.name));choices.append(armor,specialty);strip.append(choices);target.append(strip);
  }
  function drawSlots(mode,current){
   const saving=mode==='save';heading('','Saved games');
@@ -220,7 +234,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r51'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r54'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...shell.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){

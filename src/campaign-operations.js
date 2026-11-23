@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=campaign-pacing-r53';
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=campaign-pacing-r53';
-import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=campaign-pacing-r53';
+import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=critic-fixes-r54';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=critic-fixes-r54';
+import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=critic-fixes-r54';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},
@@ -83,7 +83,7 @@ export function campaignOperationGuidance(value,{player,puzzle,progression}){
  const exit=campaignOperationExit(id);steps.push(step(id==='nest'?'Reach Evacuation':'Reach sector exit',false,`${exit.direction}. Press Interact at the marked ${exit.label.toLowerCase()} to depart.`));
  const objectivesDone=campaignOperationObjectivesComplete(id,{player,progression:state});
  const next=steps.find(s=>!s.done),battle=state.zones.find(z=>z.status==='active');
- return {title:objectivesDone?(id==='nest'?'Reach Evacuation':'Reach sector exit'):battle?`Clear ${battle.label.toLowerCase()}`:next?.label??'Operation complete',hint:objectivesDone?`${exit.direction}. Press Interact at the marked ${exit.label.toLowerCase()}.`:battle?`${battle.remaining} creatures remain, including reinforcements.`:next?.hint??'All operation objectives completed.',steps:steps.map(({label,done})=>({label,done}))};
+ return {title:id==='freight'&&tasks.freightRoute?.running?'Escort cargo':objectivesDone?(id==='nest'?'Reach Evacuation':'Reach sector exit'):battle?`Clear ${battle.label.toLowerCase()}`:next?.label??'Operation complete',hint:objectivesDone?`${exit.direction}. Press Interact at the marked ${exit.label.toLowerCase()}.`:battle?`${battle.remaining} creatures remain, including reinforcements.`:next?.hint??'All operation objectives completed.',steps:steps.map(({label,done})=>({label,done}))};
 }
 
 export function isCampaignOperationUnlocked(id,completed=[]){const index=CAMPAIGN_OPERATIONS.findIndex(op=>op.id===id);return index>=0&&CAMPAIGN_OPERATIONS.slice(0,index).every(op=>completed.includes(op.id));}

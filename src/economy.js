@@ -1,5 +1,6 @@
-import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=campaign-pacing-r53';
-import {normalizeAttachments} from './weapon-attachments.js?v=campaign-pacing-r53';
+import {damageStep,damageBonus,reloadStep} from './weapon-tuning.js?v=critic-fixes-r54';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=critic-fixes-r54';
+import {normalizeAttachments} from './weapon-attachments.js?v=critic-fixes-r54';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','lancet','orison','pistol'],UPGRADES=['damage','magazine','reload'];
@@ -42,8 +43,8 @@ export function createEconomy(snapshot){
     for(const gun of GUNS)for(const upgrade of UPGRADES){
       const level=state.upgrades[gun][upgrade],maxed=level>=3,cost=maxed?0:(upgrade==='damage'?(DAMAGE_COSTS[gun]??COSTS.damage):COSTS[upgrade])[level];
       const labels={damage:'Damage tuning',magazine:'Extended magazine',reload:'Quick reload kit'};
-      const descriptions={damage:'+1 damage per shot for this weapon.',magazine:`+${MAGAZINE_STEPS[gun]} round${MAGAZINE_STEPS[gun]===1?'':'s'} per magazine for this weapon.`,reload:'Reload this weapon 0.18 seconds faster (minimum 0.5s).'};
-      offers.push({id:`${gun}.${upgrade}`,kind:'upgrade',label:`${GUN_NAMES[gun]} ${labels[upgrade]}`,description:maxed?'Fully upgraded.':descriptions[upgrade],cost,owned:level,level,maxLevel:3,increment:upgrade==='magazine'?MAGAZINE_STEPS[gun]:upgrade==='damage'?1:-.18,available:!maxed&&state.credits>=cost});
+      const descriptions={damage:`+${damageStep(gun,Math.min(level,2))} damage per hit for this weapon.`,magazine:`+${MAGAZINE_STEPS[gun]} round${MAGAZINE_STEPS[gun]===1?'':'s'} per magazine for this weapon.`,reload:`Reload ${reloadStep(gun)} seconds faster (minimum 0.5s).`};
+      offers.push({id:`${gun}.${upgrade}`,kind:'upgrade',label:`${GUN_NAMES[gun]} ${labels[upgrade]}`,description:maxed?'Fully upgraded.':descriptions[upgrade],cost,owned:level,level,maxLevel:3,increment:upgrade==='magazine'?MAGAZINE_STEPS[gun]:upgrade==='damage'?damageStep(gun,Math.min(level,2)):-reloadStep(gun),available:!maxed&&state.credits>=cost});
     }
     for(const [id,label,description,cost] of [['medkit','Field medkit','Use to restore up to 50 health. Carry up to five.',60],['grenade','Frag grenade','A throwable explosive. Carry up to five.',90],['fireGrenade','Incendiary grenade','Burns an area. Carry up to five.',120]]){
       offers.push({id,kind:'item',label,description,effect:id==='fireGrenade'?'Burns an area':id==='grenade'?'Explodes on impact':'Restores health',cost,owned:state.items[id],available:state.items[id]<ITEM_LIMIT&&state.credits>=cost});
@@ -85,7 +86,7 @@ export function createEconomy(snapshot){
   function stats(type,base={}){
     const key=type==='carbine'?'rifle':type,upgrades=GUNS.includes(key)?state.upgrades[key]:{damage:0,magazine:0,reload:0};
     const capacity=integer(base.capacity,1,10000,12),reload=clamp(base.reload,0,100,1.3),interval=clamp(base.interval,.001,100,.2);
-    return {damage:clamp(base.damage,1,10000,1)+upgrades.damage,capacity:capacity+(state.magazineBonuses[key]??0),reload:Math.max(.5,reload-.18*upgrades.reload),interval};
+    return {damage:clamp(base.damage,1,10000,1)+damageBonus(key,upgrades.damage),capacity:capacity+(state.magazineBonuses[key]??0),reload:Math.max(.5,reload-reloadStep(key)*upgrades.reload),interval};
   }
   restore(snapshot);
   return {state,getOffers,purchase,rewardKill,beginReplayAttempt,claimReward,claimEnemyReward,migrateEnemyRewards,consume,stats,serialize,restore};

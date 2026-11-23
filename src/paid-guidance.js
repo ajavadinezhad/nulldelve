@@ -1,8 +1,10 @@
-import {campaignOperationGuidance,campaignOperationExit} from './campaign-operations.js?v=campaign-pacing-r53';
-import {missionGuidance} from './session-rules.js?v=campaign-pacing-r53';
-import {ARTIFACTS,hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=campaign-pacing-r53';
-import {WIRE_LAYOUT,WIRE_SOLUTION} from './wire-circuit.js?v=campaign-pacing-r53';
-export {GUIDANCE_COST} from './economy.js?v=campaign-pacing-r53';
+import {freightEscortPoint} from './freight-escort.js?v=critic-fixes-r54';
+import {initialMechanism,nextMechanismAction} from './physical-puzzles.js?v=critic-fixes-r54';
+import {campaignOperationGuidance,campaignOperationExit} from './campaign-operations.js?v=critic-fixes-r54';
+import {missionGuidance} from './session-rules.js?v=critic-fixes-r54';
+import {ARTIFACTS,hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=critic-fixes-r54';
+import {WIRE_LAYOUT,WIRE_SOLUTION} from './wire-circuit.js?v=critic-fixes-r54';
+export {GUIDANCE_COST} from './economy.js?v=critic-fixes-r54';
 const ZONES={security:[23,10],storage:[23,26],command:[38,10],generator:[35,53],lab:[59,10],reactor:[59,30],transit:[59,55],containment:[86,30],evacuation:[86,53],nest:[86,10],'hospital-triage':[112,10],'hospital-ward':[136,10],'hospital-isolation':[136,52],'freight-pumps':[162,30],'freight-yard':[186,30],'freight-cold':[186,10],'signal-yard':[212,30],'signal-relay':[236,30],'signal-uplink':[236,10]};
 /** Resolve one live action, without changing a puzzle or relying on proximity to a door. */
 export function nextGuidanceStep({operation,mission='campaign',player,puzzle,progression}){
@@ -10,8 +12,9 @@ export function nextGuidanceStep({operation,mission='campaign',player,puzzle,pro
  const point=(id,p,text)=>p&&Number.isFinite(p.x)&&Number.isFinite(p.z)?{id,x:p.x,z:p.z,label:text}:null;
  const use=(task,text)=>{const d=devices.find(d=>d.id===task||d.task===task);return point(task,d,text??`Use ${d?.label?.toLowerCase()??'this control'}.`);};
  const fight=id=>{const xy=ZONES[id];return xy?point('fight-'+id,{x:xy[0],z:xy[1]},zone(id)?.status==='active'?'Defeat the remaining creatures in this room.':'Enter this room and clear its outbreak.'):null;};
- const sequence=(kind)=>{const p=s[kind],seq=p?.sequence??[],input=p?.input??[],prefix=input.every((v,i)=>v===seq[i]),id=seq[prefix?input.length:0];return use(kind==='archive'?'glyph-'+id:id,`Activate this ${kind==='archive'?id:kind==='power'?'routing control':'pressure valve'} next.`);};
+ const sequence=(key)=>{const kind={archive:'glyphs',power:'routing',valves:'valves'}[key],deviceKind={archive:'glyph',power:'power',valves:'valve'}[key],i=nextMechanismAction(kind,s[key]?.mechanism??initialMechanism(kind),s.remix);const d=devices.filter(d=>d.kind===deviceKind)[i??0];const control=key==='archive'?`${d?.glyph??'key'} dial`:key==='power'?['West breaker','North breaker','East breaker'][i??0]:['West valve','East valve'][i??0];return use(d?.id,`Adjust the ${control} once, then inspect the apparatus.`);};
  const wire=()=>{const c=s.circuit;if(!c?.powered)return use('commandRepair','Finish the Power House restart before connecting its cable.');for(let i=0;i<WIRE_LAYOUT.length;i++){const period=WIRE_LAYOUT[i].kind==='straight'?2:4;if(c.rotations[i]%period!==WIRE_SOLUTION[i]%period)return point('wire-'+i,WIRE_LAYOUT[i],'Rotate this junction once, then follow the cable.');}return use('commandRepair','Return to the restored supply console.');};
+ if(operation==='freight'&&t.freightRoute?.running)return point('cargo-escort',freightEscortPoint(t.freightRoute.remaining),'Stay near the cargo and keep creatures away from its path.');
  const battle=s.zones?.find(z=>z.status==='active');
  // A jam needs a player action even while its defense wave is active.
  if(operation==='command'&&t.generatorDefense?.jammed)return use('commandRepair','Repair the jammed restart console.');

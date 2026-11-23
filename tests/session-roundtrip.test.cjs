@@ -42,7 +42,7 @@ function session({expanded=false}={}){
  ctx.progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant,{encounter}={})=>{const stats=ROACH_VARIANTS[variant],e={encounter,id:'e'+ctx.nextEnemyId++,x,z,...stats,maxHp:stats.hp,variant,cooldown:1,alerted:true,mesh:mesh(),attackWindup:0,staggerTime:0,spawnDelay:0};enemies.push(e);return e;}});
  ctx.persistCampaignProfile=()=>ctx.campaignProfile.persist();
  ctx.queueCheckpoint=reason=>{ctx.pendingCheckpoint=reason;};
- ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();ctx.encounterStats=require('../src/campaign-threat.js').encounterStats;vm.createContext(ctx);
+ ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();ctx.encounterStats=require('../src/campaign-threat.js').encounterStats;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;vm.createContext(ctx);
  vm.runInContext(fragment('function applyUpgrades()','\napplyUpgrades();'),ctx);
  vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
  vm.runInContext(fragment('function equippedModelType(','\nrefreshPlayerWeapon();'),ctx);
@@ -65,7 +65,7 @@ function populatedSnapshot(){
 test('actual browser capture/restore roundtrip preserves equipment, world discovery, and active horde identity',()=>{
  const saved=populatedSnapshot(),target=session();assert.equal(target.restore(saved),true);const {ctx}=target;
  assert.equal(ctx.selected,'pistol');assert.equal(ctx.player.hp,63);assert.equal(ctx.player.ammo,7);assert.equal(ctx.player.hurtGrace,.23);assert.equal(ctx.reload,.64);
- assert.equal(ctx.weapons.rifle.ammo,19);assert.equal(ctx.weapons.rifle.damage,3);assert.equal(ctx.weapons.rifle.capacity,36);assert.ok(Math.abs(ctx.weapons.rifle.reload-1.52)<1e-10);assert.equal(ctx.weapons.pistol.damage,3);
+ assert.equal(ctx.weapons.rifle.ammo,19);assert.equal(ctx.weapons.rifle.damage,2.75);assert.equal(ctx.weapons.rifle.capacity,36);assert.ok(Math.abs(ctx.weapons.rifle.reload-1.48)<1e-10);assert.equal(ctx.weapons.pistol.damage,3);
  assert.equal(ctx.economy.state.credits,420);assert.deepEqual(plain(ctx.economy.state.items),{medkit:2,grenade:3,fireGrenade:0});assert.equal(ctx.economy.state.shield,18);
  assert.deepEqual([...ctx.explored].sort((a,b)=>a-b),saved.explored.sort((a,b)=>a-b));assert.ok(ctx.seenRooms.has('SECURITY'));assert.ok(ctx.rewardedZones.has('storage'));
  assert.equal(ctx.puzzle.solved,true);assert.equal(ctx.puzzle.plates.every(p=>p.active),true);assert.equal(ctx.puzzle.crates.every(c=>c.seated),true);assert.equal(ctx.puzzle.crates[0].x,4);assert.equal(ctx.doors[0].unlocked,true);assert.equal(ctx.doors[1].slide,.65);

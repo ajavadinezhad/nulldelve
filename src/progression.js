@@ -1,7 +1,9 @@
-import {puzzleAccessVisible,puzzleAccessPoint} from './puzzle-access.js';
-import {OPERATION_ROUTES} from './operation-routes.js?v=campaign-pacing-r53';
-import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=campaign-pacing-r53';
-import {DIFFICULTY_RULES} from './difficulty.js?v=campaign-pacing-r53';
+import {freightEscortStatus,FREIGHT_ESCORT_DURATION} from './freight-escort.js?v=critic-fixes-r54';
+import {initialMechanism,mechanismAction,mechanismSolved,mechanismStateValid,mechanismPanel,nextMechanismAction} from './physical-puzzles.js?v=critic-fixes-r54';
+import {puzzleAccessVisible,puzzleAccessPoint} from './puzzle-access.js?v=critic-fixes-r54';
+import {OPERATION_ROUTES} from './operation-routes.js?v=critic-fixes-r54';
+import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=critic-fixes-r54';
+import {DIFFICULTY_RULES} from './difficulty.js?v=critic-fixes-r54';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -63,7 +65,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   const difficulty=()=>DIFFICULTY_RULES[getDifficulty()]??DIFFICULTY_RULES.normal;
   const scaledTotal=definition=>Math.max(1,Math.round(definition.total*(difficulty().waveSize??1)));
   const zones=definitions.map(d=>({id:d.id,label:d.label,status:'dormant',wave:[],liveCap:d.liveCap,total:scaledTotal(d),spawned:0,queued:0,remaining:0,queue:[],rewardQueue:[],spawnTimer:0,phaseRested:false}));
-  const state={devices,zones,clue:{x:9,z:13,label:'ARCHIVE PANEL'},remix:!!remix,archive:{sequence:initialSequences.archive,input:[],solved:false},relay:{started:false,remaining:0,duration:8,completed:false},elapsed:0,totalEnemies:zones.reduce((sum,zone)=>sum+zone.total,0),liveCap:36,mission:'campaign',operationId:null,operationTasks:createOperationTasks(),circuit:createWireCircuit(),milestone:0,operationZoneIds:null,power:{sequence:initialSequences.power,input:[],solved:false},valves:{sequence:initialSequences.valves,input:[],solved:false},logs:[],artifacts:[],evacuation:{started:false,remaining:20,completed:false}};
+  const state={devices,zones,clue:{x:9,z:13,label:'ARCHIVE PANEL'},remix:!!remix,archive:{sequence:initialSequences.archive,input:[],solved:false,mechanism:initialMechanism('glyphs')},relay:{started:false,remaining:0,duration:8,completed:false},elapsed:0,totalEnemies:zones.reduce((sum,zone)=>sum+zone.total,0),liveCap:36,mission:'campaign',operationId:null,operationTasks:createOperationTasks(),circuit:createWireCircuit(),milestone:0,operationZoneIds:null,power:{sequence:initialSequences.power,input:[],solved:false,mechanism:initialMechanism('routing')},valves:{sequence:initialSequences.valves,input:[],solved:false,mechanism:initialMechanism('valves')},logs:[],artifacts:[],evacuation:{started:false,remaining:20,completed:false}};
   state.clue.id='archive';state.clue.kind='clue';
   state.clues=[state.clue,{id:'signal',kind:'clue',x:216,z:25,label:'FEEDER CAPACITY PLATE'},{id:'freight',kind:'clue',x:164,z:25,label:'CARGO ROUTING PLATE'},{id:'hospital',kind:'clue',x:118,z:31,label:'HOSPITAL FLOW PLAQUE'},{id:'power',kind:'clue',x:59,z:33,label:'REACTOR ROUTING PLAQUE'},{id:'valves',kind:'clue',x:86,z:32,label:'CONTAINMENT MAINTENANCE PLAQUE'}];
   // Inspection describes the mechanism, never its hidden target/order.
@@ -117,7 +119,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       [28,state.operationId!=='freight'||!state.operationTasks.freightDrain||active(freightPumps)||active(freightYard),'FLOODED TRACK · RESTORE THE PUMP BREAKER'],
       [29,state.operationId!=='freight'||!state.operationTasks.freightManifest,'RAIL CONTROL LOCK · RECOVER THE CARGO MANIFEST'],
       [30,state.operationId!=='freight'||!state.operationTasks.freightRelease,'ARRIVAL BYPASS · RELEASE RAIL CONTROL'],
-      [31,state.operationId!=='freight'||!state.operationTasks.freightDispatch||active(freightCold),'COLD CHAIN LOCK · DELIVER THE TRANSFER CARGO'],
+      [31,state.operationId!=='freight'||!state.operationTasks.freightDispatch||active(freightYard)||active(freightCold),'COLD CHAIN LOCK · DELIVER THE TRANSFER CARGO'],
       [18,state.operationId!=='hospital','HOSPITAL TRANSFER SEALED'],
       [19,state.operationId!=='hospital'||active(hospitalTriage),'HOSPITAL TRIAGE LOCKDOWN'],
       [20,state.operationId!=='hospital'||!state.operationTasks.hospitalPower||active(hospitalTriage),'HOSPITAL POWER OFFLINE · FIND THE PHARMACY FUSE'],
@@ -163,12 +165,13 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(['glyph','power','valve','wire'].includes(d.kind)){
       const key={glyph:'archive',power:'power',valve:'valves'}[d.kind],kind={glyph:'glyphs',power:'routing',valve:'valves',wire:'junction'}[d.kind],system=key?state[key]:state.circuit;
       const group=d.kind==='wire'?[d]:devices.filter(v=>v.kind===d.kind),complete=!!system.solved;
+      const hardware=key?mechanismPanel(kind,system.mechanism,state.remix):null;
       const names={glyph:'Archive access',power:'Reactor switchgear',valve:'Containment manifold',wire:'Cable junction'};
-      return {kind,id:d.kind==='wire'?d.id:kind,title:names[d.kind],mode:'actions',complete,locked:complete,controls:group.map((v,i)=>({id:v.id,label:v.kind==='glyph'?v.label:v.kind==='wire'?'Rotate coupling':v.kind==='valve'?['West valve','East valve'][i]:['West breaker','North breaker','East breaker'][i],style:v.kind==='glyph'?'key':v.kind==='power'?'breaker':v.kind==='valve'?'wheel':'junction',symbol:v.glyph,active:v.active,ports:v.kind==='wire'?junctionPorts(state.circuit,v.index):null}))};
+      return {kind,id:d.kind==='wire'?d.id:kind,title:names[d.kind],instrument:hardware?.instrument,mode:'actions',complete,locked:complete,controls:group.map((v,i)=>({id:v.id,label:v.kind==='glyph'?v.label:v.kind==='wire'?'Rotate coupling':v.kind==='valve'?['West valve','East valve'][i]:['West breaker','North breaker','East breaker'][i],style:v.kind==='glyph'?'key':v.kind==='power'?'breaker':v.kind==='valve'?'wheel':'junction',symbol:v.glyph,...(hardware?.controls[i]??{}),active:key?!!system.mechanism?.positions[i]:v.active,ports:v.kind==='wire'?junctionPorts(state.circuit,v.index):null}))};
     }
     const entry=Object.entries(settingGroups).find(([,g])=>(g.tasks.includes(d.task)||g.test===d.task)&&(!state.operationId||state.operationId===g.operation));if(!entry)return null;
     const [kind,g]=entry,t=state.operationTasks,complete=kind==='pressure'?t.hospitalSterile:kind==='tracks'?t.freightDispatch:t.signalLoad,running=kind==='pressure'?t.hospitalAirlock.running:kind==='tracks'&&t.freightRoute.running;
-    const locked=complete||running||(kind==='pressure'?!t.hospitalAuth:kind==='tracks'?(!t.freightDrain||freightYard.status!=='cleared'):signalYard.status!=='cleared');
+    const locked=complete||running||(kind==='pressure'?!t.hospitalAuth:kind==='tracks'?(!t.freightDrain||freightYard.status==='dormant'):signalYard.status!=='cleared');
     const values=kind==='pressure'?t.hospitalAirlock.settings:kind==='tracks'?t.freightRoute.switches:t.signalLoadout.feeders;
     return {kind,title:g.title,locked,complete:!!complete,running:!!running,controls:g.tasks.map((task,i)=>({id:task,label:devices.find(d=>d.task===task).label,value:values[i],min:0,max:g.max,options:kind==='feeders'?['A','B']:kind==='tracks'?['│','╱']:null,optionLabels:kind==='tracks'?['Straight','Divert']:null}))};
   }
@@ -183,7 +186,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     const panel=settingsPanel(player);if(!panel||panel.kind!==kind||panel.mode!=='actions'||panel.locked||!Number.isInteger(index)||!panel.controls[index])return {ok:false};
     const device=devices.find(d=>d.id===panel.controls[index].id),key={glyphs:'archive',routing:'power',valves:'valves'}[kind],before=key?state[key].input.length:0;
     perform(device);const after=settingsPanel(player);if(!after)return {ok:false};
-    return {ok:true,accepted:kind==='junction'?null:(after.complete||state[key].input.length>before),complete:after.complete};
+    return {ok:true,accepted:after.complete?true:null,complete:after.complete};
   }
   function getPrompt(player){
     const d=nearestDevice(player);if(!d)return null;
@@ -331,17 +334,17 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
         }
         if(['signalAntennaA','signalAntennaB'].includes(d.task)){if(!tasks.signalLoad||signalRelay.status==='dormant'){onToast('ENTER THE ANTENNA HALL FIRST');return true;}tasks[d.task]=true;return finish('ANTENNA FEED ISOLATED','Isolate the other antenna feed and secure the hall, then cut the transmitter.');}
         if(d.task==='signalShutdown'){if(signalRelay.status!=='cleared'||!tasks.signalAntennaA||!tasks.signalAntennaB){onToast('ISOLATE BOTH ANTENNA FEEDS AND CLEAR THE DEFENSE');return true;}tasks.signalShutdown=true;return finish('COLONY TRANSMITTER CUT · UPLINK ROUTE OPEN','Proceed north to Transmission Core. The south service passage is now an open shortcut.');}
-        if(d.task==='signalSent'){if(!tasks.signalShutdown||signalUplink.status!=='cleared'){onToast('SECURE TRANSMISSION CORE FIRST');return true;}tasks.signalSent=true;return finish('EVIDENCE TRANSMITTED · SERVICE EXIT RELEASED','Leave via the marked southern Service Exit. The colony signal is isolated and the records are outside the facility.');}
+        if(d.task==='signalSent'){if(!tasks.signalShutdown||signalUplink.status==='dormant'){onToast('REACH TRANSMISSION CORE FIRST');return true;}tasks.signalSent=true;return finish(signalUplink.status==='cleared'?'EVIDENCE TRANSMITTED · SERVICE EXIT RELEASED':'EVIDENCE UPLINK LIVE · DEFEND THE CORE','Leave via the marked southern Service Exit. The colony signal is isolated and the records are outside the facility.');}
       }
       if(FREIGHT_TASKS.includes(d.task)){
         const cargo=tasks.freightRoute;if(tasks[d.task]&&!['freightSwitchA','freightSwitchB'].includes(d.task)){onToast('FREIGHT SYSTEM ALREADY SECURED');return true;}
         if(d.task==='freightDrain'){if(freightPumps.status!=='cleared'){onToast('CLEAR THE PUMP HALL BEFORE RESETTING ITS BREAKER');return true;}tasks.freightDrain=true;return finish('FLOOD CHANNEL DRAINED · LOADING ROUTE OPEN','Cross east into the Loading Yard.');}
         if(['freightSwitchA','freightSwitchB','freightDispatch'].includes(d.task)){
-          if(!tasks.freightDrain||freightYard.status!=='cleared'){onToast('CLEAR THE LOADING YARD FIRST');return true;}
+          if(!tasks.freightDrain||freightYard.status==='dormant'){onToast('ENTER THE LOADING YARD FIRST');return true;}
           if(cargo.running||cargo.delivered){onToast(cargo.delivered?'CARGO ROUTE LOCKED · DELIVERY COMPLETE':'TRANSFER MOVING · TRACKS INTERLOCKED');return true;}
           if(d.task!=='freightDispatch'){const index=d.task==='freightSwitchA'?0:1;cargo.switches[index]=1-cargo.switches[index];tasks[d.task]=!!cargo.switches[index];d.progress=cargo.switches[index];onToast(`${d.label} · ${cargo.switches[index]?'DIVERT':'STRAIGHT'}`);return true;}
           if(!cargo.switches.every((value,i)=>value===freightTrackTarget(state.remix)[i])){onToast('ROUTE REJECTED');return true;}
-          cargo.running=true;cargo.remaining=3;state.milestone++;onToast('CARGO TRANSFER STARTED · AUTOMATIC ROUTE LOCKED');return true;
+          cargo.running=true;cargo.remaining=FREIGHT_ESCORT_DURATION;state.milestone++;onToast('CARGO MOVING');return true;
         }
         if(d.task==='freightManifest'){if(!cargo.delivered||freightCold.status!=='cleared'){onToast('CLEAR COLD CHAIN BEFORE REMOVING ITS MANIFEST');return true;}tasks.freightManifest=true;return finish('QUARANTINE MANIFEST RECOVERED','Return south through the Loading Yard and release Rail Control.');}
         if(d.task==='freightRelease'){if(!tasks.freightManifest){onToast('MISSING CARGO MANIFEST');return true;}tasks.freightRelease=true;return finish('RAIL EXTRACTION RELEASED','Reach the marked departure platform in Rail Control.');}
@@ -382,25 +385,13 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if(!state.logs.includes(d.id))state.logs.push(d.id);d.active=true;d.progress=1;
       onToast(`${d.label} · ${d.text}`);hint(state.logs.length===3?'All research logs recovered. The colony was receiving commands from below the facility.':d.text);return true;
     }
-    if(d.kind==='power'||d.kind==='valve'){
-      const puzzle=d.kind==='power'?state.power:state.valves,sequence=puzzle.sequence;
-      if(puzzle.solved){onToast(d.kind==='power'?'REACTOR POWER ONLINE':'CONTAINMENT PRESSURE SAFE');return true;}
-      if(d.id!==sequence[puzzle.input.length]){puzzle.input=[];for(const device of devices.filter(x=>x.kind===d.kind)){device.active=false;device.progress=0;}onToast('INPUT REJECTED');return true;}
-      puzzle.input.push(d.id);d.active=true;d.progress=puzzle.input.length/sequence.length;
-      if(puzzle.input.length===sequence.length){puzzle.solved=true;for(const device of devices.filter(x=>x.kind===d.kind)){device.active=true;device.progress=1;}recomputeLocks();onToast(d.kind==='power'?'POWER ROUTED · SOUTH EXIT READY':'PRESSURE RELEASED · SOUTH EXIT READY');hint(d.kind==='power'?'Reactor routing restored.':'Containment pressure stabilized.');}
-      else onToast('INPUT ACCEPTED');
-      return true;
-    }
-    if(d.kind==='glyph'){
-      if(state.archive.solved){onToast('CIPHER ALREADY ACCEPTED · ARCHIVE EXIT UNLOCKED');return true;}
-      const {archive}=state;
-      if(d.glyph!==archive.sequence[archive.input.length]){
-        archive.input.length=0;for(const glyph of devices.filter(x=>x.kind==='glyph')){glyph.active=false;glyph.progress=0;}
-        onToast('INPUT REJECTED');hint('Try another input pattern.');return true;
-      }
-      archive.input.push(d.glyph);d.active=true;d.progress=1;
-      if(archive.input.length===archive.sequence.length){archive.solved=true;recomputeLocks();onToast('ARCHIVE CIPHER ACCEPTED · SECURITY ACCESS OPEN');hint('Archive access restored.');}
-      else onToast('INPUT ACCEPTED');
+    if(['glyph','power','valve'].includes(d.kind)){
+      const key={glyph:'archive',power:'power',valve:'valves'}[d.kind],kind={glyph:'glyphs',power:'routing',valve:'valves'}[d.kind],puzzle=state[key];
+      if(puzzle.solved){onToast('SYSTEM ONLINE');return true;}
+      const bank=devices.filter(v=>v.kind===d.kind),index=bank.indexOf(d);
+      puzzle.mechanism=mechanismAction(kind,puzzle.mechanism??initialMechanism(kind),index);
+      bank.forEach((v,i)=>{v.active=puzzle.mechanism.positions[i]>0;v.progress=puzzle.mechanism.positions[i]/(kind==='routing'?1:3);});
+      if(mechanismSolved(kind,puzzle.mechanism,state.remix)){puzzle.solved=true;puzzle.input=[...puzzle.sequence];recomputeLocks();onToast('SYSTEM ONLINE');}
       return true;
     }
     if(state.relay.completed){onToast('RELAY LINK ESTABLISHED');return true;}
@@ -428,7 +419,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if(freightPumps.status==='dormant'&&inBounds(player,156,169,25,35))launchWave(freightPumps,player);
       if(state.operationTasks.freightDrain&&freightYard.status==='dormant'&&inBounds(player,180,193,25,35))launchWave(freightYard,player);
       if(cargo.delivered&&freightCold.status==='dormant'&&inBounds(player,180,193,6,15))launchWave(freightCold,player);
-      if(cargo.running){cargo.remaining=Math.max(0,cargo.remaining-step);const dispatch=devices.find(d=>d.task==='freightDispatch');dispatch.progress=1-Math.min(1,cargo.remaining/3);if(cargo.remaining===0){cargo.running=false;cargo.delivered=true;state.operationTasks.freightDispatch=true;dispatch.active=true;state.milestone++;recomputeLocks();onToast('CARGO DELIVERED · COLD CHAIN OPEN');}}
+      if(cargo.running){const escort=freightEscortStatus(cargo,player,enemies);cargo.blocked=escort.blocked;cargo.escorting=escort.near&&!escort.blocked;if(cargo.escorting)cargo.remaining=Math.max(freightYard.status==='cleared'?0:.01,cargo.remaining-step);const dispatch=devices.find(d=>d.task==='freightDispatch');dispatch.progress=1-Math.min(1,cargo.remaining/FREIGHT_ESCORT_DURATION);if(cargo.remaining===0&&freightYard.status==='cleared'){cargo.running=false;cargo.delivered=true;state.operationTasks.freightDispatch=true;dispatch.active=true;state.milestone++;recomputeLocks();onToast('CARGO DELIVERED · COLD CHAIN OPEN');}}
     }
     const defense=state.operationTasks.generatorDefense;
     if(defense.started&&!defense.completed){
@@ -479,10 +470,15 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     }
     recomputeLocks();
   }
+  function savedMechanism(key,kind){
+    let m=state[key].mechanism??initialMechanism(kind);
+    if(state[key].solved)for(let n=0;n<32&&!mechanismSolved(kind,m,state.remix);n++){const i=nextMechanismAction(kind,m,state.remix);if(i===null)break;m=mechanismAction(kind,m,i);}
+    return structuredClone(m);
+  }
   function serializeState(){
     return {
-      version:1,remix:state.remix,operationId:state.operationId,operationTasks:JSON.parse(JSON.stringify(state.operationTasks)),circuit:{rotations:[...state.circuit.rotations],powered:state.circuit.powered,solved:state.circuit.solved},milestone:state.milestone,elapsed:state.elapsed,archiveEntered,securityEntered,mission:state.mission,operationZoneIds:state.operationZoneIds?[...state.operationZoneIds]:null,power:{input:[...state.power.input],solved:state.power.solved},valves:{input:[...state.valves.input],solved:state.valves.solved},logs:[...state.logs],artifacts:[...state.artifacts],evacuation:{...state.evacuation},
-      archive:{input:[...state.archive.input],solved:state.archive.solved},
+      version:1,remix:state.remix,operationId:state.operationId,operationTasks:JSON.parse(JSON.stringify(state.operationTasks)),circuit:{rotations:[...state.circuit.rotations],powered:state.circuit.powered,solved:state.circuit.solved},milestone:state.milestone,elapsed:state.elapsed,archiveEntered,securityEntered,mission:state.mission,operationZoneIds:state.operationZoneIds?[...state.operationZoneIds]:null,power:{input:[...state.power.input],solved:state.power.solved,mechanism:savedMechanism('power','routing')},valves:{input:[...state.valves.input],solved:state.valves.solved,mechanism:savedMechanism('valves','valves')},logs:[...state.logs],artifacts:[...state.artifacts],evacuation:{...state.evacuation},
+      archive:{input:[...state.archive.input],solved:state.archive.solved,mechanism:savedMechanism('archive','glyphs')},
       relay:{started:state.relay.started,remaining:state.relay.remaining,completed:state.relay.completed},
       zones:zones.map(zone=>({id:zone.id,status:zone.status,total:zone.total,spawned:zone.spawned,queue:[...zone.queue],rewardQueue:[...zone.rewardQueue],spawnTimer:zone.spawnTimer,phaseRested:zone.phaseRested,
         waveIds:zone.wave.map(enemy=>enemy.id),waveRewardIds:zone.wave.map(enemy=>enemy.rewardIdentity),waveVariants:zone.wave.map(enemy=>enemy.variant||'normal')})),
@@ -493,6 +489,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(!snapshot||snapshot.version!==1||!snapshot.archive||!snapshot.relay||!Array.isArray(snapshot.zones)||snapshot.zones.length<7||snapshot.zones.length>zones.length)return false;
     if(snapshot.remix!==undefined&&typeof snapshot.remix!=='boolean')return false;
     const restoredSequences=progressionSequences(snapshot.remix===true);
+    for(const [key,kind]of [['archive','glyphs'],['power','routing'],['valves','valves']])if(snapshot[key]?.mechanism!==undefined&&(!mechanismStateValid(kind,snapshot[key].mechanism)||snapshot[key].solved!==mechanismSolved(kind,snapshot[key].mechanism,snapshot.remix===true)))return false;
     if(!Array.isArray(snapshot.archive.input)||snapshot.archive.input.length>3||snapshot.archive.solved&&snapshot.archive.input.length!==3||!snapshot.archive.input.every((glyph,index)=>glyph===restoredSequences.archive[index]))return false;
     if(snapshot.zones.some(saved=>!saved||!zones.some(zone=>zone.id===saved.id))||new Set(snapshot.zones.map(saved=>saved.id)).size!==snapshot.zones.length)return false;
     for(const zone of zones){
@@ -539,6 +536,11 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     state.operationZoneIds=snapshot.operationZoneIds?[...snapshot.operationZoneIds]:null;
     state.mission=['campaign','siege','nest'].includes(snapshot.mission)?snapshot.mission:'campaign';
     for(const key of ['power','valves']){state[key].input=[...(snapshot[key]?.input??[])];state[key].solved=!!snapshot[key]?.solved;}
+    for(const [key,kind]of [['archive','glyphs'],['power','routing'],['valves','valves']]){
+      let m=snapshot[key]?.mechanism?structuredClone(snapshot[key].mechanism):initialMechanism(kind);
+      if(snapshot[key]?.solved)for(let n=0;n<32&&!mechanismSolved(kind,m,state.remix);n++){const i=nextMechanismAction(kind,m,state.remix);if(i===null)break;m=mechanismAction(kind,m,i);}
+      state[key].mechanism=m;
+    }
     state.artifacts=[...(snapshot.artifacts??[])];nestExitAllowance=false;legacyNestEscape=snapshot.artifacts===undefined;
     state.logs=Array.isArray(snapshot.logs)?snapshot.logs.filter(id=>devices.some(d=>d.kind==='log'&&d.id===id)):[];
     state.evacuation.started=!!snapshot.evacuation?.started;state.evacuation.remaining=Math.max(0,Math.min(20,snapshot.evacuation?.remaining ?? 20));state.evacuation.completed=!!snapshot.evacuation?.completed;
@@ -548,12 +550,12 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     state.relay.completed=!!snapshot.relay.completed;state.relay.started=!!snapshot.relay.started&&!state.relay.completed;
     state.relay.remaining=state.relay.started?Math.max(0,Math.min(8,Number(snapshot.relay.remaining)||0)):0;
     for(const d of devices){
-      if(d.kind==='glyph'){d.active=state.archive.solved||state.archive.input.includes(d.glyph);d.progress=d.active?1:0;}
+      if(d.kind==='glyph'){const i=devices.filter(v=>v.kind==='glyph').indexOf(d),position=state.archive.mechanism.positions[i];d.active=position>0;d.progress=position/3;}
       else if(d.kind==='task'){const relay=state.operationTasks.nestRelay;d.active=d.task==='nestStart'?relay.started||relay.linked:d.task==='nestLink'?relay.linked:d.task==='nestDecode'?relay.decoded:!!state.operationTasks[d.task];d.progress=d.active?1:0;}
       else if(d.kind==='wire'){d.active=state.circuit.solved;d.progress=state.circuit.rotations[d.index]/4;}
       else if(d.kind==='artifact'){d.active=state.artifacts.includes(d.id);d.progress=d.active?1:0;}
       else if(d.kind==='log'){d.active=state.logs.includes(d.id);d.progress=d.active?1:0;}
-      else if(d.kind==='power'||d.kind==='valve'){const puzzle=d.kind==='power'?state.power:state.valves;d.active=puzzle.solved||puzzle.input.includes(d.id);d.progress=d.active?1:0;}
+      else if(d.kind==='power'||d.kind==='valve'){const bank=devices.filter(v=>v.kind===d.kind),puzzle=d.kind==='power'?state.power:state.valves,position=puzzle.mechanism.positions[bank.indexOf(d)];d.active=position>0;d.progress=position/(d.kind==='power'?1:3);}
       else{d.active=state.relay.completed||d.id==='relay-a'&&state.relay.started;d.progress=state.relay.completed?1:d.id==='relay-a'?state.relay.remaining/8:0;}
     }
     for(const zone of zones){
@@ -575,7 +577,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   function startMission(mission,player){
     if(!['siege','nest'].includes(mission))return false;
     state.mission=mission;
-    state.archive.solved=true;state.archive.input=[...state.archive.sequence];state.relay.started=false;state.relay.remaining=0;state.relay.completed=true;
+    state.archive.solved=true;state.archive.input=[...state.archive.sequence];state.archive.mechanism=savedMechanism('archive','glyphs');state.relay.started=false;state.relay.remaining=0;state.relay.completed=true;
     archiveEntered=securityEntered=true;
     for(const d of devices.filter(d=>['glyph','relay'].includes(d.kind))){d.active=true;d.progress=1;}
     for(const zone of zones){

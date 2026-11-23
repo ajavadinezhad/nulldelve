@@ -1,9 +1,9 @@
-import {EXPLORATION_EVENTS} from './exploration.js?v=campaign-pacing-r53';
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=campaign-pacing-r53';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=campaign-pacing-r53';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=campaign-pacing-r53';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=campaign-pacing-r53';
-import {createProgression} from './progression.js?v=campaign-pacing-r53';
+import {EXPLORATION_EVENTS} from './exploration.js?v=critic-fixes-r54';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=critic-fixes-r54';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=critic-fixes-r54';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=critic-fixes-r54';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=critic-fixes-r54';
+import {createProgression} from './progression.js?v=critic-fixes-r54';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','spitter','mender','boss']);
