@@ -76,27 +76,23 @@ export function referencePuzzleHint(preset={},level=1){
 }
 async function startWorkshop(){
  if(new URLSearchParams(location.search).has('embedded'))document.body.classList.add('embedded-journal');
- const $=id=>document.getElementById(id),{PUZZLE_PRESETS:allPresets}=await import('./puzzle-presets.js?v=progression-balance-r46'),{createPuzzleDiscovery}=await import('./puzzle-discovery.js?v=progression-balance-r46');
+ const $=id=>document.getElementById(id),{PUZZLE_PRESETS:allPresets}=await import('./puzzle-presets.js?v=paid-camera-r47'),{createPuzzleDiscovery}=await import('./puzzle-discovery.js?v=paid-camera-r47');
  const discovered=new Set(createPuzzleDiscovery().list()),presets=allPresets.filter(p=>discovered.has(p.id));
  for(const id of ['setup-form','solution-details','puzzle-controls','puzzle-readouts','puzzle-state','puzzle-feedback','reset-puzzle','export-setup']){const element=$(id);if(element)element.hidden=true;}
  if(!presets.length){$('catalog-count').textContent='Field notes';$('filter-count').textContent='';$('puzzle-title').textContent='No systems recorded';$('puzzle-objective').textContent='Discover systems while exploring.';document.body.classList.add('empty-journal');return;}
- let selected=presets[0],hintLevel=0;
+ let selected=presets[0];
  $('catalog-count').textContent=presets.length+' encountered '+(presets.length===1?'system':'systems');
  for(const mechanic of [...new Set(presets.map(p=>String(p.mechanic??'Other')))]){const option=node('option','',mechanic);option.value=mechanic;$('puzzle-filter').append(option);}
- const hintButton=document.querySelector('[data-hint="1"]');for(const button of document.querySelectorAll('[data-hint]'))button.hidden=button!==hintButton;
  function render(){
   $('puzzle-title').textContent=selected.name;$('puzzle-mechanic').textContent=selected.mechanic??'';$('puzzle-objective').textContent='Reference only';$('puzzle-instructions').textContent='';
-  renderPuzzleBoard($('puzzle-board'),referencePuzzleView(selected),null);
-  $('puzzle-hint').hidden=!hintLevel;$('clear-hint').hidden=!hintLevel;
-  if(hintLevel)$('puzzle-hint').textContent=referencePuzzleHint(selected,hintLevel);
-  hintButton.textContent=hintLevel===0?'Need a clue?':hintLevel<3?'Another clue':'Repeat clue';
+  $('puzzle-board').replaceChildren();
  }
  function renderLibrary(){
   const list=$('preset-list'),old=list.scrollTop,left=list.scrollLeft;list.replaceChildren();const matches=presets.filter(p=>puzzleMatchesFilter(p,$('puzzle-search').value,$('puzzle-filter').value));$('filter-count').textContent=matches.length+' shown';
-  for(const preset of matches){const button=node('button','preset-card'+(preset.id===selected.id?' selected':''));button.type='button';button.dataset.preset=preset.id;button.setAttribute('aria-pressed',String(preset.id===selected.id));button.append(node('span','preset-number','◇'),node('strong','',preset.name),node('small','',preset.mechanic??''));button.addEventListener('click',()=>{selected=preset;hintLevel=0;renderLibrary();render();});list.append(button);}
+  for(const preset of matches){const button=node('button','preset-card'+(preset.id===selected.id?' selected':''));button.type='button';button.dataset.preset=preset.id;button.setAttribute('aria-pressed',String(preset.id===selected.id));button.append(node('span','preset-number','◇'),node('strong','',preset.name),node('small','',preset.mechanic??''));button.addEventListener('click',()=>{selected=preset;renderLibrary();render();});list.append(button);}
   if(!matches.length)list.append(node('p','objective','No matching systems.'));list.scrollTop=old;list.scrollLeft=left;
  }
  $('puzzle-search').addEventListener('input',renderLibrary);$('puzzle-filter').addEventListener('change',renderLibrary);
- hintButton.addEventListener('click',()=>{hintLevel=Math.min(3,hintLevel+1);render();});$('clear-hint').addEventListener('click',()=>{hintLevel=0;render();});renderLibrary();render();
+ renderLibrary();render();
 }
 if(typeof document!=='undefined'&&document.getElementById?.('preset-list'))startWorkshop().catch(error=>{const host=document.getElementById('startup-error');if(host){host.hidden=false;host.textContent='The puzzle workshop could not load. '+(error?.message??'Please reload and try again.');}});

@@ -1,5 +1,5 @@
-import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=progression-balance-r46';
-import {normalizeAttachments} from './weapon-attachments.js?v=progression-balance-r46';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=paid-camera-r47';
+import {normalizeAttachments} from './weapon-attachments.js?v=paid-camera-r47';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','lancet','orison','pistol'],UPGRADES=['damage','magazine','reload'];
@@ -11,6 +11,7 @@ const DAMAGE_COSTS={rifle:[180,300,450],smg:[180,300,450],lmg:[180,300,450],vesp
 const REWARDS={normal:2,runner:3,brute:8,charger:10,sentinel:14,screecher:12,leaper:9,spitter:10,mender:12,boss:40};
 export const isEnemyRewardVariant=variant=>variant==='paid'||Object.prototype.hasOwnProperty.call(REWARDS,variant);
 const GUN_NAMES={rifle:'MK4',smg:'VX9',shotgun:'BREACH-12',marksman:'SABLE',lmg:'M60',hush:'HUSH-9',scattergun:'TWIN',kestrel:'KESTREL',mantis:'MANTIS',jackal:'JACKAL',vesper:'VESPER',lancet:'LANCET',orison:'ORISON',pistol:'P9'};
+export const GUIDANCE_COST=20;
 const ITEM_LIMIT=5,CREDIT_LIMIT=999999999;
 const clamp=(value,min,max,fallback=0)=>typeof value==='number'&&Number.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
 const integer=(value,min,max,fallback=0)=>Math.floor(clamp(value,min,max,fallback));
@@ -52,6 +53,7 @@ export function createEconomy(snapshot){
   }
   function purchase(id){
     if(typeof id==='string'&&id.startsWith('carbine.'))id='rifle.'+id.slice(8);
+    if(id==='guidance'){if(state.credits<GUIDANCE_COST)return {ok:false,message:`$${GUIDANCE_COST} required.`};state.credits-=GUIDANCE_COST;return {ok:true,message:'Camera assistance purchased.'};}
     const offer=getOffers().find(item=>item.id===id);
     if(!offer)return {ok:false,message:'That item is not available.'};
     if(offer.kind==='upgrade'&&offer.level>=offer.maxLevel)return {ok:false,message:'This weapon upgrade is already at its maximum level.'};

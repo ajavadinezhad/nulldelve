@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=progression-balance-r46';
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=progression-balance-r46';
-import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=progression-balance-r46';
+import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=paid-camera-r47';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=paid-camera-r47';
+import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=paid-camera-r47';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},

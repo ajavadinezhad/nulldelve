@@ -1,74 +1,74 @@
-import {EXPLORATION_CACHES,createExplorationEvents} from './exploration.js?v=progression-balance-r46';
-import {createExplorationArt} from './exploration-art.js?v=progression-balance-r46';
-import {createLiftTransfer,stairHeightAt} from './transit.js?v=progression-balance-r46';
-import {buildTransitArt} from './transit-art.js?v=progression-balance-r46';
-import {SIGNAL_ROOMS,SIGNAL_DOORS,carveSignal,addSignalProps} from './signal-layout.js?v=progression-balance-r46';
-import {createBurstFire} from './weapon-actions.js?v=progression-balance-r46';
-import {campaignDebrief} from './campaign-story.js?v=progression-balance-r46';
-import {encounterStatus} from './encounter-status.js?v=progression-balance-r46';
-import {SALVAGE_CACHES} from './mission-salvage.js?v=progression-balance-r46';
-import {createSalvageArt} from './salvage-art.js?v=progression-balance-r46';
-import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=progression-balance-r46';
-import {createFieldSkills,fieldSkillEffects,effectiveFieldStats,normalizeFieldSkill} from './field-skills.js?v=progression-balance-r46';
-import {applyWeaponAttachment} from './weapon-attachments.js?v=progression-balance-r46';
-import {createMutationNotes} from './mutation-notes.js?v=progression-balance-r46';
-import {grantHospitalAmmo,grantSignalAmmo} from './mission-supplies.js?v=progression-balance-r46';
-import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=progression-balance-r46';
-import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=progression-balance-r46';
-import {createGrenadeActions} from './grenade-actions.js?v=progression-balance-r46';
-import {createCameraFraming,renderPixelRatio} from './device-presentation.js?v=progression-balance-r46';
-import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=progression-balance-r46';
-import {compatibleStorage} from './storage-compat.js?v=progression-balance-r46';
-import {createTouchControls,touchAimDirection} from './touch-controls.js?v=progression-balance-r46';
-import {createHudFeedback} from './hud-feedback.js?v=progression-balance-r46';
-import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=progression-balance-r46';
+import {nextGuidanceStep,puzzleStatusFeedback,GUIDANCE_COST} from './paid-guidance.js?v=paid-camera-r47';
+import {EXPLORATION_CACHES,createExplorationEvents} from './exploration.js?v=paid-camera-r47';
+import {createExplorationArt} from './exploration-art.js?v=paid-camera-r47';
+import {createLiftTransfer,stairHeightAt} from './transit.js?v=paid-camera-r47';
+import {buildTransitArt} from './transit-art.js?v=paid-camera-r47';
+import {SIGNAL_ROOMS,SIGNAL_DOORS,carveSignal,addSignalProps} from './signal-layout.js?v=paid-camera-r47';
+import {createBurstFire} from './weapon-actions.js?v=paid-camera-r47';
+import {campaignDebrief} from './campaign-story.js?v=paid-camera-r47';
+import {encounterStatus} from './encounter-status.js?v=paid-camera-r47';
+import {SALVAGE_CACHES} from './mission-salvage.js?v=paid-camera-r47';
+import {createSalvageArt} from './salvage-art.js?v=paid-camera-r47';
+import {FREIGHT_ROOMS,FREIGHT_DOORS,carveFreight,addFreightProps} from './freight-layout.js?v=paid-camera-r47';
+import {createFieldSkills,fieldSkillEffects,effectiveFieldStats,normalizeFieldSkill} from './field-skills.js?v=paid-camera-r47';
+import {applyWeaponAttachment} from './weapon-attachments.js?v=paid-camera-r47';
+import {createMutationNotes} from './mutation-notes.js?v=paid-camera-r47';
+import {grantHospitalAmmo,grantSignalAmmo} from './mission-supplies.js?v=paid-camera-r47';
+import {WORLD_WIDTH,WORLD_HEIGHT,upgradeWorldSnapshot} from './world-layout.js?v=paid-camera-r47';
+import {HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,addHospitalProps} from './hospital-layout.js?v=paid-camera-r47';
+import {createGrenadeActions} from './grenade-actions.js?v=paid-camera-r47';
+import {createCameraFraming,renderPixelRatio} from './device-presentation.js?v=paid-camera-r47';
+import {attachGraphicsRecovery,renderGraphicsRecovery,graphicsRecoveryUrl} from './graphics-recovery.js?v=paid-camera-r47';
+import {compatibleStorage} from './storage-compat.js?v=paid-camera-r47';
+import {createTouchControls,touchAimDirection} from './touch-controls.js?v=paid-camera-r47';
+import {createHudFeedback} from './hud-feedback.js?v=paid-camera-r47';
+import {createPuzzleDiscovery,encounteredPuzzles} from './puzzle-discovery.js?v=paid-camera-r47';
 const puzzleDiscovery=createPuzzleDiscovery();
 const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
-import {buildArt} from './environment.js?v=progression-balance-r46';
-import {soldier, animateSoldier} from './character.js?v=progression-balance-r46';
-import {weapon, createCombatEffects} from './weapons.js?v=progression-balance-r46';
-import {addRoomDetails} from './room-details.js?v=progression-balance-r46';
-import {createMinimap} from './minimap.js?v=progression-balance-r46';
-import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=progression-balance-r46';
-import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=progression-balance-r46';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=progression-balance-r46';
-import {createPuzzleArt} from './puzzle-art.js?v=progression-balance-r46';
-import {createWeaponPreview} from './weapon-preview.js?v=progression-balance-r46';
-import {createProgression} from './progression.js?v=progression-balance-r46';
-import {createProgressionArt} from './progression-art.js?v=progression-balance-r46';
-import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=progression-balance-r46';
-import {buildWorld} from './world-render.js?v=progression-balance-r46';
-import {createNavigator} from './navigation.js?v=progression-balance-r46';
-import {createGameMenu} from './game-menu.js?v=progression-balance-r46';
-import {createSaveSlots} from './save-slots.js?v=progression-balance-r46';
-import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=progression-balance-r46';
-import {createEconomy} from './economy.js?v=progression-balance-r46';
-import {createExplosions} from './explosion.js?v=progression-balance-r46';
-import {createGameAudio} from './audio.js?v=progression-balance-r46';
-import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved,keyboardAimDirection} from './controls.js?v=progression-balance-r46';
-import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=progression-balance-r46';
-import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=progression-balance-r46';
-import {observeHudLayout} from './interface-layout.js?v=progression-balance-r46';
-import {createMapFocus} from './map-accessibility.js?v=progression-balance-r46';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=progression-balance-r46';
-import {placeLootDrops} from './loot-placement.js?v=progression-balance-r46';
-import {createExplosiveBarrels} from './explosive-barrels.js?v=progression-balance-r46';
-import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=progression-balance-r46';
-import {createFireZones} from './fire-grenades.js?v=progression-balance-r46';
-import {itemIconPath} from './item-icons.js?v=progression-balance-r46';
-import {createLootView} from './loot-view.js?v=progression-balance-r46';
-import {meleeTargets} from './melee.js?v=progression-balance-r46';
-import {createPuzzleHints} from './puzzle-hints.js?v=progression-balance-r46';
-import {createOnboarding} from './onboarding.js?v=progression-balance-r46';
-import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=progression-balance-r46';
-import {validateSnapshot} from './snapshot-validation.js?v=progression-balance-r46';
-import {DIFFICULTY_RULES} from './difficulty.js?v=progression-balance-r46';
-import {createCampaignProfile} from './campaign-profile.js?v=progression-balance-r46';
-import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=progression-balance-r46';
-import {createCampaignProgress} from './campaign-progress.js?v=progression-balance-r46';
-import {buildOperationEnvironment} from './operation-environments.js?v=progression-balance-r46';
-import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=progression-balance-r46';
+import {buildArt} from './environment.js?v=paid-camera-r47';
+import {soldier, animateSoldier} from './character.js?v=paid-camera-r47';
+import {weapon, createCombatEffects} from './weapons.js?v=paid-camera-r47';
+import {addRoomDetails} from './room-details.js?v=paid-camera-r47';
+import {createMinimap} from './minimap.js?v=paid-camera-r47';
+import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=paid-camera-r47';
+import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=paid-camera-r47';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=paid-camera-r47';
+import {createPuzzleArt} from './puzzle-art.js?v=paid-camera-r47';
+import {createWeaponPreview} from './weapon-preview.js?v=paid-camera-r47';
+import {createProgression} from './progression.js?v=paid-camera-r47';
+import {createProgressionArt} from './progression-art.js?v=paid-camera-r47';
+import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=paid-camera-r47';
+import {buildWorld} from './world-render.js?v=paid-camera-r47';
+import {createNavigator} from './navigation.js?v=paid-camera-r47';
+import {createGameMenu} from './game-menu.js?v=paid-camera-r47';
+import {createSaveSlots} from './save-slots.js?v=paid-camera-r47';
+import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=paid-camera-r47';
+import {createEconomy} from './economy.js?v=paid-camera-r47';
+import {createExplosions} from './explosion.js?v=paid-camera-r47';
+import {createGameAudio} from './audio.js?v=paid-camera-r47';
+import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved,keyboardAimDirection} from './controls.js?v=paid-camera-r47';
+import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,missionGuidance,checkpointMatchesOperation} from './session-rules.js?v=paid-camera-r47';
+import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=paid-camera-r47';
+import {observeHudLayout} from './interface-layout.js?v=paid-camera-r47';
+import {createMapFocus} from './map-accessibility.js?v=paid-camera-r47';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=paid-camera-r47';
+import {placeLootDrops} from './loot-placement.js?v=paid-camera-r47';
+import {createExplosiveBarrels} from './explosive-barrels.js?v=paid-camera-r47';
+import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=paid-camera-r47';
+import {createFireZones} from './fire-grenades.js?v=paid-camera-r47';
+import {itemIconPath} from './item-icons.js?v=paid-camera-r47';
+import {createLootView} from './loot-view.js?v=paid-camera-r47';
+import {meleeTargets} from './melee.js?v=paid-camera-r47';
+import {createOnboarding} from './onboarding.js?v=paid-camera-r47';
+import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=paid-camera-r47';
+import {validateSnapshot} from './snapshot-validation.js?v=paid-camera-r47';
+import {DIFFICULTY_RULES} from './difficulty.js?v=paid-camera-r47';
+import {createCampaignProfile} from './campaign-profile.js?v=paid-camera-r47';
+import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=paid-camera-r47';
+import {createCampaignProgress} from './campaign-progress.js?v=paid-camera-r47';
+import {buildOperationEnvironment} from './operation-environments.js?v=paid-camera-r47';
+import {CAMPAIGN_OPERATIONS,normalizeCampaignOperation,deployCampaignOperation,campaignOperationComplete,campaignOperationObjectivesComplete,campaignOperationExit,campaignOperationGuidance} from './campaign-operations.js?v=paid-camera-r47';
 const $=s=>document.querySelector(s), W=WORLD_WIDTH,H=WORLD_HEIGHT;
 const hudFeedback=createHudFeedback({query:$});
 function browserStorage(){try{return compatibleStorage(localStorage);}catch{return null;}}
@@ -77,7 +77,7 @@ const params=new URLSearchParams(location.search);
 const runConfig={mission:['campaign','siege','nest'].includes(params.get('mission'))?params.get('mission'):'campaign',difficulty:['easy','normal','hard'].includes(params.get('difficulty'))?params.get('difficulty'):'normal',operation:normalizeCampaignOperation(params.get('operation')),remix:params.get('remix')==='1'};
 const difficultyRules=DIFFICULTY_RULES;
 const explorationEvents=createExplorationEvents();
-const puzzleHints=createPuzzleHints();const campaignProgress=createCampaignProgress(browserStorage());const fieldSkills=createFieldSkills(browserStorage());let activeFieldSkill=fieldSkills.selected(campaignProgress.completed()),activeFieldSkillState=null;
+const campaignProgress=createCampaignProgress(browserStorage());const fieldSkills=createFieldSkills(browserStorage());let activeFieldSkill=fieldSkills.selected(campaignProgress.completed()),activeFieldSkillState=null;
 function skillEffects(){return fieldSkillEffects(activeFieldSkill);}
 const burstFire=createBurstFire();
 const operationStats=createOperationStats();let tutorial=null,replayRewardId=null;
@@ -88,6 +88,7 @@ let barrelSystem=null,doorHint=null,restoreHintFog=null,guidanceDoorIndex=null;
 let grenadeActions=null;
 let liftTransfer=null;
 let rules=difficultyRules[runConfig.difficulty],menu=null,touchControls=null,mapOpen=false,helpOpen=false,aimMode='mouse',lastPointer=null;
+let guidanceBusy=false;
 let guidanceKey='';let checkpointPending=null,lastCheckpointTime=0;let keyboardAim={x:0,z:-1};const rewardedZones=new Set();
 
 const scene=new THREE.Scene();const lootView=createLootView(scene);scene.background=new THREE.Color('#080e11');
@@ -134,7 +135,7 @@ doors[0].needsPower=true;doors[0].unlocked=false;doors[0].status.material.color.
 const updatePuzzleArt=createPuzzleArt(scene,box,puzzle.crates,puzzle.plates,doors[0]);
 function nearbyDoor(){return doors.filter(d=>Math.hypot(d.x-player.x,d.z-player.z)<2.7).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0];}
 function beginInteraction(){if(beginCrateGrab(puzzle,player,(x,z,r)=>solid(x,z,r,true)))return;interact();}
-function interact(){if(liftTransfer?.nearby(player,runConfig.operation)&&!combatIsActive(player,enemies,progression.state.zones)&&liftTransfer.start(player,runConfig.operation)){releaseCrateGrab(puzzle);touchControls?.reset();keys.clear();shooting=false;burstFire.cancel();grenadeActions?.cancel();audio.door(true);$('#hud-status').textContent='Service lift in transit';return;}const hospitalSampleBefore=!!progression.state.operationTasks?.hospitalSample,hospitalAuthBefore=!!progression.state.operationTasks?.hospitalAuth,freightDrainBefore=!!progression.state.operationTasks?.freightDrain,freightDispatchBefore=!!progression.state.operationTasks?.freightRoute?.running,signalLoadBefore=!!progression.state.operationTasks?.signalLoad,signalShutdownBefore=!!progression.state.operationTasks?.signalShutdown;if(runConfig.operation&&campaignOperationComplete(runConfig.operation,{player,progression})){queueCheckpoint('Sector departed');commitCheckpoint();end(true);return;}if(collectSalvage())return;const artifactsBefore=progression.state.artifacts?.length??0,taskBefore=progression.state.milestone??0,cipherBefore=progression.state.archive.solved,powerBefore=progression.state.power.solved,valvesBefore=progression.state.valves.solved,logsBefore=progression.state.logs.length;if(progression.interact(player)){if((runConfig.operation==='hospital'&&((!hospitalSampleBefore&&progression.state.operationTasks.hospitalSample)||(!hospitalAuthBefore&&progression.state.operationTasks.hospitalAuth)))||(runConfig.operation==='freight'&&((!freightDrainBefore&&progression.state.operationTasks.freightDrain)||(!freightDispatchBefore&&progression.state.operationTasks.freightRoute?.running)))||(runConfig.operation==='signal'&&((!signalLoadBefore&&progression.state.operationTasks.signalLoad)||(!signalShutdownBefore&&progression.state.operationTasks.signalShutdown)))){(runConfig.operation==='signal'?grantSignalAmmo:grantHospitalAmmo)(weapons);audio.pickup('ammo');hud();}if((progression.state.artifacts?.length??0)>artifactsBefore){for(const id of progression.state.artifacts)campaignProgress.recordArtifact(id);}if((progression.state.milestone??0)>taskBefore)queueCheckpoint('Operation milestone');if(!powerBefore&&progression.state.power.solved)queueCheckpoint('Reactor power restored');if(!valvesBefore&&progression.state.valves.solved)queueCheckpoint('Containment vented');if(progression.state.logs.length>logsBefore){for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);queueCheckpoint('Research log recovered');}if(!cipherBefore&&progression.state.archive.solved){queueCheckpoint('Archive cipher solved');audio.puzzle(true);}return;}const d=nearbyDoor();if(!d)return;if(d.progressLocked){toast(d.lockReason);return;}if(d.needsPower&&!d.unlocked){toast('NO POWER · 2 CIRCUITS OFFLINE');return;}const across=d.axis==='x'?Math.abs(player.z-d.z):Math.abs(player.x-d.x),along=d.axis==='x'?Math.abs(player.x-d.x):Math.abs(player.z-d.z);if(d.open&&((across<.6&&along<1.9)||enemies.some(e=>e.hp>0&&Math.abs(e.x-d.x)<(d.axis==='x'?1.9:.6)&&Math.abs(e.z-d.z)<(d.axis==='x'?.6:1.9)))){toast('CLEAR THE DOORWAY FIRST');return;}if(d.slide>.05&&d.slide<.95)return;d.open=!d.open;if(d.open)tutorial?.event('door');d.status.material.color.set(d.open||d.unlocked?0x9ae8a9:0xd7a75f);audio.door(d.open);updateFog();}
+function interact(){if(liftTransfer?.nearby(player,runConfig.operation)&&!combatIsActive(player,enemies,progression.state.zones)&&liftTransfer.start(player,runConfig.operation)){releaseCrateGrab(puzzle);touchControls?.reset();keys.clear();shooting=false;burstFire.cancel();grenadeActions?.cancel();audio.door(true);$('#hud-status').textContent='Service lift in transit';return;}const hospitalSampleBefore=!!progression.state.operationTasks?.hospitalSample,hospitalAuthBefore=!!progression.state.operationTasks?.hospitalAuth,freightDrainBefore=!!progression.state.operationTasks?.freightDrain,freightDispatchBefore=!!progression.state.operationTasks?.freightRoute?.running,signalLoadBefore=!!progression.state.operationTasks?.signalLoad,signalShutdownBefore=!!progression.state.operationTasks?.signalShutdown;if(runConfig.operation&&campaignOperationComplete(runConfig.operation,{player,progression})){queueCheckpoint('Sector departed');commitCheckpoint();end(true);return;}if(collectSalvage())return;const artifactsBefore=progression.state.artifacts?.length??0,taskBefore=progression.state.milestone??0,cipherBefore=progression.state.archive.solved,powerBefore=progression.state.power.solved,valvesBefore=progression.state.valves.solved,logsBefore=progression.state.logs.length;if(progression.interact(player)){if((runConfig.operation==='hospital'&&((!hospitalSampleBefore&&progression.state.operationTasks.hospitalSample)||(!hospitalAuthBefore&&progression.state.operationTasks.hospitalAuth)))||(runConfig.operation==='freight'&&((!freightDrainBefore&&progression.state.operationTasks.freightDrain)||(!freightDispatchBefore&&progression.state.operationTasks.freightRoute?.running)))||(runConfig.operation==='signal'&&((!signalLoadBefore&&progression.state.operationTasks.signalLoad)||(!signalShutdownBefore&&progression.state.operationTasks.signalShutdown)))){(runConfig.operation==='signal'?grantSignalAmmo:grantHospitalAmmo)(weapons);audio.pickup('ammo');hud();}if((progression.state.artifacts?.length??0)>artifactsBefore){for(const id of progression.state.artifacts)campaignProgress.recordArtifact(id);}if((progression.state.milestone??0)>taskBefore)queueCheckpoint('Operation milestone');if(!powerBefore&&progression.state.power.solved)queueCheckpoint('Reactor power restored');if(!valvesBefore&&progression.state.valves.solved)queueCheckpoint('Containment vented');if(progression.state.logs.length>logsBefore){for(const id of progression.state.logs)campaignProgress.recordLog(id);for(const id of progression.state.artifacts??[])campaignProgress.recordArtifact(id);queueCheckpoint('Research log recovered');}if(!cipherBefore&&progression.state.archive.solved){queueCheckpoint('Archive cipher solved');audio.puzzle(true);}return;}const d=nearbyDoor();if(!d)return;if(d.progressLocked){toast('LOCKED');return;}if(d.needsPower&&!d.unlocked){toast('NO POWER');return;}const across=d.axis==='x'?Math.abs(player.z-d.z):Math.abs(player.x-d.x),along=d.axis==='x'?Math.abs(player.x-d.x):Math.abs(player.z-d.z);if(d.open&&((across<.6&&along<1.9)||enemies.some(e=>e.hp>0&&Math.abs(e.x-d.x)<(d.axis==='x'?1.9:.6)&&Math.abs(e.z-d.z)<(d.axis==='x'?.6:1.9)))){toast('CLEAR THE DOORWAY FIRST');return;}if(d.slide>.05&&d.slide<.95)return;d.open=!d.open;if(d.open)tutorial?.event('door');d.status.material.color.set(d.open||d.unlocked?0x9ae8a9:0xd7a75f);audio.door(d.open);updateFog();}
 function actor(color){return soldier(color,scene,box);}
 const primary=primaryWeapon(campaignProfile.state.primary);const weapons={rifle:{...primary,name:primary.name.toUpperCase(),capacity:primary.id==='carbine'?rules.magazine:primary.capacity,ammo:primary.id==='carbine'?rules.magazine:primary.capacity,reserve:primaryReserve(primary.id,runConfig.difficulty)},pistol:{name:'P9 SIDEARM',capacity:12,ammo:12,reserve:rules.pistolReserve,interval:.29,reload:1.1,baseDamage:2,range:22,stagger:.25,pellets:1,spread:0}};let selected='rifle';
 for(const gun of Object.values(weapons)){gun.baseCapacity=gun.capacity;gun.baseReload=gun.reload;}
@@ -157,7 +158,7 @@ function spawnEnemy(x,z,variant='normal',{encounter,rewardIdentity}={}){
 }
 [[8,6,'normal'],[25,6,'runner'],[20,13,'normal'],[25,24,'brute'],[36,7,'runner'],[42,13,'normal'],[42,29,'normal']].forEach(([x,z,type])=>{const e=spawnEnemy(x,z,type);if(e){e.alerted=false;e.spawnDelay=0;removeSpawnCue(e);}});
 
-const progression=createProgression({doors,enemies,spawnEnemy,getDifficulty:()=>runConfig.difficulty,remix:runConfig.remix,onToast:toast});
+const progression=createProgression({doors,enemies,spawnEnemy,getDifficulty:()=>runConfig.difficulty,remix:runConfig.remix,onToast:text=>{const status=puzzleStatusFeedback(text);if(status)toast(status);}});
 // Pre-ledger completed operations already paid into the existing wallet; never pay them again.
 const completedRewardZones={breach:['security','storage'],command:['command','generator'],research:['lab','reactor','transit'],containment:['containment','evacuation'],nest:['nest'],hospital:['hospital-triage','hospital-ward','hospital-isolation'],freight:['freight-pumps','freight-yard','freight-cold'],signal:['signal-yard','signal-relay','signal-uplink']};
 const paidZones=new Set(campaignProgress.completed().flatMap(id=>completedRewardZones[id]??[]));
@@ -190,7 +191,7 @@ function updateFog(){
 }
 
 function bindings(){return menu?.settings.bindings??DEFAULT_BINDINGS;}
-function isRunning(){return !liftTransfer?.active&&active&&!paused&&!ended&&!mapOpen&&!helpOpen&&!doorHint?.isActive()&&!menu?.isOpen();}
+function isRunning(){return !(typeof guidanceBusy!=='undefined'&&guidanceBusy)&&!liftTransfer?.active&&active&&!paused&&!ended&&!mapOpen&&!helpOpen&&!doorHint?.isActive()&&!menu?.isOpen();}
 function isSafeToShop(){return !active||ended;}
 function prepareOperation(){burstFire.cancel();if(active&&!ended){queueCheckpoint('Returned to base');commitCheckpoint();}persistCampaignProfile();active=false;paused=true;shooting=false;keys.clear();audio.setPaused(true);tutorial?.hide();helpOpen=false;$('#controls-help').hidden=true;document.body.classList.remove('playing');return true;}
 function hud(){showWeaponPreview(equippedModelType());$('#cash-amount').textContent='$'+economy.state.credits.toLocaleString();$('#medkit-count').textContent=economy.state.items.medkit;const fireSelected=economy.state.grenadeType==='fire',grenadeCount=economy.state.items[fireSelected?'fireGrenade':'grenade'];$('#grenade-count').textContent=grenadeCount;$('#grenade-type-label').textContent=fireSelected?'Fire':'Frag';$('#grenade-name').textContent=fireSelected?'Fire':'Frag';$('#grenade-icon').src=itemIconPath(fireSelected?'fireGrenade':'grenade');$('#switch-grenade').hidden=!economy.state.items.fireGrenade&&!fireSelected;$('#medkit-key').textContent=formatKey(bindings().medkit);$('#grenade-key').textContent=formatKey(bindings().grenade);$('#use-medkit').setAttribute('aria-label',`Use medkit, ${economy.state.items.medkit} available, key ${formatKey(bindings().medkit)}`);$('#use-grenade').setAttribute('aria-label',`Hold to set range, release to throw ${fireSelected?'fire':'frag'} grenade, ${grenadeCount} available, key ${formatKey(bindings().grenade)}`);$('#use-medkit').classList.toggle('empty',economy.state.items.medkit===0);$('#use-grenade').classList.toggle('empty',grenadeCount===0);$('#armor').textContent=Math.ceil(economy.state.shield)+' ARMOR';$('#armorbar').style.width=(economy.state.shield/60*100)+'%';$('.armor-track').setAttribute('aria-valuenow',String(economy.state.shield));$('#health').textContent=Math.ceil(player.hp);$('#healthbar').style.width=(player.hp/player.maxHp*100)+'%';$('#ammo').textContent=`${player.ammo} / ${weapons[selected].capacity}`;$('#reserve').textContent=reload>0?'RELOADING…':weapons[selected].reserve+' RESERVE';$('.player-status').classList.toggle('low-health',player.hp>0&&player.hp<=player.maxHp*.3);$('.ammo-status').classList.toggle('empty-magazine',player.ammo===0&&reload===0);$('.ammo-status').classList.toggle('low-ammo',player.ammo>0&&player.ammo<=Math.max(1,Math.floor(weapons[selected].capacity*.2)));$('.ammo-status').classList.toggle('out-of-ammo',player.ammo===0&&weapons[selected].reserve===0);$('.ammo-status').classList.toggle('reloading',reload>0);$('#weapon').textContent=weapons[selected].name;$('#rooms').textContent=`${seenRooms.size} / ${roomDefs.length}`;}
@@ -246,7 +247,7 @@ function pauseRun(){liftTransfer?.cancel(player);burstFire.cancel();
  if(mapOpen){mapOpen=false;mapFocus.close();drawMinimap.setExpanded(false);$('.map-panel').classList.remove('map-expanded');$('.map-panel').style.display=menu?.settings?.showMinimap===false?'none':'block';$('#toggle-map').textContent='EXPAND  '+formatKey(bindings().map);$('#toggle-map').setAttribute('aria-label','Open map');}
  paused=true;shooting=false;keys.clear();simulation.reset();audio.setPaused(true);$('#pause').textContent='RESUME  ESC';menu?.show('pause');
 }
-function togglePause(){
+function togglePause(){if(guidanceBusy)return;
  if(mapOpen){toggleMap();return;}
  if(!active||ended)return;
  if(menu?.isOpen()){resumeRun();menu.hide();return;}
@@ -261,9 +262,20 @@ function navigateBack(){
 }
 addEventListener('nulldelve-back',event=>{if(navigateBack())event.preventDefault();});
 $('#pause').onclick=togglePause;
-function toggleHelp(){burstFire.cancel();if(!active||ended||menu?.isOpen())return;if(typeof puzzle!=='undefined')puzzle.grabbed=null;if(typeof grenadeActions!=='undefined')grenadeActions?.cancel();touchControls?.reset();helpOpen=!helpOpen;const help=$('#controls-help');help.hidden=!helpOpen;$('#help-button').setAttribute('aria-expanded',String(helpOpen));keys.clear();shooting=false;simulation.reset();if(helpOpen){refreshHelp();help.focus?.();}else renderer.domElement.focus();}
+function toggleHelp(){if(guidanceBusy)return;burstFire.cancel();if(!active||ended||menu?.isOpen())return;if(typeof puzzle!=='undefined')puzzle.grabbed=null;if(typeof grenadeActions!=='undefined')grenadeActions?.cancel();touchControls?.reset();helpOpen=!helpOpen;const help=$('#controls-help');help.hidden=!helpOpen;$('#help-button').setAttribute('aria-expanded',String(helpOpen));keys.clear();shooting=false;simulation.reset();if(helpOpen){refreshHelp();help.focus?.();}else renderer.domElement.focus();}
 $('#help-button').onclick=toggleHelp;
-$('#replay-guidance').onclick=()=>{const door=doors[guidanceDoorIndex];if(!isRunning()||!door?.hintTarget)return;if(combatIsActive(player,enemies,progression.state.zones)){toast('CAMERA LEAD AVAILABLE AFTER COMBAT');return;}doorHint.repeat(String(guidanceDoorIndex),door.hintTarget,player);};
+$('#replay-guidance').onclick=async()=>{
+ if(!isRunning()||guidanceBusy)return;
+ const step=nextGuidanceStep({operation:runConfig.operation,mission:runConfig.mission,player,puzzle,progression});
+ if(!step){toast('NO CAMERA STEP AVAILABLE');return;}
+ guidanceBusy=true;touchControls?.reset();keys.clear();shooting=false;burstFire.cancel();grenadeActions?.cancel();
+ try{
+  await campaignProfile.flushRewards();
+  const result=await campaignProfile.purchaseOffer('guidance');
+  if(!result.ok){toast(result.message);return;}
+  doorHint.repeat('paid-'+step.id,step,player);hud();updateDeploymentTransfer();queueCheckpoint('Camera assistance purchased');
+ }catch{toast('CAMERA PURCHASE FAILED');}finally{guidanceBusy=false;renderer.domElement.focus();}
+};
 $('#switch-grenade').onclick=()=>{if(isRunning())cycleGrenade();renderer.domElement.focus();};
 $('#use-medkit').onclick=()=>{if(isRunning())useMedkit();renderer.domElement.focus();};$('#use-grenade').onclick=event=>{if(event.detail===0&&isRunning())throwGrenade();renderer.domElement.focus();};const grenadeButton=$('#use-grenade');let grenadePointer=null;
 grenadeButton.addEventListener('pointerdown',event=>{if(!isRunning()||event.button>0||grenadePointer!==null)return;event.preventDefault();grenadePointer=event.pointerId;grenadeButton.setPointerCapture?.(event.pointerId);beginGrenadeCharge();});
@@ -271,14 +283,15 @@ grenadeButton.addEventListener('pointerup',event=>{if(event.pointerId!==grenadeP
 function cancelGrenadePointer(event){if(event&&event.type!=='resize'&&event.pointerId!==grenadePointer)return;grenadePointer=null;cancelGrenadeCharge();}
 grenadeButton.addEventListener('pointercancel',cancelGrenadePointer);grenadeButton.addEventListener('lostpointercapture',cancelGrenadePointer);window.addEventListener('resize',cancelGrenadePointer);
 
-function toggleMap(){burstFire.cancel();
+function toggleMap(){if(guidanceBusy)return;burstFire.cancel();
  if(typeof puzzle!=='undefined')puzzle.grabbed=null;
  if(menu?.isOpen()||ended)return;if(typeof grenadeActions!=='undefined')grenadeActions?.cancel();touchControls?.reset();mapOpen=!mapOpen;shooting=false;keys.clear();drawMinimap.setExpanded(mapOpen);$('.map-panel').classList.toggle('map-expanded',mapOpen);$('#toggle-map').textContent=(mapOpen?'CLOSE MAP  ':'EXPAND  ')+formatKey(bindings().map);$('#toggle-map').setAttribute('aria-label',mapOpen?'Close map':'Open map');$('.map-panel').style.display=mapOpen||menu?.settings.showMinimap?'block':'none';drawMinimap(visibleTiles);if(mapOpen)mapFocus.open();else{mapFocus.close();renderer.domElement.focus();}
 }
 $('#toggle-map').onclick=toggleMap;
 touchControls=createTouchControls({host:$('#touch-controls'),isRunning,onAction:action=>{if(action==='interact')beginInteraction();if(action==='interactEnd')releaseCrateGrab(puzzle);if(action==='reload')beginReload();if(action==='weapon')equip(selected==='rifle'?'pistol':'rifle');if(action==='knife')knifeStrike();if(action==='fire')shoot();renderer.domElement.focus();}});
 const mapFocus=createMapFocus({panel:$('.map-panel'),closeButton:$('#toggle-map'),onClose:toggleMap});
-doorHint=createDoorHintCamera({onBegin:target=>{touchControls?.reset();restoreHintFog=previewFog(fogPixels,W,H,map,target);fogTexture.needsUpdate=true;renderer.domElement.style.filter=`brightness(${menu?.settings.brightness??1}) grayscale(1)`;keys.clear();shooting=false;for(const enemy of enemies){enemy.mesh.visible=false;if(enemy.healthBar)enemy.healthBar.group.visible=false;}lootView.update(loot,()=>false,time);barrelSystem.update(()=>false);toast('LOCKED · '+target.label);},onEnd:()=>{restoreHintFog?.();restoreHintFog=null;fogTexture.needsUpdate=true;renderer.domElement.style.filter=`brightness(${menu?.settings.brightness??1})`;focus.x=player.x;focus.z=player.z;updateFog();lootView.update(loot,visible,time);barrelSystem.update(visible);}});
+const paidLeadMarker=new THREE.Mesh(new THREE.RingGeometry(.42,.56,32),new THREE.MeshBasicMaterial({color:0x94d3ef,transparent:true,opacity:.95,depthWrite:false,side:THREE.DoubleSide}));paidLeadMarker.rotation.x=-Math.PI/2;paidLeadMarker.visible=false;scene.add(paidLeadMarker);
+doorHint=createDoorHintCamera({onBegin:target=>{paidLeadMarker.position.set(target.x,.09,target.z);paidLeadMarker.visible=true;touchControls?.reset();restoreHintFog=previewFog(fogPixels,W,H,map,target);fogTexture.needsUpdate=true;renderer.domElement.style.filter=`brightness(${menu?.settings.brightness??1}) grayscale(1)`;keys.clear();shooting=false;for(const enemy of enemies){enemy.mesh.visible=false;if(enemy.healthBar)enemy.healthBar.group.visible=false;}lootView.update(loot,()=>false,time);barrelSystem.update(()=>false);toast(target.label);},onEnd:()=>{paidLeadMarker.visible=false;restoreHintFog?.();restoreHintFog=null;fogTexture.needsUpdate=true;renderer.domElement.style.filter=`brightness(${menu?.settings.brightness??1})`;focus.x=player.x;focus.z=player.z;updateFog();lootView.update(loot,visible,time);barrelSystem.update(visible);}});
 addEventListener('keydown',e=>{
  void audio.unlock();if(e.defaultPrevented)return;
  if(doorHint?.isActive()){e.preventDefault();if(e.code==='Escape'||actionForCode(e.code,bindings())==='interact')doorHint.skip();return;}
@@ -311,7 +324,7 @@ function frameCamera(dt=0){const {height:h,width:w}=cameraFraming.update(viewHei
 function resize(){if(menu)document.documentElement.style.setProperty('--hud-scale',String(menu.settings.hudScale??1));frameCamera();renderer.setPixelRatio(renderPixelRatio(menu?.settings.quality??'medium',{width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio}));renderer.setSize(innerWidth,innerHeight);}
 addEventListener('resize',resize);renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();if(touchControls?.enabled)return;viewHeight=THREE.MathUtils.clamp(viewHeight+Math.sign(e.deltaY)*1.5,14,32);if(menu)menu.settings.zoom=viewHeight;},{passive:false});resize();
 function simulate(dt){
- if(isRunning()){const lockedDoor=nearbyDoor();if(lockedDoor?.hintTarget)guidanceDoorIndex=doors.indexOf(lockedDoor);operationStats.elapsed+=dt;for(const d of doors)d.slide=THREE.MathUtils.clamp(d.slide+(d.open?1:-1)*dt*2.7,0,1);const touch=touchControls?.getState();if(!keys.has(bindings().interact)&&!touch?.interactHeld)releaseCrateGrab(puzzle);let dx=Number(keys.has(bindings().moveRight))-Number(keys.has(bindings().moveLeft))+(touch?.move.x??0),dz=Number(keys.has(bindings().moveDown))-Number(keys.has(bindings().moveUp))+(touch?.move.z??0);const l=Math.max(1,Math.hypot(dx,dz)),speed=puzzle.grabbed!=null?2.4:keys.has(bindings().sprint)||touch?.sprint?6*skillEffects().sprintMultiplier:4;move(player,dx/l*dt*speed,dz/l*dt*speed);if(updatePressurePuzzle(puzzle,player)){doors[0].unlocked=true;$('#hint').textContent='Door powered. Use '+formatKey(bindings().interact)+' at the green indicator.';toast('BOTH CIRCUITS ONLINE · DOOR READY · '+formatKey(bindings().interact));queueCheckpoint('Insertion door powered');audio.puzzle(true);}updatePuzzleArt();progression.update(player,dt);mutationNotes.record(enemies,visible);puzzleDiscovery.record(encounteredPuzzles({player,devices:progression.state.devices,plates:puzzle.plates,visible}));const ax=Number(keys.has(bindings().aimRight))-Number(keys.has(bindings().aimLeft)),az=Number(keys.has(bindings().aimDown))-Number(keys.has(bindings().aimUp));if((ax||az)&&menu?.settings.aimMode!=='mouse'){const length=Math.hypot(ax,az);keyboardAim={x:ax/length,z:az/length};aimMode='keyboard';}const touchDirection=touchAimDirection(touch);if(touchDirection){keyboardAim=touchDirection;aimMode='keyboard';}if(ax||az||touchDirection)tutorial?.event('aim');tutorial?.update(player,puzzle);if(aimMode==='keyboard')aim.set(player.x+keyboardAim.x*10,0,player.z+keyboardAim.z*10);else{ray.setFromCamera(mouse,camera);ray.ray.intersectPlane(plane,aim);}if(Math.hypot(aim.x-player.x,aim.z-player.z)>.05)player.angle=Math.atan2(-(aim.x-player.x),-(aim.z-player.z));grenadeActions?.update(dt,player,aim,solid);advanceWeaponTimers(dt);player.hurtGrace=Math.max(0,(player.hurtGrace??0)-dt);burstFire.update(dt,()=>{if(!isRunning()||reload>0||player.ammo<=0)return false;shoot(true);return !ended;});if(shooting||touch?.firing||keys.has(bindings().fire))shoot();if(ended)return;
+ if(isRunning()){const lockedDoor=nearbyDoor();if(lockedDoor?.hintTarget)guidanceDoorIndex=doors.indexOf(lockedDoor);operationStats.elapsed+=dt;for(const d of doors)d.slide=THREE.MathUtils.clamp(d.slide+(d.open?1:-1)*dt*2.7,0,1);const touch=touchControls?.getState();if(!keys.has(bindings().interact)&&!touch?.interactHeld)releaseCrateGrab(puzzle);let dx=Number(keys.has(bindings().moveRight))-Number(keys.has(bindings().moveLeft))+(touch?.move.x??0),dz=Number(keys.has(bindings().moveDown))-Number(keys.has(bindings().moveUp))+(touch?.move.z??0);const l=Math.max(1,Math.hypot(dx,dz)),speed=puzzle.grabbed!=null?2.4:keys.has(bindings().sprint)||touch?.sprint?6*skillEffects().sprintMultiplier:4;move(player,dx/l*dt*speed,dz/l*dt*speed);if(updatePressurePuzzle(puzzle,player)){doors[0].unlocked=true;toast('ACCEPTED');queueCheckpoint('Insertion door powered');audio.puzzle(true);}updatePuzzleArt();progression.update(player,dt);mutationNotes.record(enemies,visible);puzzleDiscovery.record(encounteredPuzzles({player,devices:progression.state.devices,plates:puzzle.plates,visible}));const ax=Number(keys.has(bindings().aimRight))-Number(keys.has(bindings().aimLeft)),az=Number(keys.has(bindings().aimDown))-Number(keys.has(bindings().aimUp));if((ax||az)&&menu?.settings.aimMode!=='mouse'){const length=Math.hypot(ax,az);keyboardAim={x:ax/length,z:az/length};aimMode='keyboard';}const touchDirection=touchAimDirection(touch);if(touchDirection){keyboardAim=touchDirection;aimMode='keyboard';}if(ax||az||touchDirection)tutorial?.event('aim');tutorial?.update(player,puzzle);if(aimMode==='keyboard')aim.set(player.x+keyboardAim.x*10,0,player.z+keyboardAim.z*10);else{ray.setFromCamera(mouse,camera);ray.ray.intersectPlane(plane,aim);}if(Math.hypot(aim.x-player.x,aim.z-player.z)>.05)player.angle=Math.atan2(-(aim.x-player.x),-(aim.z-player.z));grenadeActions?.update(dt,player,aim,solid);advanceWeaponTimers(dt);player.hurtGrace=Math.max(0,(player.hurtGrace??0)-dt);burstFire.update(dt,()=>{if(!isRunning()||reload>0||player.ammo<=0)return false;shoot(true);return !ended;});if(shooting||touch?.firing||keys.has(bindings().fire))shoot();if(ended)return;
  const livingEnemies=enemies.filter(enemy=>enemy.hp>0);
  for(const e of livingEnemies){
    if((e.spawnDelay??0)>0){e.spawnDelay=Math.max(0,e.spawnDelay-dt);e.mesh.visible=false;if(e.spawnCue){e.spawnCue.visible=visible(e.x,e.z);e.spawnCue.scale.setScalar(1+(.7-e.spawnDelay)*.6);e.spawnCue.material.opacity=.35+Math.sin(time*18)*.2;}if(e.spawnDelay===0)removeSpawnCue(e);continue;}
@@ -352,9 +365,9 @@ let last=performance.now(),lastPausedRender=0;renderer.setAnimationLoop(()=>{
  const dt=Math.min(elapsed,.1);if(liftTransfer.active&&active&&!paused&&!mapOpen&&!helpOpen&&!menu?.isOpen()){if(liftTransfer.update(dt,player)){touchControls?.reset();keys.clear();shooting=false;updateFog();audio.door(false);$('#hud-status').textContent='Service lift arrived';}liftCurtain.style.opacity=liftTransfer.active?String(Math.sin(liftTransfer.progress*Math.PI)*.9):'0';}else liftCurtain.style.opacity='0';let running=isRunning();if(running)time+=dt;audio.setPaused(!running);simulation.advance(elapsed,simulate,running);running=isRunning();if(!running&&!liftTransfer.active&&!doorHint?.isActive()&&now-lastPausedRender<250)return;if(!running)lastPausedRender=now;const hintFocus=doorHint?.update(dt,player);
 
  for(const d of doors){d.group.position.set(d.x+(d.axis==='x'?d.slide*3:0),0,d.z+(d.axis==='z'?d.slide*3:0));if(d!==doors[0])d.status.material.color.set(d.progressLocked?0xe57c59:0x92d9a6);}
- const guidanceDoor=doors[guidanceDoorIndex];$('#replay-guidance').hidden=!active||!!menu?.isOpen()||!guidanceDoor?.hintTarget;$('#replay-guidance').disabled=!!doorHint?.isActive();
+ const cameraButton=$('#replay-guidance');cameraButton.hidden=!active||ended||!!menu?.isOpen();cameraButton.disabled=guidanceBusy||!!doorHint?.isActive();cameraButton.classList.toggle('unaffordable',economy.state.credits<GUIDANCE_COST);
  salvageArt.update();const explorationFrame=explorationEvents.update(dt,{player,operation:runConfig.operation,visible,enabled:running});explorationArt.update(explorationFrame.active);if(explorationFrame.started.length)queueCheckpoint('Service recess discovered');
- const nearest=isRunning()?nearbyDoor():null;const cashCache=isRunning()?nearbySalvage():null;const devicePrompt=cashCache?`E · SALVAGE · $${cashCache.amount}`:isRunning()?progression.getPrompt(player):null;const sectorExit=runConfig.operation?campaignOperationExit(runConfig.operation):null,exitReady=!!sectorExit&&campaignOperationObjectivesComplete(runConfig.operation,{player,progression});missionPoints.exit=runConfig.operation?(exitReady?sectorExit:null):{x:92,z:60};missionPoints.intel=runConfig.operation&&runConfig.operation!=='nest'?null:{x:93,z:7};sectorExitMarker.visible=exitReady&&visible(sectorExit.x,sectorExit.z);if(exitReady)sectorExitMarker.position.set(sectorExit.x,.06,sectorExit.z);const exitPrompt=isRunning()&&exitReady&&Math.hypot(player.x-sectorExit.x,player.z-sectorExit.z)<=1.4?(runConfig.operation==='nest'?'E · EVACUATE':'E · LEAVE SECTOR'):null;const cratePrompt=isRunning()?(puzzle.grabbed!=null?'E · RELEASE TO LET GO':nearestPullableCrate(puzzle,player,(x,z,r)=>solid(x,z,r,true))?'E · HOLD TO GRAB CRATE':null):null;$('#interact').textContent=(cratePrompt||exitPrompt||(isRunning()&&!combatIsActive(player,enemies,progression.state.zones)&&liftTransfer.nearby(player,runConfig.operation)?'E · RIDE LIFT':null)||devicePrompt||(nearest?(nearest.progressLocked?'E · LOCKED · '+nearest.lockReason:nearest.needsPower&&!nearest.unlocked?'E · LOCKED · NO POWER':`E · ${nearest.open?'CLOSE':'OPEN'} DOOR`):'')).replace(/^E · /,formatKey(bindings().interact)+' · ');
+ const nearest=isRunning()?nearbyDoor():null;const cashCache=isRunning()?nearbySalvage():null;const devicePrompt=cashCache?`E · SALVAGE · $${cashCache.amount}`:isRunning()?progression.getPrompt(player):null;const sectorExit=runConfig.operation?campaignOperationExit(runConfig.operation):null,exitReady=!!sectorExit&&campaignOperationObjectivesComplete(runConfig.operation,{player,progression});missionPoints.exit=runConfig.operation?(exitReady?sectorExit:null):{x:92,z:60};missionPoints.intel=runConfig.operation&&runConfig.operation!=='nest'?null:{x:93,z:7};sectorExitMarker.visible=exitReady&&visible(sectorExit.x,sectorExit.z);if(exitReady)sectorExitMarker.position.set(sectorExit.x,.06,sectorExit.z);const exitPrompt=isRunning()&&exitReady&&Math.hypot(player.x-sectorExit.x,player.z-sectorExit.z)<=1.4?(runConfig.operation==='nest'?'E · EVACUATE':'E · LEAVE SECTOR'):null;const cratePrompt=isRunning()?(puzzle.grabbed!=null?'E · RELEASE TO LET GO':nearestPullableCrate(puzzle,player,(x,z,r)=>solid(x,z,r,true))?'E · HOLD TO GRAB CRATE':null):null;$('#interact').textContent=(cratePrompt||exitPrompt||(isRunning()&&!combatIsActive(player,enemies,progression.state.zones)&&liftTransfer.nearby(player,runConfig.operation)?'E · RIDE LIFT':null)||devicePrompt||(nearest?(nearest.progressLocked?'E · LOCKED':nearest.needsPower&&!nearest.unlocked?'E · LOCKED · NO POWER':`E · ${nearest.open?'CLOSE':'OPEN'} DOOR`):'')).replace(/^E · /,formatKey(bindings().interact)+' · ');
  touchControls?.setInteractAvailable($('#interact').textContent);
  for(const mesh of [playerMesh]){if(!paused)mesh.userData.flashTime=Math.max(0,mesh.userData.flashTime-dt);mesh.userData.flash.visible=mesh.userData.flashTime>0;}
  const stairHeight=stairHeightAt(player.x,player.z);playerMesh.position.set(player.x,stairHeight,player.z);playerMesh.rotation.y=player.angle;if(isRunning()){animateSoldier(playerMesh,active?dt:0,reload>0?{progress:1-reload/reloadDuration(),type:equippedModelType()}:false);for(const e of enemies)if(e.hp>0&&e.mesh.visible)animateRoach(e.mesh,active?dt:0);}combatEffects.update(running?dt:0);explosions.update(running?dt:0);updateProgressionArt(time);ring.material.color.set(player.hurtGrace>0?0xf2b26f:0xb7f8c6);ring.position.set(player.x,stairHeight+.05,player.z);if(hintFocus){focus.x=hintFocus.x;focus.z=hintFocus.z;}else{focus.x+=(player.x-focus.x)*(1-Math.exp(-7*dt));focus.z+=(player.z-focus.z)*(1-Math.exp(-7*dt));}frameCamera(dt);camera.position.set(focus.x,40,focus.z);camera.lookAt(focus.x,0,focus.z);camera.updateMatrixWorld();if(aimMode==='keyboard'&&active){const screen=aim.clone().project(camera);$('#crosshair').style.left=THREE.MathUtils.clamp((screen.x+1)*innerWidth/2,16,innerWidth-16)+'px';$('#crosshair').style.top=THREE.MathUtils.clamp((1-screen.y)*innerHeight/2,16,innerHeight-16)+'px';}sun.position.set(player.x-18,35,player.z+3);sun.target.position.set(player.x,0,player.z);if(running)fogTick+=dt;if(running&&fogTick>.07){updateFog();fogTick=0;}intelMesh.rotation.y=time;for(let i=tracers.length-1;i>=0;i--){tracers[i].life-=dt;if(tracers[i].life<=0){scene.remove(tracers[i].line);tracers[i].line.geometry.dispose();tracers[i].line.material.dispose();tracers.splice(i,1);}}if(running){lootView.update(loot,visible,time);barrelSystem.update(visible);}renderer.render(scene,camera);
@@ -398,10 +411,10 @@ function restoreSnapshot(data){burstFire.cancel();
 
  reload=Math.max(0,reload);refreshPlayerWeapon();persistCampaignProfile();refreshGuidance(true);updateFog();hud();if(retainPurchases)queueCheckpoint('Loadout updated');return true;
 }
-function startOperation(saveInitial=true){let replayIssue=null;if(saveInitial&&runConfig.mission==='campaign'){const attempt=campaignProfile.beginReplayAttempt(runConfig.operation);replayRewardId=attempt.ok?attempt.rewardId:null;if(!attempt.ok&&campaignProgress.completed().includes(runConfig.operation))replayIssue=attempt.message??'Replay payout unavailable for this deployment.';}active=true;ended=false;resumeRun();menu?.hide();renderer.domElement.focus();if(saveInitial&&runConfig.mission==='campaign'&&(!runConfig.operation||runConfig.operation==='breach'))tutorial?.start(player,{touch:!!touchControls?.enabled});toast(replayIssue??operationTitle().toUpperCase());if(saveInitial)queueCheckpoint('Operation deployment');if(checkpointPending)commitCheckpoint();}
+function startOperation(saveInitial=true){let replayIssue=null;if(saveInitial&&runConfig.mission==='campaign'){const attempt=campaignProfile.beginReplayAttempt(runConfig.operation);replayRewardId=attempt.ok?attempt.rewardId:null;if(!attempt.ok&&campaignProgress.completed().includes(runConfig.operation))replayIssue=attempt.message??'Replay payout unavailable for this deployment.';}active=true;ended=false;resumeRun();menu?.hide();renderer.domElement.focus();toast(replayIssue??operationTitle().toUpperCase());if(saveInitial)queueCheckpoint('Operation deployment');if(checkpointPending)commitCheckpoint();}
 function queueLoad(slot){const snapshot=saveSlots.load(slot);if(!snapshot)throw new Error('This save slot is empty or could not be read.');try{compatibleStorage(sessionStorage).setItem('nulldelve.pendingLoad',JSON.stringify(snapshot));}catch{throw new Error('Browser session storage is unavailable. Enable storage to load this save.');}location.href=location.pathname+'?play=load';return true;}
 menu=createGameMenu({overlay:$('#overlay'),
- getStatus:()=>({active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()||fieldSkills.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),skillState:fieldSkills.serialize(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:currentGuidance().steps,armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(activeFieldSkill),items:economy.state.items,sidearm:{stats:effectiveFieldStats({damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload},activeFieldSkill)},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
+ getStatus:()=>({active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()||fieldSkills.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),skillState:fieldSkills.serialize(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:[],armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(activeFieldSkill),items:economy.state.items,sidearm:{stats:effectiveFieldStats({damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload},activeFieldSkill)},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
  onPrepareOperation:prepareOperation,
  onFieldSkill:id=>{if(!isSafeToShop())return {ok:false,message:"Choose a field skill before deployment."};const result=id.startsWith('learn:')?fieldSkills.learn(id.slice(6),campaignProgress.completed()):fieldSkills.equip(id,campaignProgress.completed());if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());activeFieldSkillState=null;updateDeploymentTransfer();}return result;},
  onRespecFieldSkills:()=>{if(!isSafeToShop())return {ok:false,message:'Reset training at base before deployment.'};const result=fieldSkills.respec(campaignProgress.completed(),{atBase:true});if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());activeFieldSkillState=null;updateDeploymentTransfer();}return result;},
@@ -461,13 +474,11 @@ function cycleGrenade(){economy.state.grenadeType=economy.state.grenadeType==='f
 function removeSpawnCue(enemy){if(!enemy.spawnCue)return;scene.remove(enemy.spawnCue);enemy.spawnCue.geometry.dispose();enemy.spawnCue.material.dispose();enemy.spawnCue=null;}
 function missionCue(title){if(/evacuat|extract|exit|leave/i.test(title))return 'exit';if(/clear|survive|destroy|defeat|hold off/i.test(title))return 'combat';if(/power|relay|link|restore|charge|circuit/i.test(title))return 'power';return 'search';}
 function currentGuidance(){return campaignOperationGuidance(runConfig.operation,{player,puzzle,progression})??missionGuidance({mission:runConfig.mission,player,puzzle,progression:progression.state});}
-function refreshGuidance(force=false){const g=currentGuidance(),key=g.title+'|'+g.hint;if(force||key!==guidanceKey){if($('#objective').textContent!==g.title){const disclosure=$('#objective').closest?.('.mission-guidance');if(disclosure)disclosure.open=false;}guidanceKey=key;$('#objective').textContent=g.title;$('#objective').dataset.cue=missionCue(g.title);$('#hint').textContent=g.hint;$('#intel').textContent=player.intel?'◆':'◇';$('#intel').setAttribute('aria-label',player.intel?'Intel secured':'Intel not recovered');$('#intel').title=player.intel?'Intel secured':'Intel not recovered';$('#intel').hidden=runConfig.mission==='campaign'&&runConfig.operation&&runConfig.operation!=='nest';}}
+function refreshGuidance(force=false){$('#hint').textContent='';$('#objective').textContent='';$('.mission-note').hidden=true;}
 function refreshHelp(){
  const b=bindings(),help=$('#controls-help');$('#toggle-map').textContent=(mapOpen?'CLOSE MAP  ':'EXPAND  ')+formatKey(b.map);$('#help-button').setAttribute('aria-label','Controls help, '+formatKey(b.help));if(!help)return;help.setAttribute('tabindex','-1');help.setAttribute('role','region');help.setAttribute('aria-label','Controls help; play is paused');help.replaceChildren();const heading=document.createElement('strong');heading.textContent='CONTROLS · GAME PAUSED';help.append(heading);
  const rows=[[`${formatKey(b.moveUp)} ${formatKey(b.moveLeft)} ${formatKey(b.moveDown)} ${formatKey(b.moveRight)}`,'Move'],[['aimUp','aimLeft','aimDown','aimRight'].map(k=>formatKey(b[k])).join(' / '),'Aim (or mouse)'],['CLICK / '+formatKey(b.fire),'Fire'],[formatKey(b.knife),'Knife'],[formatKey(b.interact),'Interact / hold to drag crate'],[formatKey(b.reload),'Reload'],[formatKey(b.sprint),'Sprint'],[formatKey(b.rifle)+' / '+formatKey(b.pistol),'Weapons'],[formatKey(b.medkit),'Medkit'],[formatKey(b.grenade),'Hold / release grenade'],[formatKey(b.cycleGrenade),'Switch frag / fire'],[formatKey(b.map),'Full map'],[formatKey(b.resetPuzzle),'Reset crates'],[formatKey(b.help),'Close help']];
  if(touchControls?.enabled){const text=document.createElement('p');text.textContent='Movement stick: move and aim; push its edge to sprint. Hold the separate Fire button to shoot; release to stop. Hold the grenade icon for range, release to throw. Hold Interact beside a crate and move to drag it. Release to let go. Tap other action icons to reload, swap, or strike.';help.append(text);if(!puzzle.solved){const reset=document.createElement('button');reset.type='button';reset.textContent='Reset crates';reset.onclick=()=>{resetPressurePuzzle(puzzle,player);updatePuzzleArt();updateFog();toggleHelp();};help.append(reset);}}else for(const [key,label] of rows){const span=document.createElement('span'),kbd=document.createElement('kbd');kbd.textContent=key;span.append(kbd,document.createTextNode(' '+label));help.append(span);}
- const hintContext={player,puzzle,progression};const hintInfo=puzzleHints.get(hintContext);if(hintInfo.available){const hintText=document.createElement('p');hintText.className='puzzle-hint-text';hintText.hidden=true;const request=document.createElement('button');request.type='button';request.className='puzzle-hint-button';request.textContent='Puzzle hint';request.onclick=()=>{const hint=puzzleHints.request(hintContext);hintText.textContent=hint.text;hintText.hidden=false;request.textContent=hint.stage===2?'Repeat clue':hint.stage===1?'Another clue':'More help';};help.append(request,hintText);}
- {const replay=document.createElement('button');replay.type='button';replay.textContent='Replay training';replay.onclick=()=>{tutorial?.start(player,{force:true,touch:!!touchControls?.enabled});toggleHelp();};help.append(replay);}
  const close=document.createElement('button');close.type='button';close.textContent='Back to game';close.onclick=toggleHelp;help.append(close);
 }
 refreshGuidance(true);

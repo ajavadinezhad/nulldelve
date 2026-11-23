@@ -125,3 +125,14 @@ aside.mission-note .mission-guidance[open]>#hint{max-height:clamp(36px,calc(100d
 #interact.hud-pulse-warning::after{content:'×';color:#f09b91}
 
 #lift-transition{position:fixed;inset:0;z-index:17;pointer-events:none;background:linear-gradient(90deg,#121923,#05090e 45%,#121923);opacity:0}
+
+/* Paid camera help is a small, stable HUD action; no automatic clue panel. */
+.hud-menu-controls #replay-guidance{position:static;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex:none;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:3px;border-radius:9px;letter-spacing:0;touch-action:manipulation}
+.hud-menu-controls #replay-guidance[hidden]{display:none}
+.hud-menu-controls #replay-guidance img{width:23px;height:23px;display:block}
+.hud-menu-controls #replay-guidance small{font:10px/1 ui-monospace,monospace;color:#d5c5a8}
+.hud-menu-controls #replay-guidance::before{display:none}
+.hud-menu-controls #replay-guidance.unaffordable{opacity:.6}
+.hud-menu-controls #replay-guidance:disabled{opacity:.45}
+.hud-menu-controls #replay-guidance:focus-visible{outline:2px solid #efba62;outline-offset:3px}
+aside.mission-note[hidden]{display:none!important}

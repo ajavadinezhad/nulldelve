@@ -72,12 +72,12 @@ test('actual browser capture/restore roundtrip preserves equipment, world discov
  const security=ctx.progression.state.zones.find(z=>z.id==='security'),savedZone=saved.progression.zones.find(z=>z.id==='security');assert.equal(security.status,'active');assert.deepEqual(plain(security.queue),savedZone.queue);assert.equal(security.spawned,savedZone.spawned);
  for(const enemy of security.wave)assert.equal(enemy,ctx.enemies.find(e=>e.id===enemy.id),'wave must refer to the live restored enemy objects');
  const restored=ctx.enemies.find(e=>e.id===saved.enemies[0].id);assert.equal(restored.attackWindup,.2);assert.equal(restored.staggerTime,.12);assert.equal(restored.spawnDelay,.3);assert.equal(restored.maxHp,2);
- assert.match(target.elements.get('#objective').textContent,/security purge/i);assert.match(target.elements.get('#hint').textContent,/reinforcements/);assert.notEqual(target.elements.get('#hint').textContent,'Search the dark rooms. Watch your corners.');
+ assert.equal(target.elements.get('#objective').textContent,'');assert.equal(target.elements.get('#hint').textContent,'');assert.equal(target.elements.get('.mission-note').hidden,true);
  assert.deepEqual(target.capture(),saved,'a second capture preserves all serialized session fields');
 });
-test('actual save restoration reconstructs the next puzzle instruction after room-entry flags were already saved',()=>{
+test('save restoration does not bring free puzzle instructions back',()=>{
  const saved=populatedSnapshot();saved.enemies=[];saved.progression.relay={started:false,remaining:0,completed:false};for(const zone of saved.progression.zones){zone.rewardQueue=[];zone.waveRewardIds=[];zone.status='dormant';zone.waveIds=[];zone.waveVariants=[];zone.queue=[];zone.spawned=0;zone.spawnTimer=0;}
- saved.progression.archiveEntered=true;saved.progression.securityEntered=true;const target=session();assert.equal(target.restore(saved),true);assert.equal(target.elements.get('#objective').textContent,'Link the security relays');assert.match(target.elements.get('#hint').textContent,/eight seconds/);
+ saved.progression.archiveEntered=true;saved.progression.securityEntered=true;const target=session();assert.equal(target.restore(saved),true);assert.equal(target.elements.get('#objective').textContent,'');assert.equal(target.elements.get('#hint').textContent,'');
 });
 test('unsupported save versions are rejected before replacing the current session',()=>{const target=session(),saved=populatedSnapshot();saved.version=2;assert.equal(target.restore(saved),false);assert.equal(target.ctx.player.hp,100);assert.equal(target.ctx.enemies.length,0);});
 test('malformed nested saves never partially replace the live operator or world',()=>{for(const corrupt of [s=>s.enemies=[null],s=>delete s.puzzle.crates,s=>s.progression.version=99,s=>s.player.x=NaN]){const target=session(),before=target.capture(),saved=populatedSnapshot();corrupt(saved);assert.equal(target.restore(saved),false);assert.deepEqual(target.capture(),before);}});
@@ -142,7 +142,7 @@ test('checkpoint roundtrip preserves replay attempt identity instead of minting 
  const legacy=plain(saved);delete legacy.replayRewardId;assert.equal(restored.restore(legacy),true);assert.equal(restored.ctx.replayRewardId,null);
 });
 
-test('a new objective closes old optional guidance while same-objective refresh preserves it',()=>{
+test('objective refresh leaves free guidance hidden even when a legacy disclosure was open',()=>{
  const s=session();s.ctx.refreshGuidance(true);const objective=s.elements.get('#objective'),detail={open:true};objective.closest=()=>detail;
- s.ctx.refreshGuidance(true);assert.equal(detail.open,true);objective.textContent='Previous objective';s.ctx.refreshGuidance(true);assert.equal(detail.open,false);
+ objective.textContent='Previous objective';s.ctx.refreshGuidance(true);assert.equal(objective.textContent,'');assert.equal(s.elements.get('#hint').textContent,'');assert.equal(s.elements.get('.mission-note').hidden,true);
 });

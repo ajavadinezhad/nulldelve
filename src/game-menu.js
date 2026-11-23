@@ -1,14 +1,14 @@
-import {renderFieldJournal,journalIcon} from './field-journal.js?v=progression-balance-r46';
-import {createPuzzleDiscovery} from './puzzle-discovery.js?v=progression-balance-r46';
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=progression-balance-r46';
-import {compatibleStorage} from './storage-compat.js?v=progression-balance-r46';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=progression-balance-r46';
-import {createCampaignMap} from './campaign-map.js?v=progression-balance-r46';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=progression-balance-r46';
-import {createItemIcon} from './item-icons.js?v=progression-balance-r46';
-import {buildMissionPreview} from './mission-previews.js?v=progression-balance-r46';
-import {renderShop} from './shop-ui.js?v=progression-balance-r46';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=progression-balance-r46';
+import {renderFieldJournal,journalIcon} from './field-journal.js?v=paid-camera-r47';
+import {createPuzzleDiscovery} from './puzzle-discovery.js?v=paid-camera-r47';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=paid-camera-r47';
+import {compatibleStorage} from './storage-compat.js?v=paid-camera-r47';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=paid-camera-r47';
+import {createCampaignMap} from './campaign-map.js?v=paid-camera-r47';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=paid-camera-r47';
+import {createItemIcon} from './item-icons.js?v=paid-camera-r47';
+import {buildMissionPreview} from './mission-previews.js?v=paid-camera-r47';
+import {renderShop} from './shop-ui.js?v=paid-camera-r47';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=paid-camera-r47';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -72,7 +72,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function drawFieldNotes(){
   heading('FIELD ARCHIVE','Field notes');
   const tabs=element('div','menu-tabs journal-tabs');for(const [id,label]of [['systems','Systems'],['mutations','Mutations']]){const tab=button('',()=>{notesTab=id;noteSelection=null;noteHint=0;render(false);},'menu-button secondary'+(notesTab===id?' selected':''));tab.append(journalIcon(id),element('span','',label));tab.setAttribute('aria-pressed',String(notesTab===id));tabs.append(tab);}content.append(tabs);
-  renderFieldJournal(content,{tab:notesTab,systems:createPuzzleDiscovery().list(),mutations:status().mutationNotes??[],selected:noteSelection,hintLevel:noteHint,onSelect:id=>{noteSelection=id;noteHint=0;render(false);if(compactSkills()){const detail=content.querySelector('.journal-detail');detail?.scrollIntoView({block:'nearest'});detail?.focus?.({preventScroll:true});}},onHint:()=>{noteHint=Math.min(3,noteHint+1);render(false);}});
+  renderFieldJournal(content,{tab:notesTab,systems:createPuzzleDiscovery().list(),mutations:status().mutationNotes??[],selected:noteSelection,onSelect:id=>{noteSelection=id;noteHint=0;render(false);if(compactSkills()){const detail=content.querySelector('.journal-detail');detail?.scrollIntoView({block:'nearest'});detail?.focus?.({preventScroll:true});}}});
  }
  function drawEquipment(current){
   const row=element('section','menu-equipment');row.setAttribute('aria-label','Medical and explosive equipment');
@@ -83,7 +83,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   content.append(row);
  }
  function drawGuidance(current){
-  const guidance=current.missionGuidance;if(!guidance)return;
+  const guidance=current.missionGuidance;if(!guidance||Array.isArray(guidance)&&!guidance.length)return;
   const panel=element('section','menu-guidance');panel.setAttribute('aria-label','Current mission objective');panel.append(element('strong','','Next objective'));
   if(Array.isArray(guidance)){
    const entries=guidance.filter(Boolean),next=entries.find(entry=>!entry.done);
@@ -220,7 +220,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r46'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r47'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');footer.append(feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...shell.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){

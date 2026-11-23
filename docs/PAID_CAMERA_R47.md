@@ -1,0 +1,13 @@
+# Paid camera assistance and collected logs — r47
+
+Free puzzle help is removed from the live HUD, controls help, pause objectives, Field Notes and the standalone reference page. Decorative Archive symbol diagrams and maintenance/hospital/freight/feeder clue plaques are removed; the old clue locations offer no interaction. Physical controls retain their identities and current settings, plus accepted/rejected/interlocked feedback. They do not print required inputs. Automatic training no longer starts at deployment. Controls help remains available for input instructions.
+
+A camera icon with a20 dollar price stays available throughout active play, independent of proximity to a door. Each request resolves one current action from actual puzzle/operation state, takes payment through the existing serialized campaign-profile purchase transaction, and briefly previews that location in grayscale with a marker and the purchased instruction. It does not perform the action or permanently reveal fog. Repeating assistance costs20 again. Insufficient funds and rejected transactions reveal nothing; rapid taps coalesce while payment is pending. The world and held actions pause during payment/preview. Assistance spending advances the purchase revision, so older checkpoints cannot refund it. No real money is involved.
+
+The resolver covers pressure crates, next sequence input, relays, individual wire rotations, relics, hospital settings/cycle, freight switches/dispatch, feeder assignments, operation tasks, combat and exits. Both normal and remixed states are exercised through all eight actual operation controllers. Those tests move directly to targets and clear enemies; they are not manual playthroughs or pathfinding certification.
+
+Collected research-log interface groups now disappear entirely. They are excluded from nearby pickups/prompts, while text and collected state remain in Field Notes and serialized progress. Restored collected logs stay invisible.
+
+Verification:89 test files pass, including fixed-price payment, insufficient funds, checkpoint/reopen preservation, duplicate taps, transaction failure, all operation/resolver variants and log visibility/restore. Chrome actual Breach camera click changed150→130, showed the crate step and retained130 after reload. No console errors observed. Measured icon44×44 without intersections with HUD/map at320×740,393×740,667×320 touch layouts and1440×900 desktop; pause no longer displays the obsolete objective panel. This is browser viewport testing, not a physical-phone test. Screenshot: /tmp/nulldelve-paid-camera-phone-r47.jpg.
+
+Local changes only; not published yet.

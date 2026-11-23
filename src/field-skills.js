@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=progression-balance-r46';
+import {compatibleStorage} from './storage-compat.js?v=paid-camera-r47';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';

@@ -187,3 +187,48 @@
 /* Large thumb targets need the compact two-row utility cluster in portrait. */
 .touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(2,44px)}
 @media(min-width:600px){.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(4,44px)}}
+.touch-controls-enabled .hud-menu-controls #replay-guidance{position:static;display:inline-flex;width:44px;height:44px;margin:0;padding:3px;flex:none}
+.touch-controls-enabled .hud-menu-controls #replay-guidance[hidden]{display:none}
+.touch-controls-enabled .hud-menu-controls #replay-guidance::before{display:none}
+@media(max-width:900px){
+.touch-controls-enabled .hud-menu-controls #replay-guidance{position:fixed;left:max(8px,env(safe-area-inset-left));right:auto;top:calc(18px + var(--combat-panel-height,64px) + env(safe-area-inset-top))}
+}
+
+/* A shared phone HUD grid: instruments first, aligned utilities below. */
+@media(max-width:900px){
+.touch-controls-enabled .player-status{left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));width:auto;max-width:none;max-height:none;box-sizing:border-box;grid-template-columns:56px minmax(0,1fr) 92px;align-items:center;gap:8px;padding:7px 8px}
+.touch-controls-enabled .player-status .vital{align-self:center}
+.touch-controls-enabled .player-status .vital>strong{align-items:baseline;flex-wrap:nowrap;line-height:20px}
+.touch-controls-enabled .player-status .weapon-status{display:grid;grid-template-columns:24px minmax(0,1fr);grid-template-rows:12px 22px 12px;gap:2px 4px;align-content:center;padding-left:8px}
+.touch-controls-enabled #weapon-preview{width:24px;height:12px;grid-column:1;grid-row:1;align-self:center}
+.touch-controls-enabled .player-status #weapon{grid-column:2;grid-row:1;line-height:12px;font-size:8px;margin:0;min-width:0}
+.touch-controls-enabled .player-status .ammo-readout{grid-column:1/-1;grid-row:2;align-items:center;gap:4px;min-width:0}
+.touch-controls-enabled .player-status #ammo{font-size:18px;line-height:22px;white-space:nowrap}
+.touch-controls-enabled .ammo-icon{width:13px;height:18px}
+.touch-controls-enabled .player-status .reserve-count{grid-column:1/-1;grid-row:3;line-height:12px;margin:0;white-space:nowrap;font-size:9px}
+.touch-controls-enabled .player-status .gear-line{grid-column:3;grid-row:1;margin:0;padding:0;align-self:center;min-width:0}
+.touch-controls-enabled .player-status .inventory-items{display:grid;grid-template-columns:repeat(2,44px);gap:4px;align-items:center;width:92px}
+.touch-controls-enabled .player-status .inventory-item{display:grid;grid-template-columns:1fr;grid-template-rows:24px 12px;align-content:center;align-items:center;justify-items:center;gap:0;box-sizing:border-box;width:44px;min-width:44px;height:44px;min-height:44px;padding:3px;margin:0}
+.touch-controls-enabled .player-status .inventory-item img{width:23px;height:23px;grid-column:1;grid-row:1;margin:0}
+.touch-controls-enabled .player-status .inventory-item b{grid-column:1;grid-row:2;font-size:10px;line-height:12px;margin:0}
+.touch-controls-enabled .hud>header{left:max(8px,env(safe-area-inset-left));right:auto;top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));width:auto;height:44px;padding:0;margin:0}
+.touch-controls-enabled .hud-menu-controls{flex-direction:row;align-items:center;gap:4px;height:44px}
+.touch-controls-enabled .hud-menu-controls button{box-sizing:border-box;margin:0;height:44px;width:44px;min-width:44px;min-height:44px}
+.touch-controls-enabled .hud-menu-controls #replay-guidance{position:static;inset:auto;margin:0;height:44px;width:44px}
+.touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));height:44px;width:56px;box-sizing:border-box}
+.touch-controls-enabled .player-status #switch-grenade{position:fixed;left:calc(max(8px,env(safe-area-inset-left)) + 144px);right:auto;top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;box-sizing:border-box;width:44px;min-width:44px;height:44px;min-height:44px;padding:3px;margin:0;background:#101620a6;border-radius:10px}
+.touch-controls-enabled .player-status #switch-grenade[hidden]{display:none}
+.touch-controls-enabled #switch-grenade svg{width:22px;height:22px;flex:none}
+.touch-controls-enabled #grenade-type-label{font:9px/12px system-ui,sans-serif}
+}
+@media(min-width:600px) and (max-width:900px) and (max-height:520px){
+.touch-controls-enabled .player-status{width:340px;right:auto}
+.touch-controls-enabled .hud>header{left:auto;right:max(8px,env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top))}
+.touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){top:calc(60px + env(safe-area-inset-top))}
+.touch-controls-enabled .player-status #switch-grenade{left:auto;right:calc(max(8px,env(safe-area-inset-right)) + 64px);top:calc(60px + env(safe-area-inset-top))}
+}
+@media(max-width:900px){
+.touch-controls-enabled #credits{display:flex;align-items:center;min-width:0;max-width:100%;overflow:hidden}
+.touch-controls-enabled #credits>img{flex:none}
+.touch-controls-enabled #cash-amount{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
