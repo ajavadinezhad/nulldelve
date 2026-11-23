@@ -1,6 +1,6 @@
-import {normalizeFieldSkill} from './field-skills.js?v=critic-fixes-r54';
-import {normalizeCampaignProfile} from './campaign-profile.js?v=critic-fixes-r54';
-import {normalizeCampaignProgress} from './campaign-progress.js?v=critic-fixes-r54';
+import {normalizeFieldSkill} from './field-skills.js?v=integration-fixes-r55';
+import {normalizeCampaignProfile} from './campaign-profile.js?v=integration-fixes-r55';
+import {normalizeCampaignProgress} from './campaign-progress.js?v=integration-fixes-r55';
 const PREFIX='#deployment=';
 const MAX_CLAIMS=20000,MAX_ZONES=128,MAX_RANGES=10000;
 const zoneName=value=>typeof value==='string'&&/^[a-z][a-z0-9-]{0,39}$/.test(value);

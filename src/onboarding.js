@@ -1,5 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=critic-fixes-r54';
-import {formatKey} from './controls.js?v=critic-fixes-r54';
+import {compatibleStorage} from './storage-compat.js?v=integration-fixes-r55';
+import {formatKey} from './controls.js?v=integration-fixes-r55';
 const KEY='nulldelve.tutorial.v1';
 export function createOnboarding({storage,host,getBindings}){
  storage=compatibleStorage(storage);

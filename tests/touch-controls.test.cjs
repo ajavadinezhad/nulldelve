@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {stickVector,createTwinStickInput,shouldShowTouchControls}=require('../src/touch-controls.js');
-test('phone controls select automatically on touch hardware with explicit on/off overrides',()=>{assert.equal(shouldShowTouchControls('auto',{coarse:true}),true);assert.equal(shouldShowTouchControls('auto',{touchPoints:5}),true);assert.equal(shouldShowTouchControls('auto',{}),false);assert.equal(shouldShowTouchControls('on',{}),true);assert.equal(shouldShowTouchControls('off',{coarse:true,touchPoints:5}),false);});
+test('phone controls select automatically on touch hardware with explicit on/off overrides',()=>{assert.equal(shouldShowTouchControls('auto',{coarse:true}),true);assert.equal(shouldShowTouchControls('auto',{touchPoints:5}),false);assert.equal(shouldShowTouchControls('auto',{}),false);assert.equal(shouldShowTouchControls('on',{}),true);assert.equal(shouldShowTouchControls('off',{coarse:true,touchPoints:5}),false);});
 test('stick deadzone ignores idle drift and clamps diagonals without losing analog speed',()=>{assert.deepEqual(stickVector(.04,.04),{x:0,z:0});const half=stickVector(.575,0);assert.ok(Math.abs(half.x-.5)<1e-8);const diagonal=stickVector(2,2);assert.ok(Math.abs(Math.hypot(diagonal.x,diagonal.z)-1)<1e-8);assert.deepEqual(stickVector(NaN,1),{x:0,z:0});});
 test('two fingers move and aim independently and releasing movement does not stop aiming',()=>{const input=createTwinStickInput();assert.equal(input.begin('move',1,1,0),true);assert.equal(input.begin('aim',2,0,-1),true);assert.deepEqual(input.getState().move,{x:1,z:0});assert.equal(input.getState().aim.z,-1);assert.equal(input.getState().firing,false);input.end('move',1);assert.deepEqual(input.getState().move,{x:0,z:0});assert.equal(input.getState().firing,false);input.end('aim',2);assert.equal(input.getState().firing,false);});
 test('pointer capture ownership prevents a second finger hijacking an active stick and cancellation clears it',()=>{const input=createTwinStickInput();input.begin('move',10,.6,0);assert.equal(input.begin('move',11,-1,0),false);assert.equal(input.begin('aim',10,1,0),false);assert.equal(input.update('move',11,-1,0),false);assert.ok(input.getState().move.x>0);assert.equal(input.end('move',11),false);input.end('move',10);assert.deepEqual(input.getState().move,{x:0,z:0});input.begin('aim',11,1,0);input.reset();assert.equal(input.getState().firing,false);assert.equal(input.getState().aim.active,false);assert.equal(input.begin('move',11,0,1),true);});
@@ -58,7 +58,7 @@ test('phone movement sets facing, independent aim overrides it, and idle keeps l
  input.begin('aim',2,-1,0);assert.deepEqual(touchAimDirection(input.getState()),{x:-1,z:0});input.end('aim',2);assert.deepEqual(touchAimDirection(input.getState()),moving);input.end('move',1);assert.equal(touchAimDirection(input.getState()),null);assert.equal(touchAimDirection(null),null);assert.equal(touchAimDirection({move:{x:NaN,z:0}}),null);assert.equal(input.getState().firing,false);
 });
 
-function withTouchHarness(run){
+function withTouchHarness(run,options={}){
  const {createTouchControls}=require('../src/touch-controls.js');
  class Node{
   constructor(){this.listeners={};this.children=[];this.style={};this.dataset={};this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name),remove:(...names)=>names.forEach(name=>this.classes.delete(name))};}
@@ -70,7 +70,7 @@ function withTouchHarness(run){
  const win=new Node(),doc=new Node();doc.body=new Node();doc.createElement=doc.createElementNS=()=>new Node();const host=new Node();host.ownerDocument=doc;
  const previousAdd=globalThis.addEventListener,previousRemove=globalThis.removeEventListener,events=[];let running=true;
  globalThis.addEventListener=win.addEventListener.bind(win);globalThis.removeEventListener=win.removeEventListener.bind(win);
- const controls=createTouchControls({host,isRunning:()=>running,onAction:action=>events.push(action),device:()=>({coarse:true})});
+ const controls=createTouchControls({host,isRunning:()=>running,onAction:action=>events.push(action),device:()=>({coarse:true}),...options});
  try{run({controls,host,doc,win,events,setRunning:value=>{running=value;}});}finally{controls.dispose();globalThis.addEventListener=previousAdd;globalThis.removeEventListener=previousRemove;}
 }
 test('a brief Fire tap shoots once without needing a simulation sample or duplicating its click',()=>withTouchHarness(({controls,host,events})=>{
@@ -101,3 +101,12 @@ test('holding Fire locks facing for retreat and strafe, releasing returns moveme
  win.emit('pointerup',{pointerId:2});assert.equal(controls.getState().facingLocked,false);assert.equal(controls.getState().aim.active,false);assert.ok(controls.getState().move.x<0);
  fire.emit('pointerdown',{pointerId:3});assert.deepEqual(controls.getState().aim,{x:-1,z:0,active:true});win.emit('blur');assert.equal(controls.getState().facingLocked,false);assert.equal(controls.getState().firing,false);
 }));
+
+test('fresh movement beats a stale simulation-facing callback when Fire arrives in the same frame',()=>withTouchHarness(({controls,host})=>{
+ const move=host.children.find(n=>n.dataset.stick==='move'),fire=host.children.find(n=>n.dataset.action==='fire');move.emit('pointerdown',{pointerId:1,clientX:90,clientY:48});fire.emit('pointerdown',{pointerId:2,clientX:20,clientY:20});assert.ok(controls.getState().aim.x>.99);assert.ok(Math.abs(controls.getState().aim.z)<.001);move.emit('pointermove',{pointerId:1,clientX:5,clientY:48});assert.ok(controls.getState().move.x<0);assert.ok(controls.getState().aim.x>.99);
+ fire.emit('pointermove',{pointerId:2,clientX:20,clientY:-80});assert.ok(controls.getState().aim.z<-.8,'Fire drag retargets without needing to release');fire.emit('pointercancel',{pointerId:2});assert.equal(controls.getState().aim.active,false);assert.equal(controls.getState().firing,false);
+},{getFacing:()=>({x:0,z:-1})}));
+test('automatic hybrid controls follow real touch use and return to precise-input presentation',()=>withTouchHarness(({controls,host,win})=>{
+ assert.equal(controls.enabled,false);win.emit('pointerdown',{pointerType:'touch'});assert.equal(controls.enabled,true);const fire=host.children.find(n=>n.dataset.action==='fire');fire.emit('pointerdown',{pointerId:8,clientX:20,clientY:20});assert.equal(controls.getState().firing,true);win.emit('pointerdown',{pointerType:'mouse'});assert.equal(controls.enabled,false);assert.equal(controls.getState().firing,false);controls.configure('on');win.emit('pointerdown',{pointerType:'mouse'});assert.equal(controls.enabled,true);controls.configure('off');win.emit('pointerdown',{pointerType:'touch'});assert.equal(controls.enabled,false);
+},{device:()=>({coarse:false,touchPoints:5})}));
+test('touch modality detection does not reset an already enabled stick on its first touch',()=>withTouchHarness(({controls,host,win})=>{host.children[0].emit('pointerdown',{pointerId:1,clientX:90,clientY:48});win.emit('pointerdown',{pointerType:'touch'});assert.ok(controls.getState().move.x>.9);}));

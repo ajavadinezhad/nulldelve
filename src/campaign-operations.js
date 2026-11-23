@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=critic-fixes-r54';
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=critic-fixes-r54';
-import {progressionSequences,createOperationTasks,ARTIFACTS} from './progression.js?v=critic-fixes-r54';
+import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=integration-fixes-r55';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=integration-fixes-r55';
+import {progressionSequences,createOperationTasks,ARTIFACTS,SIGNAL_TASKS,FREIGHT_TASKS,HOSPITAL_TASKS} from './progression.js?v=integration-fixes-r55';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},
@@ -24,15 +24,23 @@ const definitions={
 };
 export function normalizeCampaignOperation(value){return typeof value==='string'&&Object.hasOwn(definitions,value)?value:null;}
 /** Apply a direct deployment before play starts. Other operation hordes remain dormant. */
-export function deployCampaignOperation(value,{player,puzzle,progression,doors}){
+export function deployCampaignOperation(value,{player,puzzle,progression,doors,continuing=false}){
  const id=normalizeCampaignOperation(value);if(!id)return false;
- const definition=definitions[id],snapshot=progression.serializeState(),sequences=progressionSequences(snapshot.remix);
+ const definition=definitions[id],snapshot=progression.serializeState(),sequences=progressionSequences(snapshot.remix),previousTasks=continuing?structuredClone(snapshot.operationTasks):null,previousCircuit=continuing?structuredClone(snapshot.circuit):null;
  snapshot.mission='campaign';snapshot.operationId=id;snapshot.operationTasks=createOperationTasks();snapshot.milestone=0;snapshot.operationZoneIds=[...definition.zones];
  if(definition.prior.includes('generator'))Object.assign(snapshot.operationTasks,{commandFuse:true,genInserted:true,commandRepair:true});
  if(definition.prior.includes('transit'))snapshot.operationTasks.researchCoolant=true;
  if(definition.prior.includes('evacuation'))snapshot.operationTasks.evacPower=true;
- snapshot.circuit=definition.prior.includes('generator')?{rotations:[...WIRE_SOLUTION],powered:true,solved:true}:createWireCircuit();
- snapshot.elapsed=0;snapshot.operationTasks.generatorDefense={started:!!snapshot.operationTasks.genInserted,progress:snapshot.operationTasks.genInserted?22:0,jammed:false,completed:!!snapshot.operationTasks.genInserted,saboteurIds:[]};snapshot.logs=[];snapshot.evacuation={started:false,remaining:20,completed:false};
+ snapshot.circuit=definition.prior.includes('generator')?(previousTasks?.commandRepair&&previousCircuit?.solved?previousCircuit:{rotations:[...WIRE_SOLUTION],powered:true,solved:true}):createWireCircuit();
+ snapshot.elapsed=0;snapshot.operationTasks.generatorDefense={started:!!snapshot.operationTasks.genInserted,progress:snapshot.operationTasks.genInserted?22:0,jammed:false,completed:!!snapshot.operationTasks.genInserted,saboteurIds:[]};snapshot.logs=continuing?[...snapshot.logs]:[];snapshot.evacuation={started:false,remaining:20,completed:false};
+ // Adjacent continuation carries completed systems; fresh/replay deployment
+ // keeps its intentionally clean task state. Never carry the next sector's work.
+ if(previousTasks){
+  const taskOperations={...Object.fromEntries(OPERATION_ROUTES.map(r=>[r.task,r.operation])),...Object.fromEntries(SIGNAL_TASKS.map(t=>[t,'signal'])),...Object.fromEntries(FREIGHT_TASKS.map(t=>[t,'freight'])),...Object.fromEntries(HOSPITAL_TASKS.map(t=>[t,'hospital'])),commandFuse:'command',genInserted:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment'};
+  for(const [task,value]of Object.entries(previousTasks))if(value===true&&taskOperations[task]&&taskOperations[task]!==id)snapshot.operationTasks[task]=true;
+  for(const [key,owner,complete]of [['generatorDefense','command',previousTasks.generatorDefense?.completed],['hospitalAirlock','hospital',previousTasks.hospitalSterile],['freightRoute','freight',previousTasks.freightRoute?.delivered],['signalLoadout','signal',previousTasks.signalLoad],['nestRelay','nest',previousTasks.nestRelay?.decoded]])if(owner!==id&&complete&&previousTasks[key])snapshot.operationTasks[key]=structuredClone(previousTasks[key]);
+ }
+
  const beyondBreach=id!=='breach',powerReady=['containment','nest','hospital','freight','signal'].includes(id),valvesReady=['nest','hospital','freight','signal'].includes(id);
  snapshot.archive={input:beyondBreach?[...sequences.archive]:[],solved:beyondBreach};
  snapshot.relay={started:false,remaining:0,completed:beyondBreach};
@@ -83,7 +91,7 @@ export function campaignOperationGuidance(value,{player,puzzle,progression}){
  const exit=campaignOperationExit(id);steps.push(step(id==='nest'?'Reach Evacuation':'Reach sector exit',false,`${exit.direction}. Press Interact at the marked ${exit.label.toLowerCase()} to depart.`));
  const objectivesDone=campaignOperationObjectivesComplete(id,{player,progression:state});
  const next=steps.find(s=>!s.done),battle=state.zones.find(z=>z.status==='active');
- return {title:id==='freight'&&tasks.freightRoute?.running?'Escort cargo':objectivesDone?(id==='nest'?'Reach Evacuation':'Reach sector exit'):battle?`Clear ${battle.label.toLowerCase()}`:next?.label??'Operation complete',hint:objectivesDone?`${exit.direction}. Press Interact at the marked ${exit.label.toLowerCase()}.`:battle?`${battle.remaining} creatures remain, including reinforcements.`:next?.hint??'All operation objectives completed.',steps:steps.map(({label,done})=>({label,done}))};
+ return {title:id==='hospital'&&state.zones.find(z=>z.id==='hospital-isolation')?.status==='active'&&!tasks.hospitalRecords?'Recover patient ledger':id==='freight'&&tasks.freightRoute?.running?'Escort cargo':objectivesDone?(id==='nest'?'Reach Evacuation':'Reach sector exit'):battle?`Clear ${battle.label.toLowerCase()}`:next?.label??'Operation complete',hint:objectivesDone?`${exit.direction}. Press Interact at the marked ${exit.label.toLowerCase()}.`:battle?`${battle.remaining} creatures remain, including reinforcements.`:next?.hint??'All operation objectives completed.',steps:steps.map(({label,done})=>({label,done}))};
 }
 
 export function isCampaignOperationUnlocked(id,completed=[]){const index=CAMPAIGN_OPERATIONS.findIndex(op=>op.id===id);return index>=0&&CAMPAIGN_OPERATIONS.slice(0,index).every(op=>completed.includes(op.id));}

@@ -1,6 +1,6 @@
-import {freightEscortPoint} from './freight-escort.js?v=critic-fixes-r54';
-import {puzzleAccessVisible} from './puzzle-access.js?v=critic-fixes-r54';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=critic-fixes-r54';
+import {freightEscortPoint} from './freight-escort.js?v=integration-fixes-r55';
+import {puzzleAccessVisible} from './puzzle-access.js?v=integration-fixes-r55';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=integration-fixes-r55';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */

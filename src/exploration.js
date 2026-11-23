@@ -13,11 +13,12 @@ export const EXPLORATION_SHORTCUTS=Object.freeze([
  {id:'shortcut.freight.manifest',operation:'freight',reward:'secret.freight.manifest',gate:{x:183,z:30,axis:'z'},floor:[[190,1,9,3],[196,1,3,16],[193,14,6,3],[182,29,4,3]],returnPoint:{x:194,z:15}},
  {id:'shortcut.signal.receiver',operation:'signal',reward:'secret.signal.receiver',gate:{x:236,z:50,axis:'x'},floor:[[240,1,10,3],[247,1,3,16],[243,14,7,3],[235,48,3,6],[235,51,9,3],[241,51,3,8]],returnPoint:{x:244,z:16}},
 ].map(value=>Object.freeze({...value,gate:Object.freeze(value.gate),floor:Object.freeze(value.floor.map(Object.freeze)),returnPoint:Object.freeze(value.returnPoint)})));
+export function explorationReleaseForReward(id){return EXPLORATION_SHORTCUTS.find(shortcut=>shortcut.reward===id)??null;}
 export function explorationShortcutBlocked(x,z,r=0,{operation,claimed=()=>false}={}){
  return EXPLORATION_SHORTCUTS.some(shortcut=>(!operation||shortcut.operation===operation)&&!claimed(shortcut.reward)&&Math.abs(x-shortcut.gate.x)<(shortcut.gate.axis==='x'?1.5:.16)+r&&Math.abs(z-shortcut.gate.z)<(shortcut.gate.axis==='x'?.16:1.5)+r);
 }
 
-export const EXPLORATION_CACHES=Object.freeze(EXPLORATION_ALCOVES.map((site,index)=>Object.freeze({id:['secret.hospital.linen','secret.freight.manifest','secret.signal.receiver'][index],operation:site.operation,...site.cache,amount:[18,22,24][index],label:'Recovered service cash'})));
+export const EXPLORATION_CACHES=Object.freeze(EXPLORATION_ALCOVES.map((site,index)=>Object.freeze({id:['secret.hospital.linen','secret.freight.manifest','secret.signal.receiver'][index],operation:site.operation,...site.cache,amount:[18,22,24][index],label:'Service release and recovered cash'})));
 // These beats activate on approach, never reveal fog, and stay spent after checkpoints.
 const ROUTE_EVENTS=[
  {id:'breach-falling-dust',operation:'breach',x:23,z:18,kind:'dust',duration:3},
@@ -50,3 +51,13 @@ export function createExplorationEvents(){
   return {started,active:views()};
  },serialize(){return {version:1,seen:[...seen]};},restore(value){if(value?.version!==1||!Array.isArray(value.seen))return false;const valid=new Set(EXPLORATION_EVENTS.map(e=>e.id));for(const id of value.seen)if(valid.has(id))seen.add(id);active.clear();return true;},reset(){seen.clear();active.clear();}};
 }
+
+/** Observable consequences of the evidence chain; no reward or collision state. */
+export const WORLD_REVEALS=Object.freeze([
+ {id:'command-backup',operation:'command',task:'commandBackup',x:42,z:29,kind:'uplink'},
+ {id:'research-specimen',operation:'research',task:'researchSample',x:64,z:13,kind:'specimen'},
+ {id:'hospital-cargo',operation:'hospital',task:'hospitalRecords',x:142,z:60,kind:'cargo'},
+ {id:'freight-origin',operation:'freight',task:'freightManifest',x:191,z:7,kind:'cargo'},
+ {id:'signal-silenced',operation:'signal',task:'signalShutdown',x:237,z:34,kind:'antenna'},
+ {id:'signal-evidence',operation:'signal',task:'signalSent',x:237,z:8,kind:'uplink'},
+].map(Object.freeze));

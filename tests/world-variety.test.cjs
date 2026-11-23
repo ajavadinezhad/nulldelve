@@ -44,3 +44,22 @@ test('legacy live mutations recover out of new walls with full body clearance an
   assert.equal(enemy.hp,17);assert.equal(enemy.maxHp,44);assert.equal(enemy.rewardIdentity,'kill.'+operation+'.7');assert.equal(enemy.radius,radius);
  }
 });
+
+test('the actual main map initializer respects authored negative space and secret return detours',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),{WORLD_WIDTH:W,WORLD_HEIGHT:H}=require('../src/world-layout.js'),source=fs.readFileSync('src/main.js','utf8'),{EXPANSION_ROOMS,carveExpansion}=require('../src/facility-expansion.js'),{HOSPITAL_ROOMS,carveHospital}=require('../src/hospital-layout.js'),{FREIGHT_ROOMS,carveFreight}=require('../src/freight-layout.js'),{SIGNAL_ROOMS,carveSignal}=require('../src/signal-layout.js');
+ const ctx={W,H,EXPANSION_ROOMS,carveExpansion,HOSPITAL_ROOMS,carveHospital,FREIGHT_ROOMS,carveFreight,SIGNAL_ROOMS,carveSignal};vm.createContext(ctx);vm.runInContext(source.slice(source.indexOf('const map=Array.'),source.indexOf('const puzzle=createPressurePuzzle()'))+';globalThis.composedMap=map',ctx);const map=ctx.composedMap;
+ assert.equal(map[28][183],1,'main must not pre-carve Freight cargo divider');assert.equal(map[53][156],1,'main must keep Freight spine narrow');assert.equal(map[30][209],1,'main must not pre-carve Signal separated aisle');assert.equal(map[30][212],0);
+ for(const [operation,a,b]of [['freight',[180,30],[189,30]],['signal',[236,46],[242,59]]]){
+  // Use the composed floor and identical real prop cover for both claim states.
+  const layout=require('../src/'+operation+'-layout.js'),cover=[],scene=new THREE.Scene();layout['add'+operation[0].toUpperCase()+operation.slice(1)+'Props'](scene,null,cover);
+  const make=claimed=>({blocked:(x,z,r=.32)=>[-r,r].some(dx=>[-r,r].some(dz=>map[Math.round(z+dz)]?.[Math.round(x+dx)]!==0))||cover.some(c=>Math.abs(x-c.x)<c.w/2+r&&Math.abs(z-c.z)<c.h/2+r)||explorationShortcutBlocked(x,z,r,{operation,claimed:()=>claimed})});
+  const before=distance(make(false),a,b),after=distance(make(true),a,b);assert.ok(Number.isFinite(before)&&after+4<=before,`${operation}: composed live shortcut must shorten route (${before}→${after})`);
+ }
+});
+
+test('service releases and evidence have physical world consequences without extra rewards',()=>{
+ const {createExplorationArt}=require('../src/exploration-art.js'),{EXPLORATION_CACHES,WORLD_REVEALS,explorationReleaseForReward}=require('../src/exploration.js');
+ const scene=new THREE.Scene();let claimed=false,tasks={};const art=createExplorationArt(scene,{operation:()=> 'freight',claimed:()=>claimed,visible:()=>true,tasks:()=>tasks});art.update();
+ const cache=EXPLORATION_CACHES.find(c=>c.operation==='freight'),release=scene.getObjectByName('release-'+cache.id),handle=release.children.at(-1),before=handle.rotation.x;assert.equal(release.visible,true);assert.equal(explorationReleaseForReward(cache.id).operation,'freight');claimed=true;art.update();assert.notEqual(handle.rotation.x,before);
+ const definition=WORLD_REVEALS.find(r=>r.operation==='freight'),reveal=scene.getObjectByName('world-reveal-'+definition.id);assert.equal(reveal.children.at(-1).visible,false);tasks.freightManifest=true;art.update();assert.equal(reveal.children.at(-1).visible,true);art.dispose();
+});

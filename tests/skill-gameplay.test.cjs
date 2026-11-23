@@ -39,7 +39,7 @@ test('all explosive ranks apply their radius at actual grenade detonation withou
   for(const fire of [false,true]){
    const inside={x:radius-.01,z:0,hp:20,radius:0,mesh:{}},outside={x:radius+.01,z:0,hp:20,radius:0,mesh:{}},hidden={x:1,z:1,hp:20,radius:0,mesh:{}},pending={x:1,z:0,hp:20,radius:0,spawnDelay:.1,mesh:{}};
    let burstRadius=0,fireRadius=0;const ctx=context(skill,{ended:false,player:{x:0,z:20,hp:100},enemies:[inside,outside,hidden,pending],barrelSystem:{explodeNear:(_x,_z,r)=>burstRadius=r},fireZones:{burst:(_x,_z,m)=>fireRadius=m},audio:{explosion:noop},menu:{settings:{reducedEffects:true}},los:(_x,_z,x,z)=>!(x===1&&z===1),updateEnemyHealthBar:noop,rewardEnemyKill:()=>assert.fail('nonlethal test'),applyPlayerDamage:()=>assert.fail('operator outside radius'),end:noop,hud:noop});
-   vm.runInContext(fragment('function detonateGrenade','function beginGrenadeCharge'),ctx);ctx.fire=fire;vm.runInContext('detonateGrenade(0,0,fire)',ctx);
+   vm.runInContext(fragment('function detonateGrenade','function useFieldAbility'),ctx);ctx.fire=fire;vm.runInContext('detonateGrenade(0,0,fire)',ctx);
    assert.equal(inside.hp,fire?18:12);assert.equal(outside.hp,20);assert.equal(hidden.hp,20);assert.equal(pending.hp,20);assert.equal(fire?fireRadius:burstRadius,fire?multiplier:radius);
   }
  }

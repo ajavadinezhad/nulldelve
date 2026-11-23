@@ -1,4 +1,4 @@
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=critic-fixes-r54';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=integration-fixes-r55';
 const NS='http://www.w3.org/2000/svg';
 let mapSerial=0;
 function svgNode(tag,attributes={},parent){const node=document.createElementNS(NS,tag);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,String(value));parent?.append(node);return node;}

@@ -1,4 +1,4 @@
-import {compatibleStorage} from './storage-compat.js?v=critic-fixes-r54';
+import {compatibleStorage} from './storage-compat.js?v=integration-fixes-r55';
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
@@ -17,9 +17,9 @@ const milestones=['breach','command','research','containment','nest','hospital',
 const advanced=[
  {id:'sealant',name:'Emergency Seal',description:'Medkits restore up to 75 health and repair 8 armor, capped at 60. Consumes a kit; no passive repair.',unlockAfter:'freight',requires:'surgeon',icon:'armor'},
  {id:'insulation',name:'Blast Insulation',description:'Take 25% less damage from your own explosions and ground fire. Retains 20% wider grenade effects; enemy attacks remain dangerous.',unlockAfter:'freight',requires:'ordnance',icon:'armor'},
- {id:'surgeon',name:'Trauma Specialist',description:'Medkits restore up to 75 health.',unlockAfter:'containment',requires:'medic',icon:'medkit'},
- {id:'pathfinder',name:'Pathfinder',description:'Sprint 15% faster. Crate movement stays unchanged.',unlockAfter:'nest',requires:'runner',icon:'move'},
- {id:'ordnance',name:'Ordnance Specialist',description:'Grenade effects and danger radius reach 20% farther.',unlockAfter:'hospital',requires:'demolition',icon:'grenade'},
+ {id:'surgeon',name:'Trauma Specialist',description:'Medkits restore up to 75 health. Field ability: temporary protection replaces Break away.',unlockAfter:'research',requires:'medic',icon:'medkit'},
+ {id:'pathfinder',name:'Pathfinder',description:'Sprint 15% faster. Field ability: longer Break away with faster recovery.',unlockAfter:'research',requires:'runner',icon:'move'},
+ {id:'ordnance',name:'Ordnance Specialist',description:'Grenade effects reach 20% farther. Field ability: remote charge replaces Break away and consumes a frag grenade.',unlockAfter:'containment',requires:'demolition',icon:'grenade'},
  {id:'plating',name:'Reactive Plating',description:'Armor uses 20% less plating per hit. Retains Trauma Specialist: medkits restore up to 75 health.',unlockAfter:'nest',requires:'surgeon',icon:'armor'},
  {id:'triage',name:'Emergency Triage',description:'Medkits restore up to 85 health. Still consumes one kit; no passive regeneration.',unlockAfter:'hospital',requires:'surgeon',icon:'healing'},
  {id:'quickloader',name:'Tactical Reload',description:'Reload 12% faster with either gun. Retains Pathfinder: sprint 15% faster.',unlockAfter:'hospital',requires:'pathfinder',icon:'reload'},

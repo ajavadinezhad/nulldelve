@@ -1,5 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=critic-fixes-r54';
-import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=critic-fixes-r54';
+import {compatibleStorage} from './storage-compat.js?v=integration-fixes-r55';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=integration-fixes-r55';
 export const CAMPAIGN_PROGRESS_KEY='nulldelve.campaign.v1';
 const ids=CAMPAIGN_OPERATIONS.map(operation=>operation.id);
 const logIds=['log-lab','log-containment','log-nest'];

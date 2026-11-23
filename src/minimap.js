@@ -71,7 +71,7 @@ export function createMinimap({canvas,map,width,height,explored,player,doors=[],
         ctx.fillStyle='#c2d6c6';ctx.fillText(text,x,z);
       }
     }
-    for(const landmark of landmarks){const complete=landmark.complete?landmark.complete():landmark.active;marker(landmark,complete?'#a6e7af':landmark.kind==='plate'?'#deb67a':'#77cfd4',expanded?5:5);if(expanded&&inView(landmark.x,landmark.z)&&explored.has(Math.round(landmark.z)*width+Math.round(landmark.x))){const [lx,lz]=pixel(landmark.x,landmark.z);ctx.font='bold 9px monospace';ctx.textAlign='left';ctx.fillStyle='#e1eadc';ctx.fillText(landmark.kind==='glyph'?landmark.label.slice(0,1):landmark.kind==='clue'?'?':landmark.label??'E',lx+5,lz-5);}}
+    for(const landmark of (typeof landmarks==='function'?landmarks():landmarks)){const complete=landmark.complete?landmark.complete():landmark.active;marker(landmark,complete?'#a6e7af':landmark.kind==='plate'?'#deb67a':'#77cfd4',expanded?5:5);if(expanded&&inView(landmark.x,landmark.z)&&explored.has(Math.round(landmark.z)*width+Math.round(landmark.x))){const [lx,lz]=pixel(landmark.x,landmark.z);ctx.font='bold 9px monospace';ctx.textAlign='left';ctx.fillStyle='#e1eadc';ctx.fillText(landmark.kind==='glyph'?landmark.label.slice(0,1):landmark.kind==='clue'?'?':landmark.label??'E',lx+5,lz-5);}}
     if(!player.intel)marker(mission.intel,'#75e4e8',expanded?7:8);
     marker(mission.exit,'#b7f4a1',expanded?8:9);
     const [x,z]=pixel(player.x,player.z);

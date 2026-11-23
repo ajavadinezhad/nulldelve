@@ -1,6 +1,6 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
 const load=import('../src/enemy-ai.js');
-function setup(distance,wall=false){const enemy={x:0,z:0,hp:2,cooldown:0,mesh:{rotation:{y:0},userData:{}}};let damage=0;return {enemy,player:{x:distance,z:0},deps:{lineOfSight:()=>!wall,move:(a,x,z)=>{a.x+=x;a.z+=z;},onBite:d=>damage+=d},damage:()=>damage};}
+function setup(distance,wall=false){const enemy={x:0,z:0,hp:2,cooldown:0,mesh:{rotation:{y:-Math.PI/2},userData:{}}};let damage=0;return {enemy,player:{x:distance,z:0},deps:{lineOfSight:()=>!wall,move:(a,x,z)=>{a.x+=x;a.z+=z;},onBite:d=>damage+=d},damage:()=>damage};}
 test('roach closes distance without firing or causing ranged damage',async()=>{const {updateRoachEnemy}=await load,s=setup(6);updateRoachEnemy(s.enemy,s.player,.1,s.deps);assert.ok(s.enemy.x>0);assert.equal(s.damage(),0);});
 test('nearby bites warn before striking and respect cooldown',async()=>{const {updateRoachEnemy}=await load,s=setup(.7);updateRoachEnemy(s.enemy,s.player,.1,s.deps);assert.equal(s.damage(),0);assert.ok(s.enemy.attackWindup>0);updateRoachEnemy(s.enemy,s.player,.2,s.deps);assert.equal(s.damage(),0);updateRoachEnemy(s.enemy,s.player,.16,s.deps);assert.equal(s.damage(),12);updateRoachEnemy(s.enemy,s.player,.1,s.deps);assert.equal(s.damage(),12);});
 test('walls prevent biting even at close range',async()=>{const {updateRoachEnemy}=await load,s=setup(.7,true);updateRoachEnemy(s.enemy,s.player,.1,s.deps);assert.equal(s.damage(),0);assert.equal(s.enemy.x,0);});

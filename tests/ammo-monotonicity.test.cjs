@@ -1,0 +1,9 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {PRIMARY_WEAPONS}=require('../src/arsenal.js'),{runSupply,encounterQueues,OPERATIONS}=require('./mission-ammo-balance.test.cjs');
+test('better aim never reduces completed kills across every current weapon, rank, mission and difficulty supply projection',()=>{
+ let cases=0;
+ for(const difficulty of ['easy','normal','hard']){const q=encounterQueues(difficulty);for(const [operation,ids]of Object.entries(OPERATIONS)){
+  const mobs=ids.flatMap(id=>q[id]),stops=operation==='research'?[q.lab.length]:operation==='containment'?[q.containment.length]:operation==='nest'?[0]:['hospital','freight','signal'].includes(operation)?[q[ids[0]].length,q[ids[0]].length+q[ids[1]].length,...(operation==='signal'?[q[ids[0]].length+q[ids[1]].length]:[])]:[];
+  for(const weapon of PRIMARY_WEAPONS)for(const rank of [0,1,2,3]){const accurate=runSupply(weapon,difficulty,mobs,5,rank,stops,operation==='signal'?'signal':64,ids[0]),lessAccurate=runSupply(weapon,difficulty,mobs,4,rank,stops,operation==='signal'?'signal':64,ids[0]);assert.ok(accurate.killed>=lessAccurate.killed,`${difficulty} ${operation} ${weapon.id} rank${rank}: 80% ${accurate.killed},75% ${lessAccurate.killed}`);cases++;}
+ }}assert.equal(cases,1248);
+});
+test('delivery caps never make a larger carried stock yield fewer total rounds after an identical earned kill',()=>{const {createLootState,dropEnemyLoot}=require('../src/loot.js');let previous=-1;for(let reserve=0;reserve<=100;reserve++){const s=createLootState(),player={x:0,z:0,hp:100,maxHp:100,ammo:0},weapons={rifle:{capacity:30,baseDamage:1,ammo:0,reserve},pistol:{ammo:0,reserve:0}};const drops=dropEnemyLoot(s,{variant:'sentinel',x:0,z:0,maxHp:38},{player,weapons,selected:'rifle',difficulty:'hard'}),total=reserve+drops.reduce((n,d)=>n+d.rifle,0);assert.ok(total>=previous,'reserve '+reserve+' must not cross a low-inventory windfall cliff');previous=total;}});

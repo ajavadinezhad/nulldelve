@@ -42,7 +42,7 @@ function session({expanded=false}={}){
  ctx.progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant,{encounter}={})=>{const stats=ROACH_VARIANTS[variant],e={encounter,id:'e'+ctx.nextEnemyId++,x,z,...stats,maxHp:stats.hp,variant,cooldown:1,alerted:true,mesh:mesh(),attackWindup:0,staggerTime:0,spawnDelay:0};enemies.push(e);return e;}});
  ctx.persistCampaignProfile=()=>ctx.campaignProfile.persist();
  ctx.queueCheckpoint=reason=>{ctx.pendingCheckpoint=reason;};
- ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();ctx.encounterStats=require('../src/campaign-threat.js').encounterStats;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;vm.createContext(ctx);
+ ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();ctx.encounterStats=require('../src/campaign-threat.js').encounterStats;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;ctx.shotRecovery??=require('../src/combat-movement.js').createShotRecovery();ctx.fieldAbility??=require('../src/field-ability.js').createFieldAbility();ctx.checkpointPrimaryAmmo=require('../src/checkpoint-ammo.js').checkpointPrimaryAmmo;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;vm.createContext(ctx);
  vm.runInContext(fragment('function applyUpgrades()','\napplyUpgrades();'),ctx);
  vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
  vm.runInContext(fragment('function equippedModelType(','\nrefreshPlayerWeapon();'),ctx);
@@ -72,12 +72,12 @@ test('actual browser capture/restore roundtrip preserves equipment, world discov
  const security=ctx.progression.state.zones.find(z=>z.id==='security'),savedZone=saved.progression.zones.find(z=>z.id==='security');assert.equal(security.status,'active');assert.deepEqual(plain(security.queue),savedZone.queue);assert.equal(security.spawned,savedZone.spawned);
  for(const enemy of security.wave)assert.equal(enemy,ctx.enemies.find(e=>e.id===enemy.id),'wave must refer to the live restored enemy objects');
  const restored=ctx.enemies.find(e=>e.id===saved.enemies[0].id);assert.equal(restored.attackWindup,.2);assert.equal(restored.staggerTime,.12);assert.equal(restored.spawnDelay,.3);assert.equal(restored.maxHp,2);
- assert.equal(target.elements.get('#objective').textContent,'');assert.equal(target.elements.get('#hint').textContent,'');assert.equal(target.elements.get('.mission-note').hidden,true);
+ assert.ok(target.elements.get('#objective').textContent.length>0);assert.equal(target.elements.get('#hint').textContent,'');assert.equal(target.elements.get('.mission-note').hidden,true,'restored session remains inactive until startOperation');
  assert.deepEqual(target.capture(),saved,'a second capture preserves all serialized session fields');
 });
 test('save restoration does not bring free puzzle instructions back',()=>{
  const saved=populatedSnapshot();saved.enemies=[];saved.progression.relay={started:false,remaining:0,completed:false};for(const zone of saved.progression.zones){zone.rewardQueue=[];zone.waveRewardIds=[];zone.status='dormant';zone.waveIds=[];zone.waveVariants=[];zone.queue=[];zone.spawned=0;zone.spawnTimer=0;}
- saved.progression.archiveEntered=true;saved.progression.securityEntered=true;const target=session();assert.equal(target.restore(saved),true);assert.equal(target.elements.get('#objective').textContent,'');assert.equal(target.elements.get('#hint').textContent,'');
+ saved.progression.archiveEntered=true;saved.progression.securityEntered=true;const target=session();assert.equal(target.restore(saved),true);assert.ok(target.elements.get('#objective').textContent.length>0);assert.equal(target.elements.get('#hint').textContent,'');
 });
 test('unsupported save versions are rejected before replacing the current session',()=>{const target=session(),saved=populatedSnapshot();saved.version=2;assert.equal(target.restore(saved),false);assert.equal(target.ctx.player.hp,100);assert.equal(target.ctx.enemies.length,0);});
 test('malformed nested saves never partially replace the live operator or world',()=>{for(const corrupt of [s=>s.enemies=[null],s=>delete s.puzzle.crates,s=>s.progression.version=99,s=>s.player.x=NaN]){const target=session(),before=target.capture(),saved=populatedSnapshot();corrupt(saved);assert.equal(target.restore(saved),false);assert.deepEqual(target.capture(),before);}});
@@ -142,7 +142,14 @@ test('checkpoint roundtrip preserves replay attempt identity instead of minting 
  const legacy=plain(saved);delete legacy.replayRewardId;assert.equal(restored.restore(legacy),true);assert.equal(restored.ctx.replayRewardId,null);
 });
 
-test('objective refresh leaves free guidance hidden even when a legacy disclosure was open',()=>{
+test('objective refresh restores non-solution intent while keeping the free hint surface empty',()=>{
  const s=session();s.ctx.refreshGuidance(true);const objective=s.elements.get('#objective'),detail={open:true};objective.closest=()=>detail;
- objective.textContent='Previous objective';s.ctx.refreshGuidance(true);assert.equal(objective.textContent,'');assert.equal(s.elements.get('#hint').textContent,'');assert.equal(s.elements.get('.mission-note').hidden,true);
+ objective.textContent='Previous objective';s.ctx.refreshGuidance(true);assert.equal(objective.textContent,'Power the insertion door');assert.equal(s.elements.get('#hint').textContent,'');assert.equal(s.elements.get('.mission-note').hidden,true);s.ctx.active=true;s.ctx.refreshGuidance(true);assert.equal(s.elements.get('.mission-note').hidden,false);
 });
+
+test('actual main checkpoint restoration converts retained weapon ammunition by base value instead of multiplying heavy rounds',async()=>{
+ const h=session({expanded:true}),{ctx}=h;ctx.economy.restore({credits:5000});assert.equal((await ctx.campaignProfile.purchaseOffer('weapon.lmg')).ok,true);vm.runInContext('applyPrimaryLoadout()',ctx);ctx.selected='rifle';ctx.player.ammo=60;ctx.weapons.rifle.ammo=60;ctx.weapons.rifle.reserve=120;const saved=h.capture();assert.equal(saved.loadout.primary,'lmg');assert.equal(saved.reserves.rifle,120);
+ assert.equal((await ctx.campaignProfile.purchaseOffer('weapon.mantis')).ok,true);const cash=ctx.economy.state.credits,revision=ctx.campaignProfile.state.purchaseRevision;assert.equal(h.restore(saved),true);assert.equal(ctx.campaignProfile.state.primary,'mantis');assert.equal(ctx.weapons.rifle.id,'mantis');assert.equal(ctx.player.ammo,5);assert.equal(ctx.weapons.rifle.reserve,17);assert.ok((ctx.player.ammo+ctx.weapons.rifle.reserve)*8<=180,'the checkpoint ammunition damage value cannot increase');assert.equal(ctx.economy.state.credits,cash);assert.equal(ctx.campaignProfile.state.purchaseRevision,revision);
+ const same=h.capture(),reserve=ctx.weapons.rifle.reserve;assert.equal(h.restore(same),true);assert.equal(ctx.weapons.rifle.reserve,reserve);assert.equal(ctx.player.ammo,5,'same-gun reload is exact, not repeatedly converted');
+});
+test('rejecting a malformed checkpoint cannot reset the live ability cooldown',()=>{const h=session({expanded:true});h.ctx.fieldAbility.activate('none',{player:h.ctx.player,direction:{x:1,z:0}});const before=h.ctx.fieldAbility.serialize(),bad=h.capture();bad.version=99;bad.fieldAbility={version:1,cooldowns:{escape:0,guard:0,demolition:0}};assert.equal(h.restore(bad),false);assert.deepEqual(h.ctx.fieldAbility.serialize(),before);});

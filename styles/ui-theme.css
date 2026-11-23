@@ -136,3 +136,5 @@ aside.mission-note .mission-guidance[open]>#hint{max-height:clamp(36px,calc(100d
 .hud-menu-controls #replay-guidance:disabled{opacity:.45}
 .hud-menu-controls #replay-guidance:focus-visible{outline:2px solid #efba62;outline-offset:3px}
 aside.mission-note[hidden]{display:none!important}
+/* A concise current goal has no empty expandable hint panel. */
+.mission-guidance>h2{min-height:36px;display:flex;align-items:center;margin:0}

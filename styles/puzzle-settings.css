@@ -90,3 +90,7 @@
  .hardware-live-reading{line-height:14px;min-height:14px}
 }
 @media(max-height:400px){.puzzle-settings-controls[data-mode=actions]{padding-block:6px}}
+/* Live engineering constraints, shared by all annex lever banks. */
+.puzzle-feeder-instruments{width:100%;display:grid;gap:9px}.puzzle-feeder-row{display:flex;gap:9px;align-items:center;min-width:0}.puzzle-feeder-label{font:600 13px/20px ui-monospace,monospace;color:#b7c6d7;width:15px;flex:none}
+.puzzle-rail-instrument{position:relative;width:100%;height:104px;overflow:hidden;background:#111922}.puzzle-rail-segment{position:absolute;inset:0;background:#657586}.puzzle-rail-segment.selected{background:#dfbf7a}.puzzle-rail-marker{position:absolute;transform:translate(-50%,-50%);font:600 15px/20px ui-monospace,monospace;color:#c9d6df;background:#111922;padding:1px 3px}.puzzle-rail-marker.entry,.puzzle-rail-marker.exit{color:#a5d0d5}.puzzle-rail-marker.buffer{color:#b78a7b}.puzzle-rail-marker.branch{font-size:12px;color:#d3bd8a}.puzzle-rail-marker.point{border:1px solid #69798b;border-radius:50%;font-size:11px;width:16px;height:16px;line-height:16px;text-align:center;padding:0}
+@media(max-height:400px){.puzzle-feeder-instruments{gap:5px}.puzzle-rail-instrument{height:75px}.puzzle-settings-controls:has(.puzzle-instrument[data-instrument=feeders]),.puzzle-settings-controls:has(.puzzle-instrument[data-instrument=rails]){padding-block:5px}}

@@ -90,7 +90,8 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,onMend
   const seesPlayer=lineOfSight(enemy.x,enemy.z,player.x,player.z);
   if(seesPlayer&&d<stat('detectRange',11))enemy.alerted=true;
   if(!seesPlayer||!enemy.alerted){cancelBite();return;}
-  enemy.mesh.rotation.y=Math.atan2(-dx,-dz);
+  const desiredFacing=Math.atan2(-dx,-dz),heavy=['brute','sentinel','boss','charger'].includes(enemy.variant);
+  if(heavy){const delta=angleDifference(desiredFacing,enemy.mesh.rotation.y||0),limit=(enemy.variant==='boss'?1.6:2.2)*dt;enemy.mesh.rotation.y+=Math.max(-limit,Math.min(limit,delta));}else enemy.mesh.rotation.y=desiredFacing;
   if(enemy.variant==='spitter'&&d>=SPITTER_SHOT.minRange&&d<=SPITTER_SHOT.range&&enemy.spitCooldown<=0){cancelBite();enemy.spitX=player.x;enemy.spitZ=player.z;enemy.spitWindup=SPITTER_SHOT.windup;visual.spitWindup=.001;visual.spitTarget={x:enemy.spitX,z:enemy.spitZ};return;}
   if(enemy.variant==='mender'&&d<=8&&(enemy.mendCharges??MENDER_PULSE.charges)>0&&enemy.mendCooldown<=0){cancelBite();enemy.mendWindup=MENDER_PULSE.windup;visual.mendWindup=.001;return;}
   if(enemy.variant==='boss'&&(enemy.encounter==='nest'||enemy.bossMechanic==='pulse')&&d>2&&d<=NEST_PULSE.radius+1&&enemy.pulseCooldown<=0){
@@ -112,7 +113,7 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,onMend
     }
     return;
   }
-  if(d<biteRange&&enemy.cooldown<=0){enemy.attackWindup=duration;visual.attackWindup=.01;return;}
+  if(d<biteRange&&enemy.cooldown<=0&&(!heavy||Math.abs(angleDifference(desiredFacing,enemy.mesh.rotation.y))<.65)){enemy.attackWindup=duration;visual.attackWindup=.01;return;}
   if(allowMovement&&d>stopDistance&&d>0){
     let mx=dx/d,mz=dz/d;
     if(stat('behavior','pursue')==='flank'&&d>2.5&&d<8){

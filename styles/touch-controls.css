@@ -234,3 +234,9 @@
 }
 /* A small sight mark confirms facing stays fixed while the separate Fire is held. */
 .touch-fire.facing-locked::after{content:'⌖';position:absolute;right:7px;top:3px;font:15px/1 system-ui;color:#edf4ff;pointer-events:none}
+/* One compact field action; it does not add a third column to the phone HUD. */
+.field-ability svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.field-ability.cooling{opacity:.65}
+.touch-controls-enabled .player-status #use-skill{position:fixed;left:max(10px,env(safe-area-inset-left));right:auto;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 96px);top:auto;z-index:25;width:44px;height:44px;min-width:44px;min-height:44px;pointer-events:auto;touch-action:none;background:#182635ed;border-color:#b7c9dc}
+.touch-controls-enabled.touch-left-handed .player-status #use-skill{left:auto;right:max(10px,env(safe-area-inset-right))}
+.touch-controls-enabled.touch-large-controls .player-status #use-skill{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 108px)}

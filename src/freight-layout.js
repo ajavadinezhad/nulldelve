@@ -1,4 +1,4 @@
-import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=critic-fixes-r54';
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=integration-fixes-r55';
 import * as THREE from '../vendor/three.module.js';
 /** Flooded freight annex appends geometry without moving any older room. */
 export const FREIGHT_ROOMS=Object.freeze([
@@ -8,7 +8,7 @@ export const FREIGHT_ROOMS=Object.freeze([
  {x:178,z:4,w:18,h:14,name:'COLD CHAIN'},
  {x:178,z:43,w:18,h:20,name:'RAIL CONTROL'},
  ...EXPLORATION_ROOMS.filter(room=>room.operation==='freight'),
-].map(Object.freeze));
+].map(room=>Object.freeze({...room,floorMask:true})));
 export const FREIGHT_DOORS=Object.freeze([
  {x:148,z:52,axis:'z'},{x:162,z:40,axis:'x'},{x:174,z:30,axis:'z'},
  {x:186,z:40,axis:'x'},{x:174,z:52,axis:'z'},{x:186,z:20,axis:'x'},
@@ -16,7 +16,7 @@ export const FREIGHT_DOORS=Object.freeze([
 // A loading spine with cargo courts replaces five interchangeable rectangular arenas.
 // Keep every old device, door and spawn corner reachable for existing checkpoints.
 export const FREIGHT_FLOOR=Object.freeze([
- [154,43,18,7],[160,50,6,13],[154,57,18,6],[165,51,7,3],
+ [154,43,18,7],[160,50,6,13],[154,57,18,6],[154,51,7,2],[165,51,7,3],
  [154,23,18,15],
  [178,23,18,4],[178,27,4,8],[185,27,11,8],[178,35,18,3],
  [178,4,18,14],

@@ -14,7 +14,7 @@ export function touchAimDirection(state){
  const x=source?.x??0,z=source?.z??0,length=Math.hypot(x,z);
  return Number.isFinite(length)&&length>0?{x:x/length,z:z/length}:null;
 }
-export function shouldShowTouchControls(mode,{coarse=false,touchPoints=0}={}){return mode==='on'||mode!=='off'&&(coarse||touchPoints>0);}
+export function shouldShowTouchControls(mode,{coarse=false,activeInput=null}={}){return mode==='on'||mode!=='off'&&(activeInput==='touch'||coarse&&activeInput!=='mouse');}
 /** Small action labels retain the full nearby-device context for assistive input. */
 export function touchInteractionContext(prompt){
  const description=typeof prompt==='string'?prompt.replace(/^[^·]{1,24} · /,'').trim():'';
@@ -42,8 +42,8 @@ const ICONS={grab:'M10 10h12v13H10zM10 14h12M16 10v13M3 17h4v9h7m15-9h-4v9h-7',i
 export function createTouchControls({host,isRunning,onAction,getFacing=()=>null,device=()=>({coarse:globalThis.matchMedia?.('(pointer: coarse)')?.matches??false,touchPoints:globalThis.navigator?.maxTouchPoints??0})}){
  if(!host)return {enabled:false,getState:()=>({move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false}),reset(){},configure(){}};
  const heldInteract=createHeldInteraction(()=>onAction('interact'),()=>onAction('interactEnd'));
- let fireButton=null,lockedFacing=null,lastFacing=null;const heldFire=createHeldInteraction(()=>{lockedFacing=touchAimDirection({aim:{...getFacing(),active:true}})??touchAimDirection(input.getState())??lastFacing;fireButton?.classList.toggle('held',true);fireButton?.classList.toggle('facing-locked',!!lockedFacing);},()=>{lockedFacing=null;fireButton?.classList.toggle('held',false);fireButton?.classList.toggle('facing-locked',false);});
- const input=createTwinStickInput(),knobs={},cleanups=[];let enabled=false,mode='auto',lastInteractPrompt=null;
+ let fireButton=null,lockedFacing=null,lastFacing=null,fireOrigin=null;const heldFire=createHeldInteraction(()=>{lockedFacing=touchAimDirection(input.getState())??touchAimDirection({aim:{...getFacing(),active:true}})??lastFacing;fireButton?.classList.toggle('held',true);fireButton?.classList.toggle('facing-locked',!!lockedFacing);},()=>{lockedFacing=null;fireOrigin=null;fireButton?.classList.toggle('held',false);fireButton?.classList.toggle('facing-locked',false);});
+ const input=createTwinStickInput(),knobs={},cleanups=[];let enabled=false,mode='auto',lastInteractPrompt=null,activeInput=null,currentOptions={};
  const doc=host.ownerDocument??document,make=(tag,cls,text)=>{const node=doc.createElement(tag);node.className=cls;if(text)node.textContent=text;return node;};
  function paint(name){const state=input.getState()[name],knob=knobs[name];if(name==='move'&&!heldFire.held){const direction=touchAimDirection(input.getState());if(direction)lastFacing=direction;}const travel=(knob.parentElement.getBoundingClientRect?.().width||96)*.24;knob.style.transform=`translate(${state.x*travel}px,${state.z*travel}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);}
  function reset(){heldFire.reset();heldInteract.reset();input.reset();for(const name of Object.keys(knobs))paint(name);}
@@ -62,17 +62,20 @@ export function createTouchControls({host,isRunning,onAction,getFacing=()=>null,
  const end=event=>{if(heldInteract.end(event.pointerId))event.preventDefault();};for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(button,type,end);
  listen(button,'click',event=>{if(event.detail===0&&enabled&&isRunning()){onAction(action);onAction('interactEnd');}});
  }else listen(button,'click',()=>{if(enabled&&isRunning())onAction(action);});actions.append(button);}host.append(actions);
- fireButton=make('button','touch-action touch-fire');fireButton.type='button';fireButton.dataset.action='fire';fireButton.setAttribute('aria-label','Fire; hold to keep facing while moving, release to turn');
+ fireButton=make('button','touch-action touch-fire');fireButton.type='button';fireButton.dataset.action='fire';fireButton.setAttribute('aria-label','Fire; hold to keep facing, drag to steer, release to turn with movement');
  const fireSvg=doc.createElementNS('http://www.w3.org/2000/svg','svg'),firePath=doc.createElementNS('http://www.w3.org/2000/svg','path');fireSvg.setAttribute('viewBox','0 0 32 32');fireSvg.setAttribute('aria-hidden','true');firePath.setAttribute('d','M12 27V12l4-7 4 7v15zM12 20h8');fireSvg.append(firePath);fireButton.append(fireSvg,make('span','','Fire'));host.append(fireButton);
- listen(fireButton,'pointerdown',event=>{if(!enabled||!isRunning()||event.button>0)return;event.preventDefault();if(heldFire.begin(event.pointerId)){try{fireButton.setPointerCapture(event.pointerId);}catch{}onAction('fire');}});
+ listen(fireButton,'pointerdown',event=>{if(!enabled||!isRunning()||event.button>0)return;event.preventDefault();if(heldFire.begin(event.pointerId)){fireOrigin={id:event.pointerId,x:event.clientX,z:event.clientY,facing:lockedFacing};try{fireButton.setPointerCapture(event.pointerId);}catch{}onAction('fire');}});
+ listen(fireButton,'pointermove',event=>{if(!fireOrigin||fireOrigin.id!==event.pointerId||!heldFire.held||!fireOrigin.facing)return;const dx=event.clientX-fireOrigin.x,dz=event.clientY-fireOrigin.z;if(!Number.isFinite(dx)||!Number.isFinite(dz)||Math.hypot(dx,dz)<6)return;const x=fireOrigin.facing.x*44+dx,z=fireOrigin.facing.z*44+dz,length=Math.hypot(x,z);if(length>1){event.preventDefault();lockedFacing={x:x/length,z:z/length};}});
  const endFire=event=>{if(heldFire.end(event.pointerId))event.preventDefault();};for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(fireButton,type,endFire);
  listen(fireButton,'click',event=>{if(event.detail===0&&enabled&&isRunning())onAction('fire');});
- function configure(next=mode,{handedness='right',size='normal'}={}){reset();doc.body.classList.toggle('touch-left-handed',handedness==='left');doc.body.classList.toggle('touch-large-controls',size==='large');mode=next;const nextEnabled=shouldShowTouchControls(mode,device());if(nextEnabled!==enabled)reset();enabled=nextEnabled;host.hidden=!enabled;doc.body.classList.toggle('touch-controls-enabled',enabled);}
+ function configure(next=mode,{handedness='right',size='normal'}={}){currentOptions={handedness,size};reset();doc.body.classList.toggle('touch-left-handed',handedness==='left');doc.body.classList.toggle('touch-large-controls',size==='large');mode=next;const nextEnabled=shouldShowTouchControls(mode,{...device(),activeInput});if(nextEnabled!==enabled)reset();enabled=nextEnabled;host.hidden=!enabled;doc.body.classList.toggle('touch-controls-enabled',enabled);}
  configure();
  // Pointer capture can be unavailable or fail during a browser gesture. Always
  // release matching owners when the pointer ends anywhere in the window.
  const releasePointer=event=>{heldFire.end(event.pointerId);heldInteract.end(event.pointerId);for(const name of Object.keys(knobs))if(input.end(name,event.pointerId))paint(name);};
  listen(globalThis,'pointerup',releasePointer);listen(globalThis,'pointercancel',releasePointer);
+ listen(globalThis,'pointerdown',event=>{if(mode!=='auto'||!['touch','mouse'].includes(event.pointerType))return;const next=event.pointerType;if(activeInput===next)return;activeInput=next;if(shouldShowTouchControls(mode,{...device(),activeInput})!==enabled)configure(mode,currentOptions);});
+ listen(globalThis,'keydown',event=>{if(mode==='auto'&&activeInput==='touch'&&!event.ctrlKey&&!event.altKey&&!event.metaKey){activeInput='mouse';configure(mode,currentOptions);}});
  listen(globalThis,'blur',reset);listen(globalThis,'resize',reset);listen(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
  return {get enabled(){return enabled;},getState:()=>enabled?{...input.getState(),...(lockedFacing?{aim:{...lockedFacing,active:true}}:{}),facingLocked:!!lockedFacing,firing:heldFire.held,interactHeld:heldInteract.held}:{move:{x:0,z:0},aim:{x:0,z:0,active:false},sprint:false,firing:false},reset,configure,setInteractAvailable(prompt){if(prompt===lastInteractPrompt)return;lastInteractPrompt=prompt;const button=actions.querySelector('[data-action="interact"]');if(!button)return;const context=touchInteractionContext(prompt);button.classList.toggle('available',context.available);button.setAttribute('aria-label',context.description);button.title=context.description;button.querySelector('span').textContent=context.label;button.querySelector('path').setAttribute('d',['Grab','Release'].includes(context.label)?ICONS.grab:ICONS.interact);},dispose(){reset();cleanups.forEach(fn=>fn());doc.body.classList.remove('touch-controls-enabled','touch-left-handed','touch-large-controls');host.replaceChildren();}};
 }

@@ -1,15 +1,17 @@
-import {EXPLORATION_EVENTS} from './exploration.js?v=critic-fixes-r54';
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=critic-fixes-r54';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=critic-fixes-r54';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=critic-fixes-r54';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=critic-fixes-r54';
-import {createProgression} from './progression.js?v=critic-fixes-r54';
+import {createFieldAbility} from './field-ability.js?v=integration-fixes-r55';
+import {EXPLORATION_EVENTS} from './exploration.js?v=integration-fixes-r55';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=integration-fixes-r55';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=integration-fixes-r55';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=integration-fixes-r55';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=integration-fixes-r55';
+import {createProgression} from './progression.js?v=integration-fixes-r55';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','spitter','mender','boss']);
 /** Validate on a detached world before the live session is touched. */
 export function validateSnapshot(data,{width,height,doorCount,crateCount=2,plateCount=2,barrelIds}={}){
  try{
+  if(data?.fieldAbility!==undefined&&!createFieldAbility().restore(data.fieldAbility))return false;
   if(!object(data)||data.version!==3||!Array.isArray(data.world)||data.world.length!==2)return false;
   const legacy=data.world[0]===LEGACY_WIDTH&&data.world[1]===LEGACY_HEIGHT,previous=data.world[0]===PREVIOUS_WIDTH&&data.world[1]===PREVIOUS_HEIGHT,freight=data.world[0]===FREIGHT_WIDTH&&data.world[1]===FREIGHT_HEIGHT,current=data.world[0]===WORLD_WIDTH&&data.world[1]===WORLD_HEIGHT;
   if(!legacy&&!previous&&!freight&&!current)return false;

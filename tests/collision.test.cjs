@@ -9,7 +9,7 @@ const {EXPANSION_ROOMS,carveExpansion}=require('../src/facility-expansion.js');
 
 function world(){
   const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8');
-  const ctx={liftWalkBlocked:require('../src/transit.js').liftWalkBlocked,runConfig:{operation:'breach'},...require('../src/signal-layout.js'),...require('../src/freight-layout.js'),barrelSystem:null,Math,Set,W:WORLD_WIDTH,H:WORLD_HEIGHT,HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,EXPANSION_ROOMS,carveExpansion,doors:[],createPressurePuzzle,overlapsCrate,moveWithCrates};vm.createContext(ctx);
+  const ctx={liftWalkBlocked:require('../src/transit.js').liftWalkBlocked,runConfig:{operation:'breach'},...require('../src/signal-layout.js'),...require('../src/freight-layout.js'),enemies:[],resolveCreaturePressure:require('../src/combat-movement.js').resolveCreaturePressure,barrelSystem:null,Math,Set,W:WORLD_WIDTH,H:WORLD_HEIGHT,HOSPITAL_ROOMS,HOSPITAL_DOORS,carveHospital,EXPANSION_ROOMS,carveExpansion,doors:[],createPressurePuzzle,overlapsCrate,moveWithCrates};vm.createContext(ctx);
   vm.runInContext(source.slice(source.indexOf('const map='),source.indexOf('const boxGeo=')),ctx);
   vm.runInContext('let player={x:7,z:20};'+source.slice(source.indexOf('function solid('),source.indexOf('const pursue=')),ctx);
   return expression=>vm.runInContext(expression,ctx);
@@ -41,6 +41,6 @@ test('all twenty rooms and both mission positions connect through carved passage
   const run=world();assert.equal(run(`(()=>{
     const visited=new Set(['7,29']),queue=[[7,29]];
     for(let i=0;i<queue.length;i++){const [x,z]=queue[i];for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,nz=z+dz,k=nx+','+nz;if(!visited.has(k)&&!solid(nx,nz,.32)){visited.add(k);queue.push([nx,nz]);}}}
-    return roomDefs.every(r=>[...visited].some(k=>{const [x,z]=k.split(',').map(Number);return x>=r.x&&x<r.x+r.w&&z>=r.z&&z<r.z+r.h;}))&&visited.has('93,7')&&visited.has('92,60');
+    return visited.has('154,52')&&visited.has('160,52')&&roomDefs.every(r=>[...visited].some(k=>{const [x,z]=k.split(',').map(Number);return x>=r.x&&x<r.x+r.w&&z>=r.z&&z<r.z+r.h;}))&&visited.has('93,7')&&visited.has('92,60');
   })()`),true);
 });

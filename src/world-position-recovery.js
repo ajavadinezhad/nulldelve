@@ -1,5 +1,5 @@
-import {FREIGHT_ROOMS} from './freight-layout.js?v=critic-fixes-r54';
-import {SIGNAL_ROOMS} from './signal-layout.js?v=critic-fixes-r54';
+import {FREIGHT_ROOMS} from './freight-layout.js?v=integration-fixes-r55';
+import {SIGNAL_ROOMS} from './signal-layout.js?v=integration-fixes-r55';
 /** Recover legacy checkpoints inside reshaped rooms without crossing a sector gate. */
 export function recoverWorldPosition(player,{operation,blocked=()=>false,radius=.32}={}){
  if(!player||!Number.isFinite(player.x)||!Number.isFinite(player.z)||!blocked(player.x,player.z,radius))return false;

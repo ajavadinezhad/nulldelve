@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {LIFT_LINKS,STAIR_PASSAGES} from './transit.js?v=critic-fixes-r54';
+import {LIFT_LINKS,STAIR_PASSAGES} from './transit.js?v=integration-fixes-r55';
 /** Shallow shafts and closed safety rails distinguish transfers from walking lanes. */
 export function buildTransitArt(scene){
  const root=new THREE.Group();root.name='facility-transit';scene.add(root);const geo=new THREE.BoxGeometry(1,1,1),materials=new Map(),batches=new Map();

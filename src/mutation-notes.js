@@ -3,13 +3,13 @@ export const MUTATION_NOTES_KEY='nulldelve.mutations.v1';
 export const MUTATION_NOTES=Object.freeze([
  {id:'normal',name:'Worker',color:'#a66d45',warning:'Short bite windup',counter:'Keep moving and leave space before it lunges.'},
  {id:'runner',name:'Runner',color:'#c39450',warning:'Fast approach',counter:'Track its approach; avoid getting pinned against a wall.'},
- {id:'brute',name:'Brute',color:'#a45f4c',warning:'Heavy bite',counter:'Use its slower pace to make space while reloading.'},
- {id:'charger',name:'Charger',color:'#c17e51',warning:'Long rush marker',counter:'Step sideways after it commits. Solid cover stops the rush.'},
- {id:'sentinel',name:'Sentinel',color:'#9186b5',warning:'Resists stagger',counter:'Keep your distance during its longer bite windup; do not rely on shots to interrupt it.'},
- {id:'screecher',name:'Screecher',color:'#a47ac1',warning:'Radial warning',counter:'Solid cover blocks the shriek. Stagger interrupts its windup.'},
- {id:'leaper',name:'Leaper',color:'#d7d1bb',warning:'Landing marker',counter:'Move away from the locked landing point. Stagger interrupts takeoff.'},
- {id:'spitter',name:'Spitter',color:'#d4a363',warning:'Locked ground circle',counter:'Leave the amber target circle before the spit lands. Cover blocks the attack.'},
- {id:'mender',name:'Mender',color:'#9bd8e6',warning:'Pale repair pulse',counter:'Interrupt its pulse or separate it from injured creatures. It has only three repair charges.'},
+ {id:'brute',name:'Brute',color:'#a45f4c',warning:'Heavy bite',counter:'Its front shell resists light rounds. Circle behind its slow turn or use penetrating fire.'},
+ {id:'charger',name:'Charger',color:'#c17e51',warning:'Long rush marker',counter:'Step sideways after it commits. Cover stops the rush; an interrupted charger briefly resists stagger.'},
+ {id:'sentinel',name:'Sentinel',color:'#9186b5',warning:'Resists stagger',counter:'Its heavy front shell resists light rounds. Use its slow turn to reach the rear; stagger resistance returns quickly.'},
+ {id:'screecher',name:'Screecher',color:'#a47ac1',warning:'Radial warning',counter:'Cover blocks its shriek. An interrupt hardens its shell briefly; evade the next warning.'},
+ {id:'leaper',name:'Leaper',color:'#d7d1bb',warning:'Landing marker',counter:'Leave the locked landing point. After an interrupt it briefly resists further stagger.'},
+ {id:'spitter',name:'Spitter',color:'#d4a363',warning:'Locked ground circle',counter:'Leave the amber spit circle or use cover. After an interrupt it briefly resists stagger.'},
+ {id:'mender',name:'Mender',color:'#9bd8e6',warning:'Pale repair pulse',counter:'Interrupt once, then separate it from injured creatures while its shell recovers. Three repair charges only.'},
  {id:'boss',name:'Matriarch',color:'#b35843',warning:'Large body, heavy bite',counter:'Keep an escape lane open and clear nearby smaller creatures.'},
 ].map(Object.freeze));
 const valid=new Set(MUTATION_NOTES.map(n=>n.id));

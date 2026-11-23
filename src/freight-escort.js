@@ -5,3 +5,10 @@ export function freightEscortStatus(cargo,player,enemies=[]){
  const point=freightEscortPoint(cargo.remaining);
  return {point,near:Math.hypot(player.x-point.x,player.z-point.z)<=4,blocked:enemies.some(e=>e.hp>0&&(e.spawnDelay??0)<=0&&Math.hypot(e.x-point.x,e.z-point.z)<2.5)};
 }
+
+/** Keep the existing finite defender queue, releasing it at cargo rail points. */
+export function freightEscortPhaseReady(cargo,phase){
+ if(phase<=0)return true;
+ if(!cargo?.running&&!cargo?.delivered)return false;
+ return cargo.delivered||cargo.remaining<=(phase===1?6:3);
+}

@@ -191,6 +191,8 @@ export function createCombatEffects(scene){
   const dustMaterial=new THREE.MeshBasicMaterial({color:0xc3b894,transparent:true,opacity:.48,depthWrite:false});
   const markMaterial=new THREE.MeshBasicMaterial({color:0x101714,transparent:true,opacity:.7,depthWrite:false});
   const markGeometry=new THREE.CircleGeometry(.075,7);
+  const hitGeometry=new THREE.BoxGeometry(1,1,1),recoveryGeometry=new THREE.RingGeometry(.3,.335,14,1,0,Math.PI*1.5);
+  const hitMaterials={shell:new THREE.MeshBasicMaterial({color:0xe5b56b,transparent:true,opacity:.9,depthWrite:false}),rear:new THREE.MeshBasicMaterial({color:0x9bdded,transparent:true,opacity:.9,depthWrite:false}),resisted:new THREE.MeshBasicMaterial({color:0xa3b0c5,transparent:true,opacity:.65,depthWrite:false,side:THREE.DoubleSide})};
   let serial=0;
   function removeParticle(index){const p=particles[index];scene.remove(p.mesh);if(p.ownMaterial)p.mesh.material.dispose();particles.splice(index,1);}
   function particle(geometry,material,position,velocity,life,kind){
@@ -212,6 +214,13 @@ export function createCombatEffects(scene){
     const mark=new THREE.Mesh(markGeometry,markMaterial);mark.rotation.x=-Math.PI/2;mark.rotation.z=(serial%7);mark.position.set(x,.034,z);scene.add(mark);marks.push(mark);
     for(let i=0;i<3;i++){const a=i*2.1+serial*.7,p=particle(sphere,dustMaterial,new THREE.Vector3(x,.08,z),new THREE.Vector3(Math.cos(a)*.5,.5+i*.13,Math.sin(a)*.5),.28+i*.05,'dust');p.mesh.scale.setScalar(.035);}
   }
+  /** Brief world-space cues: metal shards, exposed-hit cross, recovery arc. */
+  function hit(x,z,{shell=false,rear=false,resisted=false,height=1.2}={}){
+    height=Number.isFinite(height)?Math.max(.8,Math.min(3,height)):1.2;
+    if(shell)for(let i=0;i<3;i++){const a=i*Math.PI*2/3+serial*.2,p=particle(hitGeometry,hitMaterials.shell,new THREE.Vector3(x,height,z),new THREE.Vector3(Math.cos(a)*1.2,.7,Math.sin(a)*1.2),.2,'shell');p.mesh.scale.set(.075,.025,.025);p.mesh.rotation.y=a;}
+    if(rear)for(const angle of [-Math.PI/4,Math.PI/4]){const p=particle(hitGeometry,hitMaterials.rear,new THREE.Vector3(x,height+.02,z),new THREE.Vector3(0,.1,0),.24,'rear');p.mesh.scale.set(.32,.025,.045);p.mesh.rotation.y=angle;}
+    if(resisted){const p=particle(recoveryGeometry,hitMaterials.resisted,new THREE.Vector3(x,height,z),new THREE.Vector3(0,.1,0),.32,'resisted');p.mesh.rotation.x=-Math.PI/2;}
+  }
   function update(dt){
     if(dt<=0)return;
     for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;if(p.life<=0){removeParticle(i);continue;}
@@ -219,9 +228,9 @@ export function createCombatEffects(scene){
       if(p.kind==='brass'){
         if(p.mesh.position.y>.065){p.velocity.y-=7*dt;p.mesh.rotation.x+=p.spin*dt;p.mesh.rotation.z+=p.spin*.7*dt;}
         if(p.mesh.position.y<=.065){p.mesh.position.y=.065;if(!p.bounced){p.velocity.y=Math.abs(p.velocity.y)*.24;p.velocity.x*=.45;p.velocity.z*=.45;p.bounced=true;}else{p.velocity.set(0,0,0);p.mesh.rotation.x=Math.PI/2;}}
-      }else{p.velocity.multiplyScalar(Math.exp(-3*dt));p.mesh.scale.addScalar(dt*.22);p.mesh.material.opacity=(p.kind==='smoke'?.22:.48)*Math.max(0,p.life/p.maxLife);}
+      }else{p.velocity.multiplyScalar(Math.exp(-3*dt));p.mesh.scale.addScalar(dt*.22);p.mesh.material.opacity=(p.kind==='smoke'?.22:['shell','rear'].includes(p.kind)?.9:p.kind==='resisted'?.65:.48)*Math.max(0,p.life/p.maxLife);}
     }
   }
-  function dispose(){while(particles.length)removeParticle(particles.length-1);for(const mark of marks)scene.remove(mark);marks.length=0;markGeometry.dispose();markMaterial.dispose();smokeMaterial.dispose();dustMaterial.dispose();}
-  return {shot,impact,update,dispose};
+  function dispose(){while(particles.length)removeParticle(particles.length-1);for(const mark of marks)scene.remove(mark);marks.length=0;markGeometry.dispose();hitGeometry.dispose();recoveryGeometry.dispose();for(const material of Object.values(hitMaterials))material.dispose();markMaterial.dispose();smokeMaterial.dispose();dustMaterial.dispose();}
+  return {shot,impact,hit,update,dispose};
 }

@@ -33,3 +33,11 @@ test('live camera button coalesces rapid taps, charges before showing, and handl
   const first=button.onclick(),second=button.onclick();assert.equal(ctx.guidanceBusy,true);assert.equal(shows,0);unblock();await Promise.all([first,second]);assert.equal(charges,1);assert.equal(shows,fail?0:1);assert.equal(e.state.credits,fail?25:5);assert.equal(ctx.guidanceBusy,false);
  }
 });
+
+test('Freight camera follows cargo phase actions, but never skips living defenders',()=>{
+ const c=setup('freight'),yard=c.progression.state.zones.find(z=>z.id==='freight-yard');
+ yard.status='active';yard.phaseRested=true;yard.wave=[];
+ assert.match(nextGuidanceStep(c).id,/freightSwitch|freightDispatch/);
+ yard.wave.push({hp:1});
+ assert.equal(nextGuidanceStep(c).id,'fight-freight-yard');
+});

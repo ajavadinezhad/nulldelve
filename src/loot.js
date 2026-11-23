@@ -1,4 +1,4 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=critic-fixes-r54';
+import {DIFFICULTY_RULES} from './difficulty.js?v=integration-fixes-r55';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;
@@ -8,7 +8,7 @@ function allocatePickupId(state,used=new Set(state.drops.map(drop=>drop.id))){
  state.nextId=sequence>=MAX_PICKUP_ID?1:sequence+1;return 'drop'+sequence;
 }
 export function createLootState(saved){
- const state={drops:[],nextId:1,kills:0};
+ const state={drops:[],nextId:1,kills:0,supplyBudget:0};
  if(saved&&Array.isArray(saved.drops)){
   const used=new Set(),budget=value=>Number.isFinite(value)?Math.max(0,Math.min(10000,value)):0;
   // Older imports can omit nextId. Recover the sequence from existing IDs before
@@ -22,6 +22,7 @@ export function createLootState(saved){
    state.drops.push({id,...(d.compact?{compact:true}:{}),kind:d.kind,x:d.x,z:d.z,amount:budget(d.amount),rifle:budget(d.rifle),pistol:budget(d.pistol)});
   }
   state.kills=Number.isSafeInteger(saved.kills)?Math.max(0,saved.kills):0;
+  state.supplyBudget=Number.isFinite(saved.supplyBudget)?Math.max(0,Math.min(1000,saved.supplyBudget)):0;
  }
  return state;
 }
@@ -35,31 +36,20 @@ export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='n
  const held=selected??player?.selected;
  const supply=gun=>Math.max(0,Number(weapons?.[gun]?.reserve)||0)+Math.max(0,Number(held===gun?player?.ammo:weapons?.[gun]?.ammo)||0)+nearby.reduce((n,d)=>n+(d.kind==='ammo'?Math.max(0,Number(d[gun])||0):0),0);
  const primaryPellets=Math.max(1,Number(weapons?.rifle?.pellets)||1);
- const primaryLowThreshold=difficulty==='hard'?Math.max(primaryPellets>1?6:0,(weapons?.rifle?.baseDamage??1)>=8?6:0,Math.ceil(((weapons?.rifle?.baseDamage??1)>=2?60:primaryPellets>1?36:28)/(Math.max(1,Number(weapons?.rifle?.baseDamage)||1)*Math.min(3,primaryPellets)))):18;
- const lowAmmo=!!weapons&&supply('rifle')<primaryLowThreshold&&supply('pistol')<(difficulty==='hard'?24:8);
+ const baseValue=Math.max(1,Math.min(4,Number(weapons?.rifle?.baseDamage)||1),primaryPellets>1?3:1);
+ const baseHp=({normal:2,runner:1,brute:6,charger:8,sentinel:14,screecher:10,leaper:7,spitter:6,mender:8,boss:24})[enemy.variant]??2;
+ const actualHealth=Number(enemy.maxHp),healthBudget=Math.max(1,Math.min(10000,Number.isFinite(actualHealth)&&actualHealth>0?actualHealth:Math.ceil(baseHp*(DIFFICULTY_RULES[difficulty]?.hp??1))));
+ // Credit a fixed health-cost budget at each kill, regardless of inventory,
+ // accuracy or purchased damage. Inventory only caps delivery monotonically:
+ // min(capacity, existing supply + earned supply), never a low-ammo windfall.
+ state.supplyBudget=Math.min(1000,(Number.isFinite(state.supplyBudget)?state.supplyBudget:0)+healthBudget*.7);
  const added=[];
- if(big||boss||state.kills%3===0||lowAmmo){
-  const baseRifle=boss?12:big?6:lowAmmo?(difficulty==='hard'?3:2):3;
-  // A shell or AMR round carries more damage than a carbine round. Scale by
-  // the weapon's base value, capped to keep precision ammo viable; purchasing
-  // damage never reduces physical loot. Hard AMR aid uses a six-round floor
-  // only while BOTH guns are low, avoiding stockpiles from ordinary heavy kills.
-  const baseValue=Math.max(1,Math.min(4,Number(weapons?.rifle?.baseDamage)||1),primaryPellets>1?3:1);
-  let rifle=Math.max(1,Math.round(baseRifle/baseValue)),pistol=boss?4:big?2:1;
-  if(lowAmmo&&(big||boss)){
-   // Recover a bounded fighting chance after an expensive mutation, only when
-   // both weapons (including nearby uncollected drops) are running dry.
-   const baseHp=({brute:6,charger:8,sentinel:14,screecher:10,leaper:7,spitter:6,mender:8,boss:24})[enemy.variant]??2,hp=Math.max(1,Number(enemy.maxHp)||Math.ceil(baseHp*(DIFFICULTY_RULES[difficulty]?.hp??1))),gun=weapons?.rifle??{},pellets=Math.max(1,Number(gun.pellets)||1);
-   rifle=Math.max(rifle,Math.min(pellets>1?6:16,primaryLowThreshold-supply('rifle'),Math.ceil(hp/(Math.max(1,Number(gun.baseDamage)||1)*Math.min(2,pellets))*1.25)));
-   pistol=Math.max(pistol,Math.min(4,Math.ceil(hp/8)));
-  }
-  if(lowAmmo&&!big&&!boss&&Number.isFinite(enemy.maxHp)){
-   // A late worker can cost more than an early elite. Critical aid follows its
-   // real health budget, bounded by one small reserve and pending pickups.
-   const value=Math.max(1,Number(weapons?.rifle?.baseDamage)||1)*Math.min(3,primaryPellets);
-   rifle=Math.max(rifle,Math.min(12,primaryLowThreshold-supply('rifle'),Math.ceil(enemy.maxHp/value*1.25)));
-  }
-  added.push({id:allocatePickupId(state),kind:'ammo',x:enemy.x+.24,z:enemy.z+.12,rifle,pistol,amount:0});
+ if(big||boss||state.kills%3===0){
+  const earned=Math.max(1,Math.floor(state.supplyBudget/baseValue));
+  state.supplyBudget=Math.max(0,state.supplyBudget-earned*baseValue);
+  const primaryCap=Math.min(RESERVE_LIMITS.rifle,Math.max((weapons?.rifle?.capacity??30)*2,Math.ceil(60/baseValue))),pistolCap=36;
+  const rifle=Math.min(earned,Math.max(0,primaryCap-supply('rifle'))),pistol=Math.min(boss?6:big?3:3,Math.max(0,pistolCap-supply('pistol')));
+  if(rifle>0||pistol>0)added.push({id:allocatePickupId(state),kind:'ammo',x:enemy.x+.24,z:enemy.z+.12,rifle,pistol,amount:0});
  }
  const hp=Math.max(0,Number(player?.hp)||0),maxHp=Math.max(0,Number(player?.maxHp)||0);
  const pendingHealth=nearby.reduce((n,d)=>n+(d.kind==='health'?d.amount:0),0),effectiveHp=hp+pendingHealth;

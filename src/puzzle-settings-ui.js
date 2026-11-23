@@ -1,4 +1,4 @@
-import {createHardwareControl,createMechanismInstrument} from './puzzle-hardware.js?v=critic-fixes-r54';
+import {createHardwareControl,createMechanismInstrument} from './puzzle-hardware.js?v=integration-fixes-r55';
 /** The lever travel maps to discrete positions; no target settings enter this view. */
 export function leverValueAt(clientY,rect,min,max){const compact=rect.height<=140,offset=compact?36:44,bottom=compact?50:79,top=rect.top+offset,travel=Math.max(1,rect.height-offset-bottom),t=Math.max(0,Math.min(1,(clientY-top)/travel));return Math.round(max-t*(max-min));}
 export function createPuzzleSettingsUI({getPanel,onAdjust,onTest,onPress=()=>({ok:false}),onOpen=()=>{},onClose=()=>{}}){
@@ -19,7 +19,7 @@ export function createPuzzleSettingsUI({getPanel,onAdjust,onTest,onPress=()=>({o
     const hardware=createHardwareControl(c,()=>{if(!opened)return;const result=onPress(kind,i);for(const row of rows)row.feedback?.(null);hardware.feedback(result?.accepted);status.textContent=!result?.ok?'Locked':result.accepted===false?'Rejected':result.accepted===true||result.complete?'Accepted':'';status.dataset.state=result?.accepted===false?'rejected':result?.accepted===true||result.complete?'accepted':'neutral';refresh();if(result?.complete)hide();});
     controls.append(hardware.element);rows.push(hardware);return;
    }
-   const card=node('div','puzzle-lever-card'),label=node('span','puzzle-lever-label',c.label.replace(/^THEATRE /,'').replace(/^\d+ kW /,'').replace(/ MOTOR$/,''));label.id='puzzle-lever-label-'+i;
+   const card=node('div','puzzle-lever-card'),label=node('span','puzzle-lever-label',c.label.replace(/^THEATRE /,'').replace(/ MOTOR$/,''));label.id='puzzle-lever-label-'+i;
    const lever=node('button','puzzle-lever');lever.type='button';lever.setAttribute('role','slider');lever.setAttribute('aria-label',c.label);lever.setAttribute('aria-orientation','vertical');lever.setAttribute('aria-valuemin',String(c.min));lever.setAttribute('aria-valuemax',String(c.max));
    const gate=node('span','puzzle-lever-gate'),notches=node('span','puzzle-lever-notches'),marks=[];
    for(let value=c.min;value<=c.max;value++){const mark=node('span','puzzle-lever-mark',c.options?.[value]??String(value));mark.style.setProperty('--notch-top',((c.max-value)/Math.max(1,c.max-c.min)*100)+'%');notches.append(mark);marks.push(mark);}

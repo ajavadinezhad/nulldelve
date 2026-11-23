@@ -1,4 +1,4 @@
-import {normalizeCampaignOperation} from './campaign-operations.js?v=critic-fixes-r54';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=integration-fixes-r55';
 /** Session rules shared by the browser game and its regression checks. */
 export function createFixedStepper(step=1/60,maxCatchup=.5){
  let accumulator=0;
@@ -11,7 +11,8 @@ export function checkpointMatchesOperation(snapshot,config){
  return saved.mission===config.mission&&saved.difficulty===config.difficulty&&(saved.operation??null)===(config.operation??null)&&!!saved.remix===!!config.remix;
 }
 export function combatIsActive(player,enemies,zones){return zones.some(z=>z.status==='active')||enemies.some(e=>e.hp>0&&Math.hypot(e.x-player.x,e.z-player.z)<8);}
-export function canCheckpoint({active,ended,player,enemies,zones}){return !!active&&!ended&&player.hp>0&&!combatIsActive(player,enemies,zones);}
+export function safeRegroup(zones,enemies,player){const live=zones.filter(z=>z.status==='active');return live.length>0&&live.every(z=>z.phaseRested&&z.spawnTimer>2.5&&z.queue?.length&&!z.wave?.some(e=>e.hp>0))&&!enemies.some(e=>e.hp>0&&Math.hypot(e.x-player.x,e.z-player.z)<8);}
+export function canCheckpoint({active,ended,player,enemies,zones}){return !!active&&!ended&&player.hp>0&&(!combatIsActive(player,enemies,zones)||safeRegroup(zones,enemies,player));}
 export function missionGuidance({mission,player,puzzle,progression}){
  const s=progression,zones=s.zones??[],zone=id=>zones.find(z=>z.id===id);
  if(mission==='siege'){
