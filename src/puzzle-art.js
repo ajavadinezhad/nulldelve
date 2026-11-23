@@ -12,7 +12,7 @@ export function createPuzzleArt(scene, box, crates, plates, door) {
   }
   function stencil(text,w,h,color='#e3d5a1'){
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=128;
-    const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.textAlign='center';const sensor=text==='A'||text==='B';ctx.font=sensor?'bold 92px monospace':'bold 42px monospace';ctx.fillText(text,128,sensor?99:60);
+    const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.textAlign='center';ctx.font='bold 42px monospace';ctx.fillText(text,128,60);
 
     const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false}));mesh.rotation.x=-Math.PI/2;return mesh;
@@ -54,13 +54,11 @@ export function createPuzzleArt(scene, box, crates, plates, door) {
     for(const x of [-.63,.63])for(const z of [-.63,.63]){
       const lamp=new THREE.Mesh(lampGeo,status);lamp.position.set(x,.105,z);g.add(lamp);
     }
-    const label=stencil(index?'B':'A',.95,.55,'#f2f4f8');label.position.set(0,.135,0);g.add(label);
     // Each sensor has a matching lamp on the fixed doorway frame, outside the sliding leaf.
     const lampMaterial=new THREE.MeshBasicMaterial({color:red});
     const frame=new THREE.Group();frame.position.set(door.x+(index?1.6:-1.6),1.66,door.z);root.add(frame);
     part(frame,0,0,0,.32,.08,.42,dark);
     const lamp=new THREE.Mesh(new THREE.CylinderGeometry(.115,.115,.04,16),lampMaterial);lamp.position.y=.065;frame.add(lamp);
-    const identity=stencil(index?'B':'A',.25,.18);identity.position.set(0,.092,-.3);frame.add(identity);
     marks.push([stateMark(g,.89,.15,0),stateMark(frame,0,.1,.32)]);
     indicators.push(lampMaterial);
     return {platform,status};

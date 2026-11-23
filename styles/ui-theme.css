@@ -118,3 +118,10 @@ aside.mission-note .mission-guidance[open]>#hint{display:block;margin:5px 0 8px;
    must remain possible after reading a long instruction. */
 aside.mission-note:has(.mission-guidance){max-height:none;overflow:hidden}
 aside.mission-note .mission-guidance[open]>#hint{max-height:clamp(36px,calc(100dvh - 280px),160px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;overflow-wrap:anywhere}
+
+/* Puzzle attempts report state at the control, without printing an answer. */
+#interact.hud-pulse::after{position:absolute;right:-23px;top:50%;transform:translateY(-50%);width:20px;height:20px;display:grid;place-items:center;font:700 18px/1 system-ui;background:#111923;border-radius:4px}
+#interact.hud-pulse-success::after{content:'✓';color:#9bddb4}
+#interact.hud-pulse-warning::after{content:'×';color:#f09b91}
+
+#lift-transition{position:fixed;inset:0;z-index:17;pointer-events:none;background:linear-gradient(90deg,#121923,#05090e 45%,#121923);opacity:0}

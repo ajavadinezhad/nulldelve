@@ -9,3 +9,7 @@ Input tests cover full-deflection aiming without firing, independent held fire, 
 ## Movement-facing follow-up — r41
 
 The movement stick also sets facing. Independent aim takes priority while deflected; releasing it returns facing to movement. Releasing both preserves the game's last facing. Fire remains independent and no stick gesture consumes ammunition. Direction tests cover diagonals, aim priority, release, idle, and invalid input.
+
+## Two-control layout — r42
+
+Removed the separate aim stick. The combined move/facing stick defaults to the right; Fire occupies the left thumb position. The existing side-swap accessibility setting mirrors both controls, and its labels now match the displayed side. Input-reset tests verify the removed aim control does not remain in the DOM and Fire still releases independently.

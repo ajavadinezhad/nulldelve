@@ -25,6 +25,7 @@ export function touchInteractionContext(prompt){
  else if(/^(?:REREAD|READ)\b/.test(description))label='Read';
  else if(/^(?:HOLD.*GRAB|GRAB)\b/.test(description))label='Grab';
  else if(/^RELEASE\b/.test(description))label='Release';
+ else if(/^RIDE\b/.test(description))label='Ride';
  else if(/^ROTATE\b/.test(description))label='Rotate';
  else if(/^OPEN\b/.test(description))label='Open';
  else if(/^CLOSE\b/.test(description))label='Close';
@@ -45,10 +46,10 @@ export function createTouchControls({host,isRunning,onAction,device=()=>({coarse
  const input=createTwinStickInput(),knobs={},cleanups=[];let enabled=false,mode='auto',lastInteractPrompt=null;
  const doc=host.ownerDocument??document,make=(tag,cls,text)=>{const node=doc.createElement(tag);node.className=cls;if(text)node.textContent=text;return node;};
  function paint(name){const state=input.getState()[name],knob=knobs[name];const travel=(knob.parentElement.getBoundingClientRect?.().width||96)*.24;knob.style.transform=`translate(${state.x*travel}px,${state.z*travel}px)`;knob.parentElement.classList.toggle('engaged',Math.hypot(state.x,state.z)>0);}
- function reset(){heldFire.reset();heldInteract.reset();input.reset();for(const name of ['move','aim'])paint(name);}
+ function reset(){heldFire.reset();heldInteract.reset();input.reset();for(const name of Object.keys(knobs))paint(name);}
  function listen(node,name,callback,options){node.addEventListener(name,callback,options);cleanups.push(()=>node.removeEventListener(name,callback,options));}
  host.replaceChildren();
- for(const [name,label] of [['move','Move + turn'],['aim','Aim']]){
+ for(const [name,label] of [['move','Move + aim']]){
   const stick=make('div','touch-stick touch-stick-'+name);stick.setAttribute('role','group');stick.setAttribute('aria-label',name==='move'?'Movement and facing thumbstick; push to the outer edge to sprint':'Aim thumbstick; rotate only, does not fire');stick.dataset.stick=name;let origin=null;
   const track=make('span','touch-stick-track'),knob=make('span','touch-stick-knob'),caption=make('span','touch-stick-label',label);track.setAttribute('aria-hidden','true');knob.setAttribute('aria-hidden','true');stick.append(track,knob,caption);knobs[name]=knob;host.append(stick);
   const position=e=>{const rect=stick.getBoundingClientRect(),radius=Math.min(rect.width,rect.height)*.38;return {x:(e.clientX-(origin?.x??rect.left+rect.width/2))/radius,z:(e.clientY-(origin?.z??rect.top+rect.height/2))/radius};};

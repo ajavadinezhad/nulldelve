@@ -29,21 +29,19 @@ test('rotating the viewport releases actual captured sticks and held Interact',(
  try{
   const events=[],controls=createTouchControls({host,isRunning:()=>true,onAction:a=>events.push(a),device:()=>({coarse:true})});
   host.children[0].emit('pointerdown',{pointerId:1,clientX:90,clientY:48});
-  host.children[1].emit('pointerdown',{pointerId:2,clientX:48,clientY:48});
-  assert.equal(controls.getState().firing,false);
-  host.children[1].emit('pointermove',{pointerId:2,clientX:48,clientY:4});
-  host.children[2].children[0].emit('pointerdown',{pointerId:3});
+  assert.equal(host.children.some(n=>n.dataset.stick==='aim'),false);
+  const actions=host.children.find(n=>n.className==='touch-actions');actions.children[0].emit('pointerdown',{pointerId:3});
   assert.equal(controls.getState().firing,false);assert.equal(controls.getState().interactHeld,true);
   const fireButton=host.children.find(n=>n.dataset.action==='fire');
   fireButton.emit('pointerdown',{pointerId:4});assert.equal(controls.getState().firing,true);
   fireButton.emit('pointerup',{pointerId:5});assert.equal(controls.getState().firing,true);
   fireButton.emit('pointercancel',{pointerId:4});assert.equal(controls.getState().firing,false);
-  assert.equal(controls.getState().aim.active,true);assert.ok(controls.getState().move.x>0);
+  assert.equal(controls.getState().aim.active,false);assert.ok(controls.getState().move.x>0);
   fireButton.emit('pointerdown',{pointerId:6});assert.equal(controls.getState().firing,true);
   win.emit('resize');
   assert.deepEqual(controls.getState().move,{x:0,z:0});assert.equal(controls.getState().firing,false);assert.equal(controls.getState().interactHeld,false);
   assert.deepEqual(events,['interact','interactEnd']);
-  host.children[2].children[0].emit('pointerup',{pointerId:3});assert.equal(events.length,2);
+  actions.children[0].emit('pointerup',{pointerId:3});assert.equal(events.length,2);
   controls.dispose();assert.equal(win.listeners.resize.length,0);
  }finally{globalThis.addEventListener=previousAdd;globalThis.removeEventListener=previousRemove;}
 });

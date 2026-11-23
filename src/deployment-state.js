@@ -1,6 +1,6 @@
-import {normalizeFieldSkill} from './field-skills.js?v=move-facing-r41';
-import {normalizeCampaignProfile} from './campaign-profile.js?v=move-facing-r41';
-import {normalizeCampaignProgress} from './campaign-progress.js?v=move-facing-r41';
+import {normalizeFieldSkill} from './field-skills.js?v=passages-r44';
+import {normalizeCampaignProfile} from './campaign-profile.js?v=passages-r44';
+import {normalizeCampaignProgress} from './campaign-progress.js?v=passages-r44';
 const PREFIX='#deployment=';
 const MAX_CLAIMS=20000,MAX_ZONES=128,MAX_RANGES=10000;
 const zoneName=value=>typeof value==='string'&&/^[a-z][a-z0-9-]{0,39}$/.test(value);

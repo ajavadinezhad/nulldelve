@@ -177,3 +177,10 @@
 .touch-left-handed .touch-fire{right:auto;left:max(10px,env(safe-area-inset-left))}
 .touch-large-controls .touch-fire{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 120px)}
 @media(max-width:359px){.touch-large-controls .touch-fire{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 104px)}}
+
+/* One combined movement/facing stick, opposite a dedicated fire control. */
+.touch-controls-enabled .touch-stick-move{left:auto;right:max(10px,env(safe-area-inset-right))}
+.touch-controls-enabled .touch-fire{left:max(10px,env(safe-area-inset-left));right:auto;bottom:max(8px,env(safe-area-inset-bottom));width:84px;height:84px;border-radius:50%}
+.touch-controls-enabled.touch-left-handed .touch-stick-move{right:auto;left:max(10px,env(safe-area-inset-left))}
+.touch-controls-enabled.touch-left-handed .touch-fire{left:auto;right:max(10px,env(safe-area-inset-right))}
+.touch-controls-enabled.touch-large-controls .touch-fire{width:96px;height:96px;bottom:max(20px,env(safe-area-inset-bottom))}

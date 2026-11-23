@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import {soldier} from './character.js?v=move-facing-r41';
-import {createRoach} from './roach.js?v=move-facing-r41';
+import {soldier} from './character.js?v=passages-r44';
+import {createRoach} from './roach.js?v=passages-r44';
 
 const cache=new Map();
 let renderAttempted=false;

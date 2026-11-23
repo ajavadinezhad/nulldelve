@@ -1,11 +1,11 @@
-import {compatibleStorage} from './storage-compat.js?v=move-facing-r41';
-import {formatKey} from './controls.js?v=move-facing-r41';
+import {compatibleStorage} from './storage-compat.js?v=passages-r44';
+import {formatKey} from './controls.js?v=passages-r44';
 const KEY='nulldelve.tutorial.v1';
 export function createOnboarding({storage,host,getBindings}){
  storage=compatibleStorage(storage);
  let enabled=false,start=null,step=0,touch=false;const done=new Set();
  const steps=[['move',b=>`Move with ${['moveUp','moveLeft','moveDown','moveRight'].map(k=>formatKey(b[k])).join(' / ')}.`],['aim',b=>`Aim: mouse / ${['aimUp','aimLeft','aimDown','aimRight'].map(k=>formatKey(b[k])).join(' ')} · Fire: click / ${formatKey(b.fire)}.`],['crate',b=>`Crates: push · Hold ${formatKey(b.interact)} + move: pull.`],['door',b=>`${formatKey(b.interact)}: doors / equipment.`],['loot',()=> 'Walk over ammo cases / medical pouches.']];
- const touchSteps=[['move',()=> 'Movement stick: move + turn · edge: sprint.'],['aim',()=> 'Aim stick: fine aim · Fire button: shoot.'],['crate',()=> 'Crates: push · Hold Grab + move: pull.'],['door',()=> 'Approach a door, then tap Open.'],['loot',()=> 'Walk over ammo cases / medical pouches.']];
+ const touchSteps=[['move',()=> 'Movement stick: move + aim · edge: sprint.'],['aim',()=> 'Move + aim stick: turn · Fire button: shoot.'],['crate',()=> 'Crates: push · Hold Grab + move: pull.'],['door',()=> 'Approach a door, then tap Open.'],['loot',()=> 'Walk over ammo cases / medical pouches.']];
  const activeSteps=()=>touch?touchSteps:steps,key=()=>touch?'nulldelve.tutorial.touch.v1':KEY;
  function finish(){enabled=false;host.hidden=true;try{storage?.setItem(key(),'done');}catch{}}
  function draw(){host.replaceChildren();host.hidden=!enabled;if(!enabled)return;const current=activeSteps(),text=document.createElement('span');text.textContent=`${touch?'':'TRAINING '}${step+1}/${current.length} · ${current[step][1](getBindings())}`;const skip=document.createElement('button');skip.textContent=touch?'Skip':'Skip tutorial';skip.setAttribute?.('aria-label','Skip tutorial');skip.onclick=finish;host.append(text,skip);}

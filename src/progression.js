@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES} from './operation-routes.js?v=move-facing-r41';
-import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=move-facing-r41';
-import {DIFFICULTY_RULES} from './difficulty.js?v=move-facing-r41';
+import {OPERATION_ROUTES} from './operation-routes.js?v=passages-r44';
+import {WIRE_LAYOUT,WIRE_SOLUTION,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=passages-r44';
+import {DIFFICULTY_RULES} from './difficulty.js?v=passages-r44';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.
@@ -23,18 +23,18 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     {id:'glyph-circle',kind:'glyph',glyph:'circle',x:4,z:5,label:'CIRCLE',active:false,progress:0},
     {id:'glyph-triangle',kind:'glyph',glyph:'triangle',x:8,z:5,label:'TRIANGLE',active:false,progress:0},
     {id:'glyph-square',kind:'glyph',glyph:'square',x:12,z:5,label:'SQUARE',active:false,progress:0},
-    {id:'relay-a',kind:'relay',x:19.5,z:7,label:'RELAY A',active:false,progress:0},
-    {id:'relay-b',kind:'relay',x:27,z:13,label:'RELAY B',active:false,progress:0},
-    ...[{id:'power-a',x:54,z:35,label:'POWER A'},{id:'power-b',x:65,z:26,label:'POWER B'},{id:'power-c',x:60,z:35,label:'POWER C'}].map(d=>({...d,kind:'power',active:false,progress:0})),
-    ...[{id:'valve-a',x:79,z:34,label:'VALVE A'},{id:'valve-b',x:92,z:26,label:'VALVE B'}].map(d=>({...d,kind:'valve',active:false,progress:0})),
+    {id:'relay-a',kind:'relay',x:19.5,z:7,label:'CHARGE RELAY',active:false,progress:0},
+    {id:'relay-b',kind:'relay',x:27,z:13,label:'RECEIVING RELAY',active:false,progress:0},
+    ...[{id:'power-a',x:54,z:35,label:'ROUTING CONSOLE'},{id:'power-b',x:65,z:26,label:'ROUTING CONSOLE'},{id:'power-c',x:60,z:35,label:'ROUTING CONSOLE'}].map(d=>({...d,kind:'power',active:false,progress:0})),
+    ...[{id:'valve-a',x:79,z:34,label:'PRESSURE VALVE'},{id:'valve-b',x:92,z:26,label:'PRESSURE VALVE'}].map(d=>({...d,kind:'valve',active:false,progress:0})),
     ...WIRE_LAYOUT.map(d=>({...d,kind:'wire',active:false,progress:0})),
     ...ARTIFACTS.map(d=>({...d,active:false,progress:0})),
-    ...[{id:'task-fuse',task:'commandFuse',x:12,z:52,label:'MAINTENANCE FUSE'},{id:'task-generator',task:'commandRepair',x:35,z:56,label:'POWER HOUSE SUPPLY'},{id:'task-coolant',task:'researchCoolant',x:62,z:52,label:'TRANSIT COOLANT'},{id:'task-evac',task:'evacPower',x:92,z:52,label:'EVAC POWER'},{id:'task-signal-a',task:'nestStart',x:55,z:50,label:'SIGNAL RELAY A'},{id:'task-signal-b',task:'nestLink',x:82,z:31,label:'SIGNAL RELAY B'},{id:'task-signal-c',task:'nestDecode',x:61,z:12,label:'SIGNAL DECODER'}].map(d=>({...d,kind:'task',active:false,progress:0})),
+    ...[{id:'task-fuse',task:'commandFuse',x:12,z:52,label:'MAINTENANCE FUSE'},{id:'task-generator',task:'commandRepair',x:35,z:56,label:'POWER HOUSE SUPPLY'},{id:'task-coolant',task:'researchCoolant',x:62,z:52,label:'TRANSIT COOLANT'},{id:'task-evac',task:'evacPower',x:92,z:52,label:'EVAC POWER'},{id:'task-signal-a',task:'nestStart',x:55,z:50,label:'SIGNAL TRANSMITTER'},{id:'task-signal-b',task:'nestLink',x:82,z:31,label:'SIGNAL RECEIVER'},{id:'task-signal-c',task:'nestDecode',x:61,z:12,label:'SIGNAL DECODER'}].map(d=>({...d,kind:'task',active:false,progress:0})),
     ...[{id:'log-lab',x:66,z:8,label:'RESEARCH LOG 1',text:'Specimen 07 responds to electrical pulses. The power network became its nervous system.'},{id:'log-containment',x:94,z:30,label:'RESEARCH LOG 2',text:'Containment failed from inside. The colony learned the door access sequence.'},{id:'log-nest',x:92,z:14,label:'RESEARCH LOG 3',text:'The nest is a relay, not the source. Something beneath the facility is still transmitting.'}].map(d=>({...d,kind:'log',active:false,progress:0})),
   ];
   devices.push(...[{id:'hospital-fuse',task:'hospitalFuse',x:108,z:27,label:'PHARMACY POWER FUSE'},{id:'hospital-power',task:'hospitalPower',x:118,z:57,label:'EMERGENCY SUPPLY'},{id:'hospital-sample',task:'hospitalSample',x:114,z:7,label:'SEALED TRIAGE SAMPLE'},{id:'hospital-auth',task:'hospitalAuth',x:132,z:12,label:'WARD SAMPLE DIAGNOSTICS'},{id:'hospital-oxygen',task:'hospitalValveA',x:130,z:27,label:'THEATRE OXYGEN'},{id:'hospital-filter',task:'hospitalValveB',x:142,z:27,label:'THEATRE FILTER'},{id:'hospital-saline',task:'hospitalValveC',x:140,z:35,label:'THEATRE EXHAUST'}].map(d=>({...d,kind:'task',active:false,progress:0})));
   devices.push({id:'hospital-cycle',task:'hospitalSterile',kind:'task',x:136,z:36,label:'AIRLOCK CYCLE',active:false,progress:0});
-  devices.push(...[{id:'freight-pump',task:'freightDrain',x:158,z:29,label:'FLOOD PUMP BREAKER'},{id:'freight-switch-a',task:'freightSwitchA',x:180,z:29,label:'TRACK SWITCH A'},{id:'freight-switch-b',task:'freightSwitchB',x:192,z:35,label:'TRACK SWITCH B'},{id:'freight-dispatch',task:'freightDispatch',x:189,z:29,label:'CARGO DISPATCH'},{id:'freight-manifest',task:'freightManifest',x:191,z:7,label:'QUARANTINE CARGO MANIFEST'},{id:'freight-release',task:'freightRelease',x:190,z:55,label:'RAIL EXTRACTION RELEASE'}].map(d=>({...d,kind:'task',active:false,progress:0})));
+  devices.push(...[{id:'freight-pump',task:'freightDrain',x:158,z:29,label:'FLOOD PUMP BREAKER'},{id:'freight-switch-a',task:'freightSwitchA',x:180,z:29,label:'WEST TRACK SWITCH'},{id:'freight-switch-b',task:'freightSwitchB',x:192,z:35,label:'EAST TRACK SWITCH'},{id:'freight-dispatch',task:'freightDispatch',x:189,z:29,label:'CARGO DISPATCH'},{id:'freight-manifest',task:'freightManifest',x:191,z:7,label:'QUARANTINE CARGO MANIFEST'},{id:'freight-release',task:'freightRelease',x:190,z:55,label:'RAIL EXTRACTION RELEASE'}].map(d=>({...d,kind:'task',active:false,progress:0})));
   devices.push(...[{id:'signal-motor-a',task:'signalMotorA',x:207,z:29,label:'2 kW VENTILATION MOTOR'},{id:'signal-motor-b',task:'signalMotorB',x:213,z:34,label:'3 kW ANTENNA MOTOR'},{id:'signal-motor-c',task:'signalMotorC',x:218,z:28,label:'4 kW UPLINK MOTOR'},{id:'signal-load',task:'signalLoad',x:212,z:26,label:'FEEDER DISTRIBUTION TEST'},{id:'signal-antenna-a',task:'signalAntennaA',x:230,z:27,label:'ISOLATE WEST ANTENNA FEED'},{id:'signal-antenna-b',task:'signalAntennaB',x:243,z:34,label:'ISOLATE EAST ANTENNA FEED'},{id:'signal-shutdown',task:'signalShutdown',x:237,z:34,label:'CUT COLONY TRANSMITTER'},{id:'signal-send',task:'signalSent',x:237,z:8,label:'TRANSMIT EXPERIMENT EVIDENCE'}].map(d=>({...d,kind:'task',active:false,progress:0})));
   devices.push(...OPERATION_ROUTES.map(route=>({...route,kind:'task',active:false,progress:0})));
   const definitions=[
@@ -62,12 +62,12 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   const difficulty=()=>DIFFICULTY_RULES[getDifficulty()]??DIFFICULTY_RULES.normal;
   const scaledTotal=definition=>Math.max(1,Math.round(definition.total*(difficulty().waveSize??1)));
   const zones=definitions.map(d=>({id:d.id,label:d.label,status:'dormant',wave:[],liveCap:d.liveCap,total:scaledTotal(d),spawned:0,queued:0,remaining:0,queue:[],rewardQueue:[],spawnTimer:0,phaseRested:false}));
-  const state={devices,zones,clue:{x:9,z:13,label:'△ → ○ → □'},remix:!!remix,archive:{sequence:initialSequences.archive,input:[],solved:false},relay:{started:false,remaining:0,duration:8,completed:false},elapsed:0,totalEnemies:zones.reduce((sum,zone)=>sum+zone.total,0),liveCap:36,mission:'campaign',operationId:null,operationTasks:createOperationTasks(),circuit:createWireCircuit(),milestone:0,operationZoneIds:null,power:{sequence:initialSequences.power,input:[],solved:false},valves:{sequence:initialSequences.valves,input:[],solved:false},logs:[],artifacts:[],evacuation:{started:false,remaining:20,completed:false}};
+  const state={devices,zones,clue:{x:9,z:13,label:'ARCHIVE PANEL'},remix:!!remix,archive:{sequence:initialSequences.archive,input:[],solved:false},relay:{started:false,remaining:0,duration:8,completed:false},elapsed:0,totalEnemies:zones.reduce((sum,zone)=>sum+zone.total,0),liveCap:36,mission:'campaign',operationId:null,operationTasks:createOperationTasks(),circuit:createWireCircuit(),milestone:0,operationZoneIds:null,power:{sequence:initialSequences.power,input:[],solved:false},valves:{sequence:initialSequences.valves,input:[],solved:false},logs:[],artifacts:[],evacuation:{started:false,remaining:20,completed:false}};
   state.clue.id='archive';state.clue.kind='clue';
   state.clues=[state.clue,{id:'signal',kind:'clue',x:216,z:25,label:'FEEDER CAPACITY PLATE'},{id:'freight',kind:'clue',x:164,z:25,label:'CARGO ROUTING PLATE'},{id:'hospital',kind:'clue',x:118,z:31,label:'HOSPITAL FLOW PLAQUE'},{id:'power',kind:'clue',x:59,z:33,label:'REACTOR ROUTING PLAQUE'},{id:'valves',kind:'clue',x:86,z:32,label:'CONTAINMENT MAINTENANCE PLAQUE'}];
-  const symbols={triangle:'△',circle:'○',square:'□'};
-  function clueText(id){if(id==='signal')return 'MOTORS 2 / 3 / 4 kW · FEEDER A / B CAPACITY '+signalFeederTargets(state.remix).join(' / ')+' kW · CONNECT EVERY MOTOR WITHOUT OVERLOAD';if(id==='freight')return 'COLD CHAIN ROUTE · TRACK A '+(freightTrackTarget(state.remix)[0]?'DIVERT':'STRAIGHT')+' / TRACK B '+(freightTrackTarget(state.remix)[1]?'DIVERT':'STRAIGHT');if(id==='hospital')return 'OXYGEN / FILTER / EXHAUST: '+hospitalAirlockTarget(state.remix).join(' / ')+' · MATCH GAUGES, THEN CYCLE';return id==='archive'?state.archive.sequence.map(g=>symbols[g]).join(' → '):state[id].sequence.map(value=>value.slice(-1).toUpperCase()).join(' → ');}
-  function refreshClueLabels(){state.clue.label=clueText('archive');}
+  // Inspection describes the mechanism, never its hidden target/order.
+  function clueText(id){if(id==='signal')return 'MOTORS 2 / 3 / 4 kW · FEEDER CAPACITIES '+signalFeederTargets(state.remix).join(' / ')+' kW';return {archive:'THREE SYMBOL INPUTS · ACCEPTED / REJECTED',power:'ROUTING INPUTS · ONLINE / OFFLINE',valves:'PRESSURE INPUTS · SAFE / UNSAFE',hospital:'PRESSURE CONTROLS · TEST AT THE CYCLE CONSOLE',freight:'TRACK CONTROLS · TEST AT DISPATCH'}[id]??'SYSTEM CONTROL';}
+  function refreshClueLabels(){state.clue.label='ARCHIVE PANEL';}
   refreshClueLabels();
   const [security,storage,command,lab,reactor,containment,nest]=['security','storage','command','lab','reactor','containment','nest'].map(id=>zones.find(z=>z.id===id));
   const generator=zones.find(z=>z.id==='generator'),transit=zones.find(z=>z.id==='transit'),evacuationZone=zones.find(z=>z.id==='evacuation');
@@ -88,7 +88,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     const nestLockReason=nestArtifactsLocked?`NEST SEAL · ${state.artifacts.length} / 3 SOCKETS FILLED`:nestSignalLocked?'NEST SIGNAL SHIELD · LINK RELAYS AND DECODE':'SECTOR SEALED · ELIMINATE THE HORDE';
     const commandPowerLocked=state.operationId==='command'&&!state.operationTasks.commandRepair,researchExitLocked=state.operationId==='research'&&(!state.operationTasks.researchCoolant||transit.status!=='cleared');
     const rules=[
-      [1,!state.archive.solved,'ARCHIVE CIPHER · FOLLOW THE THREE GLYPHS'],
+      [1,!state.archive.solved,'ARCHIVE CIPHER LOCKED'],
       [2,securityLocked||active(storage),active(storage)?'STORAGE SEALED · ELIMINATE THE HORDE':'SECURITY LOCKDOWN · LINK THE RELAYS AND CLEAR THE PURGE'],
       [3,active(storage),'STORAGE SEALED · ELIMINATE THE HORDE'],
       [4,active(command),'COMMAND SEALED · DEFEAT THE MUTATION HORDE'],
@@ -144,13 +144,13 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       if(!tasks.commandFuse){point=devices.find(d=>d.task==='commandFuse');label='A missing service component';}
       else if(!tasks.genInserted){point=devices.find(d=>d.task==='commandRepair');label='The Power House supply';}
       else if(!tasks.generatorDefense.completed){point=devices.find(d=>d.task==='commandRepair');label=tasks.generatorDefense.jammed?'The jammed Power House restart console':'The unfinished Power House restart';}
-      else{const mismatch=WIRE_LAYOUT.slice(0,7).find(node=>node.kind==='straight'?state.circuit.rotations[node.index]%2!==WIRE_SOLUTION[node.index]%2:state.circuit.rotations[node.index]!==WIRE_SOLUTION[node.index]);point=devices.find(d=>d.id===mismatch?.id)??devices.find(d=>d.task==='commandRepair');label='A broken section of the supply cable';}
+      else{point=devices.find(d=>d.task==='commandRepair');label='The supply cable network';}
       target(6,point,label);
     }
     if(researchExitLocked){const point=!state.power.solved?state.clues.find(c=>c.id==='power'):devices.find(d=>d.task==='researchCoolant');target(17,point,!state.power.solved?'A Reactor maintenance clue':'The Transit coolant console');}
     if(state.operationId==='signal'){target(34,devices.find(d=>d.task==='signalLoad'),'The feeder capacity plate and motor distribution');target(35,devices.find(d=>d.task===(!state.operationTasks.signalAntennaA?'signalAntennaA':!state.operationTasks.signalAntennaB?'signalAntennaB':'signalShutdown')),'An active antenna feed');}
-    if(state.operationId==='freight'){target(28,devices.find(d=>d.task==='freightDrain'),'The Pump Hall flood breaker');const route=state.operationTasks.freightRoute,ready=route.switches.every((v,i)=>v===freightTrackTarget(state.remix)[i]);target(31,route.running||ready?devices.find(d=>d.task==='freightDispatch'):state.clues.find(c=>c.id==='freight'),route.running?'The moving cargo transfer':ready?'The cargo dispatch console':'A cold-chain rail specification');target(29,devices.find(d=>d.task==='freightManifest'),'The quarantined shipping manifest');}
-    if(state.operationId==='hospital'){target(20,devices.find(d=>d.task===(!state.operationTasks.hospitalFuse?'hospitalFuse':'hospitalPower')),'An emergency hospital power supply');target(22,devices.find(d=>d.task===(!state.operationTasks.hospitalSample?'hospitalSample':'hospitalAuth')),'The quarantine diagnostics route');const airlock=state.operationTasks.hospitalAirlock,cycleReady=airlock.settings.every((value,i)=>value===hospitalAirlockTarget(state.remix)[i]);target(23,airlock.running||cycleReady?devices.find(d=>d.id==='hospital-cycle'):state.clues.find(clue=>clue.id==='hospital'),airlock.running?'The sealed theatre cycle':cycleReady?'The theatre cycle console':'A theatre pressure specification');}
+    if(state.operationId==='freight'){target(28,devices.find(d=>d.task==='freightDrain'),'The Pump Hall flood breaker');target(31,devices.find(d=>d.task==='freightDispatch'),'The cargo dispatch console');target(29,devices.find(d=>d.task==='freightManifest'),'The quarantined shipping manifest');}
+    if(state.operationId==='hospital'){target(20,devices.find(d=>d.task===(!state.operationTasks.hospitalFuse?'hospitalFuse':'hospitalPower')),'An emergency hospital power supply');target(22,devices.find(d=>d.task===(!state.operationTasks.hospitalSample?'hospitalSample':'hospitalAuth')),'The quarantine diagnostics route');target(23,devices.find(d=>d.id==='hospital-cycle'),'The theatre cycle console');}
     for(const index of [8,11]){if(nestArtifactsLocked){const artifact=ARTIFACTS.find(a=>!state.artifacts.includes(a.id));target(index,artifact,'A trace of a missing relic');}else if(nestSignalLocked){const point=devices.find(d=>d.task===(state.operationTasks.nestRelay.linked?'nestDecode':state.operationTasks.nestRelay.started?'nestLink':'nestStart'));target(index,point,'A signal controlling the Nest shield');}}
   }
   const taskOperation={...Object.fromEntries(SIGNAL_TASKS.map(task=>[task,'signal'])),...Object.fromEntries(FREIGHT_TASKS.map(task=>[task,'freight'])),...Object.fromEntries(HOSPITAL_TASKS.map(task=>[task,'hospital'])),...Object.fromEntries(OPERATION_ROUTES.map(route=>[route.task,route.operation])),commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
@@ -173,15 +173,15 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
         if(d.task==='commandRepair')return state.operationTasks.commandRepair?'GENERATOR POWER ONLINE':`E · ${state.operationTasks.genInserted?'CHECK FLOOR CIRCUIT':'INSERT SERVICE FUSE'}`;
         return `E · ${d.label}${OPERATION_ROUTES.find(route=>route.task===d.task)?.optional?' · OPTIONAL':''}${d.active?' · COMPLETE':''}`;
       }
-      if(d.kind==='wire')return state.circuit.solved?'GENERATOR CABLE CONNECTED':`E · ROTATE ${d.label} · QUARTER TURN`;
+      if(d.kind==='wire')return state.circuit.solved?'GENERATOR CABLE CONNECTED':'E · ROTATE JUNCTION';
       if(d.kind==='artifact')return state.artifacts.includes(d.id)?'RELIC ALREADY RECOVERED':`E · EXAMINE ${d.label}`;
       if(d.kind==='log')return `E · ${d.active?'REREAD':'READ'} ${d.label}`;
       if(d.kind==='power')return `E · ${d.label} · ${state.power.solved?'POWER ONLINE':'RESTORE ROUTING'}`;
       if(d.kind==='valve')return `E · ${d.label} · ${state.valves.solved?'PRESSURE SAFE':'VENT PRESSURE'}`;
       if(d.kind==='glyph')return state.archive.solved?'CIPHER ACCEPTED':`E · ${d.label} CONSOLE`;
       if(state.relay.completed)return 'RELAY LINK ESTABLISHED';
-      if(d.id==='relay-a')return state.relay.started?`E · RESTART RELAY A · ${Math.ceil(state.relay.remaining)}s`:'E · CHARGE RELAY A';
-      return state.relay.started?`E · LINK RELAY B · ${Math.ceil(state.relay.remaining)}s`:'E · RELAY B · CHARGE A FIRST';
+      if(d.id==='relay-a')return state.relay.started?`E · RESTART CHARGE · ${Math.ceil(state.relay.remaining)}s`:'E · CHARGE RELAY';
+      return state.relay.started?`E · LINK RECEIVER · ${Math.ceil(state.relay.remaining)}s`:'E · RECEIVER UNCHARGED';
     }
     return null;
   }
@@ -256,7 +256,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   }
   function interact(player){
     const d=nearestDevice(player),clue=nearestClue(player);
-    if(clue&&(!d||distance(clue,player)<distance(d,player))){const title=clue.id==='archive'?'ARCHIVE CLUE':clue.label;onToast(`${title} · ${clueText(clue.id)}`);hint(`${title}: ${clue.id==='archive'?state.archive.sequence.join(' → ').toUpperCase():clueText(clue.id)}. ${clue.id==='hospital'?'Set each gauge independently, then start the sealed cycle.':clue.id==='signal'?'Connect each motor to A or B, respect both capacities, then test the distribution.':clue.id==='freight'?'Both switches must match simultaneously; their order does not matter.':'Use the consoles in this order.'}`);return true;}
+    if(clue&&(!d||distance(clue,player)<distance(d,player))){onToast(clueText(clue.id));return true;}
     if(!d)return false;
     if(d.kind==='wire'){
       if(state.circuit.solved){onToast('GENERATOR CABLE ALREADY CONNECTED');return true;}
@@ -292,7 +292,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
           if(tasks.signalLoad){onToast('FEEDER SETTINGS SEALED');return true;}
           if(motors.includes(d.task)){const index=motors.indexOf(d.task);tasks.signalLoadout.feeders[index]=(tasks.signalLoadout.feeders[index]+1)%2;d.progress=(tasks.signalLoadout.feeders[index]+1)/2;onToast(`${d.label} · FEEDER ${tasks.signalLoadout.feeders[index]===0?'A':'B'}`);return true;}
           const allocated=[0,0],feeders=tasks.signalLoadout.feeders;feeders.forEach((feeder,i)=>{if(feeder>=0)allocated[feeder]+=[2,3,4][i];});
-          if(feeders.includes(-1)||allocated.some((load,i)=>load>signalFeederTargets(state.remix)[i])){onToast('FEEDER OVERLOAD OR DISCONNECTED MOTOR · READ THE CAPACITY PLATE');return true;}
+          if(feeders.includes(-1)||allocated.some((load,i)=>load>signalFeederTargets(state.remix)[i])){onToast('DISTRIBUTION REJECTED');return true;}
           tasks.signalLoad=true;return finish('FEEDER LOADS BALANCED · ANTENNA HALL OPEN','Enter Antenna Hall to the east. Its two antenna feeds can be isolated during the defense.');
         }
         if(['signalAntennaA','signalAntennaB'].includes(d.task)){if(!tasks.signalLoad||signalRelay.status==='dormant'){onToast('ENTER THE ANTENNA HALL FIRST');return true;}tasks[d.task]=true;return finish('ANTENNA FEED ISOLATED','Isolate the other antenna feed and secure the hall, then cut the transmitter.');}
@@ -306,7 +306,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
           if(!tasks.freightDrain||freightYard.status!=='cleared'){onToast('CLEAR THE LOADING YARD FIRST');return true;}
           if(cargo.running||cargo.delivered){onToast(cargo.delivered?'CARGO ROUTE LOCKED · DELIVERY COMPLETE':'TRANSFER MOVING · TRACKS INTERLOCKED');return true;}
           if(d.task!=='freightDispatch'){const index=d.task==='freightSwitchA'?0:1;cargo.switches[index]=1-cargo.switches[index];tasks[d.task]=!!cargo.switches[index];d.progress=cargo.switches[index];onToast(`${d.label} · ${cargo.switches[index]?'DIVERT':'STRAIGHT'}`);return true;}
-          if(!cargo.switches.every((value,i)=>value===freightTrackTarget(state.remix)[i])){onToast('WRONG SIDING · READ THE PUMP HALL ROUTING PLATE');return true;}
+          if(!cargo.switches.every((value,i)=>value===freightTrackTarget(state.remix)[i])){onToast('ROUTE REJECTED');return true;}
           cargo.running=true;cargo.remaining=3;state.milestone++;onToast('CARGO TRANSFER STARTED · AUTOMATIC ROUTE LOCKED');return true;
         }
         if(d.task==='freightManifest'){if(!cargo.delivered||freightCold.status!=='cleared'){onToast('CLEAR COLD CHAIN BEFORE REMOVING ITS MANIFEST');return true;}tasks.freightManifest=true;return finish('QUARANTINE MANIFEST RECOVERED','Return south through the Loading Yard and release Rail Control.');}
@@ -317,7 +317,7 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
         if(d.task==='hospitalFuse'){tasks.hospitalFuse=true;return finish('EMERGENCY FUSE RECOVERED','Return south to Admission and restore the hospital supply.');}
         if(d.task==='hospitalPower'){if(!tasks.hospitalFuse){onToast('MISSING FUSE · SEARCH PHARMACY');return true;}tasks.hospitalPower=true;return finish('HOSPITAL EMERGENCY POWER ONLINE','Proceed north through Pharmacy into Triage.');}
         if(d.task==='hospitalSample'){if(hospitalTriage.status!=='cleared'){onToast('STABILIZE TRIAGE BEFORE HANDLING THE SAMPLE');return true;}tasks.hospitalSample=true;return finish('QUARANTINE SAMPLE SECURED','Carry the sample east to the Ward diagnostic station.');}
-        if(d.task==='hospitalAuth'){if(!tasks.hospitalSample||hospitalWard.status!=='cleared'){onToast('DIAGNOSTICS LOCKED · SECURE THE SAMPLE AND CLEAR THE WARD');return true;}tasks.hospitalAuth=true;return finish('SAMPLE AUTHENTICATED · THEATRE ACCESS OPEN','Enter Surgery to the south. Match the Surgery pressure gauges to the Pharmacy quarantine specification, then start its sealed cycle.');}
+        if(d.task==='hospitalAuth'){if(!tasks.hospitalSample||hospitalWard.status!=='cleared'){onToast('DIAGNOSTICS LOCKED · SECURE THE SAMPLE AND CLEAR THE WARD');return true;}tasks.hospitalAuth=true;return finish('SAMPLE AUTHENTICATED · THEATRE ACCESS OPEN','Enter Surgery to the south. Adjust its pressure controls and test the sealed cycle.');}
         const valves=['hospitalValveA','hospitalValveB','hospitalValveC'],airlock=tasks.hospitalAirlock;
         if(valves.includes(d.task)||d.task==='hospitalSterile'){
           if(!tasks.hospitalAuth){onToast('AIRLOCK LOCKED · AUTHENTICATE THE SAMPLE');return true;}
@@ -339,8 +339,8 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       }
       if(d.task==='researchCoolant'){if(tasks.researchCoolant){onToast('COOLANT PURGE COMPLETE');return true;}if(lab.status!=='cleared'||reactor.status!=='cleared'||!state.power.solved){onToast('COOLANT LOCKED · CLEAR BIO LAB AND RESTORE REACTOR POWER');return true;}tasks.researchCoolant=true;launchWave(transit,player);return finish('TRANSIT COOLANT PURGE · SWARM INCOMING','Defend Transit while the coolant purge clears the lower route.');}
       if(d.task==='evacPower'){if(tasks.evacPower){onToast('EVAC POWER RESTORED');return true;}if(containment.status!=='cleared'||!state.valves.solved){onToast('EVAC POWER LOCKED · CLEAR CONTAINMENT AND RELEASE PRESSURE');return true;}tasks.evacPower=true;launchWave(evacuationZone,player);return finish('EVAC POWER RESTORED · LOCKDOWN INCOMING','Clear the Evacuation lockdown, then return north to the Containment sector exit.');}
-      if(d.task==='nestStart'){if(relay.linked){onToast('SIGNAL LINK ESTABLISHED · FIND THE BIO LAB DECODER');return true;}relay.started=true;relay.remaining=30;d.active=true;d.progress=1;onToast('SIGNAL A CHARGED · 30s');return true;}
-      if(d.task==='nestLink'){if(relay.linked){onToast('SIGNAL LINK ALREADY ESTABLISHED');return true;}if(!relay.started||relay.remaining<=0){onToast('NO SIGNAL CHARGE · START RELAY A IN TRANSIT');return true;}relay.linked=true;relay.started=false;relay.remaining=0;return finish('NEST SIGNAL LINKED','Reach Bio Lab through Reactor. Use its decoder to lower the Nest shield.');}
+      if(d.task==='nestStart'){if(relay.linked){onToast('SIGNAL LINK ESTABLISHED · FIND THE BIO LAB DECODER');return true;}relay.started=true;relay.remaining=30;d.active=true;d.progress=1;onToast('SIGNAL CHARGED · 30s');return true;}
+      if(d.task==='nestLink'){if(relay.linked){onToast('SIGNAL LINK ALREADY ESTABLISHED');return true;}if(!relay.started||relay.remaining<=0){onToast('RECEIVER UNCHARGED');return true;}relay.linked=true;relay.started=false;relay.remaining=0;return finish('NEST SIGNAL LINKED','Reach Bio Lab through Reactor. Use its decoder to lower the Nest shield.');}
       if(d.task==='nestDecode'){if(relay.decoded){onToast('NEST SHIELD ALREADY DISABLED');return true;}if(!relay.linked){onToast('DECODER OFFLINE · LINK THE TRANSIT AND CONTAINMENT RELAYS');return true;}relay.decoded=true;const sealReady=state.artifacts.length===3;return finish(sealReady?'NEST APPROACH OPEN':'SIGNAL SHIELD DISABLED · RELIC SEAL STILL LOCKED',sealReady?'The Nest approach is open. Enter from Bio Lab and destroy its guarded core.':`Signal shield disabled. Recover the ${3-state.artifacts.length} missing relic${state.artifacts.length===2?'':'s'} to release the Nest seal.`);}
       return true;
     }
@@ -351,10 +351,10 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
     if(d.kind==='power'||d.kind==='valve'){
       const puzzle=d.kind==='power'?state.power:state.valves,sequence=puzzle.sequence;
       if(puzzle.solved){onToast(d.kind==='power'?'REACTOR POWER ONLINE':'CONTAINMENT PRESSURE SAFE');return true;}
-      if(d.id!==sequence[puzzle.input.length]){puzzle.input=[];for(const device of devices.filter(x=>x.kind===d.kind)){device.active=false;device.progress=0;}onToast('SEQUENCE RESET · CHECK THE FLOOR CLUE');return true;}
+      if(d.id!==sequence[puzzle.input.length]){puzzle.input=[];for(const device of devices.filter(x=>x.kind===d.kind)){device.active=false;device.progress=0;}onToast('INPUT REJECTED');return true;}
       puzzle.input.push(d.id);d.active=true;d.progress=puzzle.input.length/sequence.length;
       if(puzzle.input.length===sequence.length){puzzle.solved=true;for(const device of devices.filter(x=>x.kind===d.kind)){device.active=true;device.progress=1;}recomputeLocks();onToast(d.kind==='power'?'POWER ROUTED · SOUTH EXIT READY':'PRESSURE RELEASED · SOUTH EXIT READY');hint(d.kind==='power'?'Reactor routing restored.':'Containment pressure stabilized.');}
-      else onToast(`SEQUENCE ACCEPTED · ${puzzle.input.length} / ${sequence.length}`);
+      else onToast('INPUT ACCEPTED');
       return true;
     }
     if(d.kind==='glyph'){
@@ -362,19 +362,19 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
       const {archive}=state;
       if(d.glyph!==archive.sequence[archive.input.length]){
         archive.input.length=0;for(const glyph of devices.filter(x=>x.kind==='glyph')){glyph.active=false;glyph.progress=0;}
-        onToast('CIPHER REJECTED · SEQUENCE RESET');hint('Look for a three-symbol clue on the archive floor.');return true;
+        onToast('INPUT REJECTED');hint('Try another input pattern.');return true;
       }
       archive.input.push(d.glyph);d.active=true;d.progress=1;
       if(archive.input.length===archive.sequence.length){archive.solved=true;recomputeLocks();onToast('ARCHIVE CIPHER ACCEPTED · SECURITY ACCESS OPEN');hint('Archive access restored.');}
-      else onToast(`GLYPH ACCEPTED · ${archive.input.length} / 3`);
+      else onToast('INPUT ACCEPTED');
       return true;
     }
     if(state.relay.completed){onToast('RELAY LINK ESTABLISHED');return true;}
     if(d.id==='relay-a'){
       state.relay.started=true;state.relay.remaining=state.relay.duration;d.active=true;d.progress=1;
-      onToast('RELAY A CHARGED · 8s');return true;
+      onToast('RELAY CHARGED · 8s');return true;
     }
-    if(!state.relay.started){onToast('RELAY B HAS NO CHARGE · ACTIVATE A FIRST');return true;}
+    if(!state.relay.started){onToast('RECEIVER UNCHARGED');return true;}
     state.relay.completed=true;state.relay.started=false;state.relay.remaining=0;
     for(const relay of devices.filter(x=>x.kind==='relay')){relay.active=true;relay.progress=1;}
     launchWave(security,player);
@@ -383,10 +383,10 @@ export function createProgression({doors,enemies,spawnEnemy,onToast=()=>{},onHin
   function update(player,dt){
     const step=Number.isFinite(dt)&&dt>0?dt:0;state.elapsed+=step;
     if(legacyNestEscape&&inBounds(player,75,97,4,18))nestExitAllowance=true;else if(player.x<70||player.z>22){nestExitAllowance=false;legacyNestEscape=false;}
-    const signal=state.operationTasks.nestRelay;if(signal.started&&!signal.linked){signal.remaining=Math.max(0,signal.remaining-step);const device=devices.find(d=>d.task==='nestStart');device.progress=signal.remaining/30;const seconds=Math.ceil(signal.remaining);if(seconds!==lastSignalSecond)lastSignalSecond=seconds;if(signal.remaining===0){signal.started=false;device.active=false;onToast('SIGNAL CHARGE EXPIRED · RESTART TRANSIT RELAY A');hint('The signal charge faded. Restart relay A in northwest Transit when ready.');}}
+    const signal=state.operationTasks.nestRelay;if(signal.started&&!signal.linked){signal.remaining=Math.max(0,signal.remaining-step);const device=devices.find(d=>d.task==='nestStart');device.progress=signal.remaining/30;const seconds=Math.ceil(signal.remaining);if(seconds!==lastSignalSecond)lastSignalSecond=seconds;if(signal.remaining===0){signal.started=false;device.active=false;onToast('SIGNAL CHARGE EXPIRED');hint('The signal charge faded.');}}
     if(state.relay.started&&!state.relay.completed){
       state.relay.remaining=Math.max(0,state.relay.remaining-step);devices[3].progress=state.relay.remaining/state.relay.duration;
-      if(state.relay.remaining===0){state.relay.started=false;devices[3].active=false;devices[3].progress=0;onToast('RELAY CHARGE EXPIRED · TRY A AGAIN');hint('The relay charge faded. Plan a faster route and try the timed link again.');}
+      if(state.relay.remaining===0){state.relay.started=false;devices[3].active=false;devices[3].progress=0;onToast('RELAY CHARGE EXPIRED');hint('The relay charge faded. Plan a faster route and try the timed link again.');}
     }
     if(state.operationId==='signal'){if(signalYard.status==='dormant'&&inBounds(player,206,219,25,35))launchWave(signalYard,player);if(state.operationTasks.signalLoad&&signalRelay.status==='dormant'&&inBounds(player,230,243,25,35))launchWave(signalRelay,player);if(state.operationTasks.signalShutdown&&signalUplink.status==='dormant'&&inBounds(player,230,243,6,15))launchWave(signalUplink,player);}
     const cargo=state.operationTasks.freightRoute;

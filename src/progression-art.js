@@ -1,5 +1,4 @@
-import {hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=move-facing-r41';
-import {createWireCircuitArt} from './wire-circuit-art.js?v=move-facing-r41';
+import {createWireCircuitArt} from './wire-circuit-art.js?v=passages-r44';
 import * as THREE from '../vendor/three.module.js';
 
 /** Physical interfaces for the progression puzzles; state and collision stay in the controller. */
@@ -36,14 +35,14 @@ export function createProgressionArt(scene, box, state) {
     ctx.fillStyle=isGlyph?'#101722':device.task?.startsWith('hospital')?'#162733':'#142923';ctx.fillRect(0,0,128,128);
     if(isGlyph){ctx.strokeStyle='#657083';ctx.lineWidth=3;for(const [x,y,dx,dy]of [[7,7,1,1],[121,7,-1,1],[7,121,1,-1],[121,121,-1,-1]]){ctx.beginPath();ctx.moveTo(x+dx*15,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*15);ctx.stroke();}glyph(ctx,device.glyph||device.id.replace('glyph-',''),64,64,88,'#f2f4f8');}
     else if(device.kind==='log'){ctx.strokeStyle='#b5d7c3';ctx.lineWidth=4;ctx.strokeRect(33,22,62,70);for(let y=38;y<85;y+=13){ctx.beginPath();ctx.moveTo(43,y);ctx.lineTo(85,y);ctx.stroke();}}
-    else if(device.kind==='power'){ctx.fillStyle='#e5c477';ctx.font='bold 65px monospace';ctx.textAlign='center';ctx.fillText(device.id.slice(-1).toUpperCase(),64,80);}
+    else if(device.kind==='power'){ctx.strokeStyle='#e5c477';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(73,20);ctx.lineTo(43,65);ctx.lineTo(65,65);ctx.lineTo(55,94);ctx.lineTo(88,48);ctx.lineTo(66,48);ctx.closePath();ctx.stroke();}
     else if(device.kind==='task'){
       ctx.strokeStyle=device.task==='researchCoolant'?'#8ed5de':'#e0cf91';ctx.fillStyle='#e0cf91';ctx.lineWidth=5;
       if(device.task?.startsWith('hospital')){
        ctx.strokeStyle='#c5dbe5';ctx.fillStyle='#c5dbe5';
        if(device.task==='hospitalSample'){ctx.strokeRect(48,30,32,55);ctx.strokeRect(43,23,42,9);ctx.fillStyle='#b76c7c';ctx.fillRect(53,55,22,24);}
        else if(device.task==='hospitalAuth'){ctx.beginPath();ctx.moveTo(23,60);ctx.lineTo(42,60);ctx.lineTo(52,37);ctx.lineTo(66,82);ctx.lineTo(78,53);ctx.lineTo(104,53);ctx.stroke();}
-       else if(device.task.startsWith('hospitalValve')){ctx.beginPath();ctx.arc(64,55,29,0,Math.PI*2);ctx.stroke();ctx.font='bold 33px monospace';ctx.textAlign='center';ctx.fillText(device.task.slice(-1)==='A'?'O':device.task.slice(-1)==='B'?'F':'E',64,67);}
+       else if(device.task.startsWith('hospitalValve')){ctx.beginPath();ctx.arc(64,55,29,0,Math.PI*2);ctx.stroke();ctx.moveTo(64,55);ctx.lineTo(79,40);ctx.stroke();}
        else{ctx.beginPath();ctx.moveTo(71,22);ctx.lineTo(46,60);ctx.lineTo(65,60);ctx.lineTo(55,90);ctx.lineTo(84,49);ctx.lineTo(65,49);ctx.closePath();ctx.stroke();}
       }
       else if(device.task==='commandFuse'){ctx.strokeRect(32,41,64,28);for(const x of [39,85]){ctx.beginPath();ctx.moveTo(x,30);ctx.lineTo(x,80);ctx.stroke();}}
@@ -54,7 +53,6 @@ export function createProgressionArt(scene, box, state) {
     }
     else if(device.kind==='valve'){ctx.strokeStyle='#b5d7c3';ctx.lineWidth=5;ctx.beginPath();ctx.arc(64,57,29,0,Math.PI*2);ctx.moveTo(35,57);ctx.lineTo(93,57);ctx.moveTo(64,28);ctx.lineTo(64,86);ctx.stroke();}
     else{ctx.strokeStyle='#b5d7c3';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(64,66,14+i*13,-Math.PI*.8,-Math.PI*.2);ctx.stroke();}ctx.beginPath();ctx.arc(64,67,4,0,Math.PI*2);ctx.stroke();}
-    ctx.fillStyle='#819b8b';ctx.font=device.kind==='task'?'bold 11px monospace':'bold 13px monospace';ctx.textAlign='center';if(!isGlyph)ctx.fillText(({glyph:'GLYPH INPUT',relay:'LINK RELAY',power:'POWER NODE',valve:'VALVE '+device.id.slice(-1).toUpperCase(),log:'RESEARCH LOG',task:device.label.split(' ').slice(-2).join(' ')})[device.kind],64,111);
     const screenMaterial=new THREE.MeshBasicMaterial({map:display.texture,color:0xffffff});
     const screen=new THREE.Mesh(new THREE.PlaneGeometry(isGlyph?1.08:.59,isGlyph?1.02:.52),screenMaterial);screen.rotation.x=-Math.PI/2;screen.position.y=isGlyph?.15:.696;g.add(screen);
     const status=new THREE.MeshBasicMaterial({color:0xdfab61});
@@ -63,21 +61,21 @@ export function createProgressionArt(scene, box, state) {
   });
   // Plaques redraw after loading a saved normal/remixed operation.
   const clue=canvasTexture(512,160);plane(clue.texture,3.45,1.08,state.clue.x,.035,state.clue.z);
-  const maintenance=[['power',59,33,'POWER ROUTE'],['valves',86,32,'VENT ORDER']].map(([id,x,z,title])=>{const plaque=canvasTexture(512,100);plane(plaque.texture,4.6,.9,x,.035,z);return {id,title,...plaque};});
+  const maintenance=[['power',59,33],['valves',86,32]].map(([id,x,z])=>{const plaque=canvasTexture(512,100);plane(plaque.texture,4.6,.9,x,.035,z);return {id,...plaque};});
   const hospitalPlaque=canvasTexture(512,160);plane(hospitalPlaque.texture,3.8,1.1,118,.035,31);
   const signalPlaque=canvasTexture(512,160);plane(signalPlaque.texture,4.2,1.1,216,.035,25);
   const freightPlaque=canvasTexture(512,160);plane(freightPlaque.texture,4.2,1.1,164,.035,25);
   let clueVersion='';
   function updateClues(){
-    const version=JSON.stringify([state.archive.sequence,state.power.sequence,state.valves.sequence,state.remix]);if(version===clueVersion)return;clueVersion=version;
-    const sc=signalPlaque.ctx;sc.fillStyle='#282536';sc.fillRect(0,0,512,160);sc.strokeStyle='#c5b0d8';sc.lineWidth=4;sc.strokeRect(4,4,504,152);sc.fillStyle='#eadfc8';sc.textAlign='center';sc.font='bold 25px monospace';sc.fillText('MOTORS 2 / 3 / 4 kW',256,53);sc.fillText('FEEDERS A / B: '+(state.remix?'6 / 3':'5 / 4')+' kW',256,110);signalPlaque.texture.needsUpdate=true;
-    const fc=freightPlaque.ctx;fc.fillStyle='#23323e';fc.fillRect(0,0,512,160);fc.strokeStyle='#bca477';fc.lineWidth=4;fc.strokeRect(4,4,504,152);fc.fillStyle='#e5d3ae';fc.textAlign='center';fc.font='bold 26px monospace';fc.fillText('COLD CHAIN ROUTE',256,52);fc.fillText('A / B: '+freightTrackTarget(state.remix).join(' / '),256,111);freightPlaque.texture.needsUpdate=true;
-    const hc=hospitalPlaque.ctx;hc.clearRect(0,0,512,160);hc.fillStyle='#243540';hc.fillRect(0,0,512,160);hc.strokeStyle='#a5bbc8';hc.lineWidth=4;hc.strokeRect(4,4,504,152);hc.textAlign='center';hc.fillStyle='#e0e9e9';hc.font='bold 24px monospace';hc.fillText('QUARANTINE PRESSURE',256,48);hc.font='bold 22px monospace';hc.fillText('O / F / E: '+hospitalAirlockTarget(state.remix).join(' / '),256,106);hospitalPlaque.texture.needsUpdate=true;
-    const c=clue.ctx;c.clearRect(0,0,512,160);c.fillStyle='#222e29';c.fillRect(0,0,512,160);c.strokeStyle='#8e967b';c.lineWidth=4;c.strokeRect(4,4,504,152);
-    c.fillStyle='#a4b59b';c.textAlign='center';c.font='bold 17px monospace';c.fillText('ARCHIVE OVERRIDE · INPUT ORDER',256,31);
-    state.archive.sequence.forEach((kind,i)=>glyph(c,kind,100+i*157,94,61,'#ded4a6'));
-    for(const x of [178,335]){c.strokeStyle='#97aa94';c.lineWidth=4;c.beginPath();c.moveTo(x-18,94);c.lineTo(x+17,94);c.lineTo(x+8,85);c.moveTo(x+17,94);c.lineTo(x+8,103);c.stroke();}clue.texture.needsUpdate=true;
-    for(const plaque of maintenance){const ctx=plaque.ctx;ctx.clearRect(0,0,512,100);ctx.fillStyle='#172920';ctx.fillRect(0,0,512,100);ctx.strokeStyle='#b7ae73';ctx.lineWidth=3;ctx.strokeRect(3,3,506,94);ctx.fillStyle='#e4d4a0';ctx.font='bold 23px monospace';ctx.textAlign='center';const sequence=state[plaque.id].sequence??(plaque.id==='power'?['power-a','power-b','power-c']:['valve-a','valve-b','valve-a','valve-b']);ctx.fillText(`${plaque.title}: ${sequence.map(value=>value.slice(-1).toUpperCase()).join(' → ')}`,256,62);plaque.texture.needsUpdate=true;}
+    const version=JSON.stringify([state.archive.solved,state.power.solved,state.valves.solved,state.operationTasks?.hospitalSterile,state.operationTasks?.freightRoute?.delivered,state.remix]);if(version===clueVersion)return;clueVersion=version;
+    // Specifications describe constraints; they do not print a motor assignment.
+    const sc=signalPlaque.ctx;sc.fillStyle='#282536';sc.fillRect(0,0,512,160);sc.strokeStyle='#c5b0d8';sc.lineWidth=4;sc.strokeRect(4,4,504,152);sc.fillStyle='#eadfc8';sc.textAlign='center';sc.font='bold 25px monospace';sc.fillText('MOTORS 2 / 3 / 4 kW',256,53);sc.fillText('FEEDER LIMITS: '+(state.remix?'6 / 3':'5 / 4')+' kW',256,110);signalPlaque.texture.needsUpdate=true;
+    function panel(display,ready,draw){const c=display.ctx;c.clearRect(0,0,display.canvas.width,display.canvas.height);c.fillStyle='#1b2530';c.fillRect(0,0,display.canvas.width,display.canvas.height);c.strokeStyle='#98a9b9';c.lineWidth=5;draw(c);c.fillStyle=ready?'#8ac5a0':'#b67a6b';c.beginPath();c.arc(display.canvas.width-24,24,9,0,Math.PI*2);c.fill();display.texture.needsUpdate=true;}
+    // Unordered mechanism marks are identities, not an input-order diagram.
+    panel(clue,state.archive.solved,c=>{glyph(c,'circle',166,58,43,'#dbe1e9');glyph(c,'square',330,58,43,'#dbe1e9');glyph(c,'triangle',248,117,43,'#dbe1e9');});
+    for(const plaque of maintenance)panel(plaque,state[plaque.id].solved,c=>{if(plaque.id==='power'){c.beginPath();c.moveTo(288,18);c.lineTo(230,55);c.lineTo(268,55);c.lineTo(242,87);c.lineTo(300,45);c.lineTo(261,45);c.closePath();c.stroke();}else{c.beginPath();c.arc(256,50,30,0,Math.PI*2);c.moveTo(226,50);c.lineTo(286,50);c.moveTo(256,20);c.lineTo(256,80);c.stroke();}});
+    panel(hospitalPlaque,state.operationTasks?.hospitalSterile,c=>{for(const x of [150,256,362]){c.beginPath();c.arc(x,78,31,Math.PI,Math.PI*2);c.moveTo(x,78);c.lineTo(x,51);c.stroke();}c.beginPath();c.moveTo(112,111);c.lineTo(400,111);c.stroke();});
+    panel(freightPlaque,state.operationTasks?.freightRoute?.delivered,c=>{for(const x of [206,306]){c.beginPath();c.moveTo(x,126);c.lineTo(x,34);c.stroke();}for(const y of [48,74,100]){c.beginPath();c.moveTo(184,y);c.lineTo(328,y);c.stroke();}c.strokeRect(225,50,62,45);});
   }
   // Surface timer avoids adding an unaccounted-for obstacle between the relay stations.
   const timer=canvasTexture(512,128);plane(timer.texture,2.8,.7,24,.035,14.15);let lastTimer='';
@@ -106,9 +104,9 @@ export function createProgressionArt(scene, box, state) {
   const cargoCar=new THREE.Group();part(cargoCar,0,.2,0,1.5,.4,.85,materials.trim);part(cargoCar,0,.45,0,1.2,.2,.7,materials.steel);railBoard.add(cargoCar);
   const railSignals=[0,1].map(index=>{const material=new THREE.MeshBasicMaterial({color:0xb67b50});part(railBoard,index?1.5:-1.5,.1,0,.2,.15,.2,material);return material;});
   function update(time=0){
-    updateClues();circuitArt.update();const route=state.operationTasks?.freightRoute;if(route){const progress=route.delivered?1:route.running?1-Math.min(1,route.remaining/3):0;cargoCar.position.z=2-progress*4;const target=freightTrackTarget(state.remix);for(let i=0;i<2;i++)railSignals[i].color.set(route.switches[i]===target[i]?0x84b8c8:0xc18c51);}
-    const airlock=state.operationTasks?.hospitalAirlock,target=hospitalAirlockTarget(state.remix),defense=state.operationTasks?.generatorDefense;
-    if(airlock){const label=state.operationTasks.hospitalSterile?'AIRLOCK STERILE':airlock.running?`SEALED CYCLE ${Math.ceil(airlock.remaining)}s`:`O ${airlock.settings[0]}/2  F ${airlock.settings[1]}/2  E ${airlock.settings[2]}/2`;if(label!==lastAirlock){const c=airlockScreen.ctx;c.clearRect(0,0,512,160);c.fillStyle='#1a2a38';c.fillRect(0,0,512,160);c.textAlign='center';c.font='bold 26px monospace';c.fillStyle='#b7cbd8';c.fillText(label,256,53);c.font='bold 22px monospace';c.fillStyle='#ecc17c';c.fillText('OXYGEN / FILTER / EXHAUST',256,98);c.font='18px monospace';c.fillText('MATCH GAUGES · THEN START CYCLE',256,133);airlockScreen.texture.needsUpdate=true;lastAirlock=label;}}
+    updateClues();circuitArt.update();const route=state.operationTasks?.freightRoute;if(route){const progress=route.delivered?1:route.running?1-Math.min(1,route.remaining/3):0;cargoCar.position.z=2-progress*4;for(const signal of railSignals)signal.color.set(route.delivered?0x8ac5a0:route.running?0xd5b774:0x8794a7);}
+    const airlock=state.operationTasks?.hospitalAirlock,defense=state.operationTasks?.generatorDefense;
+    if(airlock){const label=state.operationTasks.hospitalSterile?'AIRLOCK STERILE':airlock.running?`SEALED CYCLE ${Math.ceil(airlock.remaining)}s`:`O ${airlock.settings[0]}/2  F ${airlock.settings[1]}/2  E ${airlock.settings[2]}/2`;if(label!==lastAirlock){const c=airlockScreen.ctx;c.clearRect(0,0,512,160);c.fillStyle='#1a2a38';c.fillRect(0,0,512,160);c.textAlign='center';c.font='bold 26px monospace';c.fillStyle='#b7cbd8';c.fillText(label,256,53);c.font='bold 22px monospace';c.fillStyle='#ecc17c';c.fillText('OXYGEN / FILTER / EXHAUST',256,98);c.font='18px monospace';c.fillText('PRESSURE CYCLE',256,133);airlockScreen.texture.needsUpdate=true;lastAirlock=label;}}
     if(defense){const label=defense.completed?'RESTART STABLE':defense.jammed?'JAMMED · INTERACT TO REPAIR':defense.started?`DEFEND RESTART ${Math.floor(defense.progress/22*100)}%`:'EMERGENCY RESTART';if(label!==lastRestart){const c=restartScreen.ctx;c.clearRect(0,0,512,128);c.fillStyle='#202a35';c.fillRect(0,0,512,128);c.fillStyle=defense.jammed?'#ef997c':'#edc17c';c.textAlign='center';c.font='bold 24px monospace';c.fillText(label,256,64);c.font='17px monospace';c.fillText('AMBER RINGS: CONSOLE SABOTEURS',256,102);restartScreen.texture.needsUpdate=true;lastRestart=label;}
      for(const marker of sabotageMarkers.values())marker.visible=false;const wave=state.zones.find(z=>z.id==='generator')?.wave??[];for(const e of wave){if(!defense.saboteurIds.includes(e.id))continue;let marker=sabotageMarkers.get(e.id);if(!marker){marker=new THREE.Mesh(new THREE.RingGeometry(.48,.57,20),new THREE.MeshBasicMaterial({color:0xf0bb64,side:THREE.DoubleSide,transparent:true,opacity:.8}));marker.rotation.x=-Math.PI/2;root.add(marker);sabotageMarkers.set(e.id,marker);}marker.visible=e.hp>0&&e.mesh?.visible!==false&&!defense.completed;marker.position.set(e.x,.07,e.z);}}
 

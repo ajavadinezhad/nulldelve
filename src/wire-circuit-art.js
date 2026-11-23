@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {WIRE_LAYOUT,WIRE_LINKS,junctionPorts,evaluateCircuit} from './wire-circuit.js?v=move-facing-r41';
+import {WIRE_LAYOUT,WIRE_LINKS,junctionPorts,evaluateCircuit} from './wire-circuit.js?v=passages-r44';
 
 /** The actual cross-room cable follows the same authored port graph as the puzzle. */
 export function createWireCircuitArt(scene,state){
@@ -18,7 +18,5 @@ export function createWireCircuitArt(scene,state){
   let cable=0;for(const route of routes){const energized=route.source?circuit.powered:route.output?circuit.solved:edges.has(route.link.a+':'+route.link.b);for(let i=1;i<route.points.length;i++){const a=route.points[i-1],b=route.points[i];segment(cables,cable++,a[0],a[1],b[0],b[1],.12,energized?amber:gray,.035);}}
   for(const mesh of [armMesh,nodes,cables]){mesh.instanceMatrix.needsUpdate=true;mesh.instanceColor.needsUpdate=true;mesh.computeBoundingSphere();}
  }
- const canvas=document.createElement('canvas');canvas.width=512;canvas.height=2048;const ctx=canvas.getContext('2d');ctx.font='bold 24px monospace';ctx.fillStyle='#d2cf9d';ctx.textAlign='center';for(const cell of WIRE_LAYOUT)ctx.fillText(String.fromCharCode(65+cell.index),(cell.x-33)/12*512+22,(cell.z-9)/49*2048+24);
- const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const labelMaterial=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}),labelGeometry=new THREE.PlaneGeometry(12,49),labels=new THREE.Mesh(labelGeometry,labelMaterial);labels.rotation.x=-Math.PI/2;labels.position.set(39,.023,33.5);root.add(labels);
- update();return {update,root,dispose(){scene.remove(root);box.dispose();disc.dispose();material.dispose();labelGeometry.dispose();labelMaterial.dispose();texture.dispose();}};
+ update();return {update,root,dispose(){scene.remove(root);box.dispose();disc.dispose();material.dispose();}};
 }
