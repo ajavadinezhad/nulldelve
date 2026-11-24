@@ -1,6 +1,6 @@
-import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=operator-profile-r58';
-import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=operator-profile-r58';
-import {progressionSequences,createOperationTasks,ARTIFACTS,SIGNAL_TASKS,FREIGHT_TASKS,HOSPITAL_TASKS} from './progression.js?v=operator-profile-r58';
+import {OPERATION_ROUTES,operationRouteComplete} from './operation-routes.js?v=google-launch-r59';
+import {WIRE_SOLUTION,createWireCircuit} from './wire-circuit.js?v=google-launch-r59';
+import {progressionSequences,createOperationTasks,ARTIFACTS,SIGNAL_TASKS,FREIGHT_TASKS,HOSPITAL_TASKS} from './progression.js?v=google-launch-r59';
 /** Facility operation map. x/y are percentages on the ruined-site map, not world coordinates. */
 export const CAMPAIGN_OPERATIONS=Object.freeze([
  {id:'breach',name:'Breach',description:'Restore access through Archive and Security, then survive Storage to reach the command wing.',x:18,y:73},

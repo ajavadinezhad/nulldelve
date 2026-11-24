@@ -1,5 +1,5 @@
-import {fieldAbilitySummary} from './field-ability.js?v=operator-profile-r58';
-import {compatibleStorage} from './storage-compat.js?v=operator-profile-r58';
+import {fieldAbilitySummary} from './field-ability.js?v=google-launch-r59';
+import {compatibleStorage} from './storage-compat.js?v=google-launch-r59';
 
 const withAbility=node=>Object.freeze({...node,description:node.description+' '+fieldAbilitySummary(node.id)});
 

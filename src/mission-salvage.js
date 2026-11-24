@@ -1,4 +1,4 @@
-import {EXPLORATION_CACHES} from './exploration.js?v=operator-profile-r58';
+import {EXPLORATION_CACHES} from './exploration.js?v=google-launch-r59';
 /** Finite authored exploration cash and first-clear contracts; never random loot. */
 export const SALVAGE_CACHES=Object.freeze([
  ['breach','archive',8,14,20],['breach','storage',25,25,25],

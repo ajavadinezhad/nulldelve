@@ -1,6 +1,6 @@
-import {damageStep,damageBonus,reloadStep} from './weapon-tuning.js?v=operator-profile-r58';
-import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=operator-profile-r58';
-import {normalizeAttachments} from './weapon-attachments.js?v=operator-profile-r58';
+import {damageStep,damageBonus,reloadStep} from './weapon-tuning.js?v=google-launch-r59';
+import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=google-launch-r59';
+import {normalizeAttachments} from './weapon-attachments.js?v=google-launch-r59';
 // Pure campaign economy. The game owns healing, shield absorption, and explosions;
 // this module owns credits, purchases, inventory, upgrades, and saved-state hygiene.
 const GUNS=['rifle','smg','shotgun','marksman','lmg','hush','scattergun','kestrel','mantis','jackal','vesper','lancet','orison','pistol'],UPGRADES=['damage','magazine','reload'];

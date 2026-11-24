@@ -1,5 +1,5 @@
-import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=operator-profile-r58';
-import {compatibleStorage} from './storage-compat.js?v=operator-profile-r58';
+import {CAMPAIGN_OPERATIONS} from './campaign-operations.js?v=google-launch-r59';
+import {compatibleStorage} from './storage-compat.js?v=google-launch-r59';
 const KEY='nulldelve.records.v1';
 // Keep legacy normal keys readable; alternate puzzle layouts have separate best times.
 export function operationRecordKey(config){return config.mission+(config.operation?':'+config.operation:'')+':'+config.difficulty+(config.remix?':remix':'');}
