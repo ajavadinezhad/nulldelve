@@ -14,6 +14,14 @@ export function touchAimDirection(state){
  const x=source?.x??0,z=source?.z??0,length=Math.hypot(x,z);
  return Number.isFinite(length)&&length>0?{x:x/length,z:z/length}:null;
 }
+/** Drag across the locked facing to turn. Radial drags never cross a vector singularity. */
+export function fireDragDirection(facing,dx,dz){
+ const length=Math.hypot(facing?.x??NaN,facing?.z??NaN);
+ if(!Number.isFinite(length)||length<.01||!Number.isFinite(dx)||!Number.isFinite(dz))return null;
+ const x=facing.x/length,z=facing.z/length,across=x*dz-z*dx;
+ const turn=Math.sign(across)*Math.max(0,Math.abs(across)-6)/56,angle=Math.atan2(z,x)+turn;
+ return {x:Math.cos(angle),z:Math.sin(angle)};
+}
 export function shouldShowTouchControls(mode,{coarse=false,activeInput=null}={}){return mode==='on'||mode!=='off'&&(activeInput==='touch'||coarse&&activeInput!=='mouse');}
 /** Small action labels retain the full nearby-device context for assistive input. */
 export function touchInteractionContext(prompt){
@@ -62,10 +70,10 @@ export function createTouchControls({host,isRunning,onAction,getFacing=()=>null,
  const end=event=>{if(heldInteract.end(event.pointerId))event.preventDefault();};for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(button,type,end);
  listen(button,'click',event=>{if(event.detail===0&&enabled&&isRunning()){onAction(action);onAction('interactEnd');}});
  }else listen(button,'click',()=>{if(enabled&&isRunning())onAction(action);});actions.append(button);}host.append(actions);
- fireButton=make('button','touch-action touch-fire');fireButton.type='button';fireButton.dataset.action='fire';fireButton.setAttribute('aria-label','Fire; hold to keep facing, drag to steer, release to turn with movement');
+ fireButton=make('button','touch-action touch-fire');fireButton.type='button';fireButton.dataset.action='fire';fireButton.setAttribute('aria-label','Fire; hold to keep facing, drag across your facing to turn, release to turn with movement');
  const fireSvg=doc.createElementNS('http://www.w3.org/2000/svg','svg'),firePath=doc.createElementNS('http://www.w3.org/2000/svg','path');fireSvg.setAttribute('viewBox','0 0 32 32');fireSvg.setAttribute('aria-hidden','true');firePath.setAttribute('d','M12 27V12l4-7 4 7v15zM12 20h8');fireSvg.append(firePath);fireButton.append(fireSvg,make('span','','Fire'));host.append(fireButton);
  listen(fireButton,'pointerdown',event=>{if(!enabled||!isRunning()||event.button>0)return;event.preventDefault();if(heldFire.begin(event.pointerId)){fireOrigin={id:event.pointerId,x:event.clientX,z:event.clientY,facing:lockedFacing};try{fireButton.setPointerCapture(event.pointerId);}catch{}onAction('fire');}});
- listen(fireButton,'pointermove',event=>{if(!fireOrigin||fireOrigin.id!==event.pointerId||!heldFire.held||!fireOrigin.facing)return;const dx=event.clientX-fireOrigin.x,dz=event.clientY-fireOrigin.z;if(!Number.isFinite(dx)||!Number.isFinite(dz)||Math.hypot(dx,dz)<6)return;const x=fireOrigin.facing.x*44+dx,z=fireOrigin.facing.z*44+dz,length=Math.hypot(x,z);if(length>1){event.preventDefault();lockedFacing={x:x/length,z:z/length};}});
+ listen(fireButton,'pointermove',event=>{if(!fireOrigin||fireOrigin.id!==event.pointerId||!heldFire.held||!fireOrigin.facing)return;const direction=fireDragDirection(fireOrigin.facing,event.clientX-fireOrigin.x,event.clientY-fireOrigin.z);if(direction){event.preventDefault();lockedFacing=direction;}});
  const endFire=event=>{if(heldFire.end(event.pointerId))event.preventDefault();};for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(fireButton,type,endFire);
  listen(fireButton,'click',event=>{if(event.detail===0&&enabled&&isRunning())onAction('fire');});
  function configure(next=mode,{handedness='right',size='normal'}={}){currentOptions={handedness,size};reset();doc.body.classList.toggle('touch-left-handed',handedness==='left');doc.body.classList.toggle('touch-large-controls',size==='large');mode=next;const nextEnabled=shouldShowTouchControls(mode,{...device(),activeInput});if(nextEnabled!==enabled)reset();enabled=nextEnabled;host.hidden=!enabled;doc.body.classList.toggle('touch-controls-enabled',enabled);}

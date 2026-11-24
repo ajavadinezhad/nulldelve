@@ -25,7 +25,7 @@ const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'u
 const noop=()=>{};
 const plain=value=>JSON.parse(JSON.stringify(value));
 function fragment(start,end){const at=source.indexOf(start);assert.ok(at>=0,`main contains ${start}`);const stop=source.indexOf(end,at);assert.ok(stop>at,`main contains ${end}`);return source.slice(at,stop);}
-function mesh(){return {position:{x:0,y:0,z:0,set(x,y,z){Object.assign(this,{x,y,z});},copy(value){Object.assign(this,value);}},visible:false};}
+function mesh(){return {rotation:{y:0},position:{x:0,y:0,z:0,set(x,y,z){Object.assign(this,{x,y,z});},copy(value){Object.assign(this,value);}},visible:false};}
 function session({expanded=false}={}){
  const elements=new Map();const $=selector=>{if(!elements.has(selector))elements.set(selector,{textContent:'',dataset:{},setAttribute(name,value){this[name]=value;}});return elements.get(selector);};
  const economy=createEconomy(),puzzle=createPressurePuzzle(),enemies=[],doors=Array.from({length:expanded?WORLD_DOOR_COUNT:18},()=>({open:false,slide:0,unlocked:false}));
@@ -42,7 +42,7 @@ function session({expanded=false}={}){
  ctx.progression=createProgression({doors,enemies,spawnEnemy:(x,z,variant,{encounter}={})=>{const stats=ROACH_VARIANTS[variant],e={encounter,id:'e'+ctx.nextEnemyId++,x,z,...stats,maxHp:stats.hp,variant,cooldown:1,alerted:true,mesh:mesh(),attackWindup:0,staggerTime:0,spawnDelay:0};enemies.push(e);return e;}});
  ctx.persistCampaignProfile=()=>ctx.campaignProfile.persist();
  ctx.queueCheckpoint=reason=>{ctx.pendingCheckpoint=reason;};
- ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();ctx.encounterStats=require('../src/campaign-threat.js').encounterStats;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;ctx.shotRecovery??=require('../src/combat-movement.js').createShotRecovery();ctx.fieldAbility??=require('../src/field-ability.js').createFieldAbility();ctx.checkpointPrimaryAmmo=require('../src/checkpoint-ammo.js').checkpointPrimaryAmmo;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;vm.createContext(ctx);
+ ctx.touchControls??=null;ctx.compatibleStorage=compatibleStorage;ctx.burstFire??=createBurstFire();ctx.encounterStats=require('../src/campaign-threat.js').encounterStats;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;ctx.shotRecovery??=require('../src/combat-movement.js').createShotRecovery();ctx.fieldAbility??=require('../src/field-ability.js').createFieldAbility();ctx.checkpointPrimaryAmmo=require('../src/checkpoint-ammo.js').checkpointPrimaryAmmo;ctx.checkpointLoot=require('../src/checkpoint-ammo.js').checkpointLoot;ctx.projectileDamage=require('../src/weapon-tuning.js').projectileDamage;vm.createContext(ctx);
  vm.runInContext(fragment('function applyUpgrades()','\napplyUpgrades();'),ctx);
  vm.runInContext(fragment('function equip(type)','\nconst player='),ctx);
  vm.runInContext(fragment('function equippedModelType(','\nrefreshPlayerWeapon();'),ctx);
@@ -153,3 +153,19 @@ test('actual main checkpoint restoration converts retained weapon ammunition by 
  const same=h.capture(),reserve=ctx.weapons.rifle.reserve;assert.equal(h.restore(same),true);assert.equal(ctx.weapons.rifle.reserve,reserve);assert.equal(ctx.player.ammo,5,'same-gun reload is exact, not repeatedly converted');
 });
 test('rejecting a malformed checkpoint cannot reset the live ability cooldown',()=>{const h=session({expanded:true});h.ctx.fieldAbility.activate('none',{player:h.ctx.player,direction:{x:1,z:0}});const before=h.ctx.fieldAbility.serialize(),bad=h.capture();bad.version=99;bad.fieldAbility={version:1,cooldowns:{escape:0,guard:0,demolition:0}};assert.equal(h.restore(bad),false);assert.deepEqual(h.ctx.fieldAbility.serialize(),before);});
+
+
+test('actual checkpoint conversion includes all ground pickups and preserves fractional ammo value',async()=>{
+ const target=session(),{ctx}=target;ctx.economy.state.credits=5000;assert.ok((await ctx.campaignProfile.purchaseOffer('weapon.lmg')).ok);ctx.applyPrimaryLoadout();
+ ctx.weapons.rifle.reserve=0;ctx.weapons.rifle.ammo=0;ctx.player.ammo=0;
+ ctx.loot.drops=[{id:'drop1',kind:'ammo',x:ctx.player.x,z:ctx.player.z,rifle:3,pistol:2,amount:0},{id:'health',kind:'health',x:ctx.player.x,z:ctx.player.z,amount:6,rifle:0,pistol:0},{id:'drop2',kind:'ammo',x:ctx.player.x,z:ctx.player.z,rifle:17,pistol:1,amount:0}];
+ const checkpoint=target.capture();assert.ok((await ctx.campaignProfile.purchaseOffer('weapon.mantis')).ok);const cash=ctx.economy.state.credits;assert.equal(target.restore(checkpoint),true);
+ assert.equal(ctx.weapons.rifle.reserve,0);assert.equal(ctx.loot.drops.filter(d=>d.kind==='ammo').reduce((n,d)=>n+d.rifle,0),2);assert.equal(ctx.loot.supplyBudget,4,'20 LMG rounds become two AMR rounds plus four units of earned remainder');assert.equal(ctx.loot.drops.find(d=>d.kind==='health').amount,6);
+ const gain=require('../src/loot.js').collectNearbyLoot(ctx.loot,ctx.player,ctx.weapons);assert.equal(gain.rifle,2);assert.equal(ctx.weapons.rifle.reserve,2);assert.equal(ctx.economy.state.credits,cash);
+ const again=target.capture();assert.equal(target.restore(again),true);assert.equal(ctx.weapons.rifle.reserve,2);assert.equal(ctx.loot.supplyBudget,4,'same-weapon recapture does not reconvert the remainder');
+});
+test('actual facing roundtrip retains shell weakness and rejects malformed headings before live mutation',()=>{
+ const first=session(),{ctx}=first;const enemy={id:'e999',x:9,z:29,hp:6,maxHp:6,variant:'brute',cooldown:1,mesh:mesh()};enemy.mesh.rotation.y=-Math.PI/2;ctx.enemies.push(enemy);const saved=first.capture();assert.equal(saved.enemies[0].facing,-Math.PI/2);
+ const damage=require('../src/weapon-tuning.js').projectileDamage,gun={id:'carbine',damage:1},origin={x:8,z:29};const before=damage(gun,enemy,origin),restored=session();assert.equal(restored.restore(saved),true);const live=restored.ctx.enemies[0];assert.equal(live.mesh.rotation.y,enemy.mesh.rotation.y);assert.equal(damage(gun,live,origin),before);
+ const bad=plain(saved);bad.enemies[0].facing=Infinity;assert.equal(restored.restore(bad),false);assert.equal(live.mesh.rotation.y,-Math.PI/2);delete bad.enemies[0].facing;assert.equal(restored.restore(bad),true,'old saves recover a sensible facing toward the player');
+});

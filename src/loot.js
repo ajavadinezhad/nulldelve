@@ -1,4 +1,6 @@
-import {DIFFICULTY_RULES} from './difficulty.js?v=integration-fixes-r55';
+import {ROACH_VARIANTS} from './roach.js?v=operator-profile-r58';
+import {projectileDamage} from './weapon-tuning.js?v=operator-profile-r58';
+import {DIFFICULTY_RULES} from './difficulty.js?v=operator-profile-r58';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;
@@ -36,16 +38,20 @@ export function dropEnemyLoot(state,enemy,{player,weapons,selected,difficulty='n
  const held=selected??player?.selected;
  const supply=gun=>Math.max(0,Number(weapons?.[gun]?.reserve)||0)+Math.max(0,Number(held===gun?player?.ammo:weapons?.[gun]?.ammo)||0)+nearby.reduce((n,d)=>n+(d.kind==='ammo'?Math.max(0,Number(d[gun])||0):0),0);
  const primaryPellets=Math.max(1,Number(weapons?.rifle?.pellets)||1);
- const baseValue=Math.max(1,Math.min(4,Number(weapons?.rifle?.baseDamage)||1),primaryPellets>1?3:1);
+ const baseValue=Math.max(1,Number(weapons?.rifle?.baseDamage)||1)*primaryPellets;
  const baseHp=({normal:2,runner:1,brute:6,charger:8,sentinel:14,screecher:10,leaper:7,spitter:6,mender:8,boss:24})[enemy.variant]??2;
  const actualHealth=Number(enemy.maxHp),healthBudget=Math.max(1,Math.min(10000,Number.isFinite(actualHealth)&&actualHealth>0?actualHealth:Math.ceil(baseHp*(DIFFICULTY_RULES[difficulty]?.hp??1))));
- // Credit a fixed health-cost budget at each kill, regardless of inventory,
- // accuracy or purchased damage. Inventory only caps delivery monotonically:
+ // Credit 70% of the unupgraded centered-shot cost at a fixed 3m reference.
+ // This accounts for real pellet spread, shell armor and unavoidable overkill,
+ // never the player's misses, aim position or purchased damage. Inventory caps delivery:
  // min(capacity, existing supply + earned supply), never a low-ammo windfall.
- state.supplyBudget=Math.min(1000,(Number.isFinite(state.supplyBudget)?state.supplyBudget:0)+healthBudget*.7);
+ const baseline={...weapons?.rifle,damage:Math.max(1,Number(weapons?.rifle?.baseDamage)||1)},radius=ROACH_VARIANTS[enemy.variant]?.radius??.32,spread=Math.max(0,Math.min(.8,Number(baseline.spread)||0));
+ const centerHits=primaryPellets===1?1:Array.from({length:primaryPellets},(_,i)=>Math.abs(Math.sin((i/(primaryPellets-1)-.5)*spread)*3)<=radius+.12).filter(Boolean).length;
+ const shotDamage=projectileDamage(baseline,{variant:enemy.variant,x:0,z:0},{x:3,z:0},baseline.damage)*Math.max(1,centerHits),baselineRounds=Math.ceil(healthBudget/Math.max(.1,shotDamage));
+ state.supplyBudget=Math.min(1000,(Number.isFinite(state.supplyBudget)?state.supplyBudget:0)+baselineRounds*baseValue*.7);
  const added=[];
  if(big||boss||state.kills%3===0){
-  const earned=Math.max(1,Math.floor(state.supplyBudget/baseValue));
+  const earned=Math.max(0,Math.floor((state.supplyBudget+1e-9)/baseValue));
   state.supplyBudget=Math.max(0,state.supplyBudget-earned*baseValue);
   const primaryCap=Math.min(RESERVE_LIMITS.rifle,Math.max((weapons?.rifle?.capacity??30)*2,Math.ceil(60/baseValue))),pistolCap=36;
   const rifle=Math.min(earned,Math.max(0,primaryCap-supply('rifle'))),pistol=Math.min(boss?6:big?3:3,Math.max(0,pistolCap-supply('pistol')));

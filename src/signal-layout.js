@@ -1,4 +1,4 @@
-import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=integration-fixes-r55';
+import {EXPLORATION_ROOMS,carveExploration} from './exploration.js?v=operator-profile-r58';
 import * as THREE from '../vendor/three.module.js';
 /** Communications annex keeps every earlier coordinate and door index stable. */
 export const SIGNAL_ROOMS=Object.freeze([

@@ -2,6 +2,7 @@ package com.ajavadinezhad.nulldelve;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,9 +11,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -22,10 +25,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Button;
 import androidx.webkit.WebViewAssetLoader;
 import org.json.JSONObject;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
@@ -38,9 +45,15 @@ public final class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileResult;
     private byte[] pendingBackup;
     private long lastBack;
+    private AlertDialog rendererRecovery;
+    private boolean foreground;
+    private Dialog documentDialog;
+    private WebView documentView;
+    private BackendOriginPolicy backendPolicy = BackendOriginPolicy.disabled();
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        backendPolicy = loadBackendPolicy();
         game = new WebView(this);
         game.setBackgroundColor(Color.rgb(16, 22, 32));
         FrameLayout frame = new FrameLayout(this);
@@ -70,9 +83,15 @@ public final class MainActivity extends Activity {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 WebResourceResponse local = loader.shouldInterceptRequest(request.getUrl());
                 if (local != null) return local;
-                // Never fetch missing assets or remote subresources into the trusted game origin.
+                // Optional account traffic is limited to configured REST requests;
+                // remote documents, scripts, and missing local assets remain blocked.
+                if (backendPolicy.allows(request.getMethod(), request.getUrl().toString(),
+                        request.isForMainFrame(), request.getRequestHeaders())) return null;
                 return new WebResourceResponse("text/plain", "UTF-8", 404, "Not Found",
                         Collections.emptyMap(), new ByteArrayInputStream(new byte[0]));
+            }
+            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                return recoverRenderer(view);
             }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (isLocal(request.getUrl())) return false;
@@ -82,6 +101,7 @@ public final class MainActivity extends Activity {
         });
         game.setWebChromeClient(new WebChromeClient() {
             @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (view != game) { callback.onReceiveValue(null); return true; }
                 if (fileResult != null) fileResult.onReceiveValue(null);
                 fileResult = callback;
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
@@ -91,21 +111,18 @@ public final class MainActivity extends Activity {
                 return true;
             }
             @Override public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, android.os.Message message) {
-                if (!userGesture) return false;
-                WebView popup = new WebView(MainActivity.this);
-                popup.setWebViewClient(new WebViewClient() {
-                    @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest request) {
-                        openExternal(request.getUrl()); v.destroy(); return true;
-                    }
-                });
+                if (view != game || !userGesture) return false;
+                WebView popup = createDocumentPopup(loader);
                 ((WebView.WebViewTransport) message.obj).setWebView(popup);
                 message.sendToTarget(); return true;
             }
         });
         game.addJavascriptInterface(new BackupExport(), "NulldelveFiles");
+        final WebView exportView = game;
         game.setDownloadListener((url, agent, disposition, mime, length) -> {
+            if (game != exportView) return;
             if (!url.startsWith("blob:https://" + HOST + "/")) return;
-            game.evaluateJavascript("fetch(" + JSONObject.quote(url) + ").then(r=>r.text()).then(text=>NulldelveFiles.save(text))", null);
+            exportView.evaluateJavascript("fetch(" + JSONObject.quote(url) + ").then(r=>r.text()).then(text=>NulldelveFiles.save(text))", null);
         });
         // Always use the same HTTPS origin so checkpoints survive app updates.
         game.loadUrl(START);
@@ -116,6 +133,96 @@ public final class MainActivity extends Activity {
         immersive();
     }
 
+    /** Keep bundled legal/account documents on their offline HTTPS asset origin. */
+    private WebView createDocumentPopup(WebViewAssetLoader loader) {
+        closeDocument();
+        WebView popup = new WebView(this);
+        popup.setBackgroundColor(Color.rgb(16, 22, 32));
+        WebSettings settings = popup.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        popup.setWebViewClient(new WebViewClient() {
+            @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                WebResourceResponse local = loader.shouldInterceptRequest(request.getUrl());
+                if (local != null) return local;
+                if (backendPolicy.allows(request.getMethod(), request.getUrl().toString(),
+                        request.isForMainFrame(), request.getRequestHeaders())) return null;
+                return new WebResourceResponse("text/plain", "UTF-8", 404, "Not Found",
+                        Collections.emptyMap(), new ByteArrayInputStream(new byte[0]));
+            }
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (documentView != view) return true;
+                if (isLocal(request.getUrl())) {
+                    if ("/assets/game/index.html".equals(request.getUrl().getPath())) { closeDocument(); return true; }
+                    return false;
+                }
+                if (request.isForMainFrame()) { openExternal(request.getUrl()); closeDocument(); }
+                return true;
+            }
+            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                if (documentView == view) closeDocument(); else view.destroy();
+                return true;
+            }
+        });
+        Dialog dialog = new Dialog(this);
+        LinearLayout column = new LinearLayout(this); column.setOrientation(LinearLayout.VERTICAL);
+        column.setBackgroundColor(Color.rgb(16, 22, 32));
+        Button close = new Button(this); close.setText(R.string.back_to_game); close.setOnClickListener(view -> dialog.dismiss());
+        column.addView(close, new LinearLayout.LayoutParams(-1, -2));
+        column.addView(popup, new LinearLayout.LayoutParams(-1, 0, 1));
+        dialog.setContentView(column);
+        documentDialog = dialog; documentView = popup;
+        dialog.setOnDismissListener(ignored -> {
+            if (documentDialog == dialog) { documentDialog = null; documentView = null; }
+            popup.destroy();
+        });
+        dialog.show();
+        if (dialog.getWindow() != null) dialog.getWindow().setLayout(-1, -1);
+        return popup;
+    }
+    private void closeDocument() {
+        if (documentDialog != null) documentDialog.dismiss();
+    }
+    private BackendOriginPolicy loadBackendPolicy() {
+        try (InputStream input = getAssets().open("game/backend-config.json")) {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024]; int count;
+            while ((count = input.read(buffer)) != -1) {
+                if (output.size() + count > 8192) return BackendOriginPolicy.disabled();
+                output.write(buffer, 0, count);
+            }
+            JSONObject config = new JSONObject(output.toString("UTF-8"));
+            return BackendOriginPolicy.fromConfig(config.optString("supabaseUrl", ""),
+                    config.optString("publishableKey", ""));
+        } catch (Exception ignored) { return BackendOriginPolicy.disabled(); }
+    }
+    /** A dead renderer cannot run JavaScript or capture a safe new save. */
+    private boolean recoverRenderer(WebView failed) {
+        if (failed != game) { failed.destroy(); return true; }
+        game = null;
+        closeDocument();
+        // These callbacks belong to the dead page, never a replacement page.
+        fileResult = null;
+        pendingBackup = null;
+        lastBack = 0;
+        if (failed.getParent() instanceof ViewGroup) ((ViewGroup) failed.getParent()).removeView(failed);
+        failed.removeJavascriptInterface("NulldelveFiles");
+        failed.destroy();
+        showRendererRecovery();
+        return true;
+    }
+    private void showRendererRecovery() {
+        if (!foreground || isFinishing() || isDestroyed() || rendererRecovery != null) return;
+        rendererRecovery = new AlertDialog.Builder(this).setTitle("Graphics interrupted")
+                .setMessage("Restart the game, then choose Continue to return to your latest checkpoint. Your saved progress has not been replaced.")
+                .setCancelable(false)
+                .setPositiveButton("Restart game", (dialog, which) -> recreate())
+                .setNegativeButton("Exit", (dialog, which) -> finish()).create();
+        rendererRecovery.show();
+    }
     private static boolean isLocal(Uri uri) {
         return "https".equals(uri.getScheme()) && HOST.equals(uri.getHost())
                 && uri.getPort() == -1 && uri.getPath() != null && uri.getPath().startsWith("/assets/game/");
@@ -132,7 +239,7 @@ public final class MainActivity extends Activity {
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
             if (bytes.length > 10 * 1024 * 1024) return;
             runOnUiThread(() -> {
-                if (pendingBackup != null || !isLocal(Uri.parse(game.getUrl()))) return;
+                if (game == null || pendingBackup != null || game.getUrl() == null || !isLocal(Uri.parse(game.getUrl()))) return;
                 pendingBackup = bytes;
                 Intent save = new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
                         .setType("application/json").putExtra(Intent.EXTRA_TITLE, "nulldelve-backup.json");
@@ -166,8 +273,11 @@ public final class MainActivity extends Activity {
     }
     private void handleBack() {
         // Let the game navigate submenus before considering an app-level exit.
-        game.evaluateJavascript("window.dispatchEvent(new Event('nulldelve-back',{cancelable:true}))", unhandled -> {
-            if (isFinishing() || isDestroyed()) return;
+        if (documentDialog != null) { closeDocument(); return; }
+        if (game == null) { showRendererRecovery(); return; }
+        final WebView current = game;
+        current.evaluateJavascript("window.dispatchEvent(new Event('nulldelve-back',{cancelable:true}))", unhandled -> {
+            if (isFinishing() || isDestroyed() || game != current) return;
             if ("false".equals(unhandled)) { lastBack = 0; return; }
             long now = SystemClock.elapsedRealtime();
             if (now - lastBack < 1400) {
@@ -193,12 +303,25 @@ public final class MainActivity extends Activity {
     }
     @Override public void onWindowFocusChanged(boolean focus) { super.onWindowFocusChanged(focus); if (focus) immersive(); }
     @Override protected void onPause() {
-        game.evaluateJavascript("window.dispatchEvent(new Event('blur'))", null);
-        game.onPause(); super.onPause();
+        foreground = false;
+        if (game != null) {
+            game.evaluateJavascript("window.dispatchEvent(new Event('blur'))", null);
+            game.onPause();
+        }
+        super.onPause();
     }
-    @Override protected void onResume() { super.onResume(); if (game != null) game.onResume(); }
+    @Override protected void onResume() {
+        super.onResume(); foreground = true;
+        if (game != null) game.onResume(); else showRendererRecovery();
+    }
     @Override protected void onDestroy() {
-        if (fileResult != null) fileResult.onReceiveValue(null);
-        game.removeJavascriptInterface("NulldelveFiles"); game.destroy(); super.onDestroy();
+        closeDocument();
+        if (rendererRecovery != null) { rendererRecovery.dismiss(); rendererRecovery = null; }
+        if (fileResult != null) { fileResult.onReceiveValue(null); fileResult = null; }
+        pendingBackup = null;
+        if (game != null) {
+            game.removeJavascriptInterface("NulldelveFiles"); game.destroy(); game = null;
+        }
+        super.onDestroy();
     }
 }

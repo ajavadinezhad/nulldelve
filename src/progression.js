@@ -1,10 +1,10 @@
-import {annexMechanismPanel,annexMechanismSolved} from './annex-mechanisms.js?v=integration-fixes-r55';
-import {freightEscortStatus,FREIGHT_ESCORT_DURATION,freightEscortPhaseReady} from './freight-escort.js?v=integration-fixes-r55';
-import {initialMechanism,mechanismAction,mechanismSolved,mechanismStateValid,mechanismPanel,nextMechanismAction} from './physical-puzzles.js?v=integration-fixes-r55';
-import {puzzleAccessVisible,puzzleAccessPoint} from './puzzle-access.js?v=integration-fixes-r55';
-import {OPERATION_ROUTES} from './operation-routes.js?v=integration-fixes-r55';
-import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=integration-fixes-r55';
-import {DIFFICULTY_RULES} from './difficulty.js?v=integration-fixes-r55';
+import {annexMechanismPanel,annexMechanismSolved} from './annex-mechanisms.js?v=operator-profile-r58';
+import {freightEscortStatus,FREIGHT_ESCORT_DURATION,freightEscortPhaseReady} from './freight-escort.js?v=operator-profile-r58';
+import {initialMechanism,mechanismAction,mechanismSolved,mechanismStateValid,mechanismPanel,nextMechanismAction} from './physical-puzzles.js?v=operator-profile-r58';
+import {puzzleAccessVisible,puzzleAccessPoint} from './puzzle-access.js?v=operator-profile-r58';
+import {OPERATION_ROUTES} from './operation-routes.js?v=operator-profile-r58';
+import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=operator-profile-r58';
+import {DIFFICULTY_RULES} from './difficulty.js?v=operator-profile-r58';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.

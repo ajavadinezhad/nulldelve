@@ -1,13 +1,16 @@
-import {compatibleStorage} from './storage-compat.js?v=integration-fixes-r55';
+import {fieldAbilitySummary} from './field-ability.js?v=operator-profile-r58';
+import {compatibleStorage} from './storage-compat.js?v=operator-profile-r58';
+
+const withAbility=node=>Object.freeze({...node,description:node.description+' '+fieldAbilitySummary(node.id)});
 
 /** Earn one training point per completed operation; develop a branch before its advanced node. */
 export const FIELD_SKILLS_KEY='nulldelve.field-skills.v1';
 export const FIELD_SKILLS=Object.freeze([
- {id:'none',name:'Standard kit',description:'No field skill equipped.',unlockAfter:null,icon:'armory'},
+ {id:'none',name:'Standard kit',description:'No passive field skill equipped.',unlockAfter:null,icon:'armory'},
  {id:'medic',name:'Field Medic',description:'Medkits restore up to 65 health. Still consumes one kit.',unlockAfter:'breach',icon:'medkit'},
  {id:'runner',name:'Rapid Response',description:'Sprint 10% faster. Walking and crate movement stay unchanged.',unlockAfter:'command',icon:'move'},
  {id:'demolition',name:'Demolition Harness',description:'Grenade effects reach 15% farther. Keep clear: the danger radius grows too.',unlockAfter:'research',icon:'grenade'},
-].map(Object.freeze));
+].map(withAbility));
 export const SKILL_BRANCHES=Object.freeze([
  {id:'medic',name:'Medicine',nodes:['medic','surgeon','plating','triage','sealant']},
  {id:'runner',name:'Mobility',nodes:['runner','pathfinder','quickloader','closequarters']},
@@ -17,9 +20,9 @@ const milestones=['breach','command','research','containment','nest','hospital',
 const advanced=[
  {id:'sealant',name:'Emergency Seal',description:'Medkits restore up to 75 health and repair 8 armor, capped at 60. Consumes a kit; no passive repair.',unlockAfter:'freight',requires:'surgeon',icon:'armor'},
  {id:'insulation',name:'Blast Insulation',description:'Take 25% less damage from your own explosions and ground fire. Retains 20% wider grenade effects; enemy attacks remain dangerous.',unlockAfter:'freight',requires:'ordnance',icon:'armor'},
- {id:'surgeon',name:'Trauma Specialist',description:'Medkits restore up to 75 health. Field ability: temporary protection replaces Break away.',unlockAfter:'research',requires:'medic',icon:'medkit'},
- {id:'pathfinder',name:'Pathfinder',description:'Sprint 15% faster. Field ability: longer Break away with faster recovery.',unlockAfter:'research',requires:'runner',icon:'move'},
- {id:'ordnance',name:'Ordnance Specialist',description:'Grenade effects reach 20% farther. Field ability: remote charge replaces Break away and consumes a frag grenade.',unlockAfter:'containment',requires:'demolition',icon:'grenade'},
+ {id:'surgeon',name:'Trauma Specialist',description:'Medkits restore up to 75 health.',unlockAfter:'research',requires:'medic',icon:'medkit'},
+ {id:'pathfinder',name:'Pathfinder',description:'Sprint 15% faster.',unlockAfter:'research',requires:'runner',icon:'move'},
+ {id:'ordnance',name:'Ordnance Specialist',description:'Grenade effects reach 20% farther.',unlockAfter:'containment',requires:'demolition',icon:'grenade'},
  {id:'plating',name:'Reactive Plating',description:'Armor uses 20% less plating per hit. Retains Trauma Specialist: medkits restore up to 75 health.',unlockAfter:'nest',requires:'surgeon',icon:'armor'},
  {id:'triage',name:'Emergency Triage',description:'Medkits restore up to 85 health. Still consumes one kit; no passive regeneration.',unlockAfter:'hospital',requires:'surgeon',icon:'healing'},
  {id:'quickloader',name:'Tactical Reload',description:'Reload 12% faster with either gun. Retains Pathfinder: sprint 15% faster.',unlockAfter:'hospital',requires:'pathfinder',icon:'reload'},
@@ -27,7 +30,7 @@ const advanced=[
  {id:'steadythrow',name:'Quick Cast',description:'Reach full throwing range 20% sooner. Retains Ordnance Specialist: effects and danger radius reach 20% farther.',unlockAfter:'hospital',requires:'ordnance',icon:'charge'},
  {id:'widearea',name:'Blast Control',description:'Grenade effects and danger radius reach 25% farther. Keep clear of your own blast.',unlockAfter:'hospital',requires:'ordnance',icon:'blast'},
 ];
-export const SKILL_NODES=Object.freeze([...FIELD_SKILLS.slice(1),...advanced.filter(node=>!['sealant','insulation'].includes(node.id)),...advanced.filter(node=>['sealant','insulation'].includes(node.id))].map(Object.freeze));
+export const SKILL_NODES=Object.freeze([...FIELD_SKILLS.slice(1),...advanced.filter(node=>!['sealant','insulation'].includes(node.id)).map(withAbility),...advanced.filter(node=>['sealant','insulation'].includes(node.id)).map(withAbility)].map(Object.freeze));
 export function trainingPoints(state,completed=[]){return Math.max(0,milestones.filter(id=>completed.includes(id)).length-(state?.learned?.length??0));}
 export function skillLearnable(id,state,completed=[]){const node=SKILL_NODES.find(n=>n.id===id);return !!node&&fieldSkillUnlocked(id,completed)&&(!node.requires||state?.learned?.includes(node.requires))&&!state?.learned?.includes(id)&&trainingPoints(state,completed)>0;}
 

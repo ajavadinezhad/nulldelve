@@ -1,10 +1,10 @@
-import {createFieldAbility} from './field-ability.js?v=integration-fixes-r55';
-import {EXPLORATION_EVENTS} from './exploration.js?v=integration-fixes-r55';
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=integration-fixes-r55';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=integration-fixes-r55';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=integration-fixes-r55';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=integration-fixes-r55';
-import {createProgression} from './progression.js?v=integration-fixes-r55';
+import {createFieldAbility} from './field-ability.js?v=operator-profile-r58';
+import {EXPLORATION_EVENTS} from './exploration.js?v=operator-profile-r58';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=operator-profile-r58';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=operator-profile-r58';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=operator-profile-r58';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=operator-profile-r58';
+import {createProgression} from './progression.js?v=operator-profile-r58';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','spitter','mender','boss']);
@@ -32,7 +32,7 @@ export function validateSnapshot(data,{width,height,doorCount,crateCount=2,plate
   if(!Array.isArray(data.enemies)||data.enemies.length>5000)return false;
   // Early version-3 saves predate health bars and omit maxHp; match restore's fallback.
   const legacyHp={normal:2,runner:1,brute:6,charger:8,sentinel:14,screecher:10,leaper:7,spitter:6,mender:8,boss:24},hpScale={easy:.8,normal:1,hard:1.5}[data.config.difficulty];
-  const ids=new Set();for(const e of data.enemies){const maxHp=e?.maxHp??Math.ceil(legacyHp[e?.variant]*hpScale);if(!object(e)||typeof e.id!=='string'||ids.has(e.id)||!variants.has(e.variant)||!finite(e.x,0,width)||!finite(e.z,0,height)||!finite(e.hp,0,10000)||!finite(maxHp,1,10000)||e.hp>maxHp||!finite(e.cooldown,0,1000))return false;if(e.rewardIdentity!==undefined&&(typeof e.rewardIdentity!=='string'||!/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(e.rewardIdentity)))return false;ids.add(e.id);if(e.spitCooldown!==undefined&&!finite(e.spitCooldown,0,5))return false;if(e.mendCooldown!==undefined&&!finite(e.mendCooldown,0,6))return false;if(e.mendCharges!==undefined&&(!Number.isInteger(e.mendCharges)||e.mendCharges<0||e.mendCharges>3))return false;if(e.shriekCooldown!==undefined&&!finite(e.shriekCooldown,0,6))return false;if(e.leapCooldown!==undefined&&!finite(e.leapCooldown,0,4.8))return false;if(e.chargeCooldown!==undefined&&!finite(e.chargeCooldown,0,4.5))return false;for(const key of ['spawnDelay','attackWindup','staggerTime'])if(e[key]!==undefined&&!finite(e[key],0,1000))return false;}
+  const ids=new Set();for(const e of data.enemies){const maxHp=e?.maxHp??Math.ceil(legacyHp[e?.variant]*hpScale);if(!object(e)||typeof e.id!=='string'||ids.has(e.id)||!variants.has(e.variant)||!finite(e.x,0,width)||!finite(e.z,0,height)||!finite(e.hp,0,10000)||!finite(maxHp,1,10000)||e.hp>maxHp||!finite(e.cooldown,0,1000))return false;if(e.rewardIdentity!==undefined&&(typeof e.rewardIdentity!=='string'||!/^kill\.[a-z][a-z0-9-]{0,39}\.(0|[1-9][0-9]{0,3})$/.test(e.rewardIdentity)))return false;ids.add(e.id);if(e.facing!==undefined&&!finite(e.facing,-Math.PI,Math.PI))return false;if(e.spitCooldown!==undefined&&!finite(e.spitCooldown,0,5))return false;if(e.mendCooldown!==undefined&&!finite(e.mendCooldown,0,6))return false;if(e.mendCharges!==undefined&&(!Number.isInteger(e.mendCharges)||e.mendCharges<0||e.mendCharges>3))return false;if(e.shriekCooldown!==undefined&&!finite(e.shriekCooldown,0,6))return false;if(e.leapCooldown!==undefined&&!finite(e.leapCooldown,0,4.8))return false;if(e.chargeCooldown!==undefined&&!finite(e.chargeCooldown,0,4.5))return false;for(const key of ['spawnDelay','attackWindup','staggerTime'])if(e[key]!==undefined&&!finite(e[key],0,1000))return false;}
   if(!Array.isArray(data.doors)||data.doors.length!==doorCount||!data.doors.every(d=>object(d)&&typeof d.open==='boolean'&&typeof d.unlocked==='boolean'&&finite(d.slide,0,1)))return false;
   const puzzle=data.puzzle;if(!object(puzzle)||typeof puzzle.solved!=='boolean'||!Array.isArray(puzzle.crates)||puzzle.crates.length!==crateCount||!puzzle.crates.every(c=>object(c)&&finite(c.x,0,width)&&finite(c.z,0,height)&&typeof c.seated==='boolean')||!Array.isArray(puzzle.plates)||puzzle.plates.length!==plateCount||!puzzle.plates.every(p=>object(p)&&typeof p.active==='boolean'))return false;
   if(!Array.isArray(data.explored)||data.explored.length>width*height||!data.explored.every(id=>Number.isInteger(id)&&id>=0&&id<width*height))return false;

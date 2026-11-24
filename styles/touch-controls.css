@@ -1,12 +1,12 @@
-#touch-controls{position:fixed;inset:0;z-index:18;pointer-events:none;touch-action:none;user-select:none;-webkit-user-select:none}#touch-controls[hidden]{display:none}.touch-stick{position:absolute;bottom:max(20px,env(safe-area-inset-bottom));width:108px;height:108px;border-radius:50%;border:1px solid #bbc9db55;background:radial-gradient(circle,#28364c66,#0c16234d);box-shadow:inset 0 0 0 12px #ffffff03,0 4px 20px #0004;pointer-events:auto;touch-action:none}.touch-stick-move{left:max(18px,env(safe-area-inset-left))}.touch-stick-aim{right:max(18px,env(safe-area-inset-right))}.touch-stick-track{position:absolute;inset:20px;border:1px solid #b4c5d733;border-radius:50%}.touch-stick-knob{position:absolute;left:35px;top:35px;width:36px;height:36px;border-radius:50%;border:1px solid #c8d5e5aa;background:linear-gradient(135deg,#9cadc466,#2d4059aa);box-shadow:0 4px 12px #0007;will-change:transform;pointer-events:none}.touch-stick-label{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:#b9c7d9;font:9px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.8px;pointer-events:none}.touch-stick.engaged{border-color:#efba62aa;background:#44392566}.touch-stick-aim.engaged .touch-stick-knob{border-color:#f3ca88;background:#c4974a88}.touch-actions{position:absolute;bottom:max(23px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:grid;grid-template-columns:44px 44px;gap:7px;pointer-events:auto}.touch-action{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px;width:44px;min-width:44px;height:44px;padding:3px;border:1px solid #74849b88;border-radius:9px;background:#172333d9;color:#d7e2ef;touch-action:manipulation;letter-spacing:0;box-shadow:0 3px 12px #0004}.touch-action svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.touch-action span{font:8px system-ui,sans-serif}.touch-action.available{border-color:#efba62;color:#ffe0a9;background:#493b25e6;box-shadow:0 0 15px #efba6233}.touch-controls-enabled .crosshair{display:none}
+#touch-controls{position:fixed;inset:0;z-index:18;pointer-events:none;touch-action:none;user-select:none;-webkit-user-select:none}#touch-controls[hidden]{display:none}.touch-stick{position:absolute;bottom:max(20px,env(safe-area-inset-bottom));width:108px;height:108px;border-radius:50%;border:1px solid #bbc9db55;background:radial-gradient(circle,#28364c66,#0c16234d);box-shadow:inset 0 0 0 12px #ffffff03,0 4px 20px #0004;pointer-events:auto;touch-action:none}.touch-stick-move{left:max(18px,env(safe-area-inset-left))}.touch-stick-aim{right:max(18px,env(safe-area-inset-right))}.touch-stick-track{position:absolute;inset:20px;border:1px solid #b4c5d733;border-radius:50%}.touch-stick-knob{position:absolute;left:35px;top:35px;width:36px;height:36px;border-radius:50%;border:1px solid #c8d5e5aa;background:linear-gradient(135deg,#9cadc466,#2d4059aa);box-shadow:0 4px 12px #0007;will-change:transform;pointer-events:none}.touch-stick-label{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:#b9c7d9;font:9px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.8px;pointer-events:none}.touch-stick.engaged{border-color:#efba62aa;background:#44392566}.touch-stick-aim.engaged .touch-stick-knob{border-color:#f3ca88;background:#c4974a88}.touch-actions{position:absolute;bottom:max(23px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:grid;grid-template-columns:48px 48px;gap:7px;pointer-events:auto}.touch-action{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px;width:48px;min-width:48px;height:48px;padding:3px;border:1px solid #74849b88;border-radius:9px;background:#172333d9;color:#d7e2ef;touch-action:manipulation;letter-spacing:0;box-shadow:0 3px 12px #0004}.touch-action svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.touch-action span{font:8px system-ui,sans-serif}.touch-action.available{border-color:#efba62;color:#ffe0a9;background:#493b25e6;box-shadow:0 0 15px #efba6233}.touch-controls-enabled .crosshair{display:none}
 /* Phone instruments use a single shallow row, leaving the center for play. */
 .touch-controls-enabled .hud{--hud-scale:1;padding:8px max(8px,env(safe-area-inset-right)) 8px max(8px,env(safe-area-inset-left))}
-.touch-controls-enabled .hud>header{height:44px;align-items:center;padding-top:env(safe-area-inset-top)}
+.touch-controls-enabled .hud>header{height:48px;align-items:center;padding-top:env(safe-area-inset-top)}
 .touch-controls-enabled .brand{font-size:12px;letter-spacing:1.5px}
 .touch-controls-enabled .hud-menu-controls{gap:5px}
-.touch-controls-enabled .hud-menu-controls button{height:44px;padding:6px;background:#10162099}
+.touch-controls-enabled .hud-menu-controls button{height:48px;padding:6px;background:#10162099}
 .touch-controls-enabled .hud-menu-controls kbd{display:none}
-.touch-controls-enabled #pause{font-size:0;width:44px}
+.touch-controls-enabled #pause{font-size:0;width:48px}
 .touch-controls-enabled #pause{display:inline-flex;align-items:center;justify-content:center}
 .touch-controls-enabled #pause:before{content:'';display:block;width:22px;height:22px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%205v14M16%205v14%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%205v14M16%205v14%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat}
 .touch-controls-enabled .player-status{top:calc(56px + env(safe-area-inset-top));bottom:auto;left:max(8px,env(safe-area-inset-left));width:calc(100% - max(8px,env(safe-area-inset-left)) - max(8px,env(safe-area-inset-right)));max-width:520px;max-height:none;overflow:visible;grid-template-columns:64px minmax(0,1fr) 94px;gap:7px;padding:7px 8px;transform:none;background:#101620b8;box-shadow:none}
@@ -26,23 +26,23 @@
 .touch-controls-enabled .ammo-icon{width:15px;height:20px}
 .touch-controls-enabled .ammo-readout{gap:4px}
 .touch-controls-enabled .player-status .gear-line{grid-column:3;grid-row:1;border:0;padding:0;align-self:center}
-.touch-controls-enabled .player-status .inventory-items{grid-template-columns:44px 44px;gap:4px}
-.touch-controls-enabled .player-status .inventory-item{width:44px;height:44px;min-height:44px;padding:2px;grid-template-columns:1fr;grid-template-rows:24px 12px;gap:0;justify-items:center;background:#17233366}
+.touch-controls-enabled .player-status .inventory-items{grid-template-columns:48px 48px;gap:8px}
+.touch-controls-enabled .player-status .inventory-item{width:48px;height:48px;min-height:48px;padding:2px;grid-template-columns:1fr;grid-template-rows:24px 12px;gap:0;justify-items:center;background:#17233366}
 .touch-controls-enabled .player-status .inventory-item img{width:23px;height:23px;grid-column:1;grid-row:1}
 .touch-controls-enabled .player-status .inventory-item b{font-size:10px;grid-column:1;grid-row:2}
 .touch-controls-enabled .player-status .inventory-item .item-name,.touch-controls-enabled .inventory-item kbd{display:none}
-.touch-controls-enabled .player-status #switch-grenade{grid-column:1/-1;min-height:44px;height:44px;padding:2px;flex-direction:row}
+.touch-controls-enabled .player-status #switch-grenade{grid-column:1/-1;min-height:48px;height:48px;padding:2px;flex-direction:row}
 .touch-controls-enabled #grenade-type-label{font-size:9px}
 .touch-controls-enabled aside.mission-note,.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note{left:max(8px,env(safe-area-inset-left));top:calc(64px + var(--combat-panel-height,78px) + env(safe-area-inset-top));width:calc(100% - 96px);max-width:360px;max-height:52px;padding:5px 7px;transform:none;background:#10172270;box-shadow:none}
 .touch-controls-enabled aside.mission-note h2{font-size:10px;line-height:1.3;margin:0}
 .touch-controls-enabled .mission-note label,.touch-controls-enabled aside.mission-note p,.touch-controls-enabled #intel{display:none}
-.touch-controls-enabled #replay-guidance{position:absolute;right:0;top:0;width:44px;height:44px;margin:0;padding:0;font-size:0;background:#101722aa}
+.touch-controls-enabled #replay-guidance{position:absolute;right:0;top:0;width:48px;height:48px;margin:0;padding:0;font-size:0;background:#101722aa}
 .touch-controls-enabled #replay-guidance:before{content:'';display:block;width:22px;height:22px;margin:auto;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%2018%2018%206M7%206h11v11%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%2018%2018%206M7%206h11v11%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat}
-.touch-controls-enabled .mission-note:has(#replay-guidance:not([hidden])){padding-right:48px;min-height:44px}
+.touch-controls-enabled .mission-note:has(#replay-guidance:not([hidden])){padding-right:48px;min-height:48px}
 .touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){display:block;top:calc(64px + var(--combat-panel-height,78px) + env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));width:72px;height:64px;padding:3px;background:#10162080;box-shadow:none}
 .touch-controls-enabled .map-panel:not(.map-expanded) .map-heading{display:none}
 .touch-controls-enabled .map-panel:not(.map-expanded) #minimap{width:100%;height:100%;max-height:none;aspect-ratio:auto;border:0}
-.touch-controls-enabled .map-panel:not(.map-expanded) #toggle-map{position:absolute;inset:0;margin:0;width:100%;height:100%;min-height:44px;padding:0;font-size:0;background:transparent;border:0}
+.touch-controls-enabled .map-panel:not(.map-expanded) #toggle-map{position:absolute;inset:0;margin:0;width:100%;height:100%;min-height:48px;padding:0;font-size:0;background:transparent;border:0}
 .touch-controls-enabled .map-panel:not(.map-expanded) #toggle-map:before{content:'';position:absolute;bottom:3px;right:3px;width:16px;height:16px;background:#dce3ed;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%204H4v5M15%204h5v5M4%2015v5h5M15%2020h5v-5%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%204H4v5M15%204h5v5M4%2015v5h5M15%2020h5v-5%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat}
 .touch-controls-enabled .map-panel.map-expanded{top:50%}
 .touch-controls-enabled #interact{display:none}
@@ -56,8 +56,8 @@
 .touch-stick-label{font-size:8px;bottom:7px}
 .touch-actions{bottom:max(14px,env(safe-area-inset-bottom));gap:5px}
 .touch-action{background:#17233399;box-shadow:none}
-@media(max-width:359px){.touch-stick{width:88px;height:88px}.touch-stick-knob{left:25px;top:25px}.touch-stick-move{left:6px}.touch-stick-aim{right:6px}.touch-actions{gap:4px}.touch-controls-enabled .player-status{grid-template-columns:58px minmax(0,1fr) 92px;gap:5px;padding:6px}.touch-controls-enabled .player-status #ammo{font-size:17px}}
-@media(min-width:600px) and (max-height:520px){.touch-controls-enabled .player-status{width:310px;grid-template-columns:58px minmax(0,1fr) 94px}.touch-controls-enabled aside.mission-note,.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note{top:12px;left:160px;max-width:calc(100vw - 290px);width:360px}.touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){top:64px;width:88px;height:64px}.touch-actions{grid-template-columns:repeat(4,44px);gap:7px}.touch-controls-enabled #horde-status{bottom:116px}}
+@media(max-width:359px){.touch-stick{width:88px;height:88px}.touch-stick-knob{left:25px;top:25px}.touch-stick-move{left:6px}.touch-stick-aim{right:6px}.touch-actions{gap:4px}.touch-controls-enabled .player-status{grid-template-columns:58px minmax(0,1fr) 104px;gap:5px;padding:6px}.touch-controls-enabled .player-status #ammo{font-size:17px}}
+@media(min-width:600px) and (max-height:520px){.touch-controls-enabled .player-status{width:310px;grid-template-columns:58px minmax(0,1fr) 94px}.touch-controls-enabled aside.mission-note,.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note{top:12px;left:160px;max-width:calc(100vw - 290px);width:360px}.touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){top:64px;width:88px;height:64px}.touch-actions{grid-template-columns:repeat(4,48px);gap:7px}.touch-controls-enabled #horde-status{bottom:116px}}
 
 /* Training owns the feedback slot; a live wave counter stays out of its way. */
 .touch-controls-enabled .hud:has(#tutorial:not([hidden])) #horde-status{display:none}
@@ -82,13 +82,13 @@
 .touch-controls-enabled .player-status .reserve-count{grid-column:1/-1;grid-row:3;margin-top:0}
 /* Compact phone cockpit: one shallow instrument panel, edge utilities, open center. */
 @media(max-width:900px){
-.touch-controls-enabled .hud>header{position:absolute;right:max(8px,env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));width:44px;height:auto;padding:0;border:0;margin:0}
+.touch-controls-enabled .hud>header{position:absolute;right:max(8px,env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));width:48px;height:auto;padding:0;border:0;margin:0}
 .touch-controls-enabled .brand{display:none}
 .touch-controls-enabled .hud-menu-controls{display:flex;flex-direction:column-reverse;gap:4px}
-.touch-controls-enabled .hud-menu-controls button{width:44px;height:44px;padding:0;min-width:44px;border-radius:10px;background:#10162088}
+.touch-controls-enabled .hud-menu-controls button{width:48px;height:48px;padding:0;min-width:48px;border-radius:10px;background:#10162088}
 .touch-controls-enabled #help-button{font-size:0}
 .touch-controls-enabled #help-button:before{content:'?';font:600 18px system-ui;color:#c0cddd}
-.touch-controls-enabled .player-status{top:calc(8px + env(safe-area-inset-top));width:calc(100% - 68px);max-width:340px;grid-template-columns:55px minmax(0,1fr) 92px;gap:5px;padding:5px 6px;border-radius:10px;background:#101620a6}
+.touch-controls-enabled .player-status{top:calc(8px + env(safe-area-inset-top));width:calc(100% - 68px);max-width:340px;grid-template-columns:55px minmax(0,1fr) 104px;gap:5px;padding:5px 6px;border-radius:10px;background:#101620a6}
 .touch-controls-enabled .player-status .vital>strong,.touch-controls-enabled .player-status #ammo{font-size:18px}
 .touch-controls-enabled .player-status .weapon-status{padding-left:5px;gap:3px}
 .touch-controls-enabled #credits{margin-top:3px;font-size:9px}
@@ -105,9 +105,9 @@
 .touch-controls-enabled .hud-feedback{bottom:108px}
 .touch-controls-enabled #horde-status{bottom:102px}
 }
-@media(min-width:392px) and (max-width:599px){.touch-controls-enabled:not(.touch-large-controls) .touch-actions{grid-template-columns:repeat(4,44px)}}
+@media(min-width:432px) and (max-width:599px){.touch-controls-enabled:not(.touch-large-controls) .touch-actions{grid-template-columns:repeat(4,48px)}}
 @media(min-width:600px) and (max-width:900px) and (max-height:520px){
-.touch-controls-enabled .player-status{max-width:296px;width:296px;grid-template-columns:51px minmax(0,1fr) 92px}
+.touch-controls-enabled .player-status{max-width:296px;width:296px;grid-template-columns:51px minmax(0,1fr) 104px}
 .touch-controls-enabled aside.mission-note,.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note{top:calc(18px + var(--combat-panel-height,64px) + env(safe-area-inset-top));max-width:296px;width:296px}
 .touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){top:calc(108px + env(safe-area-inset-top))}
 .touch-controls-enabled #horde-status{bottom:56px}
@@ -116,18 +116,18 @@
 /* Help and the full map temporarily own the interaction surface. */
 .touch-controls-enabled #controls-help{left:max(8px,env(safe-area-inset-left));right:auto;top:calc(8px + env(safe-area-inset-top));bottom:max(8px,env(safe-area-inset-bottom));width:min(420px,calc(100vw - 76px));max-height:none;grid-template-columns:minmax(0,1fr);gap:12px;padding:14px;scroll-padding:14px}
 .touch-controls-enabled #controls-help>p{grid-column:1/-1;min-width:0;margin:0;overflow-wrap:anywhere;font-size:12px;line-height:1.6}
-.touch-controls-enabled #controls-help>button{min-height:44px;white-space:normal;overflow-wrap:anywhere}
+.touch-controls-enabled #controls-help>button{min-height:48px;white-space:normal;overflow-wrap:anywhere}
 .touch-controls-enabled .hud:has(#controls-help:not([hidden])) #touch-controls,.touch-controls-enabled .hud:has(.map-expanded) #touch-controls{visibility:hidden;pointer-events:none}
 .touch-controls-enabled .hud:has(.map-expanded)>header,.touch-controls-enabled .hud:has(.map-expanded)>.player-status,.touch-controls-enabled .hud:has(.map-expanded)>aside.mission-note{visibility:hidden}
-.touch-controls-enabled .map-expanded #toggle-map{min-height:44px}
+.touch-controls-enabled .map-expanded #toggle-map{min-height:48px}
 /* Reserve explicit room for the ammunition line on 320–359px phones. */
-@media(max-width:359px){.touch-controls-enabled .player-status{grid-template-columns:46px minmax(0,1fr) 92px;gap:4px}.touch-controls-enabled .player-status #ammo{font-size:14px}.touch-controls-enabled .ammo-icon{width:11px;height:17px}.touch-controls-enabled .player-status #weapon-preview{width:26px}.touch-controls-enabled .player-status .weapon-status{grid-template-columns:26px minmax(0,1fr);padding-left:4px}}
+@media(max-width:359px){.touch-controls-enabled .player-status{grid-template-columns:46px minmax(0,1fr) 104px;gap:4px}.touch-controls-enabled .player-status #ammo{font-size:14px}.touch-controls-enabled .ammo-icon{width:11px;height:17px}.touch-controls-enabled .player-status #weapon-preview{width:26px}.touch-controls-enabled .player-status .weapon-status{grid-template-columns:26px minmax(0,1fr);padding-left:4px}}
 
 
 /* Keep the phone supplies at two fixed columns when a second grenade type
    becomes available. The desktop :has selector otherwise adds a phantom third
    column, squeezing the ammo readout and moving the surrounding HUD. */
-.touch-controls-enabled .player-status .inventory-items:has(#switch-grenade:not([hidden])){grid-template-columns:44px 44px}
+.touch-controls-enabled .player-status .inventory-items:has(#switch-grenade:not([hidden])){grid-template-columns:48px 48px}
 /* Counters must not change width as ammunition, health and cash tick down. */
 .touch-controls-enabled .player-status{font-variant-numeric:tabular-nums}
 .touch-controls-enabled .player-status .vital>strong{flex-wrap:nowrap}
@@ -150,7 +150,7 @@
 @media(max-width:359px){.touch-controls-enabled .ammo-readout{--ammo-cue-size:11px}}
 .touch-controls-enabled aside.mission-note:has(.mission-guidance){width:min(296px,calc(100vw - 92px));max-height:58px}
 .touch-controls-enabled aside.mission-note:has(.mission-guidance[open]){max-height:min(200px,calc(100dvh - 240px));background:#101722ed}
-.touch-controls-enabled aside.mission-note .mission-guidance>summary{min-height:44px}
+.touch-controls-enabled aside.mission-note .mission-guidance>summary{min-height:48px}
 .touch-controls-enabled aside.mission-note .mission-guidance h2{font-size:11px;gap:6px}
 .touch-controls-enabled aside.mission-note .mission-guidance[open]>#hint{display:block;font-size:12px;line-height:1.5}
 /* Keep the disclosure and camera-lead control reachable while only the
@@ -185,9 +185,9 @@
 .touch-controls-enabled.touch-left-handed .touch-fire{left:auto;right:max(10px,env(safe-area-inset-right))}
 .touch-controls-enabled.touch-large-controls .touch-fire{width:96px;height:96px;bottom:max(20px,env(safe-area-inset-bottom))}
 /* Large thumb targets need the compact two-row utility cluster in portrait. */
-.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(2,44px)}
-@media(min-width:600px){.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(4,44px)}}
-.touch-controls-enabled .hud-menu-controls #replay-guidance{position:static;display:inline-flex;width:44px;height:44px;margin:0;padding:3px;flex:none}
+.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(2,48px)}
+@media(min-width:600px){.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(4,48px)}}
+.touch-controls-enabled .hud-menu-controls #replay-guidance{position:static;display:inline-flex;width:48px;height:48px;margin:0;padding:3px;flex:none}
 .touch-controls-enabled .hud-menu-controls #replay-guidance[hidden]{display:none}
 .touch-controls-enabled .hud-menu-controls #replay-guidance::before{display:none}
 @media(max-width:900px){
@@ -196,7 +196,7 @@
 
 /* A shared phone HUD grid: instruments first, aligned utilities below. */
 @media(max-width:900px){
-.touch-controls-enabled .player-status{left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));width:auto;max-width:none;max-height:none;box-sizing:border-box;grid-template-columns:56px minmax(0,1fr) 92px;align-items:center;gap:8px;padding:7px 8px}
+.touch-controls-enabled .player-status{left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));width:auto;max-width:none;max-height:none;box-sizing:border-box;grid-template-columns:56px minmax(0,1fr) 104px;align-items:center;gap:8px;padding:7px 8px}
 .touch-controls-enabled .player-status .vital{align-self:center}
 .touch-controls-enabled .player-status .vital>strong{align-items:baseline;flex-wrap:nowrap;line-height:20px}
 .touch-controls-enabled .player-status .weapon-status{display:grid;grid-template-columns:24px minmax(0,1fr);grid-template-rows:12px 22px 12px;gap:2px 4px;align-content:center;padding-left:8px}
@@ -207,16 +207,16 @@
 .touch-controls-enabled .ammo-icon{width:13px;height:18px}
 .touch-controls-enabled .player-status .reserve-count{grid-column:1/-1;grid-row:3;line-height:12px;margin:0;white-space:nowrap;font-size:9px}
 .touch-controls-enabled .player-status .gear-line{grid-column:3;grid-row:1;margin:0;padding:0;align-self:center;min-width:0}
-.touch-controls-enabled .player-status .inventory-items{display:grid;grid-template-columns:repeat(2,44px);gap:4px;align-items:center;width:92px}
-.touch-controls-enabled .player-status .inventory-item{display:grid;grid-template-columns:1fr;grid-template-rows:24px 12px;align-content:center;align-items:center;justify-items:center;gap:0;box-sizing:border-box;width:44px;min-width:44px;height:44px;min-height:44px;padding:3px;margin:0}
+.touch-controls-enabled .player-status .inventory-items{display:grid;grid-template-columns:repeat(2,48px);gap:8px;align-items:center;width:104px}
+.touch-controls-enabled .player-status .inventory-item{display:grid;grid-template-columns:1fr;grid-template-rows:24px 12px;align-content:center;align-items:center;justify-items:center;gap:0;box-sizing:border-box;width:48px;min-width:48px;height:48px;min-height:48px;padding:3px;margin:0}
 .touch-controls-enabled .player-status .inventory-item img{width:23px;height:23px;grid-column:1;grid-row:1;margin:0}
 .touch-controls-enabled .player-status .inventory-item b{grid-column:1;grid-row:2;font-size:10px;line-height:12px;margin:0}
-.touch-controls-enabled .hud>header{left:max(8px,env(safe-area-inset-left));right:auto;top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));width:auto;height:44px;padding:0;margin:0}
-.touch-controls-enabled .hud-menu-controls{flex-direction:row;align-items:center;gap:4px;height:44px}
-.touch-controls-enabled .hud-menu-controls button{box-sizing:border-box;margin:0;height:44px;width:44px;min-width:44px;min-height:44px}
-.touch-controls-enabled .hud-menu-controls #replay-guidance{position:static;inset:auto;margin:0;height:44px;width:44px}
-.touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));height:44px;width:56px;box-sizing:border-box}
-.touch-controls-enabled .player-status #switch-grenade{position:fixed;left:calc(max(8px,env(safe-area-inset-left)) + 144px);right:auto;top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;box-sizing:border-box;width:44px;min-width:44px;height:44px;min-height:44px;padding:3px;margin:0;background:#101620a6;border-radius:10px}
+.touch-controls-enabled .hud>header{left:max(8px,env(safe-area-inset-left));right:auto;top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));width:auto;height:48px;padding:0;margin:0}
+.touch-controls-enabled .hud-menu-controls{flex-direction:row;align-items:center;gap:4px;height:48px}
+.touch-controls-enabled .hud-menu-controls button{box-sizing:border-box;margin:0;height:48px;width:48px;min-width:48px;min-height:48px}
+.touch-controls-enabled .hud-menu-controls #replay-guidance{position:static;inset:auto;margin:0;height:48px;width:48px}
+.touch-controls-enabled .map-panel:not(.map-expanded),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded){top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));height:48px;width:56px;box-sizing:border-box}
+.touch-controls-enabled .player-status #switch-grenade{position:fixed;left:calc(max(8px,env(safe-area-inset-left)) + 148px);right:auto;top:calc(16px + var(--combat-panel-height,64px) + env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;box-sizing:border-box;width:48px;min-width:48px;height:48px;min-height:48px;padding:3px;margin:0;background:#101620a6;border-radius:10px}
 .touch-controls-enabled .player-status #switch-grenade[hidden]{display:none}
 .touch-controls-enabled #switch-grenade svg{width:22px;height:22px;flex:none}
 .touch-controls-enabled #grenade-type-label{font:9px/12px system-ui,sans-serif}
@@ -237,6 +237,43 @@
 /* One compact field action; it does not add a third column to the phone HUD. */
 .field-ability svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
 .field-ability.cooling{opacity:.65}
-.touch-controls-enabled .player-status #use-skill{position:fixed;left:max(10px,env(safe-area-inset-left));right:auto;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 96px);top:auto;z-index:25;width:44px;height:44px;min-width:44px;min-height:44px;pointer-events:auto;touch-action:none;background:#182635ed;border-color:#b7c9dc}
+.touch-controls-enabled .player-status #use-skill{position:fixed;left:max(10px,env(safe-area-inset-left));right:auto;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 96px);top:auto;z-index:25;width:48px;height:48px;min-width:48px;min-height:48px;pointer-events:auto;touch-action:none;background:#182635ed;border-color:#b7c9dc}
 .touch-controls-enabled.touch-left-handed .player-status #use-skill{left:auto;right:max(10px,env(safe-area-inset-right))}
 .touch-controls-enabled.touch-large-controls .player-status #use-skill{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 108px)}
+/* Keep the goal below the portrait utility row, never over Help/Pause. */
+@media(max-width:900px){
+.touch-controls-enabled aside.mission-note:has(.mission-guidance),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note:has(.mission-guidance){top:calc(72px + var(--combat-panel-height,64px) + env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));width:min(296px,calc(100vw - 16px));max-width:calc(100vw - 16px)}
+}
+@media(min-width:600px) and (max-width:900px) and (max-height:520px){
+.touch-controls-enabled aside.mission-note:has(.mission-guidance),.touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note:has(.mission-guidance){top:calc(18px + var(--combat-panel-height,64px) + env(safe-area-inset-top));width:326px;max-width:calc(100vw - 180px)}
+}
+
+/* Android-sized hit regions: retain compact instruments, enlarge the actual actions. */
+.touch-controls-enabled .touch-action:not(.touch-fire){width:48px;min-width:48px;height:48px;min-height:48px}
+.touch-controls-enabled .touch-actions{grid-template-columns:repeat(2,48px);gap:8px}
+.touch-controls-enabled .touch-action span{font-size:10px;line-height:12px}
+.touch-controls-enabled .player-status #weapon{font-size:10px;line-height:13px;overflow:hidden;text-overflow:ellipsis}
+.touch-controls-enabled .player-status .reserve-count{font-size:11px;line-height:13px}
+.touch-controls-enabled #cash-amount{font-size:11px}
+.touch-controls-enabled .hud-menu-controls{gap:8px}
+.touch-controls-enabled .map-panel:not(.map-expanded){min-height:48px}
+@media(min-width:432px){.touch-controls-enabled:not(.touch-large-controls) .touch-actions{grid-template-columns:repeat(4,48px)}}
+@media(min-width:600px){.touch-controls-enabled.touch-large-controls .touch-actions{grid-template-columns:repeat(4,48px)}}
+@media(max-width:359px){
+.touch-controls-enabled.touch-large-controls .touch-actions{gap:4px}
+.touch-controls-enabled.touch-large-controls .touch-fire{left:max(6px,env(safe-area-inset-left))}
+.touch-controls-enabled.touch-large-controls .touch-stick-move{right:max(6px,env(safe-area-inset-right))}
+.touch-controls-enabled.touch-large-controls.touch-left-handed .touch-fire{left:auto;right:max(6px,env(safe-area-inset-right))}
+.touch-controls-enabled.touch-large-controls.touch-left-handed .touch-stick-move{right:auto;left:max(6px,env(safe-area-inset-left))}
+}
+/* Three-digit upgraded belts still fit the narrowest supported phone HUD. */
+@media(max-width:359px){.touch-controls-enabled .player-status #ammo{font-size:clamp(14px,calc(10vw - 18px),18px)}}
+/* Help text and actions keep their natural size instead of stretching into
+   large empty grid rows on tall phones. */
+.touch-controls-enabled #controls-help{align-content:start;grid-auto-rows:max-content}
+/* Feedback stays above the two-row utilities and beside the separate ability.
+   Mirroring moves the whole lane, not just the action itself. */
+@media(max-width:599px){
+.touch-controls-enabled .hud-feedback{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 112px);left:calc(max(10px,env(safe-area-inset-left)) + 58px);right:auto;transform:none;width:calc(100vw - max(10px,env(safe-area-inset-left)) - 58px - max(8px,env(safe-area-inset-right)));max-height:min(180px,calc(100dvh - 300px))}
+.touch-controls-enabled.touch-left-handed .hud-feedback{left:max(8px,env(safe-area-inset-left));right:auto;width:calc(100vw - max(10px,env(safe-area-inset-right)) - 58px - max(8px,env(safe-area-inset-left)))}
+}

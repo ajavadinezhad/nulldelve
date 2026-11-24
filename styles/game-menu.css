@@ -814,3 +814,34 @@
 .game-menu .deployment-equipment>.skill-icon,.game-menu .deployment-equipment>img{width:20px;height:20px;flex:none}
 .game-menu .deployment-equipment>span{min-width:0;overflow-wrap:anywhere}
 @media(max-height:500px){.game-menu .deployment-loadout{padding:7px 9px;margin:7px 0;gap:5px}.game-menu .deployment-specialization{padding-top:5px}}
+.game-menu .privacy-frame{display:block;width:100%;height:min(65dvh,650px);min-height:240px;border:0;border-radius:8px;background:#101620}
+.game-menu .preview-footer{flex-wrap:wrap;gap:8px 16px}
+.game-menu .privacy-link{font:inherit;min-height:44px;padding:4px 8px;color:#c4cddd;background:transparent;border:0;cursor:pointer}
+.game-menu .account-panel{max-width:640px;display:flex;flex-direction:column;gap:10px}
+.game-menu .account-panel .menu-button{align-self:stretch;min-height:48px}
+.game-menu .account-form{display:grid;gap:12px}
+.game-menu .account-panel input{width:100%;box-sizing:border-box;min-height:48px;background:#172130;color:#e5edf5;border:1px solid #63748b;border-radius:6px;padding:10px;font:inherit}
+.game-menu .account-panel label{display:grid;gap:6px}
+.game-menu .account-panel p{margin:0;color:#b9c6d6;line-height:1.5}
+.game-menu .account-panel summary{min-height:48px;cursor:pointer}
+/* Operator identity fits existing menu and HUD space without another status panel. */
+.menu-brand{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.operator-chip{display:flex;align-items:center;gap:10px;max-width:min(260px,100%);min-height:48px;padding:4px 12px 4px 4px;border:1px solid #46515f;border-radius:12px;background:#202833;color:#edf0f3;cursor:pointer;font:inherit}
+.operator-chip img,.operator-card img{flex:none;border-radius:12px}
+.operator-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-panel{max-width:560px;margin-inline:auto;width:100%;box-sizing:border-box}
+.account-panel>.menu-button{margin-block:8px;width:100%}
+.identity-form fieldset{min-width:0;margin:8px 0;padding:0;border:0}
+.identity-form legend{margin-bottom:10px;color:#b8c1ce}
+.identity-form input{box-sizing:border-box;width:100%;min-width:0}
+.avatar-grid{display:grid;grid-template-columns:repeat(4,minmax(48px,1fr));gap:10px}
+.avatar-option{min-width:48px;min-height:64px;padding:4px;background:#1a222d;border:2px solid transparent;border-radius:14px;cursor:pointer}
+.avatar-option img{display:block;width:100%;max-width:64px;height:auto;margin:auto}
+.avatar-option[aria-pressed=true]{border-color:#edba60;background:#3b3427;box-shadow:0 0 0 2px #edba6020}
+.avatar-option:focus-visible,.operator-chip:focus-visible{outline:2px solid #f1f3f6;outline-offset:3px}
+.operator-card{display:flex;align-items:center;gap:14px;margin-block:12px}
+.operator-card>div{min-width:0;display:grid;gap:5px}
+.operator-card strong,.operator-card small{overflow-wrap:anywhere}
+.operator-card small{color:#a6b2c2}
+.hud-operator-avatar{width:20px!important;height:20px!important;object-fit:contain;flex:none;margin-left:4px;border-radius:6px}
+@media(max-width:480px){.operator-chip{max-width:170px;font-size:14px}.avatar-grid{gap:8px}.avatar-option{min-height:56px}.menu-brand .operator-chip img{width:32px;height:32px}}

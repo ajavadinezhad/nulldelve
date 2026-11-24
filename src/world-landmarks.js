@@ -1,4 +1,4 @@
-import {puzzleAccessVisible} from './puzzle-access.js?v=integration-fixes-r55';
+import {puzzleAccessVisible} from './puzzle-access.js?v=operator-profile-r58';
 const BANKS={glyph:'breach',relay:'breach',power:'research',valve:'containment',wire:'command'};
 const TASKS={commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
 export function worldLandmarkVisible(device,{operation}={}){

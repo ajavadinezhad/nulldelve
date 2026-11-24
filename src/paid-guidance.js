@@ -1,11 +1,11 @@
-import {nextAnnexMechanismAction} from './annex-mechanisms.js?v=integration-fixes-r55';
-import {freightEscortPoint} from './freight-escort.js?v=integration-fixes-r55';
-import {initialMechanism,nextMechanismAction} from './physical-puzzles.js?v=integration-fixes-r55';
-import {campaignOperationGuidance,campaignOperationExit} from './campaign-operations.js?v=integration-fixes-r55';
-import {missionGuidance} from './session-rules.js?v=integration-fixes-r55';
-import {ARTIFACTS,hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=integration-fixes-r55';
-import {WIRE_LAYOUT,WIRE_SOLUTION} from './wire-circuit.js?v=integration-fixes-r55';
-export {GUIDANCE_COST} from './economy.js?v=integration-fixes-r55';
+import {nextAnnexMechanismAction} from './annex-mechanisms.js?v=operator-profile-r58';
+import {freightEscortPoint} from './freight-escort.js?v=operator-profile-r58';
+import {initialMechanism,nextMechanismAction} from './physical-puzzles.js?v=operator-profile-r58';
+import {campaignOperationGuidance,campaignOperationExit} from './campaign-operations.js?v=operator-profile-r58';
+import {missionGuidance} from './session-rules.js?v=operator-profile-r58';
+import {ARTIFACTS,hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=operator-profile-r58';
+import {WIRE_LAYOUT,WIRE_SOLUTION} from './wire-circuit.js?v=operator-profile-r58';
+export {GUIDANCE_COST} from './economy.js?v=operator-profile-r58';
 const ZONES={security:[23,10],storage:[23,26],command:[38,10],generator:[35,53],lab:[59,10],reactor:[59,30],transit:[59,55],containment:[86,30],evacuation:[86,53],nest:[86,10],'hospital-triage':[112,10],'hospital-ward':[136,10],'hospital-isolation':[136,52],'freight-pumps':[162,30],'freight-yard':[186,30],'freight-cold':[186,10],'signal-yard':[212,30],'signal-relay':[236,30],'signal-uplink':[236,10]};
 /** Resolve one live action, without changing a puzzle or relying on proximity to a door. */
 export function nextGuidanceStep({operation,mission='campaign',player,puzzle,progression}){

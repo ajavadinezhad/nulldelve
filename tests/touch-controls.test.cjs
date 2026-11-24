@@ -110,3 +110,33 @@ test('automatic hybrid controls follow real touch use and return to precise-inpu
  assert.equal(controls.enabled,false);win.emit('pointerdown',{pointerType:'touch'});assert.equal(controls.enabled,true);const fire=host.children.find(n=>n.dataset.action==='fire');fire.emit('pointerdown',{pointerId:8,clientX:20,clientY:20});assert.equal(controls.getState().firing,true);win.emit('pointerdown',{pointerType:'mouse'});assert.equal(controls.enabled,false);assert.equal(controls.getState().firing,false);controls.configure('on');win.emit('pointerdown',{pointerType:'mouse'});assert.equal(controls.enabled,true);controls.configure('off');win.emit('pointerdown',{pointerType:'touch'});assert.equal(controls.enabled,false);
 },{device:()=>({coarse:false,touchPoints:5})}));
 test('touch modality detection does not reset an already enabled stick on its first touch',()=>withTouchHarness(({controls,host,win})=>{host.children[0].emit('pointerdown',{pointerId:1,clientX:90,clientY:48});win.emit('pointerdown',{pointerType:'touch'});assert.ok(controls.getState().move.x>.9);}));
+
+test('Fire steering stays continuous through backward drags for every facing',()=>{
+ const {fireDragDirection}=require('../src/touch-controls.js');
+ for(const angle of [0,.7,Math.PI/2,Math.PI,-2.3]){
+  const facing={x:Math.cos(angle),z:Math.sin(angle)};
+  let last=fireDragDirection(facing,0,0);
+  for(let distance=0;distance<=120;distance++){
+   const direction=fireDragDirection(facing,-facing.x*distance,-facing.z*distance);
+   assert.ok(direction.x*facing.x+direction.z*facing.z>.999999,'radial drag never reverses aim');
+   assert.ok(direction.x*last.x+direction.z*last.z>.999,'no discontinuity near former44px singularity');last=direction;
+  }
+  for(let across=-180;across<=180;across++){
+   const direction=fireDragDirection(facing,-facing.z*across,facing.x*across);
+   assert.ok(Number.isFinite(direction.x)&&Number.isFinite(direction.z));assert.ok(Math.abs(Math.hypot(direction.x,direction.z)-1)<1e-10);
+   if(across>-180)assert.ok(direction.x*last.x+direction.z*last.z>.999,'one-pixel adjustment cannot flip the gun');last=direction;
+  }
+  assert.ok(fireDragDirection(facing,-facing.z*100,facing.x*100).x*facing.x+fireDragDirection(facing,-facing.z*100,facing.x*100).z*facing.z<0,'crosswise drag can turn past90degrees');
+ }
+ for(const [facing,dx,dz] of [[{x:0,z:0},0,0],[{x:NaN,z:1},0,0],[{x:1,z:0},Infinity,0]])assert.equal(fireDragDirection(facing,dx,dz),null);
+});
+test('actual Fire owner alone can steer and cancel while another finger keeps moving',()=>withTouchHarness(({controls,host,win})=>{
+ const move=host.children.find(n=>n.dataset.stick==='move'),fire=host.children.find(n=>n.dataset.action==='fire');
+ move.emit('pointerdown',{pointerId:1,clientX:90,clientY:48});fire.emit('pointerdown',{pointerId:2,clientX:60,clientY:300});
+ fire.emit('pointermove',{pointerId:3,clientX:60,clientY:150});assert.ok(controls.getState().aim.x>.999);
+ for(const distance of [40,43,44,45,46,90]){fire.emit('pointermove',{pointerId:2,clientX:60-distance,clientY:300});assert.ok(controls.getState().aim.x>.999);}
+ fire.emit('pointermove',{pointerId:2,clientX:60,clientY:200});assert.ok(controls.getState().aim.z<-.99);
+ win.emit('pointercancel',{pointerId:3});assert.equal(controls.getState().firing,true);assert.ok(controls.getState().move.x>.9);
+ win.emit('pointercancel',{pointerId:2});assert.equal(controls.getState().firing,false);assert.equal(controls.getState().aim.active,false);assert.ok(controls.getState().move.x>.9);
+ fire.emit('pointermove',{pointerId:2,clientX:600,clientY:900});assert.equal(controls.getState().aim.active,false);
+}));

@@ -139,3 +139,30 @@ Three agents checked missions/combat, cash/skills/persistence, and phone/desktop
 Cash recovery now journals enemy, salvage and first-clear rewards before asynchronous transactions. A duplicate after a quota failure cannot delete an uncommitted payout; retries preserve its original amount. Backup export waits for pending rewards. Malformed journals cannot award cash or prevent backup. Large paid-enemy transfer ledgers use validated ordinal ranges; a2,880claim case shrinks from over100k characters to2,932 and roundtrips exactly, including sparse unpaid holes. Old transfer links remain supported.
 
 Coverage retains42campaign+12legacy collision-aware route configurations,2,772ammunition projections,252skill checkpoint combinations, and the full regression suite. Browser smoke checks cover a Freight deployment, movement, virtual sticks/fire/reload, map/help/pause and portrait/landscape layouts. These are desktop browser viewport checks, not physical-phone multitouch or human full-campaign survival tests.
+
+## Critic follow-up — r56
+
+Resolved the Freight objective/checklist dependency, HUD ability focus loss,
+phone Fire steering reversal, ground-pickup ammunition conversion, backward
+heavy bites, and checkpoint enemy-facing loss. Ammo replenishment now uses
+70% of a deterministic unupgraded shot-cost estimate (including pellet spread,
+front armor, and overkill), with true per-round value and existing supply caps.
+Skill descriptions and Help share active ability effects, cooldowns and costs.
+Nest has two warning-driven conduit crossings on its existing return route;
+no additional payouts, enemies, required errands, or save fields were added.
+Objective-gated waves show their required action rather than a stuck countdown.
+
+Verification: all 109 test files pass. Added actual capture/restore and composed
+map regressions; accuracy checks cover 1,248 comparisons. Chrome checks confirmed
+ability click returns focus and Space fires, the empty Freight phase displays
+its trolley objective, and an actual Nest crossing blocks briefly then allows
+passage. Mission checks used temporary scenario setup with the actual main
+loop and renderer, not complete manual campaign playthroughs. Temporary scenario
+files were removed. Physical-device feel and performance remain unverified.
+
+Final phone-sized Chrome checks (fresh r56 assets): at393×740 the goal sits10px
+below the utility buttons; at667×320 the goal and ability avoid the header.
+Help opens and explains Break away's24s cooldown and no item cost, scrolls
+internally in landscape, and closes with Escape. No horizontal overflow or
+console errors observed. Steering ownership/cancellation is covered by pointer
+event tests, not a physical-phone gesture session.

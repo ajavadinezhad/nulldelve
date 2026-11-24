@@ -10,3 +10,12 @@ test('living and delayed attackers, ordinary spawn gaps and exhausted queues nev
  for(const status of ['dormant','cleared'])assert.equal(encounterStatus({...zone(),status}),null);
  assert.equal(encounterStatus(null),null);
 });
+test('objective-gated waves never advertise a countdown that cannot expire',()=>{
+ const z={...zone(),id:'freight-yard',total:48,spawned:16,spawnTimer:.25};
+ assert.equal(encounterStatus(z,{tasks:{freightRoute:{running:false}}}).text,'DISPATCH CARGO');
+ assert.equal(encounterStatus(z,{tasks:{freightRoute:{running:true,remaining:7}}}).text,'ESCORT CARGO');
+ assert.equal(encounterStatus(z,{tasks:{freightRoute:{running:true,remaining:6}}}).phase,'regroup');
+ assert.equal(encounterStatus({...z,id:'hospital-isolation'},{tasks:{hospitalRecords:false}}).text,'RECOVER LEDGER');
+ assert.equal(encounterStatus({...z,id:'hospital-isolation'},{tasks:{hospitalRecords:true}}).phase,'regroup');
+ assert.equal(encounterStatus({...z,wave:[{hp:1}]},{tasks:{}}).phase,'combat');
+});

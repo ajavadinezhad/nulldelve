@@ -104,7 +104,7 @@ export function updateRoachEnemy(enemy,player,dt,{lineOfSight,move,onBite,onMend
   if(rushes&&allowMovement&&d>3&&d<7&&(enemy.chargeCooldown??0)<=0){cancelBite();enemy.chargeX=dx/d;enemy.chargeZ=dz/d;enemy.chargeHit=false;enemy.chargeWindup=CHARGER_RUSH.windup;visual.chargeWindup=.01;return;}
   const duration=Math.max(enemy.variant==='sentinel'?.65:.15,stat('windupDuration',.35));
   if((enemy.attackWindup??0)>0){
-    if(d>=biteRange){cancelBite();return;}
+    if(d>=biteRange||(heavy&&Math.abs(angleDifference(desiredFacing,enemy.mesh.rotation.y))>=.65)){cancelBite();return;}
     enemy.attackWindup=Math.max(0,enemy.attackWindup-dt);
     visual.attackWindup=1-enemy.attackWindup/duration;
     if(enemy.attackWindup===0){

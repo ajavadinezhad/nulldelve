@@ -1,9 +1,9 @@
 import * as THREE from '../vendor/three.module.js';
-import {EXPLORATION_ALCOVES,EXPLORATION_CACHES,EXPLORATION_EVENTS,EXPLORATION_SHORTCUTS,WORLD_REVEALS} from './exploration.js?v=integration-fixes-r55';
+import {EXPLORATION_ALCOVES,EXPLORATION_CACHES,EXPLORATION_EVENTS,EXPLORATION_SHORTCUTS,WORLD_REVEALS,NEST_CONDUIT_GATES,nestConduitState} from './exploration.js?v=operator-profile-r58';
 /** Quiet recess dressing and small atmospheric effects remain below discovery fog. */
-export function createExplorationArt(scene,{operation,claimed=()=>false,visible=()=>false,reducedEffects=()=>false,tasks=()=>({})}={}){
+export function createExplorationArt(scene,{operation,claimed=()=>false,visible=()=>false,reducedEffects=()=>false,tasks=()=>({}),elapsed=()=>0,player=()=>null}={}){
  const root=new THREE.Group();root.name='optional-exploration';scene.add(root);
- const geometries={box:new THREE.BoxGeometry(1,1,1),sphere:new THREE.SphereGeometry(1,6,4)},materials=new Set(),sites=[],caches=[],effects=[],gates=[],releases=[],reveals=[];
+ const geometries={box:new THREE.BoxGeometry(1,1,1),sphere:new THREE.SphereGeometry(1,6,4)},materials=new Set(),sites=[],caches=[],effects=[],gates=[],releases=[],reveals=[],conduits=[];
  const material=(color,extra={})=>{const m=new THREE.MeshStandardMaterial({color,roughness:.85,...extra});materials.add(m);return m;};
  const steel=material(0x556578),edge=material(0x8796a4),dark=material(0x26313e),paper=material(0xb8c1a1),bill=material(0x567553),band=material(0xc3ad82);
  const block=(group,x,y,z,w,h,d,mat)=>{const mesh=new THREE.Mesh(geometries.box,mat);mesh.position.set(x,y,z);mesh.scale.set(w,h,d);mesh.receiveShadow=true;group.add(mesh);return mesh;};
@@ -45,12 +45,25 @@ export function createExplorationArt(scene,{operation,claimed=()=>false,visible=
   const lampMaterial=material(0xc6a66e,{emissive:0x796443,emissiveIntensity:.4}),lamp=block(frame,.13,1.03,-1.4,.08,.12,.1,lampMaterial);
   gates.push({shortcut,group,barrier,lampMaterial});
  }
+ for(const gate of NEST_CONDUIT_GATES){
+  const group=new THREE.Group();group.name=gate.id;group.position.set(gate.x,0,gate.z);if(gate.axis==='x')group.rotation.y=Math.PI/2;group.visible=false;root.add(group);
+  // Side-mounted pressure source, overhead supply and a full-width safety rail.
+  block(group,-.3,.45,-1.65,.6,.9,.45,steel);block(group,-.3,.95,-1.65,.7,.1,.5,dark);
+  block(group,0,1.15,0,.12,.12,3.4,edge);
+  const shutter=block(group,0,.45,0,.12,.9,2.8,steel),lamp=material(0x8bc8dc,{emissive:0x365e68,emissiveIntensity:.65});
+  for(const z of [-1.3,-.65,0,.65,1.3])block(group,.12,.12,z,.1,.08,.18,lamp);
+  const vapor=new THREE.Group();group.add(vapor);const steamMaterial=material(0xbacdd6,{transparent:true,opacity:.18,depthWrite:false});
+  for(let i=0;i<5;i++){const puff=new THREE.Mesh(geometries.sphere,steamMaterial);puff.position.set(0,.4,(i-2)*.55);puff.scale.set(.18,.35,.2);vapor.add(puff);}
+  conduits.push({gate,group,shutter,lamp,vapor});
+ }
  for(const event of EXPLORATION_EVENTS){const group=new THREE.Group();group.position.set(event.x,0,event.z);group.name=event.id;group.visible=false;root.add(group);const color=event.kind==='dust'?0xa99d89:event.kind==='relay'?0x89a7bf:0xc8d4d9,mat=material(color,{transparent:true,opacity:.2,depthWrite:false}),particles=[];
   for(let i=0;i<5;i++){const mesh=new THREE.Mesh(event.kind==='relay'?geometries.box:geometries.sphere,mat);mesh.scale.setScalar(event.kind==='relay'?.08:event.kind==='dust'?.045:.13);group.add(mesh);particles.push(mesh);}effects.push({event,group,mat,particles});
  }
  return {root,update(activeEvents=[]){const current=typeof operation==='function'?operation():operation;for(const {site,group}of sites)group.visible=site.operation===current&&visible(site.cache.x,site.cache.z);for(const {cache,group}of caches)group.visible=cache.operation===current&&!claimed(cache.id)&&visible(cache.x,cache.z);
   for(const {cache,group,handle}of releases){group.visible=cache.operation===current&&visible(cache.x,cache.z);handle.rotation.x=claimed(cache.id)?Math.PI*.35:-Math.PI*.35;}
   const currentTasks=typeof tasks==='function'?tasks():tasks;
+  const conduitContext={operation:current,tasks:currentTasks,elapsed:typeof elapsed==='function'?elapsed():elapsed,player:typeof player==='function'?player():player};
+  for(const {gate,group,shutter,lamp,vapor}of conduits){const status=nestConduitState(gate,conduitContext);group.visible=current==='nest'&&(visible(gate.x,gate.z)||visible(gate.x+(gate.axis==='z'?.8:0),gate.z+(gate.axis==='x'?.8:0))||visible(gate.x-(gate.axis==='z'?.8:0),gate.z-(gate.axis==='x'?.8:0)));shutter.position.y=status.closed?.45:-.5;vapor.visible=status.closed;lamp.color.setHex(status.closed?0xc78579:status.warning?0xe4b767:0x8bc8dc);lamp.emissive.setHex(status.closed?0x70392f:status.warning?0x785a26:0x365e68);}
   for(const item of reveals){const active=!!currentTasks?.[item.reveal.task];item.group.visible=item.reveal.operation===current&&visible(item.reveal.x,item.reveal.z);if(item.lid){item.lid.position.z=active?-.65:0;item.specimens.visible=active;}if(item.signalMaterial){item.signalMaterial.color.setHex(active?item.reveal.kind==='antenna'?0x596675:0x8bc8dc:0xb47468);item.signalMaterial.emissive.setHex(active?item.reveal.kind==='antenna'?0x000000:0x365e68:0x6a352d);}}
   for(const {shortcut,group,barrier,lampMaterial}of gates){const open=claimed(shortcut.reward);group.visible=shortcut.operation===current&&visible(shortcut.gate.x,shortcut.gate.z);barrier.position.y=open?-.93:0;lampMaterial.color.setHex(open?0x8bc8dc:0xc6a66e);lampMaterial.emissive.setHex(open?0x395e6b:0x796443);}
   for(const {event,group,mat,particles}of effects){const state=activeEvents.find(x=>x.id===event.id);group.visible=!!state&&event.operation===current&&visible(event.x,event.z);if(!group.visible)continue;const t=Number.isFinite(state.progress)?Math.max(0,Math.min(1,state.progress)):0,quiet=typeof reducedEffects==='function'?reducedEffects():reducedEffects;mat.opacity=quiet ? .12 :(1-t)*.22;

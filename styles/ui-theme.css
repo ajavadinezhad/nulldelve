@@ -138,3 +138,16 @@ aside.mission-note .mission-guidance[open]>#hint{max-height:clamp(36px,calc(100d
 aside.mission-note[hidden]{display:none!important}
 /* A concise current goal has no empty expandable hint panel. */
 .mission-guidance>h2{min-height:36px;display:flex;align-items:center;margin:0}
+/* First-use training stays one compact contextual card, with no game actions. */
+#tutorial .training-copy{flex:1;min-width:0;overflow-wrap:anywhere}
+#tutorial .training-actions{display:flex;gap:5px;flex-shrink:0}
+#tutorial .training-actions button{min-height:36px;white-space:nowrap}
+.training-focus{outline:2px solid #a7c8e3!important;outline-offset:3px}
+@media(max-width:520px){#tutorial{align-items:flex-start;flex-wrap:wrap}#tutorial .training-actions{margin-left:auto}#tutorial .training-actions button{min-height:44px;padding:6px 9px}.training-focus{outline-offset:2px}}
+@media(max-height:420px){#tutorial{font-size:11px;padding:6px 8px;gap:5px}#tutorial .training-actions button{padding:5px;min-height:36px}}
+/* One phone accessibility floor, including menu/puzzle/account actions whose
+   compact desktop styles may otherwise reduce the effective hit region. */
+.touch-controls-enabled button:not(.touch-fire){min-width:48px!important;min-height:48px!important}
+.touch-controls-enabled .game-menu .setting-row{min-height:48px}
+.touch-controls-enabled .game-menu .setting-row input[type=range]{height:48px}
+.touch-controls-enabled .game-menu .setting-row select{min-height:48px}

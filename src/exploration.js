@@ -61,3 +61,22 @@ export const WORLD_REVEALS=Object.freeze([
  {id:'signal-silenced',operation:'signal',task:'signalShutdown',x:237,z:34,kind:'antenna'},
  {id:'signal-evidence',operation:'signal',task:'signalSent',x:237,z:8,kind:'uplink'},
 ].map(Object.freeze));
+
+/** Nest's old service corridors become briefly live conduits after charging the
+ * transmitter. These safety shutters do not deal damage or create rewards. */
+export const NEST_CONDUIT_GATES=Object.freeze([
+ {id:'nest-transfer-conduit',x:71,z:52,axis:'z',stage:'charged',phase:0},
+ {id:'nest-lab-conduit',x:59,z:20,axis:'x',stage:'linked',phase:1.1},
+].map(Object.freeze));
+export function nestConduitState(gate,{operation,tasks={},elapsed=0,player}={}){
+ const relay=tasks.nestRelay,live=operation==='nest'&&!relay?.decoded&&(gate.stage==='charged'?relay?.started&&!relay?.linked:relay?.linked);
+ if(!live)return {live:false,closed:false,warning:false};
+ const phase=((Math.max(0,Number(elapsed)||0)+gate.phase)%4.8+4.8)%4.8;
+ // A shutter cannot close around someone already crossing its narrow seam.
+ const normal=gate.axis==='x'?'z':'x',across=normal==='x'?'z':'x';
+ const crossing=player&&Math.abs(player[normal]-gate[normal])<.41&&Math.abs(player[across]-gate[across])<1.8;
+ return {live:true,closed:!crossing&&phase>=4.05,warning:!crossing&&phase>=3.45&&phase<4.05};
+}
+export function nestConduitBlocked(x,z,r=0,context={}){
+ return NEST_CONDUIT_GATES.some(gate=>nestConduitState(gate,context).closed&&Math.abs(x-gate.x)<(gate.axis==='x'?1.5:.1)+r&&Math.abs(z-gate.z)<(gate.axis==='x'?.1:1.5)+r);
+}

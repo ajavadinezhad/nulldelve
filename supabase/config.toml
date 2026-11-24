@@ -1,0 +1,4 @@
+# The function validates every supplied bearer token with Auth.getUser itself.
+# This also supports newer Supabase asymmetric user JWTs at the Edge gateway.
+[functions.delete-account]
+verify_jwt = false

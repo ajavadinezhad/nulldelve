@@ -1,7 +1,8 @@
 const FAMILIES={escape:['pathfinder','quickloader','closequarters'],guard:['surgeon','plating','triage','sealant'],demolition:['ordnance','steadythrow','widearea','insulation']};
-const INFO=Object.freeze({escape:Object.freeze({id:'escape',name:'Break away',icon:'move',cooldown:18,duration:.38}),guard:Object.freeze({id:'guard',name:'Field guard',icon:'armor',cooldown:28,duration:2.4}),demolition:Object.freeze({id:'demolition',name:'Remote charge',icon:'blast',cooldown:12,duration:0})});
-const BASIC=Object.freeze({id:'escape',name:'Break away',icon:'move',cooldown:24,duration:.22});
+const INFO=Object.freeze({escape:Object.freeze({id:'escape',name:'Break away',icon:'move',cooldown:18,duration:.38,description:'Longer escape through creatures; walls still block you.',costLabel:'No item cost'}),guard:Object.freeze({id:'guard',name:'Field guard',icon:'armor',cooldown:28,duration:2.4,description:'Half damage for 2.4s; does not heal.',costLabel:'No item cost'}),demolition:Object.freeze({id:'demolition',name:'Remote charge',icon:'blast',cooldown:12,duration:0,description:'Detonate at your aim, up to 8m; cover blocks it.',costLabel:'1 frag grenade'})});
+const BASIC=Object.freeze({id:'escape',name:'Break away',icon:'move',cooldown:24,duration:.22,description:'Briefly escape through creatures; walls still block you.',costLabel:'No item cost'});
 export function abilityForSkill(skill){if(['none','medic','runner','demolition'].includes(skill))return BASIC;const kind=Object.keys(FAMILIES).find(k=>FAMILIES[k].includes(skill));return kind?INFO[kind]:null;}
+export function fieldAbilitySummary(skill){const a=abilityForSkill(skill);return a?`${a.name}: ${a.description} ${a.cooldown}s cooldown · ${a.costLabel}.`:'';}
 export function createFieldAbility(){
  const cooldowns={escape:0,guard:0,demolition:0};let active=null;
  return {get active(){return active?{...active,direction:active.direction&&{...active.direction}}:null;},get damageMultiplier(){return active?.id==='guard'?.5:1;},status(skill){const info=abilityForSkill(skill);return info?{...info,remaining:cooldowns[info.id],ready:cooldowns[info.id]===0}:null;},

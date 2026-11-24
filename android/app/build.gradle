@@ -13,8 +13,8 @@ android {
         applicationId 'com.ajavadinezhad.nulldelve'
         minSdk 26
         targetSdk 36
-        versionCode 3
-        versionName '0.1.2'
+        versionCode 4
+        versionName '0.1.3'
     }
     signingConfigs {
         if (signingValue('NULLDELVE_KEYSTORE')) {
@@ -42,11 +42,23 @@ android {
 // Package only runtime files. Never copy the repository, attachments or credentials.
 tasks.register('syncGameAssets', Sync) {
     from('../..') {
-        include 'index.html', 'puzzle-lab.html'
-        include 'src/**', 'styles/**', 'assets/**', 'vendor/**'
+        include 'index.html', 'puzzle-lab.html', 'privacy.html', 'account-deletion.html', 'backend-config.json'
+        include 'src/**/*.js', 'styles/**/*.css', 'vendor/**/*.js', 'vendor/LICENSE'
+        include 'assets/**/*.svg', 'assets/**/*.png', 'assets/**/*.jpg', 'assets/**/*.jpeg', 'assets/**/*.webp'
+        include 'assets/**/*.gif', 'assets/**/*.mp3', 'assets/**/*.wav', 'assets/**/*.ogg', 'assets/**/*.woff', 'assets/**/*.woff2', 'assets/**/*.ttf'
         exclude 'assets/screenshots/**', 'assets/preview/**'
+        exclude 'src/runtime-*.js', '**/*.test.*', '**/fixtures/**'
     }
     into layout.buildDirectory.dir('generated/gameAssets/game')
 }
+tasks.register('verifyReleaseSigning') {
+    doLast {
+        ['NULLDELVE_KEYSTORE', 'NULLDELVE_STORE_PASSWORD', 'NULLDELVE_KEY_ALIAS', 'NULLDELVE_KEY_PASSWORD'].each { name ->
+            if (!signingValue(name)) throw new GradleException("Missing release signing setting: " + name)
+        }
+        if (!file(signingValue('NULLDELVE_KEYSTORE')).isFile()) throw new GradleException('Upload keystore file is unavailable')
+    }
+}
 tasks.named('preBuild').configure { dependsOn 'syncGameAssets' }
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach { dependsOn 'verifyReleaseSigning' }
 dependencies { implementation 'androidx.webkit:webkit:1.14.0' }

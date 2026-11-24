@@ -112,3 +112,32 @@ PREVIEW_GAPS_R31.md for implementation and test evidence. Output:
 `dist/android/nulldelve-0.1.2-release.apk` and
 `dist/android/nulldelve-0.1.2-play.aab`. This version is not yet verified on a
 physical phone. Google Play publication remains on hold.
+
+## Current release candidate — 0.1.3 / code 4 (r57)
+
+Built current source into `dist/android/nulldelve-0.1.3-release.apk` and
+`dist/android/nulldelve-0.1.3-play.aab`. Debug compilation/lint and signed release
+builds pass; all150 packaged runtime files match the current source exactly.
+The APK and bundle signatures are checked by the release script before copying.
+All115 test files pass with the installed JDK used for native policy tests.
+
+This candidate has the current first-time training, 48px phone action targets,
+local privacy/deletion pages, native renderer-crash recovery, and explicit
+exclusion of local state from Android backup/device transfer. The new optional
+Supabase service is implemented but **not configured or deployed**: the packaged
+backend configuration is intentionally blank. It requests Internet permission
+for the optional service, while rejecting arbitrary remote WebView content.
+Older paragraphs describing no permissions apply only to those historical builds.
+
+When the owner connects a project, deploy/verify its private database rules,
+revision-safe save function, authenticated account deletion and email-code
+provider. Populate only its public URL/key, then rebuild and reverify this exact
+candidate before distributing an account-enabled build. Configured cloud accounts
+replace manual backup controls in Settings; unconfigured builds retain the local
+recovery tools until the service is verified. No Play upload or account invitations
+were sent. Physical Android runtime/thermal and full campaign completion remain
+required; see `PLAY_CLOSED_TEST_PLAN.md` and `CLOUD_ACCOUNT_SETUP.md`.
+
+Store artwork is under `docs/play-store/`. Capture the final installed Android
+build's screenshots on actual devices before completing its listing; no new
+native-device screenshots were produced by the browser layout checks.
