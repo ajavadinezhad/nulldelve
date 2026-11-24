@@ -1,9 +1,9 @@
-import {effectiveFieldStats} from './field-skills.js?v=google-launch-r59';
-import {cashReward} from './mission-salvage.js?v=google-launch-r59';
-import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=google-launch-r59';
-import {compatibleStorage} from './storage-compat.js?v=google-launch-r59';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=google-launch-r59';
-import {createEconomy,isEnemyRewardVariant} from './economy.js?v=google-launch-r59';
+import {effectiveFieldStats} from './field-skills.js?v=welcome-popup-r60';
+import {cashReward} from './mission-salvage.js?v=welcome-popup-r60';
+import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=welcome-popup-r60';
+import {compatibleStorage} from './storage-compat.js?v=welcome-popup-r60';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=welcome-popup-r60';
+import {createEconomy,isEnemyRewardVariant} from './economy.js?v=welcome-popup-r60';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';

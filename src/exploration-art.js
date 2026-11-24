@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {EXPLORATION_ALCOVES,EXPLORATION_CACHES,EXPLORATION_EVENTS,EXPLORATION_SHORTCUTS,WORLD_REVEALS,NEST_CONDUIT_GATES,nestConduitState} from './exploration.js?v=google-launch-r59';
+import {EXPLORATION_ALCOVES,EXPLORATION_CACHES,EXPLORATION_EVENTS,EXPLORATION_SHORTCUTS,WORLD_REVEALS,NEST_CONDUIT_GATES,nestConduitState} from './exploration.js?v=welcome-popup-r60';
 /** Quiet recess dressing and small atmospheric effects remain below discovery fog. */
 export function createExplorationArt(scene,{operation,claimed=()=>false,visible=()=>false,reducedEffects=()=>false,tasks=()=>({}),elapsed=()=>0,player=()=>null}={}){
  const root=new THREE.Group();root.name='optional-exploration';scene.add(root);

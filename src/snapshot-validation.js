@@ -1,10 +1,10 @@
-import {createFieldAbility} from './field-ability.js?v=google-launch-r59';
-import {EXPLORATION_EVENTS} from './exploration.js?v=google-launch-r59';
-import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=google-launch-r59';
-import {validateBarrelSnapshot} from './explosive-barrels.js?v=google-launch-r59';
-import {PRIMARY_WEAPONS} from './arsenal.js?v=google-launch-r59';
-import {normalizeCampaignOperation} from './campaign-operations.js?v=google-launch-r59';
-import {createProgression} from './progression.js?v=google-launch-r59';
+import {createFieldAbility} from './field-ability.js?v=welcome-popup-r60';
+import {EXPLORATION_EVENTS} from './exploration.js?v=welcome-popup-r60';
+import {WORLD_WIDTH,WORLD_HEIGHT,WORLD_DOOR_COUNT,FREIGHT_WIDTH,FREIGHT_HEIGHT,FREIGHT_DOOR_COUNT,PREVIOUS_WIDTH,PREVIOUS_HEIGHT,PREVIOUS_DOOR_COUNT,LEGACY_WIDTH,LEGACY_HEIGHT,LEGACY_DOOR_COUNT} from './world-layout.js?v=welcome-popup-r60';
+import {validateBarrelSnapshot} from './explosive-barrels.js?v=welcome-popup-r60';
+import {PRIMARY_WEAPONS} from './arsenal.js?v=welcome-popup-r60';
+import {normalizeCampaignOperation} from './campaign-operations.js?v=welcome-popup-r60';
+import {createProgression} from './progression.js?v=welcome-popup-r60';
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const finite=(value,min=-Infinity,max=Infinity)=>Number.isFinite(value)&&value>=min&&value<=max;
 const variants=new Set(['normal','runner','brute','charger','sentinel','screecher','leaper','spitter','mender','boss']);

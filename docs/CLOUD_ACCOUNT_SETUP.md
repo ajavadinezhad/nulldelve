@@ -149,3 +149,19 @@ Browser OAuth uses SHA-256 PKCE and removes the one-use callback code from the
 address bar. Native Android system-browser callback routing remains a separate
 required integration before claiming APK account support. The public website
 and signed Android artifacts have not been updated with this implementation.
+
+### Welcome popup follow-up (r60)
+
+First-visit entry now uses a centered welcome dialog with Continue with Google
+and Maybe later, with no Back navigation. A device-local viewed marker prevents
+refreshes from repeatedly opening the unsigned welcome. This marker never
+represents authentication. Actual Supabase sessions remain stored separately;
+returning signed-in operators load their private identity, while authenticated
+accounts without an identity see the name/avatar setup dialog. Local checkpoint
+presence does not substitute for account state.
+
+The public Auth settings were checked again on 2026-11-24: `external.google` is
+false. Thus the visible Google button reports setup is pending; no real Google
+login or profile creation has yet been verified. Desktop and 393px phone popup
+layouts were checked using an isolated UI fixture (no authenticated test user).
+The new browser UI is being published; native account callbacks still need work.

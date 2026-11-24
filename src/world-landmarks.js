@@ -1,4 +1,4 @@
-import {puzzleAccessVisible} from './puzzle-access.js?v=google-launch-r59';
+import {puzzleAccessVisible} from './puzzle-access.js?v=welcome-popup-r60';
 const BANKS={glyph:'breach',relay:'breach',power:'research',valve:'containment',wire:'command'};
 const TASKS={commandFuse:'command',commandRepair:'command',researchCoolant:'research',evacPower:'containment',nestStart:'nest',nestLink:'nest',nestDecode:'nest'};
 export function worldLandmarkVisible(device,{operation}={}){

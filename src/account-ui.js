@@ -1,4 +1,4 @@
-import {PLAYER_AVATARS,avatarPath} from './player-identity.js?v=google-launch-r59';
+import {PLAYER_AVATARS,avatarPath} from './player-identity.js?v=welcome-popup-r60';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 /** Account actions live inside the existing scrollable, focus-trapped menu. */
 export function renderAccount(host,{state={},draft={},onAction=()=>{}}={}){

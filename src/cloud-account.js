@@ -1,4 +1,4 @@
-import {normalizePlayerIdentity} from './player-identity.js?v=google-launch-r59';
+import {normalizePlayerIdentity} from './player-identity.js?v=welcome-popup-r60';
 const LIMIT=8*1024*1024;
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const emailValid=value=>typeof value==='string'&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);

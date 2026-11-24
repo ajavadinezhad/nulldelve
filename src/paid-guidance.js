@@ -1,11 +1,11 @@
-import {nextAnnexMechanismAction} from './annex-mechanisms.js?v=google-launch-r59';
-import {freightEscortPoint} from './freight-escort.js?v=google-launch-r59';
-import {initialMechanism,nextMechanismAction} from './physical-puzzles.js?v=google-launch-r59';
-import {campaignOperationGuidance,campaignOperationExit} from './campaign-operations.js?v=google-launch-r59';
-import {missionGuidance} from './session-rules.js?v=google-launch-r59';
-import {ARTIFACTS,hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=google-launch-r59';
-import {WIRE_LAYOUT,WIRE_SOLUTION} from './wire-circuit.js?v=google-launch-r59';
-export {GUIDANCE_COST} from './economy.js?v=google-launch-r59';
+import {nextAnnexMechanismAction} from './annex-mechanisms.js?v=welcome-popup-r60';
+import {freightEscortPoint} from './freight-escort.js?v=welcome-popup-r60';
+import {initialMechanism,nextMechanismAction} from './physical-puzzles.js?v=welcome-popup-r60';
+import {campaignOperationGuidance,campaignOperationExit} from './campaign-operations.js?v=welcome-popup-r60';
+import {missionGuidance} from './session-rules.js?v=welcome-popup-r60';
+import {ARTIFACTS,hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=welcome-popup-r60';
+import {WIRE_LAYOUT,WIRE_SOLUTION} from './wire-circuit.js?v=welcome-popup-r60';
+export {GUIDANCE_COST} from './economy.js?v=welcome-popup-r60';
 const ZONES={security:[23,10],storage:[23,26],command:[38,10],generator:[35,53],lab:[59,10],reactor:[59,30],transit:[59,55],containment:[86,30],evacuation:[86,53],nest:[86,10],'hospital-triage':[112,10],'hospital-ward':[136,10],'hospital-isolation':[136,52],'freight-pumps':[162,30],'freight-yard':[186,30],'freight-cold':[186,10],'signal-yard':[212,30],'signal-relay':[236,30],'signal-uplink':[236,10]};
 /** Resolve one live action, without changing a puzzle or relying on proximity to a door. */
 export function nextGuidanceStep({operation,mission='campaign',player,puzzle,progression}){

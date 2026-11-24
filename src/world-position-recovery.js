@@ -1,5 +1,5 @@
-import {FREIGHT_ROOMS} from './freight-layout.js?v=google-launch-r59';
-import {SIGNAL_ROOMS} from './signal-layout.js?v=google-launch-r59';
+import {FREIGHT_ROOMS} from './freight-layout.js?v=welcome-popup-r60';
+import {SIGNAL_ROOMS} from './signal-layout.js?v=welcome-popup-r60';
 /** Recover legacy checkpoints inside reshaped rooms without crossing a sector gate. */
 export function recoverWorldPosition(player,{operation,blocked=()=>false,radius=.32}={}){
  if(!player||!Number.isFinite(player.x)||!Number.isFinite(player.z)||!blocked(player.x,player.z,radius))return false;

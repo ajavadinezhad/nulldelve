@@ -7,3 +7,7 @@ export function normalizePlayerIdentity(value){
  return {username,displayName,avatar:value.avatar};
 }
 export function avatarPath(id){return './assets/avatars/'+(PLAYER_AVATARS.includes(id)?id:'sentinel')+'.svg';}
+const WELCOME_KEY='nulldelve.welcome.seen.v1';
+/** Viewing/dismissing the welcome is not signing in; only Auth establishes a session. */
+export function shouldShowWelcome(state,storage){if(!state?.configured)return false;if(state.signedIn)return state.profileLoaded===true&&!state.profile;try{return storage?.getItem(WELCOME_KEY)!=='1';}catch{return false;}}
+export function markWelcomeSeen(storage){try{storage?.setItem(WELCOME_KEY,'1');}catch{}}

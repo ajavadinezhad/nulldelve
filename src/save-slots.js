@@ -1,9 +1,9 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=google-launch-r59';
-import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=google-launch-r59';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=google-launch-r59';
-import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=google-launch-r59';
-import {validateSnapshot} from './snapshot-validation.js?v=google-launch-r59';
-import {normalizeSettings} from './controls.js?v=google-launch-r59';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=welcome-popup-r60';
+import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=welcome-popup-r60';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=welcome-popup-r60';
+import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=welcome-popup-r60';
+import {validateSnapshot} from './snapshot-validation.js?v=welcome-popup-r60';
+import {normalizeSettings} from './controls.js?v=welcome-popup-r60';
 const KEY='nulldelve.saves.v2';
 const VERSION=2;
 const CHECKPOINT_KEY='nulldelve.autosave.v1';

@@ -1,6 +1,6 @@
-import {ROACH_VARIANTS} from './roach.js?v=google-launch-r59';
-import {projectileDamage} from './weapon-tuning.js?v=google-launch-r59';
-import {DIFFICULTY_RULES} from './difficulty.js?v=google-launch-r59';
+import {ROACH_VARIANTS} from './roach.js?v=welcome-popup-r60';
+import {projectileDamage} from './weapon-tuning.js?v=welcome-popup-r60';
+import {DIFFICULTY_RULES} from './difficulty.js?v=welcome-popup-r60';
 /** Persistent drops and finite ammunition, independent of rendering. */
 export const RESERVE_LIMITS={rifle:300,pistol:150};
 const MAX_PICKUP_ID=Number.MAX_SAFE_INTEGER-1;

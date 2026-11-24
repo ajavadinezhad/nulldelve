@@ -1,5 +1,5 @@
-import {compatibleStorage} from './storage-compat.js?v=google-launch-r59';
-import {formatKey} from './controls.js?v=google-launch-r59';
+import {compatibleStorage} from './storage-compat.js?v=welcome-popup-r60';
+import {formatKey} from './controls.js?v=welcome-popup-r60';
 const LESSONS=['move','aim','push','pull','puzzle','door','fire','reload','ability','loot','checkpoint','armory','medkit','grenade'];
 const BASICS=['move','aim','puzzle','door','fire','reload','ability'];
 /** Training observes real play. Acknowledging a card never fabricates an action,

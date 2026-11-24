@@ -845,3 +845,17 @@
 .operator-card small{color:#a6b2c2}
 .hud-operator-avatar{width:20px!important;height:20px!important;object-fit:contain;flex:none;margin-left:4px;border-radius:6px}
 @media(max-width:480px){.operator-chip{max-width:170px;font-size:14px}.avatar-grid{gap:8px}.avatar-option{min-height:56px}.menu-brand .operator-chip img{width:32px;height:32px}}
+/* First-visit dialog is a centered popup, separate from full-page account editing. */
+.menu-overlay:has(.onboarding-shell){align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at top,#29303a90,#0b1016eb 70%)}
+.game-menu.onboarding-shell{width:min(560px,100%);max-width:560px;height:auto;min-height:0;max-height:calc(100dvh - 32px);margin:auto;padding:24px;border:1px solid #424d5b;border-radius:20px;background:#1a212b;box-shadow:0 24px 100px #0009;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
+.onboarding-brand{font-size:15px;font-weight:700;letter-spacing:5px;padding:0 0 16px;color:#edf0f3;border-bottom:1px solid #36414f;flex:none}
+.onboarding-content{margin:0;padding:16px 0 0;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.onboarding-shell .account-panel h3{margin-top:0;font-size:24px}
+.onboarding-shell .menu-status{flex:none;margin:8px 0 0;padding:0;font-size:13px;min-height:0}
+.onboarding-shell .menu-status:empty{display:none}
+.welcome-later{width:100%;margin-top:10px}
+@media(max-width:480px){.game-menu.onboarding-shell{padding:20px;max-height:calc(100dvh - 24px)}.menu-overlay:has(.onboarding-shell){padding:12px}.onboarding-shell .account-panel h3{font-size:22px}}
+#overlay.menu-overlay:has(>.onboarding-shell){display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important;box-sizing:border-box}
+#overlay.menu-overlay>.game-menu.onboarding-shell{margin:auto;min-height:0;flex:none}
+#overlay .onboarding-shell .welcome-later{min-height:48px}
+@media(max-width:480px){#overlay.menu-overlay:has(>.onboarding-shell){padding:12px!important}}

@@ -1,4 +1,4 @@
-import {primaryWeapon} from './arsenal.js?v=google-launch-r59';
+import {primaryWeapon} from './arsenal.js?v=welcome-popup-r60';
 /** Preserve rounds for the same gun; retain base ammunition value across weapon changes. */
 export function checkpointPrimaryAmmo(snapshot,currentId,capacity){
  const oldId=snapshot?.loadout?.primary??'carbine',old=primaryWeapon(oldId),next=primaryWeapon(currentId);

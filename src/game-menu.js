@@ -1,16 +1,16 @@
-import {avatarPath} from './player-identity.js?v=google-launch-r59';
-import {renderAccount} from './account-ui.js?v=google-launch-r59';
-import {renderFieldJournal,journalIcon} from './field-journal.js?v=google-launch-r59';
-import {createPuzzleDiscovery} from './puzzle-discovery.js?v=google-launch-r59';
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=google-launch-r59';
-import {compatibleStorage} from './storage-compat.js?v=google-launch-r59';
-import {formatDuration,operationRecordKey} from './operation-records.js?v=google-launch-r59';
-import {createCampaignMap} from './campaign-map.js?v=google-launch-r59';
-import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=google-launch-r59';
-import {createItemIcon} from './item-icons.js?v=google-launch-r59';
-import {buildMissionPreview} from './mission-previews.js?v=google-launch-r59';
-import {renderShop} from './shop-ui.js?v=google-launch-r59';
-import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=google-launch-r59';
+import {avatarPath} from './player-identity.js?v=welcome-popup-r60';
+import {renderAccount} from './account-ui.js?v=welcome-popup-r60';
+import {renderFieldJournal,journalIcon} from './field-journal.js?v=welcome-popup-r60';
+import {createPuzzleDiscovery} from './puzzle-discovery.js?v=welcome-popup-r60';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=welcome-popup-r60';
+import {compatibleStorage} from './storage-compat.js?v=welcome-popup-r60';
+import {formatDuration,operationRecordKey} from './operation-records.js?v=welcome-popup-r60';
+import {createCampaignMap} from './campaign-map.js?v=welcome-popup-r60';
+import {CAMPAIGN_OPERATIONS,isCampaignOperationUnlocked} from './campaign-operations.js?v=welcome-popup-r60';
+import {createItemIcon} from './item-icons.js?v=welcome-popup-r60';
+import {buildMissionPreview} from './mission-previews.js?v=welcome-popup-r60';
+import {renderShop} from './shop-ui.js?v=welcome-popup-r60';
+import {normalizeSettings,DEFAULT_BINDINGS,ACTION_LABELS,BINDING_ACTIONS,validateBinding,formatKey} from './controls.js?v=welcome-popup-r60';
 const SETTINGS_KEY='nulldelve.settings.v1';
 const DEFAULT_SETTINGS=normalizeSettings();
 const MISSIONS=[
@@ -232,13 +232,20 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function render(focus=true){
   if(!open)return;for(const node of content?.querySelectorAll('nav')??[])if(node.dataset.scrollKey)nestedScrollPositions.set(node.dataset.scrollKey,{left:node.scrollLeft,top:node.scrollTop});const oldFocus=document.activeElement,oldScroll=content?.scrollTop??0;const focusKey=oldFocus?.dataset?.focusKey??oldFocus?.dataset?.offerId??oldFocus?.dataset?.action??oldFocus?.id;const focusIndex=shell?[...shell.querySelectorAll('button:not(:disabled),input,select,summary')].indexOf(oldFocus):-1;captureAction=null;const current=status();overlay.replaceChildren();overlay.classList.add('menu-overlay');
   shell=element('div','game-menu');shell.dataset.view=view;shell.setAttribute('role','dialog');shell.setAttribute('aria-modal','true');shell.setAttribute('aria-label','Nulldelve game menu');
-  if(view==='main'||view==='pause'){const brand=element('header','menu-brand');brand.append(element('h1','','NULLDELVE'));if(current.cloud?.configured){const identity=current.cloud.profile,account=button('',()=>identity?openPanel('account'):void action(()=>onAccountAction('google',{}),[],{close:false}),'operator-chip');account.setAttribute('aria-label',identity?'Edit operator '+identity.displayName:'Continue with Google');if(identity){const image=element('img');image.src=avatarPath(identity.avatar);image.alt='';image.width=40;image.height=40;account.append(image,element('span','',identity.displayName));}else account.append(element('span','','Continue with Google'));brand.append(account);}shell.append(brand);}else{
+  if(view==='welcome'){
+   shell.classList.add('onboarding-shell');shell.setAttribute('aria-label','Welcome to Nulldelve');const logo=element('header','onboarding-brand','NULLDELVE');shell.append(logo);
+   content=element('main','menu-content onboarding-content');content.setAttribute('aria-label','Operator setup');shell.append(content);drawAccount();
+   if(!current.cloud?.signedIn){const later=button('Maybe later',()=>changeView('main'),'menu-button secondary welcome-later');content.append(later);}
+   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);overlay.append(shell);overlay.style.display='flex';
+   const candidates=[...shell.querySelectorAll('button:not(:disabled),input,select,summary')],target=focus?candidates[0]:candidates.find(n=>focusKey&&(n.dataset.focusKey===focusKey||n.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});return;
+  }
+  if(view==='main'||view==='pause'){const brand=element('header','menu-brand');brand.append(element('h1','','NULLDELVE'));if(current.cloud?.configured){const identity=current.cloud.profile,account=button('',()=>identity||current.cloud.signedIn?openPanel('account'):void action(()=>onAccountAction('google',{}),[],{close:false}),'operator-chip');account.setAttribute('aria-label',identity?'Edit operator '+identity.displayName:current.cloud.signedIn?'Account':'Continue with Google');if(identity){const image=element('img');image.src=avatarPath(identity.avatar);image.alt='';image.width=40;image.height=40;account.append(image,element('span','',identity.displayName));}else account.append(element('span','',current.cloud.signedIn?'Account':'Continue with Google'));brand.append(account);}shell.append(brand);}else{
    const navigation=element('nav','menu-navigation');navigation.setAttribute('aria-label','Menu navigation');const control=button('',()=>back(),'menu-button menu-back-control'),arrow=element('span','menu-back-arrow');arrow.setAttribute('aria-hidden','true');control.append(arrow,element('span','','Back'));control.dataset.focusKey='navigation-back';navigation.append(control,element('h2','menu-navigation-title',{'missions':'New operation','campaign-map':'Facility descent','armory':'Armory','privacy':'Privacy policy','settings':'Settings','account':'Operator','field-notes':'Field notes','save':'Save','load':'Load','saves':'Checkpoints'}[view]??'Menu'));shell.append(navigation);
   }drawPersistenceWarning(current);
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
   if(view==='account')drawAccount();else if(view==='privacy'){const frame=element('iframe','privacy-frame');frame.src='privacy.html';frame.title='Nulldelve privacy policy';content.append(frame);}else if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
-  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r59'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');const privacy=button('Privacy',()=>{privacyReturnView=view;changeView('privacy');},'privacy-link');footer.append(privacy,feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
+  const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r60'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');const privacy=button('Privacy',()=>{privacyReturnView=view;changeView('privacy');},'privacy-link');footer.append(privacy,feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
   const candidates=[...shell.querySelectorAll('button:not(:disabled),input,select,summary')];let target=focus?candidates[0]:candidates.find(node=>focusKey&&(node.dataset.focusKey===focusKey||node.dataset.offerId===focusKey||node.dataset.action===focusKey||node.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});
   if(view==='armory'&&shopTab==='skills'&&(revealSkillDetails||revealSkillTree)){
@@ -249,7 +256,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function show(next='main'){
   if(!open)previousFocus=document.activeElement;
   if(next==='campaign-map'){const current=status(),done=current.completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;if(['easy','normal','hard'].includes(current.config?.difficulty))difficulty=current.config.difficulty;}
-  clearConfirmations();open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory','account'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
+  clearConfirmations();open=true;busy=false;view=['main','pause','missions','campaign-map','save','load','saves','settings','armory','account','welcome'].includes(next)?next:'main';returnView=next==='pause'?'pause':status().active?'pause':'main';statusText='';render();
  }
  function back(){if(!open)return false;if(busy)return true;if(captureAction){captureAction=null;render(false);notice('Key change cancelled.');return true;}if(backupPreview||confirmTrainingReset){clearConfirmations();render(false);notice('Cancelled.');return true;}if(view==='privacy'){const previous=privacyReturnView??returnView;privacyReturnView=null;changeView(previous);}else if(view==='pause')action(onResume);else if(view==='campaign-map')changeView('missions');else if(view!=='main')changeView(returnView);else if(status().active)changeView('pause');else return false;return true;}
  function hide(){clearConfirmations();captureAction=null;open=false;overlay.style.display='none';overlay.classList.remove('menu-overlay');if(previousFocus?.isConnected)previousFocus.focus?.({preventScroll:true});onClose();}
