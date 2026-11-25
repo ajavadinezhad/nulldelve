@@ -186,7 +186,9 @@ export function weapon(type='rifle'){
 // Effects are ordinary depth-tested meshes beneath the visibility overlay. The caller
 // should emit only the player's shots and pass dt=0 while the operation is paused.
 export function createCombatEffects(scene){
-  const particles=[],marks=[];
+  const particles=[],marks=[],splatter=[],xpLabels=[];
+  let xpTexture;
+  const fluid=new THREE.MeshBasicMaterial({color:0x89bf43,transparent:true,opacity:.72,depthWrite:false});
   const smokeMaterial=new THREE.MeshBasicMaterial({color:0xbfc8b9,transparent:true,opacity:.22,depthWrite:false});
   const dustMaterial=new THREE.MeshBasicMaterial({color:0xc3b894,transparent:true,opacity:.48,depthWrite:false});
   const markMaterial=new THREE.MeshBasicMaterial({color:0x101714,transparent:true,opacity:.7,depthWrite:false});
@@ -221,16 +223,70 @@ export function createCombatEffects(scene){
     if(rear)for(const angle of [-Math.PI/4,Math.PI/4]){const p=particle(hitGeometry,hitMaterials.rear,new THREE.Vector3(x,height+.02,z),new THREE.Vector3(0,.1,0),.24,'rear');p.mesh.scale.set(.32,.025,.045);p.mesh.rotation.y=angle;}
     if(resisted){const p=particle(recoveryGeometry,hitMaterials.resisted,new THREE.Vector3(x,height,z),new THREE.Vector3(0,.1,0),.32,'resisted');p.mesh.rotation.x=-Math.PI/2;}
   }
+  function removeEffect(list,index){
+    const [{mesh}]=list.splice(index,1);
+    scene.remove(mesh);
+    mesh.material.dispose();
+  }
+  function enemySplatter(x,z,floor=0,isFloor=()=>true){
+    for(let i=0;i<3;i++){
+      const angle=serial*.8+i*2.4, dx=Math.cos(angle), dz=Math.sin(angle);
+      const spray=particle(sphere,fluid,new THREE.Vector3(x,floor+.65,z),new THREE.Vector3(dx*1.5,.5+i*.25,dz*1.5),.32,'fluid');
+      spray.mesh.scale.setScalar(.055);
+      const distance=.13+i*.13, px=x+dx*distance,pz=z+dz*distance;
+      if(!isFloor(px,pz))continue;
+      if(splatter.length>=72)removeEffect(splatter,0);
+      const spot=new THREE.Mesh(markGeometry,fluid.clone());
+      spot.material.color.set(0x527b2c);
+      spot.rotation.set(-Math.PI/2,0,angle);
+      spot.position.set(px,floor+.037,pz);
+      spot.scale.set(1.2+i*.4,.75+i*.14,1);
+      scene.add(spot);
+      splatter.push({mesh:spot,life:12});
+    }
+  }
+  function experience(x,z,height){
+    if(!xpTexture){
+      const canvas=document.createElement('canvas');
+      canvas.width=256;canvas.height=96;
+      const ctx=canvas.getContext('2d');
+      if(!ctx)return;
+      ctx.font='bold 54px system-ui';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.strokeStyle='#141820';ctx.lineWidth=8;
+      ctx.strokeText('+10 XP',128,48);
+      ctx.fillStyle='#f7ce82';ctx.fillText('+10 XP',128,48);
+      xpTexture=new THREE.CanvasTexture(canvas);
+      xpTexture.colorSpace=THREE.SRGBColorSpace;
+    }
+    if(xpLabels.length>=10)removeEffect(xpLabels,0);
+    const mesh=new THREE.Sprite(new THREE.SpriteMaterial({map:xpTexture,transparent:true,depthWrite:false}));
+    mesh.position.set(x,height,z);
+    mesh.scale.set(1.8,.675,1);
+    scene.add(mesh);
+    xpLabels.push({mesh,life:1});
+  }
+  function clearFeedback(){
+    for(const list of [splatter,xpLabels])while(list.length)removeEffect(list,list.length-1);
+  }
   function update(dt){
     if(dt<=0)return;
+    for(const list of [splatter,xpLabels])for(let i=list.length-1;i>=0;i--){
+      const effect=list[i];
+      effect.life-=dt;
+      if(effect.life<=0){removeEffect(list,i);continue;}
+      const floating=list===xpLabels;
+      if(floating)effect.mesh.position.z-=dt*.72;
+      effect.mesh.material.opacity=floating?Math.min(1,effect.life*2.5):.65*Math.min(1,effect.life/3);
+    }
     for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;if(p.life<=0){removeParticle(i);continue;}
       p.mesh.position.addScaledVector(p.velocity,dt);
       if(p.kind==='brass'){
         if(p.mesh.position.y>.065){p.velocity.y-=7*dt;p.mesh.rotation.x+=p.spin*dt;p.mesh.rotation.z+=p.spin*.7*dt;}
         if(p.mesh.position.y<=.065){p.mesh.position.y=.065;if(!p.bounced){p.velocity.y=Math.abs(p.velocity.y)*.24;p.velocity.x*=.45;p.velocity.z*=.45;p.bounced=true;}else{p.velocity.set(0,0,0);p.mesh.rotation.x=Math.PI/2;}}
-      }else{p.velocity.multiplyScalar(Math.exp(-3*dt));p.mesh.scale.addScalar(dt*.22);p.mesh.material.opacity=(p.kind==='smoke'?.22:['shell','rear'].includes(p.kind)?.9:p.kind==='resisted'?.65:.48)*Math.max(0,p.life/p.maxLife);}
+      }else{if(p.kind==='fluid')p.velocity.y-=7*dt;p.velocity.multiplyScalar(Math.exp(-3*dt));p.mesh.scale.addScalar(dt*.22);p.mesh.material.opacity=(p.kind==='smoke'?.22:['shell','rear'].includes(p.kind)?.9:p.kind==='resisted'?.65:.48)*Math.max(0,p.life/p.maxLife);}
     }
   }
-  function dispose(){while(particles.length)removeParticle(particles.length-1);for(const mark of marks)scene.remove(mark);marks.length=0;markGeometry.dispose();hitGeometry.dispose();recoveryGeometry.dispose();for(const material of Object.values(hitMaterials))material.dispose();markMaterial.dispose();smokeMaterial.dispose();dustMaterial.dispose();}
-  return {shot,impact,hit,update,dispose};
+  function dispose(){clearFeedback();xpTexture?.dispose();fluid.dispose();while(particles.length)removeParticle(particles.length-1);for(const mark of marks)scene.remove(mark);marks.length=0;markGeometry.dispose();hitGeometry.dispose();recoveryGeometry.dispose();for(const material of Object.values(hitMaterials))material.dispose();markMaterial.dispose();smokeMaterial.dispose();dustMaterial.dispose();}
+  return {shot,impact,hit,enemySplatter,experience,clearFeedback,update,dispose};
 }

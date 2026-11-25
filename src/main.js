@@ -41,7 +41,7 @@ const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
 import {buildArt} from './environment.js?v=mandatory-google-r61';
 import {soldier, animateSoldier} from './character.js?v=mandatory-google-r61';
-import {weapon, createCombatEffects} from './weapons.js?v=mandatory-google-r61';
+import {weapon, createCombatEffects} from './weapons.js?v=combat-fx-r66';
 import {addRoomDetails} from './room-details.js?v=mandatory-google-r61';
 import {createMinimap} from './minimap.js?v=mandatory-google-r61';
 import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=mandatory-google-r61';
@@ -254,9 +254,15 @@ function shoot(followup=false){
  const gun=weapons[selected],aimX=aim.x-player.x,aimZ=aim.z-player.z,hasAim=Math.hypot(aimX,aimZ)>.05,directions=shotDirections(hasAim?aimX:-Math.sin(player.angle),hasAim?aimZ:-Math.cos(player.angle),gun);if(!directions.length)return;
  shotRecovery.recordShot(gun.interval);player.ammo--;operationStats.shots++;audio.shot(equippedModelType());if(!followup){fire=gun.interval;burstFire.begin(gun.burstCount??1,gun.burstInterval);}playerMesh.userData.flashTime=menu?.settings.reducedEffects?0:.065;
  if(!menu?.settings.reducedEffects)combatEffects.shot(player.x,player.z,player.angle,selected);
+ const splattered=new Set();
  for(const direction of directions){if(ended)break;const hitEnemies=new Set();let x=player.x,z=player.z;for(let distance=.5;distance<gun.range;distance+=.1){x=player.x+direction.x*distance;z=player.z+direction.z*distance;const barrel=barrelSystem?.findHit(x,z,.12);if(barrel){barrelSystem.hit(barrel,gun.damage);break;}if(solid(x,z))break;
   const enemy=enemies.find(e=>!hitEnemies.has(e)&&e.hp>0&&(e.spawnDelay??0)<=0&&Math.hypot(e.x-x,e.z-z)<(e.radius??.32)+.12);if(!enemy)continue;
-  const shellDamage=projectileDamage(gun,enemy,player,gun.damage),damage=shellDamage*(hitEnemies.size?Math.max(.1,Math.min(1,gun.pierceMultiplier??.6)):1);hitEnemies.add(enemy);enemy.alerted=true;enemy.hp=Math.max(0,enemy.hp-damage);const staggerApplied=gun.stagger>0&&applyEnemyStagger(enemy,gun.stagger);if(!menu?.settings.reducedEffects)combatEffects.hit?.(enemy.x,enemy.z,{shell:shellDamage<gun.damage-.001,rear:shellDamage>gun.damage+.001,resisted:gun.stagger>0&&!staggerApplied&&enemy.hp>0,height:Math.max(1.2,(enemy.scale??1)*1.05)});if(enemy.hp===0)rewardEnemyKill(enemy);enemy.mesh.visible=enemy.hp>0;if(!enemy.hp)enemy.healthBar.group.visible=false;updateEnemyHealthBar(enemy);if(hitEnemies.size>=Math.max(1,Math.min(2,gun.pierce??1)))break;
+  const shellDamage=projectileDamage(gun,enemy,player,gun.damage),damage=shellDamage*(hitEnemies.size?Math.max(.1,Math.min(1,gun.pierceMultiplier??.6)):1);hitEnemies.add(enemy);enemy.alerted=true;enemy.hp=Math.max(0,enemy.hp-damage);const staggerApplied=gun.stagger>0&&applyEnemyStagger(enemy,gun.stagger);if(!menu?.settings.reducedEffects)combatEffects.hit?.(enemy.x,enemy.z,{shell:shellDamage<gun.damage-.001,rear:shellDamage>gun.damage+.001,resisted:gun.stagger>0&&!staggerApplied&&enemy.hp>0,height:Math.max(1.2,(enemy.scale??1)*1.05)});if(!menu?.settings.reducedEffects&&combatEffects.enemySplatter&&!splattered.has(enemy)&&visible(enemy.x,enemy.z)){
+   splattered.add(enemy);
+   const floor=stairHeightAt(enemy.x,enemy.z);
+   combatEffects.enemySplatter?.(enemy.x,enemy.z,floor,(px,pz)=>!solid(px,pz)&&Math.abs(stairHeightAt(px,pz)-floor)<.08);
+  }
+  if(enemy.hp===0)rewardEnemyKill(enemy);enemy.mesh.visible=enemy.hp>0;if(!enemy.hp)enemy.healthBar.group.visible=false;updateEnemyHealthBar(enemy);if(hitEnemies.size>=Math.max(1,Math.min(2,gun.pierce??1)))break;
  }
  if(ended)return;trace(player.x,player.z,x,z,0xd2f9b2);const ix=x-direction.x*.2,iz=z-direction.z*.2;if(!menu?.settings.reducedEffects&&visible(ix,iz))combatEffects.impact(ix,iz);
  }
@@ -424,6 +430,7 @@ function captureSnapshot(){return {
 function restoreSnapshot(data){burstFire.cancel();
  if(!validateSnapshot(data))return false;if(data.world[0]!==W||data.world[1]!==H||data.doors.length!==doors.length)data=upgradeWorldSnapshot(data);
  if(!validateSnapshot(data,{width:W,height:H,doorCount:doors.length,crateCount:puzzle.crates.length,plateCount:puzzle.plates.length,barrelIds:barrelSystem.state.map(b=>b.id)}))return false;
+ if(typeof combatEffects!=='undefined')combatEffects.clearFeedback?.();
  if(typeof shotRecovery!=='undefined')shotRecovery.cancel();if(typeof fieldAbility!=='undefined'){fieldAbility.cancel();fieldAbility.restore(data.fieldAbility??{version:1,cooldowns:{escape:0,guard:0,demolition:0}});}
  if(typeof puzzleSettings!=='undefined')puzzleSettings?.close();if(typeof grenadeActions!=='undefined')grenadeActions?.clear();doorHint?.skip();barrelSystem.restore(data.barrels);doorHint?.restoreSeen(data.doorHints??[]);guidanceDoorIndex=data.doorHints?.length?Number(data.doorHints[data.doorHints.length-1].split('|')[0]):null;
  Object.assign(operationStats,createOperationStats(data.stats));
@@ -549,7 +556,10 @@ function refreshHelp(){
 }
 refreshGuidance(true);
 
-function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(()=>{hud();cloudSync.schedule();}).catch(()=>{});const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected,reachable:los});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
+function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(result=>{
+ if(result?.ok&&enemies.includes(enemy)&&!menu?.settings.reducedEffects&&visible(enemy.x,enemy.z))combatEffects.experience(enemy.x,enemy.z,stairHeightAt(enemy.x,enemy.z)+1.6);
+ hud();cloudSync.schedule();
+ }).catch(()=>{});const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected,reachable:los});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
 
 function knifeStrike(){
  if(meleeCooldown>0)return;meleeCooldown=.55;
