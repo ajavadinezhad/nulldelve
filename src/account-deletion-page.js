@@ -1,5 +1,5 @@
-import {createCloudAccount} from './cloud-account.js?v=welcome-popup-r60';
-import {renderAccount} from './account-ui.js?v=welcome-popup-r60';
+import {createCloudAccount} from './cloud-account.js?v=mandatory-google-r61';
+import {renderAccount} from './account-ui.js?v=mandatory-google-r61';
 const host=document.querySelector('#account'),status=document.querySelector('#status'),draft={};
 let busy=false;let storage;try{storage=localStorage;}catch{}
 const account=createCloudAccount({storage});

@@ -1,14 +1,15 @@
-import {PLAYER_AVATARS,avatarPath} from './player-identity.js?v=welcome-popup-r60';
+import {PLAYER_AVATARS,avatarPath} from './player-identity.js?v=mandatory-google-r61';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 /** Account actions live inside the existing scrollable, focus-trapped menu. */
 export function renderAccount(host,{state={},draft={},onAction=()=>{}}={}){
+ const signedIn=state.signedIn&&(!state.requireGoogle||state.googleVerified);
  const panel=el('section');panel.className='account-panel';panel.setAttribute('aria-label','Account and cloud progress');host.append(panel);
  const p=text=>panel.append(el('p',text));
  const action=(text,id,disabled=false)=>{const b=el('button',text);b.type='button';b.className='menu-button secondary';b.disabled=disabled||!!state.pending;b.onclick=()=>onAction(id,{email:draft.email??'',code:draft.code??''});panel.append(b);return b;};
- panel.append(el('h3',!state.configured?'Account':!state.signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
- if(!state.configured){p('Cloud saves are not available in this build. Your checkpoints stay on this device.');return;}
- if(!state.signedIn){
-  p('Your operator. Your progress.');
+ panel.append(el('h3',!state.configured?'Account':!signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
+ if(!state.configured){p(state.requireGoogle?'Connect to the account service to sign in.':'Cloud saves are not available in this build. Your checkpoints stay on this device.');if(state.requireGoogle)action('Retry connection','reconnect');return;}
+ if(!signedIn){
+  p(state.requireGoogle?'Sign in to enter the facility.':'Your operator. Your progress.');
   if(state.status&&state.status!=='Sign in to sync your progress.')p(state.status);
   action('Continue with Google','google').className='menu-button primary';
   p('Google handles sign-in. We never ask for your Google password.');

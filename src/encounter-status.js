@@ -1,4 +1,4 @@
-import {freightEscortPhaseReady} from './freight-escort.js?v=welcome-popup-r60';
+import {freightEscortPhaseReady} from './freight-escort.js?v=mandatory-google-r61';
 /** Display existing encounter timing without changing spawning, rewards or difficulty. */
 export function encounterStatus(zone,{tasks}={}){
  if(!zone||zone.status!=='active')return null;

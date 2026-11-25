@@ -1,5 +1,5 @@
-import {fieldAbilitySummary} from './field-ability.js?v=welcome-popup-r60';
-import {compatibleStorage} from './storage-compat.js?v=welcome-popup-r60';
+import {fieldAbilitySummary} from './field-ability.js?v=mandatory-google-r61';
+import {compatibleStorage} from './storage-compat.js?v=mandatory-google-r61';
 
 const withAbility=node=>Object.freeze({...node,description:node.description+' '+fieldAbilitySummary(node.id)});
 

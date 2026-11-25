@@ -859,3 +859,8 @@
 #overlay.menu-overlay>.game-menu.onboarding-shell{margin:auto;min-height:0;flex:none}
 #overlay .onboarding-shell .welcome-later{min-height:48px}
 @media(max-width:480px){#overlay.menu-overlay:has(>.onboarding-shell){padding:12px!important}}
+/* Registered identity belongs on the opposite side of the menu title. */
+#overlay .game-menu header.menu-brand{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:nowrap}
+#overlay .game-menu header.menu-brand h1{margin:0;min-width:0}
+#overlay .game-menu header.menu-brand .operator-chip{margin-left:auto;flex-shrink:1;min-width:48px}
+@media(max-width:480px){#overlay .game-menu header.menu-brand{gap:10px}#overlay .game-menu header.menu-brand .operator-chip{max-width:140px}#overlay .game-menu header.menu-brand .operator-chip span{max-width:85px}}

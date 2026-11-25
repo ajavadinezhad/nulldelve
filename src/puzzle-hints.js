@@ -1,4 +1,4 @@
-import {ARTIFACTS} from './progression.js?v=welcome-popup-r60';
+import {ARTIFACTS} from './progression.js?v=mandatory-google-r61';
 /** Player-requested hints reveal one layer at a time, only for the nearby puzzle. */
 const PUZZLES=[
  {id:'freight-drain',title:'Freight flood control',bounds:[154,171,23,37],unsolved:c=>c.state.operationId==='freight'&&!c.state.operationTasks?.freightDrain},

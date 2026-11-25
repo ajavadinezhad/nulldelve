@@ -1,10 +1,10 @@
-import {annexMechanismPanel,annexMechanismSolved} from './annex-mechanisms.js?v=welcome-popup-r60';
-import {freightEscortStatus,FREIGHT_ESCORT_DURATION,freightEscortPhaseReady} from './freight-escort.js?v=welcome-popup-r60';
-import {initialMechanism,mechanismAction,mechanismSolved,mechanismStateValid,mechanismPanel,nextMechanismAction} from './physical-puzzles.js?v=welcome-popup-r60';
-import {puzzleAccessVisible,puzzleAccessPoint} from './puzzle-access.js?v=welcome-popup-r60';
-import {OPERATION_ROUTES} from './operation-routes.js?v=welcome-popup-r60';
-import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=welcome-popup-r60';
-import {DIFFICULTY_RULES} from './difficulty.js?v=welcome-popup-r60';
+import {annexMechanismPanel,annexMechanismSolved} from './annex-mechanisms.js?v=mandatory-google-r61';
+import {freightEscortStatus,FREIGHT_ESCORT_DURATION,freightEscortPhaseReady} from './freight-escort.js?v=mandatory-google-r61';
+import {initialMechanism,mechanismAction,mechanismSolved,mechanismStateValid,mechanismPanel,nextMechanismAction} from './physical-puzzles.js?v=mandatory-google-r61';
+import {puzzleAccessVisible,puzzleAccessPoint} from './puzzle-access.js?v=mandatory-google-r61';
+import {OPERATION_ROUTES} from './operation-routes.js?v=mandatory-google-r61';
+import {WIRE_LAYOUT,WIRE_SOLUTION,junctionPorts,createWireCircuit,rotateJunction,powerCircuit} from './wire-circuit.js?v=mandatory-google-r61';
+import {DIFFICULTY_RULES} from './difficulty.js?v=mandatory-google-r61';
 export function progressionSequences(remix=false){return remix?{archive:['square','triangle','circle'],power:['power-c','power-a','power-b'],valves:['valve-b','valve-a','valve-b','valve-a']}:{archive:['triangle','circle','square'],power:['power-a','power-b','power-c'],valves:['valve-a','valve-b','valve-a','valve-b']};}
 // Facility progression is pure state, independent of rendering and collision.
 // Door 0's pressure-plate power requirement remains owned by pressure-puzzle.js.

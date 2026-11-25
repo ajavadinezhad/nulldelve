@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import {soldier} from './character.js?v=welcome-popup-r60';
-import {createRoach} from './roach.js?v=welcome-popup-r60';
+import {soldier} from './character.js?v=mandatory-google-r61';
+import {createRoach} from './roach.js?v=mandatory-google-r61';
 
 const cache=new Map();
 let renderAttempted=false;

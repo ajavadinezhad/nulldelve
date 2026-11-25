@@ -165,3 +165,73 @@ false. Thus the visible Google button reports setup is pending; no real Google
 login or profile creation has yet been verified. Desktop and 393px phone popup
 layouts were checked using an isolated UI fixture (no authenticated test user).
 The new browser UI is being published; native account callbacks still need work.
+
+
+### Mandatory Google gate (prepared locally, not published)
+
+The owner explicitly changed sign-in from optional to mandatory. The local
+implementation has no dismiss/Back path through the login popup, defers direct
+mission and checkpoint launch until Google and identity verification pass, and
+blocks resume/menu navigation while signed out. The old welcome-seen marker
+never grants access. A restored Supabase session is checked against `/auth/v1/user`
+for a Google provider, then the private player identity is fetched. Returning
+verified accounts proceed automatically without another Google consent screen.
+Only completed identities appear as the main menu's right-aligned avatar chip;
+the duplicate unsigned header login button has been removed.
+
+Do not publish this gate until Google sign-in has been connected and tested:
+the current public provider remains disabled. The owner approved creating a
+separate Google Cloud project named Nulldelve, without enabling paid services or
+adding billing. Google's new-project form requires a billing account; submitting
+with that field blank returns "Billing account is required". No project or OAuth
+client has been created, and no billing account has been linked. The existing
+projects (VPSs, Void and SSD-HPCAN) have not been modified. Owner input is needed
+to select a billing path personally or authorize reusing a particular project.
+
+### Google Cloud setup — 2026-11-25
+
+After the owner explicitly selected My Billing Account 1, a separate Google Cloud
+project was created successfully: project ID `nulldelve`, name Nulldelve, no
+organization. The Google Auth Platform configuration is now present (the owner
+completed the configuration while browser control was handed over). No paid
+compute service was enabled and no existing project's credentials were changed.
+
+A Web application OAuth client form named `Nulldelve Web` is prepared, not yet
+submitted. Its JavaScript origin is `https://ajavadinezhad.github.io`; its only
+Google redirect URI is
+`https://jgmqtibhrpqqqoxycakh.supabase.co/auth/v1/callback`.
+The owner must finish client creation and enter its secret directly into the
+Supabase Google provider form; it must never be put in this repository or chat.
+
+Supabase Site URL was changed from local testing to
+`https://ajavadinezhad.github.io/nulldelve/`. Exact extra callbacks saved and
+visibly verified: the hosted `account-deletion.html` page and
+`http://localhost:8058/` for isolated local browser testing. No wildcard callback
+was added. Google provider activation, real OAuth, profile creation, and refresh
+persistence checks remain pending. The mandatory gate remains unpublished.
+
+### Verified Google flow and production publication — 2026-11-25
+
+The owner entered the OAuth client ID/secret directly in Supabase. Google was
+then enabled and the dashboard visibly reported `Google ENABLED`. The client
+secret was never read into source, chat, or frontend configuration.
+
+Real Chrome checks against the isolated local browser build succeeded:
+- mandatory welcome shows Continue with Google, with no Back or dismissal;
+- Google redirects through the exact Supabase callback and PKCE returns to the
+  originating browser; the callback code is removed from the URL;
+- the post-sign-in username/display-name/avatar form appears;
+- the owner completed identity `AJ`, username `ajavadinezhad`, preset `sentinel`;
+- refresh restores the signed-in account and profile without another consent;
+- the account panel reports Checkpoint saved to cloud;
+- the profile chip is aligned opposite the title, including a 393px phone layout;
+- an authenticated Breach deployment starts and the compact AJ avatar appears in
+  the gameplay cash row. The test mission was paused without buying or shooting.
+These are browser checks, not physical Android OAuth/callback sign-off.
+
+Google branding now links to the hosted game and public privacy policy. After
+explicit owner approval of public publication, the Google Auth Audience page
+visibly reported **In production**. No logo, sensitive API scopes or wildcard
+callbacks were added. The mandatory browser build is ready for publication;
+Android system-browser callback routing and a live disposable-account deletion
+check remain outstanding before claiming native/store account readiness.
