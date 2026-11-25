@@ -9,7 +9,7 @@ export function renderAccount(host,{state={},draft={},onAction=()=>{}}={}){
  if(state.checking){const loading=el('p','Checking your account…');loading.setAttribute('role','status');panel.append(loading);return;}
  panel.append(el('h3',!state.configured?'Account':!signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
  if(state.connectionError){p(state.connectionError);action('Retry connection','reconnect').className='menu-button primary';action('Sign out','signout');return;}
-!state.configured?'Account':!signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
+ panel.append(el('h3',!state.configured?'Account':!signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
  if(!state.configured){p(state.requireGoogle?'Connect to the account service to sign in.':'Cloud saves are not available in this build. Your checkpoints stay on this device.');if(state.requireGoogle)action('Retry connection','reconnect');return;}
  if(!signedIn){
   p(state.requireGoogle?'Sign in to enter the facility.':'Your operator. Your progress.');
@@ -18,7 +18,7 @@ export function renderAccount(host,{state={},draft={},onAction=()=>{}}={}){
   p('Google handles sign-in. We never ask for your Google password.');
   const privacy=el('a','Privacy policy');privacy.href='privacy.html';privacy.target='_blank';privacy.rel='noopener noreferrer';panel.append(privacy);
  }else{
-  if(state.profileLoaded===false){p('Loading your operator…');action('Retry connection','reconnect');action('Sign out','signout');return;}
+  if(state.profileLoaded===false){p('Could not load your operator.');action('Retry connection','reconnect');action('Sign out','signout');return;}
   if(state.profileLoaded===true&&(!state.profile||draft.editProfile)){
    if(state.profile)panel.append(el('h4','Edit operator'));
    const form=el('form');form.className='account-form identity-form';
