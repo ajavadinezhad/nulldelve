@@ -277,3 +277,81 @@
 .touch-controls-enabled .hud-feedback{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 112px);left:calc(max(10px,env(safe-area-inset-left)) + 58px);right:auto;transform:none;width:calc(100vw - max(10px,env(safe-area-inset-left)) - 58px - max(8px,env(safe-area-inset-right)));max-height:min(180px,calc(100dvh - 300px))}
 .touch-controls-enabled.touch-left-handed .hud-feedback{left:max(8px,env(safe-area-inset-left));right:auto;width:calc(100vw - max(10px,env(safe-area-inset-right)) - 58px - max(8px,env(safe-area-inset-left)))}
 }
+
+/* Phone HUD: instruments and utilities share safe-area anchors in both orientations. */
+@media (max-width: 900px), (orientation: landscape) and (max-height: 520px) {
+  .touch-controls-enabled .hud {
+    --phone-left: max(8px, env(safe-area-inset-left));
+    --phone-right: max(8px, env(safe-area-inset-right));
+    --phone-top: calc(6px + env(safe-area-inset-top));
+    --phone-utility-top: calc(var(--phone-top) + var(--combat-panel-height, 60px) + 4px);
+  }
+
+  .touch-controls-enabled .player-status {
+    inset: var(--phone-top) var(--phone-right) auto var(--phone-left);
+    width: auto;
+    max-width: none;
+    grid-template-columns: 60px minmax(0, 1fr) 104px;
+    padding: 4px 7px;
+    gap: 7px;
+    border-radius: 8px;
+    background: #101620d9;
+    box-shadow: none;
+  }
+  .touch-controls-enabled .vital > .status-caption,
+  .touch-controls-enabled #weapon-preview { display: none; }
+  .touch-controls-enabled .player-status .weapon-status {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 23px auto;
+    gap: 0;
+  }
+  .touch-controls-enabled .player-status #weapon { grid-column: 1; }
+  .touch-controls-enabled .player-status #ammo { font-variant-numeric: tabular-nums; }
+  .touch-controls-enabled .hud > header {
+    inset: var(--phone-utility-top) var(--phone-right) auto auto;
+    width: auto;
+    height: 48px;
+  }
+  .touch-controls-enabled .brand { display: none; }
+  .touch-controls-enabled .hud-menu-controls { flex-direction: row; gap: 4px; }
+  .touch-controls-enabled .hud-menu-controls #replay-guidance { position: static; inset: auto; }
+  .touch-controls-enabled .map-panel:not(.map-expanded),
+  .touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded) {
+    inset: var(--phone-utility-top) auto auto var(--phone-left);
+    width: 48px;
+    height: 48px;
+    box-sizing: border-box;
+  }
+  .touch-controls-enabled .player-status #switch-grenade {
+    inset: var(--phone-utility-top) auto auto calc(var(--phone-left) + 52px);
+  }
+  .touch-controls-enabled aside.mission-note,
+  .touch-controls-enabled aside.mission-note:has(.mission-guidance),
+  .touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note:has(.mission-guidance),
+  .touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note {
+    inset: calc(var(--phone-utility-top) + 52px) auto auto var(--phone-left);
+    width: fit-content;
+    max-width: min(340px, calc(100vw - var(--phone-left) - var(--phone-right)));
+    padding: 4px 7px;
+    background: #101620bc;
+  }
+}
+@media (orientation: landscape) and (min-width: 600px) and (max-height: 520px) {
+  .touch-controls-enabled .hud { --phone-utility-top: var(--phone-top); }
+  .touch-controls-enabled .player-status { right: auto; width: min(300px, calc(100vw - var(--phone-left) - var(--phone-right) - 264px)); }
+  .touch-controls-enabled .map-panel:not(.map-expanded),
+  .touch-controls-enabled .hud:has(#horde-status:not([hidden])) .map-panel:not(.map-expanded) {
+    left: auto;
+    right: calc(var(--phone-right) + 156px);
+  }
+  .touch-controls-enabled .player-status #switch-grenade {
+    left: auto;
+    right: calc(var(--phone-right) + 208px);
+  }
+  .touch-controls-enabled aside.mission-note,
+  .touch-controls-enabled aside.mission-note:has(.mission-guidance),
+  .touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note:has(.mission-guidance),
+  .touch-controls-enabled .hud:has(#horde-status:not([hidden])) .mission-note {
+    top: calc(var(--phone-top) + var(--combat-panel-height, 60px) + 4px);
+  }
+}
