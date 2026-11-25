@@ -10,7 +10,11 @@ test('unique kills fill the bar, unlock a spendable point, and survive checkpoin
  const device={getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)};
  const economy=createEconomy(),before=economy.serialize();
  const profile=createCampaignProfile({storage:device,economy});
- for(let i=0;i<15;i++)assert.ok(economy.claimEnemyReward('kill.security.'+i,'normal').ok);
+ assert.equal(economy.claimEnemyReward('kill.security.0','normal').xp,1);
+ assert.equal(economy.claimEnemyReward('kill.security.1','brute').xp,4);
+ for(let i=2;i<11;i++)assert.equal(economy.claimEnemyReward('kill.security.'+i,'boss').xp,15);
+ assert.equal(economy.claimEnemyReward('kill.security.11','charger').xp,5);
+ assert.equal(economy.claimEnemyReward('kill.security.12','leaper').xp,5);
  assert.deepEqual(playerLevel(economy.state.xp),{level:2,xp:0,next:200,points:1});
  assert.equal(economy.claimEnemyReward('kill.security.0','normal').alreadyClaimed,true);
  assert.ok(profile.persist());
@@ -23,4 +27,11 @@ test('unique kills fill the bar, unlock a spendable point, and survive checkpoin
  assert.equal(trainingPoints(skills.serialize(['breach']),['breach'],economy.state.xp),1);
  assert.equal(skills.learn('runner',['breach']).ok,false);
  assert.equal(createFieldSkills(device,()=>economy.state.xp).selected(['breach']),'medic');
+});
+
+test('old kill records keep the XP they originally awarded',()=>{
+ const economy=createEconomy({claimedRewards:{'kill.security.0':true}});
+ assert.equal(economy.state.xp,10);
+ assert.equal(economy.claimEnemyReward('kill.security.1','normal').xp,1);
+ assert.equal(createEconomy(economy.serialize()).state.xp,11);
 });

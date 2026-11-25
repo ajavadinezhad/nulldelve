@@ -1,7 +1,12 @@
-const XP_PER_KILL = 10;
+const enemyScores = Object.freeze({normal:1, runner:2, brute:4, charger:5, sentinel:7, screecher:6, leaper:5, spitter:5, mender:6, boss:15});
 
-export function earnedKillXP(claims = {}) {
-  return Object.keys(claims).filter(id => id.startsWith('kill.')).length * XP_PER_KILL;
+export function enemyXP(variant) {
+  return Object.hasOwn(enemyScores,variant) ? enemyScores[variant] : 1;
+}
+
+export function earnedKillXP(claims = {}, scores = {}) {
+  // Older claims earned 10 XP before enemy-specific scoring was introduced.
+  return Object.keys(claims).reduce((sum,id)=>sum+(id.startsWith('kill.')?(scores[id]??10):0),0);
 }
 
 export function playerLevel(totalXP = 0) {

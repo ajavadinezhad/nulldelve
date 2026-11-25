@@ -1,4 +1,4 @@
-import {playerLevel} from './player-level.js';
+import {playerLevel} from './player-level.js?v=weighted-xp-r70';
 import {avatarPath,operatorAccessReady} from './player-identity.js?v=mandatory-google-r61';
 import {renderAccount} from './account-ui.js?v=welcome-r69';
 import {renderFieldJournal,journalIcon} from './field-journal.js?v=mandatory-google-r61';

@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {weapon} from './weapons.js?v=mandatory-google-r61';
+import {weapon} from './weapons.js?v=weighted-xp-r70';
 
 // All art is generated locally: no external models or texture downloads.
 export function buildArt(scene, box, cover, rooms) {

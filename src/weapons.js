@@ -187,7 +187,7 @@ export function weapon(type='rifle'){
 // should emit only the player's shots and pass dt=0 while the operation is paused.
 export function createCombatEffects(scene){
   const particles=[],marks=[],splatter=[],xpLabels=[];
-  let xpTexture;
+  const xpTextures=new Map();
   const fluid=new THREE.MeshBasicMaterial({color:0x89bf43,transparent:true,opacity:.72,depthWrite:false});
   const smokeMaterial=new THREE.MeshBasicMaterial({color:0xbfc8b9,transparent:true,opacity:.22,depthWrite:false});
   const dustMaterial=new THREE.MeshBasicMaterial({color:0xc3b894,transparent:true,opacity:.48,depthWrite:false});
@@ -245,7 +245,9 @@ export function createCombatEffects(scene){
       splatter.push({mesh:spot,life:12});
     }
   }
-  function experience(x,z,height,{reducedMotion=false}={}){
+  function experience(x,z,height,{amount=1,reducedMotion=false}={}){
+    const text=`+${amount} XP`;
+    let xpTexture=xpTextures.get(amount);
     if(!xpTexture){
       const canvas=document.createElement('canvas');
       canvas.width=256;canvas.height=96;
@@ -254,10 +256,11 @@ export function createCombatEffects(scene){
       ctx.font='bold 54px system-ui';
       ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.strokeStyle='#141820';ctx.lineWidth=8;
-      ctx.strokeText('+10 XP',128,48);
-      ctx.fillStyle='#f7ce82';ctx.fillText('+10 XP',128,48);
+      ctx.strokeText(text,128,48);
+      ctx.fillStyle='#f7ce82';ctx.fillText(text,128,48);
       xpTexture=new THREE.CanvasTexture(canvas);
       xpTexture.colorSpace=THREE.SRGBColorSpace;
+      xpTextures.set(amount,xpTexture);
     }
     if(xpLabels.length>=10)removeEffect(xpLabels,0);
     const mesh=new THREE.Sprite(new THREE.SpriteMaterial({map:xpTexture,transparent:true,depthTest:false,depthWrite:false}));
@@ -265,7 +268,7 @@ export function createCombatEffects(scene){
     mesh.renderOrder=11; // Draw above the fog plane after visibility is checked at the kill.
     mesh.scale.set(2.05,.77,1);
     scene.add(mesh);
-    xpLabels.push({mesh,life:1.35,reducedMotion});
+    xpLabels.push({mesh,life:1.45,reducedMotion,z:mesh.position.z});
   }
   function clearFeedback(){
     for(const list of [splatter,xpLabels])while(list.length)removeEffect(list,list.length-1);
@@ -277,7 +280,10 @@ export function createCombatEffects(scene){
       effect.life-=dt;
       if(effect.life<=0){removeEffect(list,i);continue;}
       const floating=list===xpLabels;
-      if(floating&&!effect.reducedMotion)effect.mesh.position.z-=dt*.72;
+      if(floating&&!effect.reducedMotion){
+        const rise=Math.min(1,(1.45-effect.life)/.42);
+        effect.mesh.position.z=effect.z-.65*(1-(1-rise)**2);
+      }
       effect.mesh.material.opacity=floating?Math.min(1,effect.life*2.5):.65*Math.min(1,effect.life/3);
     }
     for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;if(p.life<=0){removeParticle(i);continue;}
@@ -288,6 +294,6 @@ export function createCombatEffects(scene){
       }else{if(p.kind==='fluid')p.velocity.y-=7*dt;p.velocity.multiplyScalar(Math.exp(-3*dt));p.mesh.scale.addScalar(dt*.22);p.mesh.material.opacity=(p.kind==='smoke'?.22:['shell','rear'].includes(p.kind)?.9:p.kind==='resisted'?.65:.48)*Math.max(0,p.life/p.maxLife);}
     }
   }
-  function dispose(){clearFeedback();xpTexture?.dispose();fluid.dispose();while(particles.length)removeParticle(particles.length-1);for(const mark of marks)scene.remove(mark);marks.length=0;markGeometry.dispose();hitGeometry.dispose();recoveryGeometry.dispose();for(const material of Object.values(hitMaterials))material.dispose();markMaterial.dispose();smokeMaterial.dispose();dustMaterial.dispose();}
+  function dispose(){clearFeedback();for(const texture of xpTextures.values())texture.dispose();xpTextures.clear();fluid.dispose();while(particles.length)removeParticle(particles.length-1);for(const mark of marks)scene.remove(mark);marks.length=0;markGeometry.dispose();hitGeometry.dispose();recoveryGeometry.dispose();for(const material of Object.values(hitMaterials))material.dispose();markMaterial.dispose();smokeMaterial.dispose();dustMaterial.dispose();}
   return {shot,impact,hit,enemySplatter,experience,clearFeedback,update,dispose};
 }

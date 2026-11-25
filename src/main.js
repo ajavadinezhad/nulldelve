@@ -1,4 +1,4 @@
-import {playerLevel} from './player-level.js';
+import {playerLevel} from './player-level.js?v=weighted-xp-r70';
 import {avatarPath,operatorAccessReady} from './player-identity.js?v=mandatory-google-r61';
 import {createCloudAccount} from './cloud-account.js?v=mandatory-google-r61';
 import {createCloudSync} from './cloud-sync.js?v=mandatory-google-r61';
@@ -41,7 +41,7 @@ const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
 import {buildArt} from './environment.js?v=mandatory-google-r61';
 import {soldier, animateSoldier} from './character.js?v=mandatory-google-r61';
-import {weapon, createCombatEffects} from './weapons.js?v=feedback-r67';
+import {weapon, createCombatEffects} from './weapons.js?v=weighted-xp-r70';
 import {addRoomDetails} from './room-details.js?v=mandatory-google-r61';
 import {createMinimap} from './minimap.js?v=mandatory-google-r61';
 import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=mandatory-google-r61';
@@ -55,9 +55,9 @@ import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from '
 import {buildWorld} from './world-render.js?v=mandatory-google-r61';
 import {createNavigator} from './navigation.js?v=mandatory-google-r61';
 import {createGameMenu} from './game-menu.js?v=welcome-r69';
-import {createSaveSlots} from './save-slots.js?v=operator-xp-r65';
+import {createSaveSlots} from './save-slots.js?v=weighted-xp-r70';
 import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=mandatory-google-r61';
-import {createEconomy} from './economy.js?v=operator-xp-r65';
+import {createEconomy} from './economy.js?v=weighted-xp-r70';
 import {createExplosions} from './explosion.js?v=mandatory-google-r61';
 import {createGameAudio} from './audio.js?v=mandatory-google-r61';
 import {DEFAULT_BINDINGS,actionForCode,formatKey,pointerHasMoved,keyboardAimDirection} from './controls.js?v=mandatory-google-r61';
@@ -65,7 +65,7 @@ import {createFixedStepper,restartOperationUrl,combatIsActive,canCheckpoint,safe
 import {createLootState,dropEnemyLoot,collectNearbyLoot,refillMagazine} from './loot.js?v=mandatory-google-r61';
 import {observeHudLayout} from './interface-layout.js?v=mandatory-google-r61';
 import {createMapFocus} from './map-accessibility.js?v=mandatory-google-r61';
-import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=operator-xp-r65';
+import {encodeDeploymentState,decodeDeploymentState} from './deployment-state.js?v=weighted-xp-r70';
 import {placeLootDrops} from './loot-placement.js?v=mandatory-google-r61';
 import {createExplosiveBarrels} from './explosive-barrels.js?v=mandatory-google-r61';
 import {createDoorHintCamera,previewFog} from './door-hint-camera.js?v=mandatory-google-r61';
@@ -77,7 +77,7 @@ import {createOnboarding} from './onboarding.js?v=mandatory-google-r61';
 import {createOperationStats,recordResult,formatDuration,readOperationRecords} from './operation-records.js?v=mandatory-google-r61';
 import {validateSnapshot} from './snapshot-validation.js?v=mandatory-google-r61';
 import {DIFFICULTY_RULES} from './difficulty.js?v=mandatory-google-r61';
-import {createCampaignProfile} from './campaign-profile.js?v=operator-xp-r65';
+import {createCampaignProfile} from './campaign-profile.js?v=weighted-xp-r70';
 import {primaryWeapon,shotDirections,primaryReserve} from './arsenal.js?v=mandatory-google-r61';
 import {createCampaignProgress} from './campaign-progress.js?v=mandatory-google-r61';
 import {buildOperationEnvironment} from './operation-environments.js?v=mandatory-google-r61';
@@ -232,6 +232,8 @@ function updateXPBar(totalXP){
  if(!label||!bar)return;
  const {level,xp,next}=playerLevel(totalXP);
  label.textContent='Lv '+level;
+ const count=$('#player-xp-count');
+ if(count)count.textContent=xp+' / '+next+' XP';
  bar.max=next;
  bar.value=xp;
  bar.setAttribute('aria-valuetext',xp+' of '+next+' XP to level '+(level+1));
@@ -571,9 +573,9 @@ function refreshHelp(){
 refreshGuidance(true);
 
 function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;const xpPosition=enemy.mesh?.visible?{x:enemy.x,z:enemy.z}:null;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(result=>{
- if(result?.ok&&xpPosition&&enemies.includes(enemy)&&!ended){
+ if(result?.ok&&result.xp>0&&xpPosition&&enemies.includes(enemy)&&!ended){
   const {x,z}=xpPosition;
-  combatEffects.experience(x,z,stairHeightAt(x,z)+1.6,{reducedMotion:!!menu?.settings.reducedEffects});
+  combatEffects.experience(x,z,stairHeightAt(x,z)+1.6,{amount:result.xp,reducedMotion:!!menu?.settings.reducedEffects});
  }
  hud();cloudSync.schedule();
  }).catch(()=>{});const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected,reachable:los});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
