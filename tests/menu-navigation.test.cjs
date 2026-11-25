@@ -123,3 +123,19 @@ test('first-visit welcome is a popup without Back and returning operators keep p
 
 test('mandatory login cannot be escaped, hidden, or bypassed by menu navigation and local checkpoints',()=>{const h=harness();h.state.loginRequired=true;h.state.cloud={configured:true,signedIn:false,profileLoaded:false};h.state.checkpoint={name:'Existing checkpoint'};h.state.canContinue=true;for(const target of ['main','missions','armory','pause']){h.menu.show(target);assert.ok(h.text().includes('Continue with Google'));assert.equal(h.find('Back'),undefined);assert.equal(h.find('Maybe later'),undefined);assert.equal(h.find('New operation'),undefined);h.escape();assert.ok(h.text().includes('Continue with Google'));h.menu.hide();assert.equal(h.menu.isOpen(),true);}h.state.cloud={configured:true,signedIn:true,googleVerified:true,profileLoaded:true,profile:null};h.menu.show('main');assert.ok(h.text().includes('Create your operator'));assert.equal(h.find('Back'),undefined);});
 
+
+test('Back discards unsaved operator edits and returns to account overview',async()=>{
+ const h=harness();
+ h.state.cloud={configured:true,signedIn:true,profileLoaded:true,profile:{username:'operator',displayName:'Operator',avatar:'sentinel'}};
+ h.menu.show('account');
+ h.find('Edit operator').onclick();
+ assert.ok(h.find('Save operator'));
+ const name=h.overlay.querySelectorAll('input').find(input=>input.autocomplete==='nickname');
+ name.value='Unsaved';
+ name.oninput();
+ await h.click('Back');
+ assert.ok(h.find('Edit operator'));
+ assert.ok(h.text().includes('Cloud save'));
+ h.find('Edit operator').onclick();
+ assert.equal(h.overlay.querySelectorAll('input').find(input=>input.autocomplete==='nickname').value,'Operator');
+});
