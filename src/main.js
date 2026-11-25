@@ -41,7 +41,7 @@ const mutationNotes=createMutationNotes();
 import * as THREE from '../vendor/three.module.js';
 import {buildArt} from './environment.js?v=mandatory-google-r61';
 import {soldier, animateSoldier} from './character.js?v=mandatory-google-r61';
-import {weapon, createCombatEffects} from './weapons.js?v=combat-fx-r66';
+import {weapon, createCombatEffects} from './weapons.js?v=feedback-r67';
 import {addRoomDetails} from './room-details.js?v=mandatory-google-r61';
 import {createMinimap} from './minimap.js?v=mandatory-google-r61';
 import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=mandatory-google-r61';
@@ -403,7 +403,7 @@ let last=performance.now(),lastPausedRender=0;renderer.setAnimationLoop(()=>{
  const dt=Math.min(elapsed,.1);if(liftTransfer.active&&active&&!paused&&!mapOpen&&!helpOpen&&!menu?.isOpen()){if(liftTransfer.update(dt,player)){touchControls?.reset();keys.clear();shooting=false;updateFog();audio.door(false);$('#hud-status').textContent='Service lift arrived';}liftCurtain.style.opacity=liftTransfer.active?String(Math.sin(liftTransfer.progress*Math.PI)*.9):'0';}else liftCurtain.style.opacity='0';let running=isRunning();if(running)time+=dt;audio.setPaused(!running);simulation.advance(elapsed,simulate,running);running=isRunning();if(!running&&!liftTransfer.active&&!doorHint?.isActive()&&now-lastPausedRender<250)return;if(!running)lastPausedRender=now;const hintFocus=doorHint?.update(dt,player);
 
  transitArt.userData.update(liftTransfer.linkId);
- for(const d of doors){d.group.position.set(d.x+(d.axis==='x'?d.slide*3:0),0,d.z+(d.axis==='z'?d.slide*3:0));if(d!==doors[0])d.status.material.color.set(d.progressLocked?0xe57c59:0x92d9a6);}
+ for(const d of doors){d.group.visible=!d.open||d.slide<.92;d.group.position.set(d.x+(d.axis==='x'?d.slide*3:0),0,d.z+(d.axis==='z'?d.slide*3:0));if(d!==doors[0])d.status.material.color.set(d.progressLocked?0xe57c59:0x92d9a6);}
  const cameraButton=$('#replay-guidance');cameraButton.hidden=!active||ended||!!menu?.isOpen();cameraButton.disabled=guidanceBusy||!!doorHint?.isActive();cameraButton.classList.toggle('unaffordable',economy.state.credits<GUIDANCE_COST);
  salvageArt.update();const explorationFrame=explorationEvents.update(dt,{player,operation:runConfig.operation,visible,enabled:running});explorationArt.update(explorationFrame.active);if(explorationFrame.started.length)queueCheckpoint('Service recess discovered');
  const nearest=isRunning()?nearbyDoor():null;const cashCache=isRunning()?nearbySalvage():null;const devicePrompt=cashCache?`E · SALVAGE · $${cashCache.amount}`:isRunning()?progression.getPrompt(player):null;const sectorExit=runConfig.operation?campaignOperationExit(runConfig.operation):null,exitReady=!!sectorExit&&campaignOperationObjectivesComplete(runConfig.operation,{player,progression});missionPoints.exit=runConfig.operation?(exitReady?sectorExit:null):{x:92,z:60};missionPoints.intel=runConfig.operation&&runConfig.operation!=='nest'?null:{x:93,z:7};sectorExitMarker.visible=exitReady&&visible(sectorExit.x,sectorExit.z);if(exitReady)sectorExitMarker.position.set(sectorExit.x,.06,sectorExit.z);const exitPrompt=isRunning()&&exitReady&&Math.hypot(player.x-sectorExit.x,player.z-sectorExit.z)<=1.4?(runConfig.operation==='nest'?'E · EVACUATE':'E · LEAVE SECTOR'):null;const cratePrompt=isRunning()?(puzzle.grabbed!=null?'E · RELEASE TO LET GO':nearestPullableCrate(puzzle,player,(x,z,r)=>solid(x,z,r,true))?'E · HOLD TO GRAB CRATE':null):null;$('#interact').textContent=(cratePrompt||exitPrompt||(isRunning()&&!combatIsActive(player,enemies,progression.state.zones)&&liftTransfer.nearby(player,runConfig.operation)?'E · RIDE LIFT':null)||devicePrompt||(nearest?(nearest.progressLocked?'E · LOCKED':nearest.needsPower&&!nearest.unlocked?'E · LOCKED · NO POWER':`E · ${nearest.open?'CLOSE':'OPEN'} DOOR`):'')).replace(/^E · /,formatKey(bindings().interact)+' · ');
@@ -556,8 +556,11 @@ function refreshHelp(){
 }
 refreshGuidance(true);
 
-function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(result=>{
- if(result?.ok&&enemies.includes(enemy)&&!menu?.settings.reducedEffects&&visible(enemy.x,enemy.z))combatEffects.experience(enemy.x,enemy.z,stairHeightAt(enemy.x,enemy.z)+1.6);
+function rewardEnemyKill(enemy){if(ended||enemy.lootDropped)return;operationStats.kills++;const xpPosition=enemy.mesh?.visible?{x:enemy.x,z:enemy.z}:null;campaignProfile.queueEnemyReward(enemy.rewardIdentity??`kill.static.${Math.max(0,(Number(enemy.id?.slice(1))||1)-1)}`,enemy.variant).then(result=>{
+ if(result?.ok&&xpPosition&&enemies.includes(enemy)&&!ended){
+  const {x,z}=xpPosition;
+  combatEffects.experience(x,z,stairHeightAt(x,z)+1.6,{reducedMotion:!!menu?.settings.reducedEffects});
+ }
  hud();cloudSync.schedule();
  }).catch(()=>{});const drops=dropEnemyLoot(loot,enemy,{player,weapons,difficulty:runConfig.difficulty,selected,reachable:los});placeLootDrops(loot,drops,enemy,{solid,lineOfSight:los});scene.remove(enemy.mesh);if(enemy.healthBar)scene.remove(enemy.healthBar.group);enemy.mesh=new THREE.Group();enemy.mesh.visible=false;persistCampaignProfile();hud();}
 

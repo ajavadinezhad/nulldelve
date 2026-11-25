@@ -245,7 +245,7 @@ export function createCombatEffects(scene){
       splatter.push({mesh:spot,life:12});
     }
   }
-  function experience(x,z,height){
+  function experience(x,z,height,{reducedMotion=false}={}){
     if(!xpTexture){
       const canvas=document.createElement('canvas');
       canvas.width=256;canvas.height=96;
@@ -260,11 +260,12 @@ export function createCombatEffects(scene){
       xpTexture.colorSpace=THREE.SRGBColorSpace;
     }
     if(xpLabels.length>=10)removeEffect(xpLabels,0);
-    const mesh=new THREE.Sprite(new THREE.SpriteMaterial({map:xpTexture,transparent:true,depthWrite:false}));
-    mesh.position.set(x,height,z);
-    mesh.scale.set(1.8,.675,1);
+    const mesh=new THREE.Sprite(new THREE.SpriteMaterial({map:xpTexture,transparent:true,depthTest:false,depthWrite:false}));
+    mesh.position.set(x,height,z-.38);
+    mesh.renderOrder=11; // Draw above the fog plane after visibility is checked at the kill.
+    mesh.scale.set(2.05,.77,1);
     scene.add(mesh);
-    xpLabels.push({mesh,life:1});
+    xpLabels.push({mesh,life:1.35,reducedMotion});
   }
   function clearFeedback(){
     for(const list of [splatter,xpLabels])while(list.length)removeEffect(list,list.length-1);
@@ -276,7 +277,7 @@ export function createCombatEffects(scene){
       effect.life-=dt;
       if(effect.life<=0){removeEffect(list,i);continue;}
       const floating=list===xpLabels;
-      if(floating)effect.mesh.position.z-=dt*.72;
+      if(floating&&!effect.reducedMotion)effect.mesh.position.z-=dt*.72;
       effect.mesh.material.opacity=floating?Math.min(1,effect.life*2.5):.65*Math.min(1,effect.life/3);
     }
     for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;if(p.life<=0){removeParticle(i);continue;}

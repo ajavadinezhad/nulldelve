@@ -1,3 +1,3 @@
 function failure(){const overlay=document.querySelector('#overlay');overlay.replaceChildren();const panel=document.createElement('div');panel.className='card startup-error';const title=document.createElement('h1');title.textContent='Unable to start';const text=document.createElement('p');text.textContent='The game could not finish loading. Try again when your connection is stable.';const retry=document.createElement('button');retry.textContent='Try again';retry.onclick=()=>location.reload();panel.append(title,text,retry);overlay.append(panel);overlay.style.display='flex';}
-import('./main.js?v=combat-fx-r66').catch(error=>{console.error('NULLDELVE startup failed',error);failure();});
+import('./main.js?v=feedback-r67').catch(error=>{console.error('NULLDELVE startup failed',error);failure();});
 
