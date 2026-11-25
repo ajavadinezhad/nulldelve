@@ -1,3 +1,4 @@
+import {earnedKillXP} from './player-level.js';
 import {damageStep,damageBonus,reloadStep} from './weapon-tuning.js?v=mandatory-google-r61';
 import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=mandatory-google-r61';
 import {normalizeAttachments} from './weapon-attachments.js?v=mandatory-google-r61';
@@ -27,7 +28,7 @@ export function createEconomy(snapshot){
     state.credits=legacy?150:integer(data.credits,0,CREDIT_LIMIT);
     state.attachments=normalizeAttachments(data.attachments);
     state.replayAttempts=Object.fromEntries(Object.entries(data.replayAttempts??{}).filter(([operation,id])=>replayReward(id)?.operation===operation));
-    state.enemyRewardsVersion=legacy||data.enemyRewardsVersion===1?1:0;state.claimedRewards=normalizeRewardLedger(data.claimedRewards);
+    state.enemyRewardsVersion=legacy||data.enemyRewardsVersion===1?1:0;state.claimedRewards=normalizeRewardLedger(data.claimedRewards);state.xp=earnedKillXP(state.claimedRewards);
     for(const gun of GUNS)for(const upgrade of UPGRADES)state.upgrades[gun][upgrade]=integer((gun==='rifle'?(data.upgrades?.rifle??data.upgrades?.carbine):data.upgrades?.[gun])?.[upgrade],0,3);
     // Existing purchases used six rounds per tier. Preserve that paid capacity
     // and any loaded ammunition; new purchases add the weapon-specific step.
@@ -71,11 +72,11 @@ export function createEconomy(snapshot){
     const amount=Object.prototype.hasOwnProperty.call(REWARDS,variant)?REWARDS[variant]:0;
     state.credits=Math.min(CREDIT_LIMIT,state.credits+amount);return amount;
   }
-  function migrateEnemyRewards(ids=[]){if(state.enemyRewardsVersion===1)return {ok:false,alreadyClaimed:true,message:'Enemy rewards already migrated.'};for(const id of ids)if(validEnemyRewardId(id))state.claimedRewards[id]=true;state.enemyRewardsVersion=1;return {ok:true,amount:0,message:'Existing cash preserved.'};}
+  function migrateEnemyRewards(ids=[]){if(state.enemyRewardsVersion===1)return {ok:false,alreadyClaimed:true,message:'Enemy rewards already migrated.'};for(const id of ids)if(validEnemyRewardId(id))state.claimedRewards[id]=true;state.enemyRewardsVersion=1;state.xp=earnedKillXP(state.claimedRewards);return {ok:true,amount:0,message:'Existing cash preserved.'};}
   function claimEnemyReward(id,variant){
     if(!validEnemyRewardId(id)||!isEnemyRewardVariant(variant))return {ok:false,message:'Unknown enemy reward.'};
     if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,amount:0,message:'Enemy reward already paid.'};
-    state.claimedRewards[id]=true;const amount=variant==='paid'?0:rewardKill(variant);return {ok:true,amount,message:`+$${amount}`};
+    state.claimedRewards[id]=true;state.xp=earnedKillXP(state.claimedRewards);const amount=variant==='paid'?0:rewardKill(variant);return {ok:true,amount,message:`+$${amount}`};
   }
   function beginReplayAttempt(operation,token){const id=`replay.${operation}.${token}`;if(!replayReward(id))return {ok:false,message:'Unknown replay operation.'};state.replayAttempts[operation]=id;return {ok:true,rewardId:id,message:'Replay started.'};}
   function claimReward(id){const reward=cashReward(id);if(reward?.token&&state.replayAttempts[reward.operation]!==id)return {ok:false,expired:true,message:'This replay attempt is no longer active.'};if(!reward)return {ok:false,message:'Unknown cash reward.'};if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,message:'Already collected.'};state.claimedRewards[id]=true;state.credits=Math.min(CREDIT_LIMIT,state.credits+reward.amount);return {ok:true,amount:reward.amount,message:`+$${reward.amount} · ${reward.label}`};}
@@ -91,3 +92,4 @@ export function createEconomy(snapshot){
   restore(snapshot);
   return {state,getOffers,purchase,rewardKill,beginReplayAttempt,claimReward,claimEnemyReward,migrateEnemyRewards,consume,stats,serialize,restore};
 }
+

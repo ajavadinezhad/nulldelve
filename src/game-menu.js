@@ -1,8 +1,9 @@
+import {playerLevel} from './player-level.js';
 import {avatarPath,operatorAccessReady} from './player-identity.js?v=mandatory-google-r61';
 import {renderAccount} from './account-ui.js?v=startup-r64';
 import {renderFieldJournal,journalIcon} from './field-journal.js?v=mandatory-google-r61';
 import {createPuzzleDiscovery} from './puzzle-discovery.js?v=mandatory-google-r61';
-import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=mandatory-google-r61';
+import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=operator-xp-r65';
 import {compatibleStorage} from './storage-compat.js?v=mandatory-google-r61';
 import {formatDuration,operationRecordKey} from './operation-records.js?v=mandatory-google-r61';
 import {createCampaignMap} from './campaign-map.js?v=mandatory-google-r61';
@@ -173,9 +174,9 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
    const completed=current.completedOperations??[],state=current.skillState??{learned:[],selected:current.fieldSkill??'none'};
    selectedSkill=[...SKILL_NODES,{id:'none'}].some(node=>node.id===selectedSkill)?selectedSkill:(current.fieldSkill??'none');
    const skills=element('div','skill-tree'),map=element('div','skill-map'),details=element('section','skill-detail');
-   const toolbar=element('div','skill-toolbar');skills.append(toolbar);const points=trainingPoints(state,completed),allPointsEarned=CAMPAIGN_OPERATIONS.every(operation=>completed.includes(operation.id));toolbar.append(element('p','training-balance',`${points} training points`));if(allPointsEarned&&points===0)toolbar.append(element('p','skill-requirement','All operation points earned · Reset training to try another branch'));if(onRespecFieldSkills&&state.learned.length){const reset=element('div','training-reset');if(confirmTrainingReset){reset.append(element('p','','Reset learned skills and return all training points? Your weapons and purchases stay.'),button('Reset training',()=>action(async()=>{const result=await onRespecFieldSkills();if(result?.ok!==false)confirmTrainingReset=false;return result;},[],{close:false}),'menu-button secondary'),button('Cancel',()=>{confirmTrainingReset=false;render(false);},'menu-button secondary'));}else reset.append(button('Reset training',()=>{confirmTrainingReset=true;render(false);},'menu-button secondary'));toolbar.append(reset);}
+   const toolbar=element('div','skill-toolbar');skills.append(toolbar);const points=trainingPoints(state,completed,current.xp),rank=playerLevel(current.xp);toolbar.append(element('p','training-balance',`${points} training points`));const meter=element('progress','skill-xp');meter.max=rank.next;meter.value=rank.xp;meter.setAttribute('aria-label','XP to next level');toolbar.append(element('span','skill-requirement',`Level ${rank.level} · ${rank.xp} / ${rank.next} XP`),meter);if(onRespecFieldSkills&&state.learned.length){const reset=element('div','training-reset');if(confirmTrainingReset){reset.append(element('p','','Reset learned skills and return all training points? Your weapons and purchases stay.'),button('Reset training',()=>action(async()=>{const result=await onRespecFieldSkills();if(result?.ok!==false)confirmTrainingReset=false;return result;},[],{close:false}),'menu-button secondary'),button('Cancel',()=>{confirmTrainingReset=false;render(false);},'menu-button secondary'));}else reset.append(button('Reset training',()=>{confirmTrainingReset=true;render(false);},'menu-button secondary'));toolbar.append(reset);}
    const nodeButton=(node,tier)=>{
-    const learned=node.id==='none'||state.learned.includes(node.id),available=node.id==='none'||skillLearnable(node.id,state,completed),equipped=current.fieldSkill===node.id;
+    const learned=node.id==='none'||state.learned.includes(node.id),available=node.id==='none'||skillLearnable(node.id,state,completed,current.xp),equipped=current.fieldSkill===node.id;
     const control=button('',()=>{selectedSkill=node.id;selectedSkillBranch=SKILL_BRANCHES.find(branch=>branch.nodes.includes(node.id))?.id??selectedSkillBranch;revealSkillDetails=compactSkills();render(false);},'skill-circle'+(learned?' developed':'')+(available&&!learned?' available':'')+(equipped?' equipped':'')+(!learned&&!available?' locked':''));
     control.dataset.focusKey='skill-node-'+node.id;control.setAttribute('aria-pressed',String(selectedSkill===node.id));control.setAttribute('aria-label',`${node.name}, ${equipped?'equipped':learned?'developed':available?'available':'locked'}`);control.setAttribute('aria-controls','skill-detail');
     control.append(skillIcon(node));const badge=element('span','skill-circle-badge',equipped?'✓':!learned&&!available?'⌑':String(tier));badge.setAttribute('aria-hidden','true');control.append(badge);
@@ -192,13 +193,13 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
      for(const node of tierNodes){const holder=element('div','skill-node-wrap'+(node.requires&&state.learned.includes(node.requires)?' parent-developed':''));if(node.requires)holder.dataset.requires=node.requires;holder.append(nodeButton(node,tier),element('span','skill-node-name',node.name));row.append(holder);}lane.append(row);
     }branches.append(lane);
    }map.append(branches);
-   const node=selectedSkill==='none'?standard:SKILL_NODES.find(n=>n.id===selectedSkill),learned=node.id==='none'||state.learned.includes(node.id),canLearn=skillLearnable(node.id,state,completed);
+   const node=selectedSkill==='none'?standard:SKILL_NODES.find(n=>n.id===selectedSkill),learned=node.id==='none'||state.learned.includes(node.id),canLearn=skillLearnable(node.id,state,completed,current.xp);
    details.id='skill-detail';details.dataset.focusKey='skill-detail';details.tabIndex=-1;details.setAttribute('aria-label','Selected skill');details.append(skillIcon(node),element('h3','',node.name),element('p','',node.description));
    const treeReturn=button('← Tree',()=>{revealSkillTree=true;render(false);},'skill-tree-return');treeReturn.dataset.focusKey='skill-tree-return';treeReturn.setAttribute('aria-label','Return to selected skill in tree');details.append(treeReturn);
    details.append(element('span','skill-equipped-summary',`Equipped: ${[...FIELD_SKILLS,...SKILL_NODES].find(skill=>skill.id===current.fieldSkill)?.name??'Standard kit'}`));
-   const requirement=!fieldSkillUnlocked(node.id,completed)?`Complete ${node.unlockAfter}`:node.requires&&!state.learned.includes(node.requires)?`Develop ${SKILL_NODES.find(n=>n.id===node.requires).name} first`:points<1?(allPointsEarned?'Reset training to try another branch':'Earn a training point from your next first clear'):'1 training point';
+   const requirement=!fieldSkillUnlocked(node.id,completed)?`Complete ${node.unlockAfter}`:node.requires&&!state.learned.includes(node.requires)?`Develop ${SKILL_NODES.find(n=>n.id===node.requires).name} first`:points<1?'Level up or finish an operation to earn a training point':'1 training point';
    if(!learned)details.append(element('p','skill-requirement',requirement));
-   const activate=button(current.fieldSkill===node.id?'Equipped':learned?'Equip':'Develop · 1 point',()=>{revealSkillDetails=compactSkills();return action(onFieldSkill,[learned?node.id:'learn:'+node.id],{close:false});},'menu-button skill-activate');activate.disabled=current.fieldSkill===node.id||!learned&&!canLearn;activate.dataset.focusKey='skill-activate';details.append(activate,element('small','','One skill equipped. First clears earn training points.'));
+   const activate=button(current.fieldSkill===node.id?'Equipped':learned?'Equip':'Develop · 1 point',()=>{revealSkillDetails=compactSkills();return action(onFieldSkill,[learned?node.id:'learn:'+node.id],{close:false});},'menu-button skill-activate');activate.disabled=current.fieldSkill===node.id||!learned&&!canLearn;activate.dataset.focusKey='skill-activate';details.append(activate,element('small','','One skill equipped. Level-ups and first clears earn training points.'));
    skills.append(map,details);content.append(skills);
   }
 
@@ -282,3 +283,4 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  show('main');
  return {show,hide,back,notice,refresh:()=>render(false),isOpen:()=>open,settings};
 }
+

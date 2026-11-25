@@ -1,6 +1,7 @@
-import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=mandatory-google-r61';
+import {earnedKillXP} from './player-level.js';
+import {createFieldSkills,normalizeFieldSkill,FIELD_SKILLS_KEY} from './field-skills.js?v=operator-xp-r65';
 import {compatibleStorage,LEGACY_BACKUP_FORMAT} from './storage-compat.js?v=mandatory-google-r61';
-import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=mandatory-google-r61';
+import {normalizeCampaignProfile,defaultCampaignProfile,CAMPAIGN_PROFILE_KEY} from './campaign-profile.js?v=operator-xp-r65';
 import {createCampaignProgress,normalizeCampaignProgress,CAMPAIGN_PROGRESS_KEY} from './campaign-progress.js?v=mandatory-google-r61';
 import {validateSnapshot} from './snapshot-validation.js?v=mandatory-google-r61';
 import {normalizeSettings} from './controls.js?v=mandatory-google-r61';
@@ -57,7 +58,7 @@ export function createSaveSlots(storage){
     if(overrides.profile!==undefined){const live=normalizeCampaignProfile(overrides.profile);if(!live)throw new Error('The current armory profile could not be backed up.');profile=live;}
     const campaign=overrides.campaign!==undefined?normalizeCampaignProgress(overrides.campaign):createCampaignProgress(storage).serialize();
     if(overrides.settings!==undefined)settings=normalizeSettings(overrides.settings);
-    const fieldSkill=overrides.fieldSkill!==undefined?normalizeFieldSkill(overrides.fieldSkill,campaign.completed):createFieldSkills(storage).serialize(campaign.completed);
+    const fieldSkill=overrides.fieldSkill!==undefined?normalizeFieldSkill(overrides.fieldSkill,campaign.completed,earnedKillXP(profile.economy.claimedRewards)):createFieldSkills(storage,()=>earnedKillXP(profile.economy.claimedRewards)).serialize(campaign.completed);
     let checkpoint=readCheckpoint();
     if(overrides.checkpoint!==undefined){
       const live=overrides.checkpoint;
@@ -88,7 +89,7 @@ export function createSaveSlots(storage){
     if(hasProfile&&!profile)throw new Error('This backup contains an invalid armory profile.');
     const hasFieldSkill=Object.prototype.hasOwnProperty.call(data,'fieldSkill');
     if(hasFieldSkill&&(!hasCampaign||![1,2].includes(data.fieldSkill?.version)||typeof data.fieldSkill.selected!=='string'||data.fieldSkill.version===2&&(!Array.isArray(data.fieldSkill.learned)||!data.fieldSkill.learned.every(id=>typeof id==='string'))))throw new Error('This backup contains invalid skill development.');
-    const fieldSkill=hasFieldSkill?normalizeFieldSkill(data.fieldSkill,normalizeCampaignProgress(data.campaign).completed):null;
+    const fieldSkill=hasFieldSkill?normalizeFieldSkill(data.fieldSkill,normalizeCampaignProgress(data.campaign).completed,earnedKillXP(profile?.economy.claimedRewards)):null;
     pendingBackup={id:++previewSequence,saves:{version:VERSION,slots},checkpoint,settings:data.settings===null?null:normalizeSettings(data.settings),campaign:hasCampaign?normalizeCampaignProgress(data.campaign):null,profile,fieldSkill};
     return {id:pendingBackup.id,slots:slots.map(e=>e?copy(e.metadata):null),checkpoint:checkpoint?copy(checkpoint.metadata):null,hasSettings:pendingBackup.settings!==null,hasProfile:pendingBackup.profile!==null,hasFieldSkill:pendingBackup.fieldSkill!==null,hasCampaign:pendingBackup.campaign!==null,completedCampaign:pendingBackup.campaign?[...pendingBackup.campaign.completed]:null};
   }

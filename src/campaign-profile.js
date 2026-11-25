@@ -1,9 +1,10 @@
-import {effectiveFieldStats} from './field-skills.js?v=mandatory-google-r61';
+import {earnedKillXP} from './player-level.js';
+import {effectiveFieldStats} from './field-skills.js?v=operator-xp-r65';
 import {cashReward} from './mission-salvage.js?v=mandatory-google-r61';
 import {attachmentOptions,applyWeaponAttachment} from './weapon-attachments.js?v=mandatory-google-r61';
 import {compatibleStorage} from './storage-compat.js?v=mandatory-google-r61';
 import {PRIMARY_WEAPONS} from './arsenal.js?v=mandatory-google-r61';
-import {createEconomy,isEnemyRewardVariant} from './economy.js?v=mandatory-google-r61';
+import {createEconomy,isEnemyRewardVariant} from './economy.js?v=operator-xp-r65';
 export const CAMPAIGN_PROFILE_KEY='nulldelve.profile.v1';
 const PENDING_PREFIX='nulldelve.enemy-reward.pending.';
 const CASH_PENDING_PREFIX='nulldelve.cash-reward.pending.';
@@ -166,7 +167,7 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
  function restoreCheckpointEconomy(saved){
   const latest=read(),preserve=!!latest.saved||sessionOnly||state.revision>0,current=economy.serialize();
   economy.restore(saved);
-  if(preserve){economy.state.credits=current.credits;economy.state.enemyRewardsVersion=current.enemyRewardsVersion;economy.state.claimedRewards={...economy.state.claimedRewards,...current.claimedRewards};economy.state.replayAttempts={...current.replayAttempts};}
+  if(preserve){economy.state.credits=current.credits;economy.state.enemyRewardsVersion=current.enemyRewardsVersion;economy.state.claimedRewards={...economy.state.claimedRewards,...current.claimedRewards};economy.state.replayAttempts={...current.replayAttempts};economy.state.xp=earnedKillXP(economy.state.claimedRewards);}
  }
  function restoreLoadout(saved={}){const primary=ids().includes(saved.primary)?saved.primary:'carbine';state.unlocked=['carbine',...ids().filter(id=>id!=='carbine'&&(state.unlocked.includes(id)||saved.unlocked?.includes(id)||id===primary))];state.primary=primary;return true;}
  function restoreTransient(value){const saved=normalizeCampaignProfile(value);if(!saved)return false;const latest=read();if(latest.saved&&latest.saved.revision>saved.revision){observedRaw=latest.raw;apply(latest.saved);return false;}apply(saved);observedRaw=latest.raw;sessionOnly=true;return true;}
@@ -174,3 +175,4 @@ export function createCampaignProfile({storage,economy=createEconomy(),locks=glo
  return {state,persist,reload,markPurchase,hasPurchasesSince,beginReplayAttempt,getWeaponOffers,purchaseWeapon,equipPrimary,purchaseOffer,claimCashReward,queueEnemyReward,recoverEnemyRewards,recoverRewards,flushRewards,flushEnemyRewards,migrateEnemyRewards,restoreCheckpointEconomy,restoreLoadout,serialize,restoreTransient,isSessionOnly:()=>sessionOnly};
 }
 export function defaultCampaignProfile(){return initial();}
+

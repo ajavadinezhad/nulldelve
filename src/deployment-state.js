@@ -1,5 +1,6 @@
-import {normalizeFieldSkill} from './field-skills.js?v=mandatory-google-r61';
-import {normalizeCampaignProfile} from './campaign-profile.js?v=mandatory-google-r61';
+import {earnedKillXP} from './player-level.js';
+import {normalizeFieldSkill} from './field-skills.js?v=operator-xp-r65';
+import {normalizeCampaignProfile} from './campaign-profile.js?v=operator-xp-r65';
 import {normalizeCampaignProgress} from './campaign-progress.js?v=mandatory-google-r61';
 const PREFIX='#deployment=';
 const MAX_CLAIMS=20000,MAX_ZONES=128,MAX_RANGES=10000;
@@ -40,8 +41,8 @@ function expandClaims(value){
 /** Game-only session transfer survives document navigation when storage is blocked. */
 export function encodeDeploymentState({profile,progress,fieldSkill}={}){
  const normalized=normalizeCampaignProfile(profile);if(!normalized)return '';
- const killClaims=compactClaims(normalized);if(!killClaims)return '';
- const campaign=normalizeCampaignProgress(progress),hash=PREFIX+encodeURIComponent(JSON.stringify({version:2,profile:normalized,killClaims,progress:campaign,...(fieldSkill?{fieldSkill:normalizeFieldSkill(fieldSkill,campaign.completed)}:{})}));
+ const xp=earnedKillXP(normalized.economy.claimedRewards),killClaims=compactClaims(normalized);if(!killClaims)return '';
+ const campaign=normalizeCampaignProgress(progress),hash=PREFIX+encodeURIComponent(JSON.stringify({version:2,profile:normalized,killClaims,progress:campaign,...(fieldSkill?{fieldSkill:normalizeFieldSkill(fieldSkill,campaign.completed,xp)}:{})}));
  return hash.length<=100000?hash:'';
 }
 export function decodeDeploymentState(hash){
@@ -51,6 +52,6 @@ export function decodeDeploymentState(hash){
   if(![1,2].includes(value?.version)||!value.progress||value.progress.version!==1||!Array.isArray(value.progress.completed))return null;
   const profile=normalizeCampaignProfile(value.profile);if(!profile)return null;
   if(value.version===2){const claims=expandClaims(value.killClaims);if(!claims)return null;profile.economy.claimedRewards={...profile.economy.claimedRewards,...claims};}
-  return {profile,progress:normalizeCampaignProgress(value.progress),...(value.fieldSkill?{fieldSkill:normalizeFieldSkill(value.fieldSkill,normalizeCampaignProgress(value.progress).completed)}:{})};
+  return {profile,progress:normalizeCampaignProgress(value.progress),...(value.fieldSkill?{fieldSkill:normalizeFieldSkill(value.fieldSkill,normalizeCampaignProgress(value.progress).completed,earnedKillXP(profile.economy.claimedRewards))}:{})};
  }catch{return null;}
 }

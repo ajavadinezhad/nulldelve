@@ -28,8 +28,9 @@ test('unchanged live HUD does not repeat DOM writes, but ammo, items, reserve an
  const source=fs.readFileSync(new URL('../src/main.js',`file://${__filename}`),'utf8'),start=source.indexOf('function hud()'),end=source.indexOf('\nfunction end(',start);assert.ok(start>=0&&end>start);
  let writes=0,previews=0;const elements=new Map(),node=()=>new Proxy({style:new Proxy({}, {set(o,k,v){writes++;o[k]=v;return true;}}),classList:{toggle(){writes++;}},setAttribute(){writes++;}}, {set(o,k,v){writes++;o[k]=v;return true;}}),binding={medkit:'KeyQ',grenade:'KeyG'};
  const ctx={selected:0,player:{hp:100,maxHp:100,ammo:30},reload:0,weapons:[{capacity:30,reserve:60,name:'Rifle'}],economy:{state:{credits:150,shield:0,items:{medkit:0,grenade:0,fireGrenade:0},grenadeType:'frag'}},seenRooms:new Set(),roomDefs:[{}],bindings:()=>binding,showWeaponPreview:()=>previews++,equippedModelType:()=>0,itemIconPath:x=>x,formatKey:x=>x,$:id=>{if(!elements.has(id))elements.set(id,node());return elements.get(id);}};
- vm.createContext(ctx);vm.runInContext(source.slice(start,end),ctx);vm.runInContext('hud()',ctx);const first=writes;assert.ok(first>0);assert.equal(previews,1);
+ Object.assign(ctx,{currentPlayerXP:()=>ctx.economy?.state.xp??0,updateXPBar:()=>{}});vm.createContext(ctx);vm.runInContext(source.slice(start,end),ctx);vm.runInContext('hud()',ctx);const first=writes;assert.ok(first>0);assert.equal(previews,1);
  for(let i=0;i<30;i++)vm.runInContext('hud()',ctx);assert.equal(writes,first);assert.equal(previews,1);
  for(const change of [()=>ctx.player.ammo--,()=>ctx.weapons[0].reserve--,()=>ctx.economy.state.items.medkit++,()=>binding.medkit='KeyF',()=>ctx.reload=1]){const before=writes;change();vm.runInContext('hud()',ctx);assert.ok(writes>before);const after=writes;vm.runInContext('hud()',ctx);assert.equal(writes,after);}
  assert.equal(elements.get('#reserve').textContent,'RELOADING…');
 });
+
