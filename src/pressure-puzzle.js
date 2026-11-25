@@ -14,6 +14,24 @@ export function releaseCrateGrab(puzzle){puzzle.grabbed=null;}
 
 /** Small axis steps prevent tunnelling. A blocked push leaves both player and box in place. */
 export function moveWithCrates(actor,dx,dz,puzzle,blocked){
+  // A door, crate, or restored checkpoint can leave the actor overlapping an edge.
+  // Find a nearby clear center without crossing a wall or a crate.
+  const clear=(x,z,r)=>!blocked(x,z,r)&&!puzzle.crates.some(crate=>overlapsCrate(x,z,r,crate));
+  if((dx||dz)&&!clear(actor.x,actor.z,.32)&&clear(actor.x,actor.z,0)){
+    const direction=Math.atan2(dz,dx);
+    for(let distance=.04;distance<=.65;distance+=.04){
+      for(let offset=0;offset<16;offset++){
+        const angle=direction+offset*Math.PI/8;
+        const x=actor.x+Math.cos(angle)*distance,z=actor.z+Math.sin(angle)*distance;
+        if(!clear(x,z,.32))continue;
+        const steps=Math.ceil(distance/.025);
+        if(Array.from({length:steps},(_,i)=>(i+1)/steps).some(t=>!clear(actor.x+(x-actor.x)*t,actor.z+(z-actor.z)*t,0)))continue;
+        releaseCrateGrab(puzzle);
+        actor.x=x;actor.z=z;
+        return;
+      }
+    }
+  }
   for(const [axis,amount] of [['x',dx],['z',dz]]){
     const steps=Math.max(1,Math.ceil(Math.abs(amount)/.06)),step=amount/steps;
     for(let i=0;i<steps;i++){
@@ -44,7 +62,7 @@ export function updatePressurePuzzle(puzzle,actor){
     if(plate.active)continue;
     const crate=puzzle.crates.find(c=>!c.seated&&Math.abs(c.x-plate.x)<.22&&Math.abs(c.z-plate.z)<.22);
     // Don't snap into a player standing alongside the box.
-    if(crate&&(!actor||!overlapsCrate(actor.x,actor.z,.32,{...crate,x:plate.x,z:plate.z}))){crate.x=plate.x;crate.z=plate.z;crate.seated=true;plate.active=true;if(puzzle.crates[puzzle.grabbed]===crate)releaseCrateGrab(puzzle);}
+    if(crate&&(!actor||!overlapsCrate(actor.x,actor.z,.32,{...crate,x:plate.x,z:plate.z}))&&!puzzle.crates.some(other=>other!==crate&&overlapsCrate(plate.x,plate.z,crate.w/2,other))){crate.x=plate.x;crate.z=plate.z;crate.seated=true;plate.active=true;if(puzzle.crates[puzzle.grabbed]===crate)releaseCrateGrab(puzzle);}
   }
   puzzle.solved=puzzle.plates.every(p=>p.active);
   return puzzle.solved;

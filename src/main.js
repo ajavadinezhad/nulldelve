@@ -46,7 +46,7 @@ import {addRoomDetails} from './room-details.js?v=mandatory-google-r61';
 import {createMinimap} from './minimap.js?v=mandatory-google-r61';
 import {createRoach,animateRoach,ROACH_VARIANTS} from './roach.js?v=mandatory-google-r61';
 import {updateRoachEnemy,applyEnemyStagger} from './enemy-ai.js?v=mandatory-google-r61';
-import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=mandatory-google-r61';
+import {createPressurePuzzle,nearestPullableCrate,beginCrateGrab,releaseCrateGrab,overlapsCrate,moveWithCrates,updatePressurePuzzle,resetPressurePuzzle} from './pressure-puzzle.js?v=corner-r68';
 import {createPuzzleArt} from './puzzle-art.js?v=mandatory-google-r61';
 import {createWeaponPreview} from './weapon-preview.js?v=mandatory-google-r61';
 import {createProgression} from './progression.js?v=mandatory-google-r61';
@@ -189,7 +189,21 @@ const keys=new Set(),mouse=new THREE.Vector2(),aim=new THREE.Vector3(7,0,24),ray
 function solid(x,z,r=0,ignoreCrates=false,ignoreBarrels=false){if(typeof nestConduitBlocked==='function'&&nestConduitBlocked(x,z,r,{operation:typeof runConfig==='undefined'?null:runConfig.operation,tasks:typeof progression==='undefined'?{}:progression.state.operationTasks,elapsed:typeof progression==='undefined'?0:progression.state.elapsed,player:typeof player==='undefined'?null:player}))return true;if(typeof explorationShortcutBlocked==='function'&&explorationShortcutBlocked(x,z,r,{operation:typeof runConfig==='undefined'?null:runConfig.operation,claimed:id=>typeof economy!=='undefined'&&!!economy.state.claimedRewards?.[id]}))return true;if(x<1||z<1||x>=W-1||z>=H-1)return true;for(const dx of [-r,r])for(const dz of [-r,r])if(map[Math.round(z+dz)]?.[Math.round(x+dx)]!==0)return true;if(doors.some(d=>(!d.open||d.slide<.92)&&Math.abs(x-d.x)<(d.axis==='x'?1.5:.16)+r&&Math.abs(z-d.z)<(d.axis==='x'?.16:1.5)+r))return true;if(!ignoreCrates&&puzzle.crates.some(c=>overlapsCrate(x,z,r,c)))return true;return cover.some(c=>Math.abs(x-c.x)<c.w/2+r&&Math.abs(z-c.z)<c.h/2+r)||(!ignoreBarrels&&!!barrelSystem?.state.some(b=>b.hp>0&&Math.hypot(x-b.x,z-b.z)<b.radius+r));}
 function los(ax,az,bx,bz,ignoreBarrels=false){const d=Math.hypot(bx-ax,bz-az),n=Math.ceil(d*7);for(let i=1;i<n;i++)if(solid(ax+(bx-ax)*i/n,az+(bz-az)*i/n,0,false,ignoreBarrels))return false;return true;}
 function visible(x,z){return Math.hypot(player.x-x,player.z-z)<10&&los(player.x,player.z,x,z);}
-function move(a,dx,dz,{escape=false}={}){if(a===player){const pressure=resolveCreaturePressure(a,dx,dz,enemies,(x,z,r)=>solid(x,z,r,true)||liftWalkBlocked(x,z,r,runConfig.operation),{escape});dx=pressure.x;dz=pressure.z;moveWithCrates(a,dx,dz,puzzle,(x,z,r)=>solid(x,z,r,true)||liftWalkBlocked(x,z,r,runConfig.operation));return;}const radius=a.radius??.32;if(!solid(a.x+dx,a.z,radius))a.x+=dx;if(!solid(a.x,a.z+dz,radius))a.z+=dz;}
+function move(a,dx,dz,{escape=false}={}){
+ if(a===player){
+  const blocked=(x,z,r)=>solid(x,z,r,true)||liftWalkBlocked(x,z,r,runConfig.operation);
+  if((dx||dz)&&blocked(a.x,a.z,.32)){
+   moveWithCrates(a,dx,dz,puzzle,blocked);
+   return;
+  }
+  const pressure=resolveCreaturePressure(a,dx,dz,enemies,blocked,{escape});
+  moveWithCrates(a,pressure.x,pressure.z,puzzle,blocked);
+  return;
+ }
+ const radius=a.radius??.32;
+ if(!solid(a.x+dx,a.z,radius))a.x+=dx;
+ if(!solid(a.x,a.z+dz,radius))a.z+=dz;
+}
 const pursue=createNavigator(W,H,(x,z,r)=>solid(x,z,r));
 barrelSystem=createExplosiveBarrels(scene,{blocked:(x,z,r)=>solid(x,z,r)||enemies.some(e=>e.hp>0&&Math.hypot(e.x-x,e.z-z)<r+(e.radius??.32)),lineOfSight:(ax,az,bx,bz)=>los(ax,az,bx,bz,true),onBlast:({x,z,radius,damage})=>{if(ended)return;audio.explosion();if(!menu?.settings.reducedEffects)explosions.burst(x,z);for(const enemy of enemies){if(enemy.hp<=0||(enemy.spawnDelay??0)>0)continue;const distance=Math.hypot(enemy.x-x,enemy.z-z);if(distance>radius||!los(x,z,enemy.x,enemy.z,true))continue;enemy.hp=Math.max(0,enemy.hp-Math.max(2,Math.round(damage*(1-distance/radius))));enemy.alerted=true;if(!enemy.hp)rewardEnemyKill(enemy);updateEnemyHealthBar(enemy);}const distance=Math.hypot(player.x-x,player.z-z);if(active&&distance<radius&&los(x,z,player.x,player.z,true)&&applyPlayerDamage(Math.max(1,Math.round(30*(1-distance/radius)))*(skillEffects().selfExplosionMultiplier??1))){hud();if(!player.hp)end(false);} }});barrelSystem.update(visible);
 function toast(s){if(hudFeedback.notify(s))return;if(/(HORDE|SWARM|PURGE|OUTBREAK|BREACH).*(HOSTILES|INCOMING)/.test(s))audio.wave();$('#toast').textContent=s;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').textContent='',2500);}

@@ -13,3 +13,19 @@ test('dragging onto a sensor seats and releases the crate, preserving full door 
 test('reset cancels a grip and dragging never tunnels through a thin obstruction',()=>{const p=createPressurePuzzle(),a={x:6.85,z:23.5};beginCrateGrab(p,a,()=>false);moveWithCrates(a,5,0,p,(x,z,r)=>Math.abs(x-8)<.05+r);assert.ok(a.x<7.7);assert.ok(p.crates[0].x<7);assert.equal(resetPressurePuzzle(p,a),true);assert.equal(p.grabbed,null);});
 
 test('recovering the second crate from the insertion north wall still powers the first door',()=>{const p=createPressurePuzzle(),a={x:11,z:29.2},bounds=(x,z,r)=>x-r<1.5||x+r>13.5||z-r<20.5||z+r>31.5;for(let i=0;i<120;i++){moveWithCrates(a,0,-.08,p,bounds);updatePressurePuzzle(p,a);}assert.ok(p.crates[1].z<21.1);assert.equal(beginCrateGrab(p,a,bounds),true);for(let i=0;i<250&&!p.crates[1].seated;i++){moveWithCrates(a,0,.04,p,bounds);updatePressurePuzzle(p,a);}assert.equal(p.plates[1].active,true);assert.equal(p.grabbed,null);Object.assign(p.crates[0],{x:4,z:23.5});assert.equal(updatePressurePuzzle(p,a),true);});
+
+test('an overlapping crate edge cannot pin a player whose center is still on clear floor',()=>{
+ const p=createPressurePuzzle(),a={x:6.7,z:23.5};
+ p.crates[0].seated=true;
+ moveWithCrates(a,.03,0,p,()=>false);
+ assert.ok(a.x>=6.845);
+ assert.equal(p.crates[0].x,6);
+});
+test('a pressure plate does not snap its crate into another crate',()=>{
+ const p=createPressurePuzzle();
+ Object.assign(p.crates[0],{x:4.15,z:23.5});
+ Object.assign(p.crates[1],{x:2.96,z:23.5});
+ updatePressurePuzzle(p);
+ assert.equal(p.plates[0].active,false);
+ assert.equal(p.crates[0].x,4.15);
+});

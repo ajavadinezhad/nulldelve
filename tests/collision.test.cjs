@@ -44,3 +44,15 @@ test('all twenty rooms and both mission positions connect through carved passage
     return visited.has('154,52')&&visited.has('160,52')&&roomDefs.every(r=>[...visited].some(k=>{const [x,z]=k.split(',').map(Number);return x>=r.x&&x<r.x+r.w&&z>=r.z&&z<r.z+r.h;}))&&visited.has('93,7')&&visited.has('92,60');
   })()`),true);
 });
+
+test('movement frees an operator clipped into the insertion southeast corner beside the seated crate',()=>{
+  const run=world();
+  run('Object.assign(puzzle.crates[1],{x:11,z:29.5,seated:true});player.x=13.22;player.z=31.22');
+  assert.equal(run('solid(player.x,player.z,.32)'),true);
+  assert.equal(run('solid(player.x,player.z,0)'),false);
+  run('move(player,-.05,0)');
+  assert.equal(run('solid(player.x,player.z,.32)'),false);
+  run('for(let i=0;i<30;i++)move(player,-.06,0)');
+  assert.ok(run('player.x')<12);
+  assert.equal(run('puzzle.crates[1].seated'),true);
+});
