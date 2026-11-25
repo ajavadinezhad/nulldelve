@@ -4,11 +4,11 @@ const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.
 export function renderAccount(host,{state={},draft={},onAction=()=>{}}={}){
  const signedIn=state.signedIn&&(!state.requireGoogle||state.googleVerified);
  const panel=el('section');panel.className='account-panel';panel.setAttribute('aria-label','Account and cloud progress');host.append(panel);
- const p=text=>panel.append(el('p',text));
- const action=(text,id,disabled=false)=>{const b=el('button',text);b.type='button';b.className='menu-button secondary';b.disabled=disabled||!!state.pending;b.onclick=()=>onAction(id,{email:draft.email??'',code:draft.code??''});panel.append(b);return b;};
+ const p=(text,group=panel)=>group.append(el('p',text));
+ const action=(text,id,disabled=false,data={},group=panel)=>{const b=el('button',text);b.type='button';b.className='menu-button secondary';b.disabled=disabled||!!state.pending;b.onclick=()=>onAction(id,{email:draft.email??'',code:draft.code??'',...data});group.append(b);return b;};
  if(state.checking){const loading=el('p','Checking your account…');loading.setAttribute('role','status');panel.append(loading);return;}
  if(state.connectionError){p(state.connectionError);action('Retry connection','reconnect').className='menu-button primary';action('Sign out','signout');return;}
- panel.append(el('h3',!state.configured?'Account':!signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
+ if(!signedIn||!state.profile)panel.append(el('h3',!state.configured?'Account':!signedIn?'Welcome to Nulldelve':'Create your operator'));
  if(!state.configured){p(state.requireGoogle?'Connect to the account service to sign in.':'Cloud saves are not available in this build. Your checkpoints stay on this device.');if(state.requireGoogle)action('Retry connection','reconnect');return;}
  if(!signedIn){
   p(state.requireGoogle?'Sign in to enter the facility.':'Your operator. Your progress.');
@@ -28,15 +28,31 @@ export function renderAccount(host,{state={},draft={},onAction=()=>{}}={}){
    for(const id of PLAYER_AVATARS){const choice=el('button');choice.type='button';choice.className='avatar-option';choice.setAttribute('aria-label',id[0].toUpperCase()+id.slice(1));choice.setAttribute('aria-pressed',String(draft.avatar===id));const image=el('img');image.src=avatarPath(id);image.alt='';image.width=56;image.height=56;choice.append(image);choice.onclick=()=>{draft.avatar=id;for(const [key,node]of buttons)node.setAttribute('aria-pressed',String(key===id));};choice.disabled=!!state.pending;buttons.push([id,choice]);grid.append(choice);}form.append(avatars);
    const save=el('button',state.profile?'Save operator':'Enter Nulldelve');save.type='submit';save.className='menu-button primary';save.disabled=!!state.pending;form.append(save);form.onsubmit=event=>{event.preventDefault();if(form.reportValidity&&!form.reportValidity())return;onAction('profile',{username:username.value,displayName:display.value,avatar:draft.avatar});};panel.append(form);action('Sign out','signout');return;
   }
-  if(state.profile){const card=el('div');card.className='operator-card';const avatar=el('img');avatar.src=avatarPath(state.profile.avatar);avatar.alt='';avatar.width=56;avatar.height=56;const names=el('div');names.append(el('strong',state.profile.displayName),el('small','@'+state.profile.username));card.append(avatar,names);panel.append(card);action('Edit operator','edit-profile');}
-  p(state.email??'Signed in');p(state.needsChoice?'Choose progress before cloud saving starts.':state.lastSaved?'Checkpoint saved to cloud.':'Checkpoints save automatically when online.');
-  if(state.error){const message=el('p',state.error);message.setAttribute('role','status');panel.append(message);}
+  panel.className+=' account-overview';
+  const profile=el('div');profile.className='account-card account-identity';
+  if(state.profile){
+   const card=el('div');card.className='operator-card';
+   const avatar=el('img');avatar.src=avatarPath(state.profile.avatar);avatar.alt='';avatar.width=56;avatar.height=56;
+   const names=el('div');names.append(el('strong',state.profile.displayName),el('small','@'+state.profile.username));card.append(avatar,names);profile.append(card);
+   action('Edit operator','edit-profile',false,{},profile);
+  }
+  panel.append(profile);
+  const cloud=el('section');cloud.className='account-card account-cloud';
+  cloud.append(el('h3','Cloud save'));
+  panel.append(cloud);
+  p(state.needsChoice?'Choose progress before cloud saving starts.':state.lastSaved?'Checkpoint saved to cloud.':'Checkpoints save automatically when online.',cloud);
+  if(state.error){const message=el('p',state.error);message.setAttribute('role','status');cloud.append(message);}
   if(state.needsChoice){
-   if(state.hasRemote)action(draft.cloudConfirm?'Confirm: replace local with cloud':'Continue cloud progress',draft.cloudConfirm?'cloud':'confirm-cloud');
-   action(draft.replaceConfirm?'Confirm: replace cloud with this device':'Keep this device’s progress',draft.replaceConfirm?'device':'confirm-device');
-  }else if(state.error)action('Reconnect cloud saves','reconnect');
-  action('Sign out','signout');
-  const deletion=el('details'),summary=el('summary','Delete account');deletion.append(summary,el('p','Permanently deletes your account and cloud progress. The local checkpoint stays on this device.'));
-  const confirm=el('input');confirm.placeholder='Type DELETE';confirm.setAttribute('aria-label','Type DELETE to confirm account deletion');confirm.autocomplete='off';const remove=el('button','Permanently delete account');remove.type='button';remove.className='menu-button secondary';remove.disabled=true;confirm.oninput=()=>remove.disabled=confirm.value!=='DELETE'||!!state.pending;remove.onclick=()=>onAction('delete');deletion.append(confirm,remove);panel.append(deletion);
+   if(state.hasRemote)action(draft.cloudConfirm?'Confirm: replace local with cloud':'Continue cloud progress',draft.cloudConfirm?'cloud':'confirm-cloud',false,{},cloud);
+   action(draft.replaceConfirm?'Confirm: replace cloud with this device':'Keep this device’s progress',draft.replaceConfirm?'device':'confirm-device',false,{},cloud);
+  }else if(state.error)action('Reconnect cloud saves','reconnect',false,{},cloud);
+  const settings=el('section');settings.className='account-card account-settings';
+  const account=el('div');account.className='account-signin';
+  const identity=el('div');identity.append(el('h3','Google account'),el('p',state.email??'Signed in'));account.append(identity);
+  action('Sign out','signout',false,{},account);
+  settings.append(account);
+  panel.append(settings);
+  const deletion=el('details'),summary=el('summary','Delete account');deletion.className='account-deletion';const body=el('div');body.className='account-deletion-body';body.append(el('p','Permanently deletes your account and cloud progress. The local checkpoint stays on this device.'));
+  const confirm=el('input');confirm.placeholder='Type DELETE';confirm.setAttribute('aria-label','Type DELETE to confirm account deletion');confirm.autocomplete='off';const remove=el('button','Permanently delete account');remove.type='button';remove.className='menu-button secondary account-delete-action';remove.disabled=true;confirm.oninput=()=>remove.disabled=confirm.value!=='DELETE'||!!state.pending;remove.onclick=()=>onAction('delete');body.append(confirm,remove);deletion.append(summary,body);settings.append(deletion);
  }
 }

@@ -864,3 +864,46 @@
 #overlay .game-menu header.menu-brand h1{margin:0;min-width:0}
 #overlay .game-menu header.menu-brand .operator-chip{margin-left:auto;flex-shrink:1;min-width:48px}
 @media(max-width:480px){#overlay .game-menu header.menu-brand{gap:10px}#overlay .game-menu header.menu-brand .operator-chip{max-width:140px}#overlay .game-menu header.menu-brand .operator-chip span{max-width:85px}}
+
+.game-menu .account-overview {
+  max-width: 700px;
+  gap: 12px;
+}
+.account-overview .account-card {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: clamp(12px, 3vw, 20px);
+  background: #161e29;
+  border: 1px solid #374456;
+  border-radius: 10px;
+}
+.account-overview .account-identity,
+.account-overview .account-signin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.account-overview .operator-card { margin: 0; }
+.account-overview .operator-card strong { font-size: 18px; }
+.account-overview h3 { margin: 0; font-size: 15px; }
+.account-overview .account-cloud,
+.account-overview .account-deletion-body { display: grid; gap: 8px; }
+.account-overview .account-signin > div { min-width: 0; overflow-wrap: anywhere; }
+.account-overview .account-signin p { font-size: 13px; }
+.account-overview .account-deletion {
+  margin-top: 10px;
+  border-top: 1px solid #374456;
+}
+.account-overview .account-deletion summary {
+  padding: 12px 0;
+  box-sizing: border-box;
+  color: #efafa2;
+}
+.account-overview .account-deletion-body { padding-block: 0 4px; }
+.account-overview .account-delete-action {
+  justify-self: start;
+  color: #ffd2c7;
+  border-color: #9b5c52;
+}

@@ -5,7 +5,7 @@ import {campaignOperationGuidance,campaignOperationExit} from './campaign-operat
 import {missionGuidance} from './session-rules.js?v=mandatory-google-r61';
 import {ARTIFACTS,hospitalAirlockTarget,freightTrackTarget} from './progression.js?v=mandatory-google-r61';
 import {WIRE_LAYOUT,WIRE_SOLUTION} from './wire-circuit.js?v=mandatory-google-r61';
-export {GUIDANCE_COST} from './economy.js?v=weighted-xp-r70';
+export {GUIDANCE_COST} from './economy.js?v=operator-ui-r72';
 const ZONES={security:[23,10],storage:[23,26],command:[38,10],generator:[35,53],lab:[59,10],reactor:[59,30],transit:[59,55],containment:[86,30],evacuation:[86,53],nest:[86,10],'hospital-triage':[112,10],'hospital-ward':[136,10],'hospital-isolation':[136,52],'freight-pumps':[162,30],'freight-yard':[186,30],'freight-cold':[186,10],'signal-yard':[212,30],'signal-relay':[236,30],'signal-uplink':[236,10]};
 /** Resolve one live action, without changing a puzzle or relying on proximity to a door. */
 export function nextGuidanceStep({operation,mission='campaign',player,puzzle,progression}){

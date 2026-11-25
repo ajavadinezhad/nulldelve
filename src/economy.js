@@ -1,4 +1,4 @@
-import {earnedKillXP,enemyXP} from './player-level.js?v=weighted-xp-r70';
+import {earnedKillXP,enemyXP,playerLevel} from './player-level.js?v=weighted-xp-r70';
 import {damageStep,damageBonus,reloadStep} from './weapon-tuning.js?v=mandatory-google-r61';
 import {cashReward,replayReward,normalizeRewardLedger,validEnemyRewardId} from './mission-salvage.js?v=mandatory-google-r61';
 import {normalizeAttachments} from './weapon-attachments.js?v=mandatory-google-r61';
@@ -76,7 +76,15 @@ export function createEconomy(snapshot){
   function claimEnemyReward(id,variant){
     if(!validEnemyRewardId(id)||!isEnemyRewardVariant(variant))return {ok:false,message:'Unknown enemy reward.'};
     if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,amount:0,message:'Enemy reward already paid.'};
-    state.claimedRewards[id]=true;const xp=variant==='paid'?0:enemyXP(variant);if(xp)state.killScores[id]=xp;state.xp=earnedKillXP(state.claimedRewards,state.killScores);const amount=variant==='paid'?0:rewardKill(variant);return {ok:true,amount,xp,message:`+$${amount}`};
+    const previous=playerLevel(state.xp);
+    state.claimedRewards[id]=true;
+    const xp=variant==='paid'?0:enemyXP(variant);
+    if(xp)state.killScores[id]=xp;
+    state.xp=earnedKillXP(state.claimedRewards,state.killScores);
+    const current=playerLevel(state.xp);
+    const levelUp=xp&&current.level>previous.level?{level:current.level,points:current.points-previous.points}:null;
+    const amount=variant==='paid'?0:rewardKill(variant);
+    return {ok:true,amount,xp,...(levelUp?{levelUp}:{}),message:`+$${amount}`};
   }
   function beginReplayAttempt(operation,token){const id=`replay.${operation}.${token}`;if(!replayReward(id))return {ok:false,message:'Unknown replay operation.'};state.replayAttempts[operation]=id;return {ok:true,rewardId:id,message:'Replay started.'};}
   function claimReward(id){const reward=cashReward(id);if(reward?.token&&state.replayAttempts[reward.operation]!==id)return {ok:false,expired:true,message:'This replay attempt is no longer active.'};if(!reward)return {ok:false,message:'Unknown cash reward.'};if(state.claimedRewards[id])return {ok:false,alreadyClaimed:true,message:'Already collected.'};state.claimedRewards[id]=true;state.credits=Math.min(CREDIT_LIMIT,state.credits+reward.amount);return {ok:true,amount:reward.amount,message:`+$${reward.amount} · ${reward.label}`};}

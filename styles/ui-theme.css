@@ -170,3 +170,15 @@ aside.mission-note[hidden]{display:none!important}
 .xp-meter progress, .skill-xp { accent-color: #eabe75; }
 .xp-meter progress { grid-column: 1 / -1; width: 100%; min-width: 0; height: 8px; }
 .skill-xp { width: min(120px, 100%); height: 8px; }
+
+.level-up-notice {
+  margin: 0;
+  padding: 8px 10px;
+  background: #182333;
+  color: #f7d38e;
+  border-left: 2px solid #eabe75;
+  border-radius: 4px;
+  font: 600 12px/1.4 system-ui, sans-serif;
+}
+.level-up-notice:empty { padding: 0; border: 0; margin: 0; }
+.hud-feedback .level-up-notice:empty { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

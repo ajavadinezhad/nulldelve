@@ -1,8 +1,6 @@
 import {playerLevel} from './player-level.js?v=weighted-xp-r70';
 import {avatarPath,operatorAccessReady} from './player-identity.js?v=mandatory-google-r61';
-import {renderAccount} from './account-ui.js?v=welcome-r69';
-import {renderFieldJournal,journalIcon} from './field-journal.js?v=mandatory-google-r61';
-import {createPuzzleDiscovery} from './puzzle-discovery.js?v=mandatory-google-r61';
+import {renderAccount} from './account-ui.js?v=operator-ui-r72';
 import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=operator-xp-r65';
 import {compatibleStorage} from './storage-compat.js?v=mandatory-google-r61';
 import {formatDuration,operationRecordKey} from './operation-records.js?v=mandatory-google-r61';
@@ -35,7 +33,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  const settings=readSettings();
  const previousDifficulty=status().config?.difficulty;
  let open=false,view='main',mission='campaign',operation=CAMPAIGN_OPERATIONS[0].id,difficulty=['easy','normal','hard'].includes(previousDifficulty)?previousDifficulty:'normal',statusText='',busy=false,returnView='main',previousFocus=null,settingsTab='controls',shopTab='weapons',shopSelectedWeapon=null,shopDetailTab='upgrades',selectedSkill=null,selectedSkillBranch=null,backupPreview=null,backupFilename='',keyboardOpen=null;
- let shell=null,content=null,statusNode=null,captureAction=null,notesTab='systems',noteSelection=null,noteHint=0,revealSkillDetails=false,revealSkillTree=false,confirmTrainingReset=false;
+ let shell=null,content=null,statusNode=null,captureAction=null,revealSkillDetails=false,revealSkillTree=false,confirmTrainingReset=false;
  const compactSkills=()=>typeof matchMedia==='function'&&matchMedia('(max-width:1100px)').matches;
  const accountDraft={};let privacyReturnView=null;
  const nestedScrollPositions=new Map();
@@ -53,7 +51,7 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
  function actions(){const row=element('div','menu-actions');content.append(row);return row;}
  function openPanel(next,home=view){returnView=home==='pause'?'pause':'main';changeView(next);}
  async function prepareView(next,back='main'){await action(async()=>{const result=await onPrepareOperation();if(result===false||result?.ok===false)return result;returnView=back;view=next;if(next==='campaign-map'){const done=status().completedOperations??[];operation=CAMPAIGN_OPERATIONS.find(item=>!done.includes(item.id)&&isCampaignOperationUnlocked(item.id,done))?.id??operation;}return result;},[],{close:false});}
- function homeAction(row,label,callback,detail,primary=false){const control=button('',callback,`menu-button home-action${primary?' primary':''}`);control.append(element('strong','',label));if(detail)control.append(element('small','',detail));const symbols={'Continue':'play','Resume':'play','New operation':'operation','Armory':'armory','Field notes':'notes','Saved games':'saves','Save / load':'saves','Settings':'settings','Main menu':'home'},icon=element('img','menu-action-icon');icon.src='./assets/menu-'+(symbols[label]??'operation')+'.svg';icon.alt='';icon.setAttribute('aria-hidden','true');icon.width=32;icon.height=32;control.append(icon);row.append(control);return control;}
+ function homeAction(row,label,callback,detail,primary=false){const control=button('',callback,`menu-button home-action${primary?' primary':''}`);control.append(element('strong','',label));if(detail)control.append(element('small','',detail));const symbols={'Continue':'play','Resume':'play','New operation':'operation','Armory':'armory','Saved games':'saves','Save / load':'saves','Settings':'settings','Main menu':'home'},icon=element('img','menu-action-icon');icon.src='./assets/menu-'+(symbols[label]??'operation')+'.svg';icon.alt='';icon.setAttribute('aria-hidden','true');icon.width=32;icon.height=32;control.append(icon);row.append(control);return control;}
  function latestSave(current){return current.checkpoint??null;}
  function drawAccount(){renderAccount(content,{state:{...status().cloud,requireGoogle:!!status().loginRequired,pending:status().cloud?.pending},draft:accountDraft,onAction:(id,data)=>{if(id==='edit-profile'){accountDraft.editProfile=true;render(false);return;}if(id==='confirm-device'||id==='confirm-cloud'){accountDraft.replaceConfirm=id==='confirm-device';accountDraft.cloudConfirm=id==='confirm-cloud';render(false);return;}void action(async()=>{const result=await onAccountAction(id,data);if(id==='profile'){accountDraft.editProfile=false;view='main';}accountDraft.replaceConfirm=false;accountDraft.cloudConfirm=false;return result;},[],{close:false});}});}
  function drawMain(current){
@@ -62,22 +60,15 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const continueButton=homeAction(row,'Continue',()=>action(current.active?onResume:onContinue),current.active?(CAMPAIGN_OPERATIONS.find(item=>item.id===current.config?.operation)?.name??'Current operation'):save?`${missionName} · ${save.name??'Checkpoint'} · ${formatTime(save.time)}`:'',true);continueButton.disabled=!(current.canContinue||current.active);
   homeAction(row,'New operation',()=>openPanel('missions','main'));
   homeAction(row,'Armory',()=>prepareView('armory'));
-  homeAction(row,'Field notes',()=>openPanel('field-notes','main'));
   homeAction(row,'Settings',()=>openPanel('settings','main'));
  }
  function drawPause(){
   const current=status();heading('OPERATION PAUSED','Paused');
   const row=actions();row.classList.add('home-actions','pause-actions');
   homeAction(row,'Resume',()=>action(onResume),null,true);
-  homeAction(row,'Field notes',()=>openPanel('field-notes','pause'));
   homeAction(row,'Settings',()=>openPanel('settings','pause'));
   homeAction(row,'Main menu',()=>changeView('main'));
   drawGuidance(current);
- }
- function drawFieldNotes(){
-  heading('FIELD ARCHIVE','Field notes');
-  const tabs=element('div','menu-tabs journal-tabs');for(const [id,label]of [['systems','Systems'],['mutations','Mutations']]){const tab=button('',()=>{notesTab=id;noteSelection=null;noteHint=0;render(false);},'menu-button secondary'+(notesTab===id?' selected':''));tab.append(journalIcon(id),element('span','',label));tab.setAttribute('aria-pressed',String(notesTab===id));tabs.append(tab);}content.append(tabs);
-  renderFieldJournal(content,{tab:notesTab,systems:createPuzzleDiscovery().list(),mutations:status().mutationNotes??[],selected:noteSelection,onSelect:id=>{noteSelection=id;noteHint=0;render(false);if(compactSkills()){const detail=content.querySelector('.journal-detail');detail?.scrollIntoView({block:'nearest'});detail?.focus?.({preventScroll:true});}}});
  }
  function drawEquipment(current){
   const row=element('section','menu-equipment');row.setAttribute('aria-label','Medical and explosive equipment');
@@ -240,10 +231,10 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
    const candidates=[...shell.querySelectorAll('button:not(:disabled),input,select,summary')],target=focus?candidates[0]:candidates.find(n=>focusKey&&(n.dataset.focusKey===focusKey||n.id===focusKey))??candidates[Math.max(0,Math.min(focusIndex,candidates.length-1))];if(!focus)content.scrollTop=oldScroll;target?.focus({preventScroll:true});return;
   }
   if(view==='main'||view==='pause'){const brand=element('header','menu-brand');brand.append(element('h1','','NULLDELVE'));if(current.cloud?.profile){const identity=current.cloud.profile,account=button('',()=>openPanel('account'),'operator-chip');account.setAttribute('aria-label','Edit operator '+identity.displayName);if(identity){const image=element('img');image.src=avatarPath(identity.avatar);image.alt='';image.width=40;image.height=40;account.append(image,element('span','',identity.displayName));}else account.append(element('span','',current.cloud.signedIn?'Account':'Continue with Google'));brand.append(account);}shell.append(brand);}else{
-   const navigation=element('nav','menu-navigation');navigation.setAttribute('aria-label','Menu navigation');const control=button('',()=>back(),'menu-button menu-back-control'),arrow=element('span','menu-back-arrow');arrow.setAttribute('aria-hidden','true');control.append(arrow,element('span','','Back'));control.dataset.focusKey='navigation-back';navigation.append(control,element('h2','menu-navigation-title',{'missions':'New operation','campaign-map':'Facility descent','armory':'Armory','privacy':'Privacy policy','settings':'Settings','account':'Operator','field-notes':'Field notes','save':'Save','load':'Load','saves':'Checkpoints'}[view]??'Menu'));shell.append(navigation);
+   const navigation=element('nav','menu-navigation');navigation.setAttribute('aria-label','Menu navigation');const control=button('',()=>back(),'menu-button menu-back-control'),arrow=element('span','menu-back-arrow');arrow.setAttribute('aria-hidden','true');control.append(arrow,element('span','','Back'));control.dataset.focusKey='navigation-back';navigation.append(control,element('h2','menu-navigation-title',{'missions':'New operation','campaign-map':'Facility descent','armory':'Armory','privacy':'Privacy policy','settings':'Settings','account':'Operator','save':'Save','load':'Load','saves':'Checkpoints'}[view]??'Menu'));shell.append(navigation);
   }drawPersistenceWarning(current);
   const layout=element('div','menu-layout');content=element('main','menu-content');content.setAttribute('aria-label',view==='pause'?'Pause menu':view==='main'?'Main menu':view==='saves'?'Saved games':view);layout.append(content);shell.append(layout);
-  if(view==='account')drawAccount();else if(view==='privacy'){const frame=element('iframe','privacy-frame');frame.src='privacy.html';frame.title='Nulldelve privacy policy';content.append(frame);}else if(view==='field-notes')drawFieldNotes();else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
+  if(view==='account')drawAccount();else if(view==='privacy'){const frame=element('iframe','privacy-frame');frame.src='privacy.html';frame.title='Nulldelve privacy policy';content.append(frame);}else if(view==='pause')drawPause();else if(view==='missions')drawMissions();else if(view==='campaign-map')drawCampaignMap();else if(['save','load','saves'].includes(view))drawSlots(view,current);else if(view==='settings')drawSettings();else if(view==='armory')drawArmory(current);else drawMain(current);
   statusNode=element('p','menu-status',statusText);statusNode.setAttribute('role','status');statusNode.setAttribute('aria-live','polite');shell.append(statusNode);
   const footer=element('footer','preview-footer');footer.append(element('span','','EARLY PREVIEW · r61'));const feedback=element('a','','Report an issue ↗');feedback.href='https://github.com/ajavadinezhad/nulldelve/issues/new?template=bug_report.yml';feedback.target='_blank';feedback.rel='noopener noreferrer';feedback.setAttribute('aria-label','Report an issue on GitHub (opens a new tab)');const privacy=button('Privacy',()=>{privacyReturnView=view;changeView('privacy');},'privacy-link');footer.append(privacy,feedback);shell.append(footer);overlay.append(shell);overlay.style.display='flex';
   for(const node of content.querySelectorAll('nav')){const saved=nestedScrollPositions.get(node.dataset.scrollKey);if(saved){node.scrollLeft=saved.left;node.scrollTop=saved.top;}}
