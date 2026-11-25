@@ -22,6 +22,16 @@ const DIFFICULTIES=[
  {id:'normal',name:'Operator / Normal'},
  {id:'hard',name:'Veteran / Hard'}
 ];
+// Targets are Armory upgrade tiers for the equipped primary.
+const MISSION_GEAR={
+ breach:[0,0],command:[1,0],research:[1,1],containment:[2,1],
+ nest:[2,1],hospital:[2,2],freight:[3,2],signal:[3,3]
+};
+function upgradeTier(armory,type){
+ const primary=armory.primary??'carbine',key=primary==='carbine'?'rifle':primary;
+ const offer=armory.offers?.find(item=>item.id===key+'.'+type);
+ return Math.max(0,Math.min(3,Number(offer?.level??offer?.owned)||0));
+}
 function readSettings(){try{return normalizeSettings(JSON.parse(compatibleStorage(localStorage).getItem(SETTINGS_KEY)??'{}'));}catch{return normalizeSettings();}}
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 function button(text,action,className='menu-button'){const node=element('button',className,text);node.type='button';node.addEventListener('click',action);return node;}
@@ -103,22 +113,41 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   const deployment=element('div','campaign-deployment'),mapPane=element('div','campaign-map-pane'),briefing=element('div','campaign-briefing');deployment.append(mapPane,briefing);content.append(deployment);
   mapPane.append(createCampaignMap({selected:operation,onSelect:id=>{if(!CAMPAIGN_OPERATIONS.some(item=>item.id===id))return;if(!isCampaignOperationUnlocked(id,status().completedOperations??[])){notice('Complete the previous operation to unlock this location.');return;}operation=id;render(false);},completed}));
   const selected=CAMPAIGN_OPERATIONS.find(item=>item.id===operation)??CAMPAIGN_OPERATIONS[0];
-  const detail=element('section','campaign-operation-detail');{const preview=element('div','mission-preview hospital-preview');preview.append(buildMissionPreview(selected.id));detail.append(preview);}detail.setAttribute('aria-live','polite');detail.append(element('h3','',selected.name),element('p','',selected.description.replace(/^Enter the ruins\. /,'')));briefing.append(detail);
+  const detail=element('section','campaign-operation-detail');
+  const preview=element('div','mission-preview hospital-preview');
+  const recommendation=element('div','mission-gear');
+  recommendation.setAttribute('role','status');
+  recommendation.setAttribute('aria-atomic','true');
+  preview.append(buildMissionPreview(selected.id),recommendation);
+  detail.setAttribute('aria-live','polite');
+  detail.append(preview,element('h3','',selected.name),element('p','',selected.description.replace(/^Enter the ruins\. /,'')));
+  briefing.append(detail);
+  function updateGearRecommendation(){
+   const [baseDamage,baseMagazine]=MISSION_GEAR[selected.id]??[0,0];
+   const adjustment=baseDamage===0?0:difficulty==='easy'?-1:difficulty==='hard'?1:0;
+   const damage=Math.max(0,Math.min(3,baseDamage+adjustment));
+   const magazine=Math.max(0,baseMagazine+(difficulty==='easy'?-1:0));
+   const armory=status().armory??{};
+   const ready=upgradeTier(armory,'damage')>=damage&&upgradeTier(armory,'magazine')>=magazine;
+   const target=[damage&&`Damage ${damage}`,magazine&&`Magazine ${magazine}`].filter(Boolean).join(' · ');
+   recommendation.className='mission-gear'+(ready?'':' mission-gear-warning');
+   recommendation.replaceChildren(element('strong','',ready?'Gear ready':'Upgrade advised'),element('span','',target||'Stock primary'));
+  }
   const fieldset=element('fieldset','menu-fieldset');fieldset.append(element('legend','','Difficulty'));
   const choices=element('div','difficulty-options'),personalBest=element('p','operation-best');personalBest.setAttribute('role','status');personalBest.setAttribute('aria-label','Personal best for selected operation and difficulty');
   function updatePersonalBest(){const record=status().personalBests?.[operationRecordKey({mission:'campaign',operation:selected.id,difficulty,remix:false})];personalBest.replaceChildren();personalBest.hidden=false;if(!Number.isFinite(record?.elapsed)){personalBest.append(element('span','','Personal best'),element('strong','','—'));}else{personalBest.append(element('span','','Personal best'),element('strong','',formatDuration(record.elapsed)));if(Number.isFinite(record.kills))personalBest.append(element('small','',`${Math.max(0,Math.floor(record.kills))} kills`));if(Number.isFinite(record.exploration))personalBest.append(element('small','',`${Math.round(Math.max(0,Math.min(100,record.exploration)))}% mapped`));}}
-  for(const option of DIFFICULTIES){const label=element('label',`difficulty-option${difficulty===option.id?' selected':''}`),input=element('input');label.dataset.difficulty=option.id;input.type='radio';input.name='operation-difficulty';input.value=option.id;input.checked=difficulty===option.id;input.addEventListener('change',()=>{if(!input.checked)return;difficulty=option.id;for(const row of choices.children)row.className=`difficulty-option${row.dataset.difficulty===difficulty?' selected':''}`;updatePersonalBest();});input.setAttribute('aria-label',option.name);const check=element('span','difficulty-check','✓');check.setAttribute('aria-hidden','true');label.append(input,element('strong','',option.name),check);choices.append(label);}
-  updatePersonalBest();fieldset.append(choices,personalBest);briefing.append(fieldset);
+  for(const option of DIFFICULTIES){const label=element('label',`difficulty-option${difficulty===option.id?' selected':''}`),input=element('input');label.dataset.difficulty=option.id;input.type='radio';input.name='operation-difficulty';input.value=option.id;input.checked=difficulty===option.id;input.addEventListener('change',()=>{if(!input.checked)return;difficulty=option.id;for(const row of choices.children)row.className=`difficulty-option${row.dataset.difficulty===difficulty?' selected':''}`;updatePersonalBest();updateGearRecommendation();});input.setAttribute('aria-label',option.name);const check=element('span','difficulty-check','✓');check.setAttribute('aria-hidden','true');label.append(input,element('strong','',option.name),check);choices.append(label);}
+  updatePersonalBest();updateGearRecommendation();fieldset.append(choices,personalBest);briefing.append(fieldset);
   drawDeploymentLoadout(briefing,status());
-  const deployActions=element('div','menu-actions');briefing.append(deployActions);deployActions.append(button('Deploy',()=>{if(!isCampaignOperationUnlocked(operation,status().completedOperations??[])){notice('Complete the previous operation before deploying here.');return;}action(onNewGame,[{mission:'campaign',difficulty,operation,remix:false}]);},'menu-button primary'),button('Armory',()=>prepareView('armory','campaign-map'),'menu-button secondary'));
+  const deployActions=element('div','menu-actions');briefing.append(deployActions);deployActions.append(button('Deploy',()=>{if(!isCampaignOperationUnlocked(operation,status().completedOperations??[])){notice('Complete the previous operation before deploying here.');return;}action(onNewGame,[{mission:'campaign',difficulty,operation,remix:false}]);},'menu-button primary'),button('Armory',()=>{shopTab='weapons';shopDetailTab='upgrades';shopSelectedWeapon=status().armory?.primary??null;prepareView('armory','campaign-map');},'menu-button secondary'));
  }
  function drawDeploymentLoadout(target,current){
   const armory=current.armory??{},primary=armory.primary??'carbine',equipped=armory.weapons?.find(gun=>gun.weaponId===primary),skill=[...FIELD_SKILLS,...SKILL_NODES].find(node=>node.id===current.fieldSkill)??FIELD_SKILLS[0];
   const strip=element('section','deployment-loadout');strip.setAttribute('aria-label','Deployment equipment');
   const weapon=element('div','deployment-weapon');weapon.append(skillIcon({icon:'armory'}));const copy=element('div','deployment-weapon-copy');copy.append(element('strong','',equipped?.label??'MK4 Carbine'));
-  const upgrades=element('div','deployment-upgrades'),key=primary==='carbine'?'rifle':primary;
+  const upgrades=element('div','deployment-upgrades');
   for(const [type,label]of [['damage','Damage'],['magazine','Magazine'],['reload','Reload']]){
-   const offer=armory.offers?.find(item=>item.id===key+'.'+type),level=Math.max(0,Math.min(3,Number(offer?.level??offer?.owned)||0)),item=element('span','deployment-upgrade');item.title=label+' '+level+'/3';item.setAttribute('aria-label',item.title);item.append(element('small','',label==='Magazine'?'MAG':label==='Damage'?'DMG':'RLD'));
+   const level=upgradeTier(armory,type),item=element('span','deployment-upgrade');item.title=label+' '+level+'/3';item.setAttribute('aria-label',item.title);item.append(element('small','',label==='Magazine'?'MAG':label==='Damage'?'DMG':'RLD'));
    for(let n=0;n<3;n++){const pip=element('i',n<level?'filled':'');pip.setAttribute('aria-hidden','true');item.append(pip);}upgrades.append(item);
   }
   copy.append(upgrades);weapon.append(copy);strip.append(weapon);

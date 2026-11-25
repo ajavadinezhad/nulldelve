@@ -907,3 +907,25 @@
   color: #ffd2c7;
   border-color: #9b5c52;
 }
+
+
+.game-menu .campaign-operation-detail .mission-preview { position: relative; }
+.game-menu .mission-gear {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  max-width: calc(100% - 16px);
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid #536577;
+  border-radius: 6px;
+  background: #101620f5;
+  color: #dbe6ee;
+  font: 11px/1.35 system-ui, sans-serif;
+}
+.game-menu .mission-gear span { color: #c6d0dd; }
+.game-menu .mission-gear-warning { border-color: #af8044; }
+.game-menu .mission-gear-warning strong { color: #ffd284; }

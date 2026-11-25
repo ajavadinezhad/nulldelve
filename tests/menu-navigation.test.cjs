@@ -139,3 +139,22 @@ test('Back discards unsaved operator edits and returns to account overview',asyn
  h.find('Edit operator').onclick();
  assert.equal(h.overlay.querySelectorAll('input').find(input=>input.autocomplete==='nickname').value,'Operator');
 });
+
+
+test('mission picture gear recommendation follows difficulty and the equipped primary',()=>{
+ const h=harness();
+ h.state.completedOperations=['breach','command'];
+ h.state.armory.primary='smg';
+ h.state.armory.offers=[{id:'smg.damage',level:1},{id:'smg.magazine',level:1},{id:'rifle.damage',level:3}];
+ h.menu.show('campaign-map');
+ assert.match(h.text(),/Gear readyDamage 1 · Magazine 1/);
+ const hard=h.overlay.querySelectorAll('input').find(input=>input.value==='hard');
+ hard.checked=true;
+ hard.listeners.change[0]();
+ assert.match(h.text(),/Upgrade advisedDamage 2 · Magazine 1/);
+ assert.ok(h.find('Deploy'));
+ assert.ok(h.find('Armory'));
+ h.state.armory.offers[0].level=2;
+ h.menu.refresh();
+ assert.match(h.text(),/Gear readyDamage 2 · Magazine 1/);
+});
