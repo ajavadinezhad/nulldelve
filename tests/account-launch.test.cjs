@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {operatorAccessReady}=require('../src/player-identity.js');
-const main=fs.readFileSync('src/main.js','utf8'),start=main.indexOf('async function initializeAccount(){'),end=main.indexOf('void initializeAccount();',start),source=main.slice(start,end);
+const main=fs.readFileSync('src/main.js','utf8'),start=main.indexOf('async function initializeAccount(){'),end=main.indexOf('void initializeAccount().then',start),source=main.slice(start,end);
 async function launch({signedIn=false,profile=null,google=true,network=true}={}){
  const shown=[],calls=[],state={configured:true,signedIn,profile,profileLoaded:false,googleVerified:false};
  const context={active:false,paused:false,cloudAccount:{init:async()=>{},consumeSignInLink:async()=>{},getState:()=>state,verifyGoogleSession:async()=>{calls.push('google');state.googleVerified=google;return google;},fetchProfile:async()=>{calls.push('profile');if(!network)throw Error('offline');state.profileLoaded=true;return profile;}},accountAccessReady:()=>operatorAccessReady(state),updatePlayerIdentity:()=>{},launchRequestedOperation:()=>calls.push('launch'),cloudSync:{connect:async()=>calls.push('sync')},menu:{show:view=>shown.push(view),isOpen:()=>true,refresh:()=>{}},pauseRun:()=>{},latestSnapshot:()=>{throw Error('Local checkpoints must not skip mandatory Google sign-in');}};

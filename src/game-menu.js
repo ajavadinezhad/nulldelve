@@ -1,5 +1,5 @@
 import {avatarPath,operatorAccessReady} from './player-identity.js?v=mandatory-google-r61';
-import {renderAccount} from './account-ui.js?v=mandatory-google-r61';
+import {renderAccount} from './account-ui.js?v=startup-r63';
 import {renderFieldJournal,journalIcon} from './field-journal.js?v=mandatory-google-r61';
 import {createPuzzleDiscovery} from './puzzle-discovery.js?v=mandatory-google-r61';
 import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=mandatory-google-r61';
@@ -280,5 +280,5 @@ export function createGameMenu({overlay,onNewGame=()=>{},onPrepareOperation=()=>
   else if(!event.shiftKey&&(document.activeElement===last||!panel.contains(document.activeElement))){event.preventDefault();first.focus();}
  });
  show('main');
- return {show,hide,back,refresh:()=>render(false),isOpen:()=>open,settings};
+ return {show,hide,back,notice,refresh:()=>render(false),isOpen:()=>open,settings};
 }

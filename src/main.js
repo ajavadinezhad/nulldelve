@@ -53,7 +53,7 @@ import {createProgressionArt} from './progression-art.js?v=mandatory-google-r61'
 import {EXPANSION_ROOMS,EXPANSION_DOORS,carveExpansion,addExpansionProps} from './facility-expansion.js?v=mandatory-google-r61';
 import {buildWorld} from './world-render.js?v=mandatory-google-r61';
 import {createNavigator} from './navigation.js?v=mandatory-google-r61';
-import {createGameMenu} from './game-menu.js?v=mandatory-google-r61';
+import {createGameMenu} from './game-menu.js?v=startup-r63';
 import {createSaveSlots} from './save-slots.js?v=mandatory-google-r61';
 import {attachEnemyHealthBar,updateEnemyHealthBar} from './enemy-health.js?v=mandatory-google-r61';
 import {createEconomy} from './economy.js?v=mandatory-google-r61';
@@ -452,7 +452,7 @@ function continueConnectedSector(config){
 }
 function queueLoad(slot){const snapshot=saveSlots.load(slot);if(!snapshot)throw new Error('This save slot is empty or could not be read.');try{compatibleStorage(sessionStorage).setItem('nulldelve.pendingLoad',JSON.stringify(snapshot));}catch{throw new Error('Browser session storage is unavailable. Enable storage to load this save.');}location.href=location.pathname+'?play=load';return true;}
 menu=createGameMenu({overlay:$('#overlay'),
- getStatus:()=>({loginRequired:true,cloud:{...cloudSync.getState(),requireGoogle:true},active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()||fieldSkills.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),skillState:fieldSkills.serialize(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:currentGuidance().steps??[],armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(activeFieldSkill),items:economy.state.items,sidearm:{stats:effectiveFieldStats({damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload},activeFieldSkill)},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
+ getStatus:()=>({loginRequired:true,cloud:{...cloudSync.getState(),requireGoogle:true,checking:!initializeAccount.settled,connectionError:initializeAccount.error},active:active&&!ended,personalBests:readOperationRecords(browserStorage()),persistenceWarning:campaignProfile.isSessionOnly()||campaignProgress.isSessionOnly()||fieldSkills.isSessionOnly()?'Session only':null,completedOperations:campaignProgress.completed(),mutationNotes:mutationNotes.list(),fieldSkill:fieldSkills.selected(campaignProgress.completed()),skillState:fieldSkills.serialize(campaignProgress.completed()),config:{...runConfig},researchLogs:progression.state.devices.filter(d=>d.kind==='log'&&d.active).map(d=>({label:d.label,text:d.text})),slots:saveSlots.list(),checkpoint:saveSlots.checkpointInfo(),missionGuidance:currentGuidance().steps??[],armory:{available:isSafeToShop(),reason:'Available at base before deployment.',bindings:bindings(),credits:economy.state.credits,grenadeType:economy.state.grenadeType,offers:economy.getOffers(),weapons:campaignProfile.getWeaponOffers(activeFieldSkill),items:economy.state.items,sidearm:{stats:effectiveFieldStats({damage:weapons.pistol.damage,capacity:weapons.pistol.capacity,reload:weapons.pistol.reload},activeFieldSkill)},shield:economy.state.shield,primary:campaignProfile.state.primary},canContinue:active&&!ended||!!latestSnapshot()}),
  onPrepareOperation:prepareOperation,onAccountAction:accountAction,
  onFieldSkill:id=>{if(!isSafeToShop())return {ok:false,message:"Choose a field skill before deployment."};const result=id.startsWith('learn:')?fieldSkills.learn(id.slice(6),campaignProgress.completed()):fieldSkills.equip(id,campaignProgress.completed());if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());activeFieldSkillState=null;updateDeploymentTransfer();}return result;},
  onRespecFieldSkills:()=>{if(!isSafeToShop())return {ok:false,message:'Reset training at base before deployment.'};const result=fieldSkills.respec(campaignProgress.completed(),{atBase:true});if(result.ok){activeFieldSkill=fieldSkills.selected(campaignProgress.completed());activeFieldSkillState=null;updateDeploymentTransfer();}return result;},
@@ -575,13 +575,51 @@ function updatePlayerIdentity(){const profile=cloudAccount.getState().profile,ca
 async function accountAction(action,data={}){
  if(action==='google'){const result=await cloudAccount.beginGoogleSignIn(location.origin+location.pathname);location.assign(result.url);return {ok:true};}
  if(action==='profile'){if(!cloudAccount.getState().googleVerified)throw new Error('Sign in with Google first.');await cloudAccount.saveProfile(data);await cloudSync.connect();updatePlayerIdentity();launchRequestedOperation();return {ok:true,message:'Operator ready.'};}
- if(action==='signout'){await cloudAccount.signOut();cloudSync.forget();updatePlayerIdentity();requireAccount();return {ok:true,message:'Signed out. Local progress is still available.'};}
+ if(action==='signout'){initializeAccount.error='';await cloudAccount.signOut();cloudSync.forget();updatePlayerIdentity();requireAccount();return {ok:true,message:'Signed out. Local progress is still available.'};}
  if(action==='delete'){await cloudAccount.deleteAccount();cloudSync.forget();updatePlayerIdentity();requireAccount();return {ok:true,message:'Account and cloud progress deleted. Local progress stays on this device.'};}
  if(action==='cloud'){await cloudSync.useCloud();return {ok:true};}
  if(action==='device'){await cloudSync.useDevice();return {ok:true,message:cloudSync.getState().error||'This device is connected to automatic cloud saves.'};}
- if(action==='reconnect'){await initializeAccount();return {ok:true};}
+ if(action==='reconnect'){if(accountAccessReady()){await cloudSync.connect();return {ok:!cloudSync.getState().error,message:cloudSync.getState().error};}return initializeAccount();}
  return {ok:false,message:'That account action is unavailable.'};
 }
-async function initializeAccount(){try{if(!cloudAccount.getState().configured){const response=await fetch('backend-config.json',{cache:'no-store'});if(!response.ok)throw new Error('Account connection unavailable.');const config=await response.json();await cloudAccount.init({url:config.supabaseUrl,publishableKey:config.publishableKey});}if(!cloudAccount.getState().configured)throw new Error('Account connection unavailable.');await cloudAccount.consumeSignInLink();if(cloudAccount.getState().signedIn&&await cloudAccount.verifyGoogleSession()){await cloudAccount.fetchProfile();updatePlayerIdentity();if(accountAccessReady()){await cloudSync.connect();menu.show('main');launchRequestedOperation();}}if(!accountAccessReady()){if(active&&!paused)pauseRun();menu.show('welcome');}if(menu?.isOpen())menu.refresh();}catch{if(active&&!paused)pauseRun();menu.show('welcome');}}
-void initializeAccount();
+async function initializeAccount(){
+ if(initializeAccount.flight)return initializeAccount.flight;
+ initializeAccount.error='';
+ const connect=async()=>{
+  try{
+   if(!cloudAccount.getState().configured){
+    const response=await fetch('backend-config.json',{cache:'no-store',signal:AbortSignal.timeout(10000)});
+    if(!response.ok)throw new Error('Account connection unavailable.');
+    const config=await response.json();
+    await cloudAccount.init({url:config.supabaseUrl,publishableKey:config.publishableKey});
+   }
+   if(!cloudAccount.getState().configured)throw new Error('Account connection unavailable.');
+   await cloudAccount.consumeSignInLink();
+   if(cloudAccount.getState().signedIn&&await cloudAccount.verifyGoogleSession()){
+    await cloudAccount.fetchProfile();
+    updatePlayerIdentity();
+    if(accountAccessReady()){
+     await cloudSync.connect();
+     initializeAccount.settled=true;
+     menu.show('main');
+     launchRequestedOperation();
+     return {ok:true};
+    }
+   }
+   initializeAccount.settled=true;
+   menu.show('welcome');
+   return {ok:true};
+  }catch(error){
+   if(active&&!paused)pauseRun();
+   initializeAccount.settled=true;
+   const message=error?.code?error.message:'Could not connect to your account. Check your connection and try again.';
+   if(cloudAccount.getState().signedIn)initializeAccount.error=message;
+   menu.show('welcome');
+   return {ok:false,message:initializeAccount.error?'':message};
+  }
+ };
+ initializeAccount.flight=connect();
+ try{return await initializeAccount.flight;}finally{initializeAccount.flight=null;}
+}
+void initializeAccount().then(result=>{if(!result.ok&&result.message)menu.notice(result.message);});
 addEventListener('online',()=>{if(!accountAccessReady()){void initializeAccount();return;}if(cloudAccount.getState().signedIn){if(cloudSync.getState().revision===null)void cloudSync.connect();else void cloudSync.flush();}});
