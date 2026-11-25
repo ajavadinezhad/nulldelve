@@ -7,7 +7,6 @@ export function renderAccount(host,{state={},draft={},onAction=()=>{}}={}){
  const p=text=>panel.append(el('p',text));
  const action=(text,id,disabled=false)=>{const b=el('button',text);b.type='button';b.className='menu-button secondary';b.disabled=disabled||!!state.pending;b.onclick=()=>onAction(id,{email:draft.email??'',code:draft.code??''});panel.append(b);return b;};
  if(state.checking){const loading=el('p','Checking your account…');loading.setAttribute('role','status');panel.append(loading);return;}
- panel.append(el('h3',!state.configured?'Account':!signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
  if(state.connectionError){p(state.connectionError);action('Retry connection','reconnect').className='menu-button primary';action('Sign out','signout');return;}
  panel.append(el('h3',!state.configured?'Account':!signedIn?'Welcome to Nulldelve':state.profile?'Your operator':'Create your operator')); 
  if(!state.configured){p(state.requireGoogle?'Connect to the account service to sign in.':'Cloud saves are not available in this build. Your checkpoints stay on this device.');if(state.requireGoogle)action('Retry connection','reconnect');return;}

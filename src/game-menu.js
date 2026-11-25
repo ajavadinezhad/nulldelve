@@ -1,6 +1,6 @@
 import {playerLevel} from './player-level.js';
 import {avatarPath,operatorAccessReady} from './player-identity.js?v=mandatory-google-r61';
-import {renderAccount} from './account-ui.js?v=startup-r64';
+import {renderAccount} from './account-ui.js?v=welcome-r69';
 import {renderFieldJournal,journalIcon} from './field-journal.js?v=mandatory-google-r61';
 import {createPuzzleDiscovery} from './puzzle-discovery.js?v=mandatory-google-r61';
 import {FIELD_SKILLS,SKILL_BRANCHES,SKILL_NODES,trainingPoints,skillLearnable,fieldSkillUnlocked,fieldSkillEffects} from './field-skills.js?v=operator-xp-r65';
